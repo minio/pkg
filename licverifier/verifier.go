@@ -19,17 +19,22 @@
 package licverifier
 
 import (
+	"context"
 	"crypto/ecdsa"
+	"crypto/x509"
+	"encoding/pem"
 	"errors"
 	"fmt"
 	"time"
 
-	"github.com/dgrijalva/jwt-go"
+	"github.com/lestrrat-go/jwx/jwa"
+	"github.com/lestrrat-go/jwx/jwk"
+	"github.com/lestrrat-go/jwx/jwt"
 )
 
 // LicenseVerifier needs an ECDSA public key in PEM format for initialization.
 type LicenseVerifier struct {
-	ecPubKey *ecdsa.PublicKey
+	keySet jwk.Set
 }
 
 // LicenseInfo holds customer metadata present in the license key.
@@ -52,34 +57,65 @@ const (
 	plan         = "plan"
 )
 
+// parse PEM encoded PKCS1 or PKCS8 public key
+func parseECPublicKeyFromPEM(key []byte) (*ecdsa.PublicKey, error) {
+	var err error
+
+	// Parse PEM block
+	var block *pem.Block
+	if block, _ = pem.Decode(key); block == nil {
+		return nil, errors.New("key must be a PEM encoded PKCS1 or PKCS8 key")
+	}
+
+	// Parse the key
+	var parsedKey interface{}
+	if parsedKey, err = x509.ParsePKIXPublicKey(block.Bytes); err != nil {
+		if cert, err := x509.ParseCertificate(block.Bytes); err == nil {
+			parsedKey = cert.PublicKey
+		} else {
+			return nil, err
+		}
+	}
+
+	var pkey *ecdsa.PublicKey
+	var ok bool
+	if pkey, ok = parsedKey.(*ecdsa.PublicKey); !ok {
+		return nil, errors.New("key is not a valid RSA public key")
+	}
+
+	return pkey, nil
+}
+
 // NewLicenseVerifier returns an initialized license verifier with the given
 // ECDSA public key in PEM format.
 func NewLicenseVerifier(pemBytes []byte) (*LicenseVerifier, error) {
-	pbKey, err := jwt.ParseECPublicKeyFromPEM(pemBytes)
+	pbKey, err := parseECPublicKeyFromPEM(pemBytes)
 	if err != nil {
 		return nil, fmt.Errorf("Failed to parse public key: %s", err)
 	}
+	key, err := jwk.New(pbKey)
+	if err != nil {
+		return nil, err
+	}
+	key.Set(jwk.AlgorithmKey, jwa.ES384)
+	keyset := jwk.NewSet()
+	keyset.Add(key)
 	return &LicenseVerifier{
-		ecPubKey: pbKey,
+		keySet: keyset,
 	}, nil
 }
 
 // toLicenseInfo extracts LicenseInfo from claims. It returns an error if any of
 // the claim values are invalid.
-func toLicenseInfo(claims jwt.MapClaims) (LicenseInfo, error) {
+func toLicenseInfo(token jwt.Token) (LicenseInfo, error) {
+	claims, err := token.AsMap(context.Background())
+	if err != nil {
+		return LicenseInfo{}, err
+	}
 	accID, ok := claims[accountID].(float64)
 	if !ok || ok && accID <= 0 {
 		return LicenseInfo{}, errors.New("Invalid accountId in claims")
 	}
-	email, ok := claims[sub].(string)
-	if !ok {
-		return LicenseInfo{}, errors.New("Invalid email in claims")
-	}
-	expiryTS, ok := claims[expiresAt].(float64)
-	if !ok {
-		return LicenseInfo{}, errors.New("Invalid time of expiry in claims")
-	}
-	expiresAt := time.Unix(int64(expiryTS), 0)
 	orgName, ok := claims[organization].(string)
 	if !ok {
 		return LicenseInfo{}, errors.New("Invalid organization in claims")
@@ -93,26 +129,26 @@ func toLicenseInfo(claims jwt.MapClaims) (LicenseInfo, error) {
 		return LicenseInfo{}, errors.New("Invalid plan in claims")
 	}
 	return LicenseInfo{
-		Email:           email,
+		Email:           token.Subject(),
 		Organization:    orgName,
 		AccountID:       int64(accID),
 		StorageCapacity: int64(storageCap),
 		Plan:            plan,
-		ExpiresAt:       expiresAt,
+		ExpiresAt:       token.Expiration(),
 	}, nil
 
 }
 
 // Verify verifies the license key and validates the claims present in it.
 func (lv *LicenseVerifier) Verify(license string) (LicenseInfo, error) {
-	token, err := jwt.ParseWithClaims(license, &jwt.MapClaims{}, func(token *jwt.Token) (interface{}, error) {
-		return lv.ecPubKey, nil
-	})
+	token, err := jwt.ParseString(license,
+		jwt.WithKeySet(lv.keySet),
+		jwt.UseDefaultKey(true),
+		jwt.WithValidate(true),
+	)
 	if err != nil {
-		return LicenseInfo{}, fmt.Errorf("Failed to verify license: %s", err)
+		return LicenseInfo{}, fmt.Errorf("failed to verify license: %s", err)
 	}
-	if claims, ok := token.Claims.(*jwt.MapClaims); ok && token.Valid {
-		return toLicenseInfo(*claims)
-	}
-	return LicenseInfo{}, errors.New("Invalid claims found in license")
+
+	return toLicenseInfo(token)
 }

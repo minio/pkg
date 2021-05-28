@@ -8,6 +8,7 @@ require (
 	github.com/fatih/color v1.12.0
 	github.com/fatih/structs v1.1.0
 	github.com/gorilla/mux v1.8.0
+	github.com/lestrrat-go/jwx v1.2.0
 	github.com/mattn/go-colorable v0.1.8
 	github.com/mattn/go-isatty v0.0.13
 	github.com/rjeczalik/notify v0.9.2
