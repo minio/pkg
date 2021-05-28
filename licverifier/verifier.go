@@ -140,12 +140,9 @@ func toLicenseInfo(token jwt.Token) (LicenseInfo, error) {
 }
 
 // Verify verifies the license key and validates the claims present in it.
-func (lv *LicenseVerifier) Verify(license string) (LicenseInfo, error) {
-	token, err := jwt.ParseString(license,
-		jwt.WithKeySet(lv.keySet),
-		jwt.UseDefaultKey(true),
-		jwt.WithValidate(true),
-	)
+func (lv *LicenseVerifier) Verify(license string, options ...jwt.ParseOption) (LicenseInfo, error) {
+	options = append(options, jwt.WithKeySet(lv.keySet), jwt.UseDefaultKey(true), jwt.WithValidate(true))
+	token, err := jwt.ParseString(license, options...)
 	if err != nil {
 		return LicenseInfo{}, fmt.Errorf("failed to verify license: %s", err)
 	}

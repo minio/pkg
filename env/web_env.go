@@ -32,7 +32,9 @@ import (
 	"strings"
 	"time"
 
-	"github.com/dgrijalva/jwt-go"
+	"github.com/lestrrat-go/jwx/jwa"
+	"github.com/lestrrat-go/jwx/jwk"
+	"github.com/lestrrat-go/jwx/jwt"
 )
 
 const (
@@ -100,19 +102,30 @@ func getEnvValueFromHTTP(urlStr, envKey string) (string, string, string, error) 
 		return "", "", "", err
 	}
 
-	claims := &jwt.StandardClaims{
-		ExpiresAt: int64(15 * time.Minute),
-		Issuer:    username,
-		Subject:   envKey,
-	}
-
-	token := jwt.NewWithClaims(jwt.SigningMethodHS512, claims)
-	ss, err := token.SignedString([]byte(password))
+	skey, err := jwk.New([]byte(password))
 	if err != nil {
 		return "", "", "", err
 	}
+	skey.Set(jwk.AlgorithmKey, jwa.HS512)
+	skey.Set(jwk.KeyIDKey, "minio")
 
-	req.Header.Set("Authorization", "Bearer "+ss)
+	token := jwt.New()
+	t := time.Now().Add(15 * time.Minute)
+	if err = token.Set(jwt.IssuerKey, username); err != nil {
+		return "", "", "", err
+	}
+	if err = token.Set(jwt.SubjectKey, envKey); err != nil {
+		return "", "", "", err
+	}
+	if err = token.Set(jwt.ExpirationKey, t.Unix()); err != nil {
+		return "", "", "", err
+	}
+
+	signed, err := jwt.Sign(token, jwa.HS512, skey)
+	if err != nil {
+		return "", "", "", err
+	}
+	req.Header.Set("Authorization", "Bearer "+string(signed))
 
 	clnt := &http.Client{
 		Transport: &http.Transport{

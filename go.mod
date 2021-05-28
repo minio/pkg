@@ -4,7 +4,6 @@ go 1.16
 
 require (
 	github.com/cheggaaa/pb v1.0.29
-	github.com/dgrijalva/jwt-go v3.2.0+incompatible
 	github.com/fatih/color v1.12.0
 	github.com/fatih/structs v1.1.0
 	github.com/gorilla/mux v1.8.0

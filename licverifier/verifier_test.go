@@ -22,15 +22,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/dgrijalva/jwt-go"
+	"github.com/lestrrat-go/jwx/jwt"
 )
-
-// at fixes the jwt.TimeFunc at t and calls f in that context.
-func at(t time.Time, f func()) {
-	jwt.TimeFunc = func() time.Time { return t }
-	f()
-	jwt.TimeFunc = time.Now
-}
 
 func areEqLicenseInfo(a, b LicenseInfo) bool {
 	if a.Email == b.Email && a.Organization == b.Organization && a.AccountID == b.AccountID && a.Plan == b.Plan && a.StorageCapacity == b.StorageCapacity && a.ExpiresAt.Equal(b.ExpiresAt) {
@@ -69,20 +62,20 @@ mr/cKCUyBL7rcAvg0zNq1vcSrUSGlAmY3SEDCu3GOKnjG/U4E7+p957ocWSV+mQU
 	for i, tc := range testCases {
 		// Fixing the jwt.TimeFunc at 2021-01-06 05:16:09 +0000 UTC to
 		// ensure that the license JWT doesn't expire ever.
-		at(time.Unix(int64(1609910169), 0), func() {
-			licInfo, err := lv.Verify(tc.lic)
-			if err != nil && tc.shouldPass {
-				t.Fatalf("%d: Expected license to pass verification but failed with %s", i+1, err)
+		licInfo, err := lv.Verify(tc.lic, jwt.ParseOption(jwt.WithClock(jwt.ClockFunc(func() time.Time {
+			return time.Unix(int64(1609910169), 0)
+		}))))
+		if err != nil && tc.shouldPass {
+			t.Fatalf("%d: Expected license to pass verification but failed with %s", i+1, err)
+		}
+		if err == nil {
+			if !tc.shouldPass {
+				t.Fatalf("%d: Expected license to fail verification but passed", i+1)
 			}
-			if err == nil {
-				if !tc.shouldPass {
-					t.Fatalf("%d: Expected license to fail verification but passed", i+1)
-				}
-				if !areEqLicenseInfo(tc.expectedLicInfo, licInfo) {
-					t.Fatalf("%d: Expected license info %v but got %v", i+1, tc.expectedLicInfo, licInfo)
-				}
+			if !areEqLicenseInfo(tc.expectedLicInfo, licInfo) {
+				t.Fatalf("%d: Expected license info %v but got %v", i+1, tc.expectedLicInfo, licInfo)
 			}
-		})
+		}
 	}
 }
 

@@ -29,6 +29,7 @@ import (
 
 func GetenvHandler(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
+	fmt.Println(r)
 	if vars["namespace"] != "default" {
 		http.Error(w, "namespace not found", http.StatusNotFound)
 		return
