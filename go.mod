@@ -10,6 +10,7 @@ require (
 	github.com/lestrrat-go/jwx v1.2.0
 	github.com/mattn/go-colorable v0.1.8
 	github.com/mattn/go-isatty v0.0.13
+	github.com/minio/minio-go/v7 v7.0.11-0.20210302210017-6ae69c73ce78
 	github.com/rjeczalik/notify v0.9.2
 	go.etcd.io/etcd/client/v3 v3.5.0-beta.4
 	golang.org/x/sys v0.0.0-20210403161142-5e06dd20ab57
