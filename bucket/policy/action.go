@@ -176,6 +176,9 @@ const (
 
 	// RestoreObjectAction - RestoreObject REST API action
 	RestoreObjectAction = "s3:RestoreObject"
+	// ResetBucketReplicationStateAction - MinIO extension API ResetBucketReplicationState to reset replication state
+	// on a bucket
+	ResetBucketReplicationStateAction = "s3:ResetBucketReplicationState"
 )
 
 // List of all supported object actions.
@@ -203,6 +206,7 @@ var supportedObjectActions = map[Action]struct{}{
 	ReplicateTagsAction:                  {},
 	GetObjectVersionForReplicationAction: {},
 	RestoreObjectAction:                  {},
+	ResetBucketReplicationStateAction:    {},
 }
 
 // isObjectAction - returns whether action is object type or not.
@@ -265,6 +269,7 @@ var supportedActions = map[Action]struct{}{
 	ReplicateTagsAction:                    {},
 	GetObjectVersionForReplicationAction:   {},
 	RestoreObjectAction:                    {},
+	ResetBucketReplicationStateAction:      {},
 }
 
 // IsValid - checks if action is valid or not.
@@ -423,4 +428,5 @@ var actionConditionKeyMap = map[Action]condition.KeySet{
 	ReplicateTagsAction:                  condition.NewKeySet(condition.CommonKeys...),
 	GetObjectVersionForReplicationAction: condition.NewKeySet(condition.CommonKeys...),
 	RestoreObjectAction:                  condition.NewKeySet(condition.CommonKeys...),
+	ResetBucketReplicationStateAction:    condition.NewKeySet(condition.CommonKeys...),
 }
