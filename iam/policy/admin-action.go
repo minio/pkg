@@ -140,6 +140,9 @@ const (
 	// ListTierAction - allow listing remote tiers
 	ListTierAction = "admin:ListTier"
 
+	// ListPoolsAction - list pools action
+	ListPoolsAction = "admin:ListPools"
+
 	// AllAdminActions - provides all admin permissions
 	AllAdminActions = "admin:*"
 )
@@ -189,6 +192,7 @@ var supportedAdminActions = map[AdminAction]struct{}{
 	GetBucketTargetAction:           {},
 	SetTierAction:                   {},
 	ListTierAction:                  {},
+	ListPoolsAction:                 {},
 	AllAdminActions:                 {},
 }
 
@@ -243,4 +247,5 @@ var adminActionConditionKeyMap = map[Action]condition.KeySet{
 	GetBucketTargetAction:       condition.NewKeySet(condition.AllSupportedAdminKeys...),
 	SetTierAction:               condition.NewKeySet(condition.AllSupportedAdminKeys...),
 	ListTierAction:              condition.NewKeySet(condition.AllSupportedAdminKeys...),
+	ListPoolsAction:             condition.NewKeySet(condition.AllSupportedAdminKeys...),
 }
