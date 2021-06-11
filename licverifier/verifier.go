@@ -111,7 +111,7 @@ func toLicenseInfo(token jwt.Token) (LicenseInfo, error) {
 		return LicenseInfo{}, err
 	}
 	accID, ok := claims[accountID].(float64)
-	if !ok || ok && accID <= 0 {
+	if !ok || ok && accID < 0 {
 		return LicenseInfo{}, errors.New("Invalid accountId in claims")
 	}
 	orgName, ok := claims[organization].(string)
