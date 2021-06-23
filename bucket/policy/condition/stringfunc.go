@@ -56,9 +56,9 @@ func (f stringFunc) eval(values map[string][]string) bool {
 		rvalues = rvalues.ApplyFunc(strings.ToLower)
 		fvalues = fvalues.ApplyFunc(strings.ToLower)
 	}
-	ivalues := fvalues.Intersection(rvalues)
+	ivalues := rvalues.Intersection(fvalues)
 	if f.n.qualifier == forAllValues {
-		return rvalues.IsEmpty() || fvalues.Equals(ivalues)
+		return rvalues.IsEmpty() || rvalues.Equals(ivalues)
 	}
 	return !ivalues.IsEmpty()
 }
@@ -131,26 +131,18 @@ type stringLikeFunc struct {
 
 func (f stringLikeFunc) eval(values map[string][]string) bool {
 	rvalues := getValuesByKey(values, f.k.Name())
-	if f.n.qualifier == forAllValues && len(rvalues) == 0 {
-		return true
-	}
 	fvalues := f.values.ApplyFunc(substitute(values))
-	if f.n.qualifier == forAllValues && len(rvalues) != len(fvalues) {
-		return false
-	}
-
-	result := false
 	for _, v := range rvalues {
-		result = !fvalues.FuncMatch(wildcard.Match, v).IsEmpty()
+		matched := !fvalues.FuncMatch(wildcard.Match, v).IsEmpty()
 		if f.n.qualifier == forAllValues {
-			if !result {
+			if !matched {
 				return false
 			}
-		} else if result {
+		} else if matched {
 			return true
 		}
 	}
-	return result
+	return f.n.qualifier == forAllValues
 }
 
 // evaluate() - evaluates to check whether value by Key in given values is wildcard

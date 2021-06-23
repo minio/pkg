@@ -68,7 +68,7 @@ func TestStringEqualsFuncEvaluate(t *testing.T) {
 		{case2Function, map[string][]string{"delimiter": {"/"}}, false},
 
 		{case3Function, map[string][]string{"groups": {"prod", "art"}}, true},
-		{case3Function, map[string][]string{"groups": {"art"}}, false},
+		{case3Function, map[string][]string{"groups": {"art"}}, true},
 		{case3Function, map[string][]string{}, true},
 		{case3Function, map[string][]string{"delimiter": {"/"}}, true},
 
@@ -127,7 +127,7 @@ func TestStringNotEqualsFuncEvaluate(t *testing.T) {
 		{case2Function, map[string][]string{"delimiter": {"/"}}, true},
 
 		{case3Function, map[string][]string{"groups": {"prod", "art"}}, false},
-		{case3Function, map[string][]string{"groups": {"art"}}, true},
+		{case3Function, map[string][]string{"groups": {"art"}}, false},
 		{case3Function, map[string][]string{}, false},
 		{case3Function, map[string][]string{"delimiter": {"/"}}, false},
 
@@ -184,7 +184,7 @@ func TestStringEqualsIgnoreCaseFuncEvaluate(t *testing.T) {
 		{case2Function, map[string][]string{"delimiter": {"/"}}, false},
 
 		{case3Function, map[string][]string{"groups": {"prod", "art"}}, true},
-		{case3Function, map[string][]string{"groups": {"art"}}, false},
+		{case3Function, map[string][]string{"groups": {"art"}}, true},
 		{case3Function, map[string][]string{}, true},
 		{case3Function, map[string][]string{"delimiter": {"/"}}, true},
 
@@ -241,7 +241,7 @@ func TestStringNotEqualsIgnoreCaseFuncEvaluate(t *testing.T) {
 		{case2Function, map[string][]string{"delimiter": {"/"}}, true},
 
 		{case3Function, map[string][]string{"groups": {"prod", "art"}}, false},
-		{case3Function, map[string][]string{"groups": {"art"}}, true},
+		{case3Function, map[string][]string{"groups": {"art"}}, false},
 		{case3Function, map[string][]string{}, false},
 		{case3Function, map[string][]string{"delimiter": {"/"}}, false},
 
@@ -323,7 +323,7 @@ func TestBinaryEqualsFuncEvaluate(t *testing.T) {
 		{case2Function, map[string][]string{"delimiter": {"/"}}, false},
 
 		{case3Function, map[string][]string{"groups": {"prod", "art"}}, true},
-		{case3Function, map[string][]string{"groups": {"art"}}, false},
+		{case3Function, map[string][]string{"groups": {"art"}}, true},
 		{case3Function, map[string][]string{}, true},
 		{case3Function, map[string][]string{"delimiter": {"/"}}, true},
 
@@ -381,7 +381,7 @@ func TestStringLikeFuncEvaluate(t *testing.T) {
 		{case2Function, map[string][]string{"delimiter": {"/"}}, false},
 
 		{case3Function, map[string][]string{"groups": {"prod", "arts"}}, true},
-		{case3Function, map[string][]string{"groups": {"art"}}, false},
+		{case3Function, map[string][]string{"groups": {"art"}}, true},
 		{case3Function, map[string][]string{}, true},
 		{case3Function, map[string][]string{"delimiter": {"/"}}, true},
 
@@ -439,7 +439,7 @@ func TestStringNotLikeFuncEvaluate(t *testing.T) {
 		{case2Function, map[string][]string{"delimiter": {"/"}}, true},
 
 		{case3Function, map[string][]string{"groups": {"prod", "arts"}}, false},
-		{case3Function, map[string][]string{"groups": {"art"}}, true},
+		{case3Function, map[string][]string{"groups": {"art"}}, false},
 		{case3Function, map[string][]string{}, false},
 		{case3Function, map[string][]string{"delimiter": {"/"}}, false},
 
