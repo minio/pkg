@@ -15,7 +15,7 @@ lint: getdeps
 
 test: lint
 	@echo "Running unit tests"
-	@GO111MODULE=on CGO_ENABLED=0 go test -tags kqueue ./... 1>/dev/null
+	@GO111MODULE=on CGO_ENABLED=0 go test -tags kqueue ./...
 
 clean:
 	@echo "Cleaning up all the generated files"
