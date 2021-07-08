@@ -56,8 +56,8 @@ const (
 	HealthInfoAdminAction = "admin:OBDInfo"
 	// BandwidthMonitorAction - allow monitoring bandwidth usage
 	BandwidthMonitorAction = "admin:BandwidthMonitor"
-	// DownloadRawAction - allows downloading raw files from backend
-	DownloadRawAction = "admin:DownloadRaw"
+	// InspectDataAction - allows downloading raw files from backend
+	InspectDataAction = "admin:InspectData"
 
 	// ServerUpdateAdminAction - allow MinIO binary update
 	ServerUpdateAdminAction = "admin:ServerUpdate"
