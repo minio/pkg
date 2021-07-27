@@ -42,11 +42,14 @@ type Args struct {
 	DenyOnly        bool                   `json:"denyOnly"` // only applies deny
 }
 
-// GetPoliciesFromClaims returns the list of policies to be applied for this
-// incoming request, extracting the information from input JWT claims.
-func GetPoliciesFromClaims(claims map[string]interface{}, policyClaimName string) (set.StringSet, bool) {
+// GetValuesFromClaims returns the list of values for the input claimName.
+// Supports values in following formats
+// - string
+// - command separated values
+// - string array
+func GetValuesFromClaims(claims map[string]interface{}, claimName string) (set.StringSet, bool) {
 	s := set.NewStringSet()
-	pname, ok := claims[policyClaimName]
+	pname, ok := claims[claimName]
 	if !ok {
 		return s, false
 	}
@@ -82,6 +85,12 @@ func GetPoliciesFromClaims(claims map[string]interface{}, policyClaimName string
 		}
 	}
 	return s, true
+}
+
+// GetPoliciesFromClaims returns the list of policies to be applied for this
+// incoming request, extracting the information from input JWT claims.
+func GetPoliciesFromClaims(claims map[string]interface{}, policyClaimName string) (set.StringSet, bool) {
+	return GetValuesFromClaims(claims, policyClaimName)
 }
 
 // GetPolicies returns the list of policies to be applied for this
