@@ -54,24 +54,13 @@ func parseEllipsesRange(pattern string) (seq []string, err error) {
 		return nil, errors.New("Invalid argument")
 	}
 
-	var hexadecimal bool
-	var start, end uint64
-	if start, err = strconv.ParseUint(ellipsesRange[0], 10, 64); err != nil {
-		// Look for hexadecimal conversions if any.
-		start, err = strconv.ParseUint(ellipsesRange[0], 16, 64)
-		if err != nil {
-			return nil, err
-		}
-		hexadecimal = true
+	var start, end int
+	if start, err = strconv.Atoi(ellipsesRange[0]); err != nil {
+		return nil, err
 	}
 
-	if end, err = strconv.ParseUint(ellipsesRange[1], 10, 64); err != nil {
-		// Look for hexadecimal conversions if any.
-		end, err = strconv.ParseUint(ellipsesRange[1], 16, 64)
-		if err != nil {
-			return nil, err
-		}
-		hexadecimal = true
+	if end, err = strconv.Atoi(ellipsesRange[1]); err != nil {
+		return nil, err
 	}
 
 	if start > end {
@@ -80,17 +69,9 @@ func parseEllipsesRange(pattern string) (seq []string, err error) {
 
 	for i := start; i <= end; i++ {
 		if strings.HasPrefix(ellipsesRange[0], "0") && len(ellipsesRange[0]) > 1 || strings.HasPrefix(ellipsesRange[1], "0") {
-			if hexadecimal {
-				seq = append(seq, fmt.Sprintf(fmt.Sprintf("%%0%dx", len(ellipsesRange[1])), i))
-			} else {
-				seq = append(seq, fmt.Sprintf(fmt.Sprintf("%%0%dd", len(ellipsesRange[1])), i))
-			}
+			seq = append(seq, fmt.Sprintf(fmt.Sprintf("%%0%dd", len(ellipsesRange[1])), i))
 		} else {
-			if hexadecimal {
-				seq = append(seq, fmt.Sprintf("%x", i))
-			} else {
-				seq = append(seq, fmt.Sprintf("%d", i))
-			}
+			seq = append(seq, fmt.Sprintf("%d", i))
 		}
 	}
 
