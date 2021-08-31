@@ -89,6 +89,20 @@ func TestWebEnv(t *testing.T) {
 	}
 }
 
+func TestIsSet(t *testing.T) {
+	os.Setenv("_TEST_ENV", "")
+	defer os.Unsetenv("_TEST_ENV")
+
+	if IsSet("_TEST_ENV") {
+		t.Fatal("Expected IsSet(false) but found IsSet(true)")
+	}
+
+	os.Setenv("_TEST_ENV", "v")
+	if !IsSet("_TEST_ENV") {
+		t.Fatal("Expected IsSet(true) but found IsSet(false)")
+	}
+}
+
 func TestGetEnv(t *testing.T) {
 	// Set empty env-value, this test covers situation
 	// where env is set but with empty value, choose
