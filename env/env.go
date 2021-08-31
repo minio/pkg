@@ -71,6 +71,9 @@ func Get(key, defaultValue string) string {
 		return defaultValue
 	}
 	if v, _, _, err := LookupEnv(key); err == nil {
+		if v == "" {
+			return defaultValue
+		}
 		return v
 	}
 	return defaultValue

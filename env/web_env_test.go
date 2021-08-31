@@ -22,6 +22,7 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"net/url"
+	"os"
 	"testing"
 
 	"github.com/gorilla/mux"
@@ -85,5 +86,27 @@ func TestWebEnv(t *testing.T) {
 
 	if pwd != "minio123" {
 		t.Fatalf("Unexpected value %s", v)
+	}
+}
+
+func TestGetEnv(t *testing.T) {
+	// Set empty env-value, this test covers situation
+	// where env is set but with empty value, choose
+	// to fallback to default value at this point.
+	os.Setenv("_TEST_ENV", "")
+
+	if v := Get("_TEST_ENV", "value"); v != "value" {
+		t.Fatalf("Expected 'value', but got %s", v)
+	}
+
+	os.Unsetenv("_TEST_ENV")
+	if v := Get("_TEST_ENV", "value"); v != "value" {
+		t.Fatalf("Expected 'value', but got %s", v)
+	}
+
+	os.Setenv("_TEST_ENV", "value-new")
+	defer os.Unsetenv("_TEST_ENV")
+	if v := Get("_TEST_ENV", "value"); v != "value-new" {
+		t.Fatalf("Expected 'value-new', but got %s", v)
 	}
 }
