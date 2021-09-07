@@ -28,8 +28,8 @@ const (
 	// HealAdminAction - allows heal command
 	HealAdminAction = "admin:Heal"
 
-	// DecomissionAdminAction - allows decomissioning of pools
-	DecomissionAdminAction = "admin:Decomission"
+	// DecommissionAdminAction - allows decomissioning of pools
+	DecommissionAdminAction = "admin:Decommission"
 
 	// Service Actions
 
