@@ -25,8 +25,8 @@ import (
 
 func TestSetColor(t *testing.T) {
 	SetColor("unknown", color.New(color.FgWhite))
-	_, ok := Theme["unknown"]
-	if !ok {
+	cl := getThemeColor("unknown")
+	if cl == nil {
 		t.Fatal("missing theme")
 	}
 }
