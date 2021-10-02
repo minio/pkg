@@ -95,7 +95,7 @@ const (
 	SiteReplicationInfoAction = "admin:SiteReplicationInfo"
 	// SiteReplicationOperationAction - allow performing site replication
 	// create/update/delete operations to peers
-	SiteReplicationOperationAction = "admin:SiteReplicationManage"
+	SiteReplicationOperationAction = "admin:SiteReplicationOperation"
 
 	// Service account Actions
 
