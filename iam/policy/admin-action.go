@@ -85,6 +85,18 @@ const (
 	// GetUserAdminAction - allows GET permission on user info
 	GetUserAdminAction = "admin:GetUser"
 
+	// Cluster Replicate Actions
+
+	// SiteReplicationAddAction - allow adding clusters for site-level replication
+	SiteReplicationAddAction = "admin:SiteReplicationAdd"
+	// SiteReplicationDisableAction - allow disabling a cluster from replication
+	SiteReplicationDisableAction = "admin:SiteReplicationDisable"
+	// SiteReplicationInfoAction - allow getting site replication info
+	SiteReplicationInfoAction = "admin:SiteReplicationInfo"
+	// SiteReplicationOperationAction - allow performing site replication
+	// create/update/delete operations to peers
+	SiteReplicationOperationAction = "admin:SiteReplicationOperation"
+
 	// Service account Actions
 
 	// CreateServiceAccountAdminAction - allow create a service account for a user
