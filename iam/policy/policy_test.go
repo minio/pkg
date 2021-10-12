@@ -18,9 +18,9 @@
 package iampolicy
 
 import (
+	"bytes"
 	"encoding/json"
 	"net"
-	"reflect"
 	"strings"
 	"testing"
 	"time"
@@ -1054,6 +1054,162 @@ func TestPolicyUnmarshalJSONAndValidate(t *testing.T) {
 		},
 	}
 
+	case12Data := []byte(`{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Action": [
+        "s3:*"
+      ],
+      "Resource": [
+        "arn:aws:s3:::*"
+      ]
+    },
+    {
+      "Effect": "Allow",
+      "Action": [
+        "admin:*"
+      ]
+    },
+    {
+      "Effect": "Allow",
+      "Action": [
+        "s3:*"
+      ],
+      "Resource": [
+        "arn:aws:s3:::*"
+      ]
+    }
+  ]
+}`)
+
+	case12Policy := Policy{
+		Version: DefaultVersion,
+		Statements: []Statement{
+			NewStatement(
+				policy.Allow,
+				NewActionSet(AllAdminActions),
+				ResourceSet{},
+				condition.NewFunctions(),
+			),
+			NewStatement(
+				policy.Allow,
+				NewActionSet(AllActions),
+				NewResourceSet(NewResource("*", "")),
+				condition.NewFunctions(),
+			),
+		},
+	}
+
+	case13Data := []byte(`{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Action": [
+        "s3:*"
+      ],
+      "Resource": [
+        "arn:aws:s3:::*"
+      ]
+    },
+    {
+      "Effect": "Deny",
+      "Action": [
+        "admin:*"
+      ]
+    },
+    {
+      "Effect": "Allow",
+      "Action": [
+        "s3:*"
+      ],
+      "Resource": [
+        "arn:aws:s3:::*"
+      ]
+    },
+    {
+      "Effect": "Allow",
+      "Action": [
+        "admin:*"
+      ]
+    }
+  ]
+}`)
+
+	case13Policy := Policy{
+		Version: DefaultVersion,
+		Statements: []Statement{
+			NewStatement(
+				policy.Deny,
+				NewActionSet(AllAdminActions),
+				ResourceSet{},
+				condition.NewFunctions(),
+			),
+			NewStatement(
+				policy.Allow,
+				NewActionSet(AllActions),
+				NewResourceSet(NewResource("*", "")),
+				condition.NewFunctions(),
+			),
+			NewStatement(
+				policy.Allow,
+				NewActionSet(AllAdminActions),
+				ResourceSet{},
+				condition.NewFunctions(),
+			),
+		},
+	}
+
+	case14Data := []byte(`{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Action": [
+        "s3:*"
+      ],
+      "Resource": [
+        "arn:aws:s3:::*"
+      ]
+    },
+    {
+      "Effect": "Deny",
+      "Action": [
+        "admin:*"
+      ]
+    },
+    {
+      "Effect": "Allow",
+      "Action": [
+        "s3:*"
+      ],
+      "Resource": [
+        "arn:aws:s3:::*"
+      ]
+    }
+  ]
+}`)
+
+	case14Policy := Policy{
+		Version: DefaultVersion,
+		Statements: []Statement{
+			NewStatement(
+				policy.Deny,
+				NewActionSet(AllAdminActions),
+				ResourceSet{},
+				condition.NewFunctions(),
+			),
+			NewStatement(
+				policy.Allow,
+				NewActionSet(AllActions),
+				NewResourceSet(NewResource("*", "")),
+				condition.NewFunctions(),
+			),
+		},
+	}
+
 	testCases := []struct {
 		data                []byte
 		expectedResult      Policy
@@ -1074,6 +1230,12 @@ func TestPolicyUnmarshalJSONAndValidate(t *testing.T) {
 		{case10Data, case10Policy, false, false},
 		// Duplicate statement success (Effect differs).
 		{case11Data, case11Policy, false, false},
+		// Duplicate statement success, must be removed.
+		{case12Data, case12Policy, false, false},
+		// Duplicate statement success, must be removed.
+		{case13Data, case13Policy, false, false},
+		// Duplicate statement success, must be removed.
+		{case14Data, case14Policy, false, false},
 	}
 
 	for i, testCase := range testCases {
@@ -1093,7 +1255,9 @@ func TestPolicyUnmarshalJSONAndValidate(t *testing.T) {
 		}
 
 		if !testCase.expectUnmarshalErr && !testCase.expectValidationErr {
-			if !reflect.DeepEqual(result, testCase.expectedResult) {
+			exp1, _ := json.Marshal(result)
+			exp2, _ := json.Marshal(testCase.expectedResult)
+			if !bytes.Equal(exp1, exp2) {
 				t.Errorf("case %v: result: expected: %v, got: %v", i+1, testCase.expectedResult, result)
 			}
 		}

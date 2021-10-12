@@ -18,6 +18,8 @@
 package condition
 
 import (
+	"bytes"
+	"encoding/json"
 	"net"
 	"reflect"
 	"testing"
@@ -208,7 +210,9 @@ func TestIPAddrFuncClone(t *testing.T) {
 	for i, testCase := range testCases {
 		result := testCase.f.clone()
 
-		if !reflect.DeepEqual(result, testCase.expectedResult) {
+		exp1, _ := json.Marshal(result)
+		exp2, _ := json.Marshal(testCase.expectedResult)
+		if !bytes.Equal(exp1, exp2) {
 			t.Fatalf("case %v: result: expected: %v, got: %v\n", i+1, testCase.expectedResult, result)
 		}
 	}

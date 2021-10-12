@@ -194,11 +194,11 @@ func (iamp Policy) Merge(input Policy) Policy {
 func (iamp *Policy) dropDuplicateStatements() {
 redo:
 	for i := range iamp.Statements {
-		for j, statement := range iamp.Statements[i+1:] {
+		for _, statement := range iamp.Statements[i+1:] {
 			if !iamp.Statements[i].Equals(statement) {
 				continue
 			}
-			iamp.Statements = append(iamp.Statements[:j], iamp.Statements[j+1:]...)
+			iamp.Statements = append(iamp.Statements[:i], iamp.Statements[i+1:]...)
 			goto redo
 		}
 	}
