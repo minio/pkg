@@ -42,6 +42,7 @@ type LicenseInfo struct {
 	Email           string    // Email of the license key requestor
 	Organization    string    // Subnet organization name
 	AccountID       int64     // Subnet account id
+	DeploymentID    string    // Cluster deployment ID
 	StorageCapacity int64     // Storage capacity used in TB
 	Plan            string    // Subnet plan
 	ExpiresAt       time.Time // Time of license expiry
@@ -50,6 +51,7 @@ type LicenseInfo struct {
 // license key JSON field names
 const (
 	accountID    = "aid"
+	deploymentID = "did"
 	organization = "org"
 	capacity     = "cap"
 	plan         = "plan"
@@ -114,6 +116,11 @@ func toLicenseInfo(token jwt.Token) (LicenseInfo, error) {
 	if !ok || ok && accID < 0 {
 		return LicenseInfo{}, errors.New("Invalid accountId in claims")
 	}
+
+	// deployment id may not be present in older licenses.
+	// so don't fail if it's not found.
+	depUUID, _ := claims[deploymentID].(string)
+
 	orgName, ok := claims[organization].(string)
 	if !ok {
 		return LicenseInfo{}, errors.New("Invalid organization in claims")
@@ -130,6 +137,7 @@ func toLicenseInfo(token jwt.Token) (LicenseInfo, error) {
 		Email:           token.Subject(),
 		Organization:    orgName,
 		AccountID:       int64(accID),
+		DeploymentID:    depUUID,
 		StorageCapacity: int64(storageCap),
 		Plan:            plan,
 		ExpiresAt:       token.Expiration(),
