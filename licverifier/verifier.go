@@ -30,6 +30,7 @@ import (
 	"github.com/lestrrat-go/jwx/jwa"
 	"github.com/lestrrat-go/jwx/jwk"
 	"github.com/lestrrat-go/jwx/jwt"
+	"github.com/minio/pkg/env"
 )
 
 // LicenseVerifier needs an ECDSA public key in PEM format for initialization.
@@ -154,4 +155,40 @@ func (lv *LicenseVerifier) Verify(license string, options ...jwt.ParseOption) (L
 	}
 
 	return toLicenseInfo(token)
+}
+
+// VerifyClusterLicense - verifies if the given license string is valid for the given cluster (deployment id)
+func VerifyClusterLicense(lic string, depID string, options ...jwt.ParseOption) error {
+	var pemBytes []byte
+
+	devMode := env.Get("MINIO_CI_CD", "") != ""
+	if devMode {
+		pemBytes = []byte(`-----BEGIN PUBLIC KEY-----
+MHYwEAYHKoZIzj0CAQYFK4EEACIDYgAEbo+e1wpBY4tBq9AONKww3Kq7m6QP/TBQ
+mr/cKCUyBL7rcAvg0zNq1vcSrUSGlAmY3SEDCu3GOKnjG/U4E7+p957ocWSV+mQU
+9NKlTdQFGF3+aO6jbQ4hX/S5qPyF+a3z
+-----END PUBLIC KEY-----`)
+	} else {
+		pemBytes = []byte(`-----BEGIN PUBLIC KEY-----
+MHYwEAYHKoZIzj0CAQYFK4EEACIDYgAEaK31xujr6/rZ7ZfXZh3SlwovjC+X8wGq
+qkltaKyTLRENd4w3IRktYYCRgzpDLPn/nrf7snV/ERO5qcI7fkEES34IVEr+2Uff
+JkO2PfyyAYEO/5dBlPh1Undu9WQl6J7B
+-----END PUBLIC KEY-----`)
+	}
+
+	lv, e := NewLicenseVerifier(pemBytes)
+	if e != nil {
+		return e
+	}
+
+	licInfo, e := lv.Verify(lic, options...)
+	if e != nil {
+		return e
+	}
+
+	if licInfo.DeploymentID != depID {
+		return errors.New("Invalid license - deployment ID doesn't match")
+	}
+
+	return nil
 }
