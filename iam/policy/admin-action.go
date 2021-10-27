@@ -72,6 +72,9 @@ const (
 	// ConfigUpdateAdminAction - allow MinIO config management
 	ConfigUpdateAdminAction = "admin:ConfigUpdate"
 
+	// GetSubnetLicenseAdminAction - allow retrieving subnet license
+	GetSubnetLicenseAdminAction = "admin:GetSubnetLicense"
+
 	// CreateUserAdminAction - allow creating MinIO user
 	CreateUserAdminAction = "admin:CreateUser"
 	// DeleteUserAdminAction - allow deleting MinIO user
