@@ -28,80 +28,101 @@ const (
 	SessionPolicyName = "sessionPolicy"
 )
 
-// ReadWrite - provides full access to all buckets and all objects
-var ReadWrite = Policy{
-	Version: DefaultVersion,
-	Statements: []Statement{
-		{
-			SID:       policy.ID(""),
-			Effect:    policy.Allow,
-			Actions:   NewActionSet(AllActions),
-			Resources: NewResourceSet(NewResource("*", "")),
+// DefaultPolicies - list of canned policies available in MinIO.
+var DefaultPolicies = []struct {
+	Name       string
+	Definition Policy
+}{
+	// ReadWrite - provides full access to all buckets and all objects.
+	{
+		Name: "readwrite",
+		Definition: Policy{
+			Version: DefaultVersion,
+			Statements: []Statement{
+				{
+					SID:       policy.ID(""),
+					Effect:    policy.Allow,
+					Actions:   NewActionSet(AllActions),
+					Resources: NewResourceSet(NewResource("*", "")),
+				},
+			},
 		},
 	},
-}
 
-// ReadOnly - read only.
-var ReadOnly = Policy{
-	Version: DefaultVersion,
-	Statements: []Statement{
-		{
-			SID:       policy.ID(""),
-			Effect:    policy.Allow,
-			Actions:   NewActionSet(GetBucketLocationAction, GetObjectAction),
-			Resources: NewResourceSet(NewResource("*", "")),
+	// ReadOnly - read only.
+	{
+		Name: "readonly",
+		Definition: Policy{
+			Version: DefaultVersion,
+			Statements: []Statement{
+				{
+					SID:       policy.ID(""),
+					Effect:    policy.Allow,
+					Actions:   NewActionSet(GetBucketLocationAction, GetObjectAction),
+					Resources: NewResourceSet(NewResource("*", "")),
+				},
+			},
 		},
 	},
-}
 
-// WriteOnly - provides write access.
-var WriteOnly = Policy{
-	Version: DefaultVersion,
-	Statements: []Statement{
-		{
-			SID:       policy.ID(""),
-			Effect:    policy.Allow,
-			Actions:   NewActionSet(PutObjectAction),
-			Resources: NewResourceSet(NewResource("*", "")),
+	// WriteOnly - provides write access.
+	{
+		Name: "writeonly",
+		Definition: Policy{
+			Version: DefaultVersion,
+			Statements: []Statement{
+				{
+					SID:       policy.ID(""),
+					Effect:    policy.Allow,
+					Actions:   NewActionSet(PutObjectAction),
+					Resources: NewResourceSet(NewResource("*", "")),
+				},
+			},
 		},
 	},
-}
 
-// AdminDiagnostics - provides admin diagnostics access.
-var AdminDiagnostics = Policy{
-	Version: DefaultVersion,
-	Statements: []Statement{
-		{
-			SID:    policy.ID(""),
-			Effect: policy.Allow,
-			Actions: NewActionSet(ProfilingAdminAction,
-				TraceAdminAction, ConsoleLogAdminAction,
-				ServerInfoAdminAction, TopLocksAdminAction,
-				HealthInfoAdminAction, BandwidthMonitorAction,
-				PrometheusAdminAction,
-			),
-			Resources: NewResourceSet(NewResource("*", "")),
+	// AdminDiagnostics - provides admin diagnostics access.
+	{
+		Name: "diagnostics",
+		Definition: Policy{
+			Version: DefaultVersion,
+			Statements: []Statement{
+				{
+					SID:    policy.ID(""),
+					Effect: policy.Allow,
+					Actions: NewActionSet(ProfilingAdminAction,
+						TraceAdminAction, ConsoleLogAdminAction,
+						ServerInfoAdminAction, TopLocksAdminAction,
+						HealthInfoAdminAction, BandwidthMonitorAction,
+						PrometheusAdminAction,
+					),
+					Resources: NewResourceSet(NewResource("*", "")),
+				},
+			},
 		},
 	},
-}
 
-// Admin - provides admin all-access canned policy
-var Admin = Policy{
-	Version: DefaultVersion,
-	Statements: []Statement{
-		{
-			SID:        policy.ID(""),
-			Effect:     policy.Allow,
-			Actions:    NewActionSet(AllAdminActions),
-			Resources:  NewResourceSet(),
-			Conditions: condition.NewFunctions(),
-		},
-		{
-			SID:        policy.ID(""),
-			Effect:     policy.Allow,
-			Actions:    NewActionSet(AllActions),
-			Resources:  NewResourceSet(NewResource("*", "")),
-			Conditions: condition.NewFunctions(),
+	// Admin - provides admin all-access canned policy
+	{
+		Name: "admin",
+		Definition: Policy{
+			Version: DefaultVersion,
+			Statements: []Statement{
+				{
+					SID:        policy.ID(""),
+					Effect:     policy.Allow,
+					Actions:    NewActionSet(AllAdminActions),
+					Resources:  NewResourceSet(),
+					Conditions: condition.NewFunctions(),
+				},
+				{
+					SID:        policy.ID(""),
+					Effect:     policy.Allow,
+					Actions:    NewActionSet(AllActions),
+					Resources:  NewResourceSet(NewResource("*", "")),
+					Conditions: condition.NewFunctions(),
+				},
+			},
 		},
 	},
 }
