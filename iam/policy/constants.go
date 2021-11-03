@@ -104,7 +104,7 @@ var DefaultPolicies = []struct {
 
 	// Admin - provides admin all-access canned policy
 	{
-		Name: "admin",
+		Name: "consoleAdmin",
 		Definition: Policy{
 			Version: DefaultVersion,
 			Statements: []Statement{
