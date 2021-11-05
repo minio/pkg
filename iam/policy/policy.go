@@ -45,7 +45,7 @@ type Args struct {
 // GetValuesFromClaims returns the list of values for the input claimName.
 // Supports values in following formats
 // - string
-// - command separated values
+// - comma separated values
 // - string array
 func GetValuesFromClaims(claims map[string]interface{}, claimName string) (set.StringSet, bool) {
 	s := set.NewStringSet()
@@ -97,6 +97,17 @@ func GetPoliciesFromClaims(claims map[string]interface{}, policyClaimName string
 // incoming request, extracting the information from JWT claims.
 func (a Args) GetPolicies(policyClaimName string) (set.StringSet, bool) {
 	return GetPoliciesFromClaims(a.Claims, policyClaimName)
+}
+
+// GetRoleArn returns the role ARN from JWT claims if present. Otherwise returns
+// empty string.
+func (a Args) GetRoleArn() string {
+	s, ok := a.Claims["roleArn"]
+	roleArn, ok2 := s.(string)
+	if ok && ok2 {
+		return roleArn
+	}
+	return ""
 }
 
 // Policy - iam bucket iamp.
