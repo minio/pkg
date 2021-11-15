@@ -127,6 +127,36 @@ func (iamp Policy) MatchResource(resource string) bool {
 	return false
 }
 
+// IsAllowedActions returns all supported actions for this policy.
+func (iamp Policy) IsAllowedActions(bucketName, objectName string, conditionValues map[string][]string) ActionSet {
+	actionSet := make(ActionSet)
+	for action := range supportedActions {
+		if iamp.IsAllowed(Args{
+			BucketName:      bucketName,
+			ObjectName:      objectName,
+			Action:          action,
+			ConditionValues: conditionValues,
+		}) {
+			actionSet.Add(action)
+		}
+	}
+	for action := range supportedAdminActions {
+		admAction := Action(action)
+		if iamp.IsAllowed(Args{
+			BucketName:      bucketName,
+			ObjectName:      objectName,
+			Action:          admAction,
+			ConditionValues: conditionValues,
+			// checks mainly for actions that can have explicit
+			// deny, while without it are implicitly enabled.
+			DenyOnly: action == CreateServiceAccountAdminAction || action == CreateUserAdminAction,
+		}) {
+			actionSet.Add(admAction)
+		}
+	}
+	return actionSet
+}
+
 // IsAllowed - checks given policy args is allowed to continue the Rest API.
 func (iamp Policy) IsAllowed(args Args) bool {
 	// Check all deny statements. If any one statement denies, return false.

@@ -74,6 +74,56 @@ func TestGetPoliciesFromClaims(t *testing.T) {
 	}
 }
 
+func TestPolicyIsAllowedActions(t *testing.T) {
+	policy1 := `{
+   "Version":"2012-10-17",
+   "Statement":[
+      {
+         "Sid":"statement1",
+         "Effect":"Allow",
+         "Action": "s3:CreateBucket",
+         "Resource": "arn:aws:s3:::*",
+         "Condition": {
+             "StringLike": {
+                 "s3:LocationConstraint": "us-east-1"
+             }
+         }
+       },
+      {
+         "Sid":"statement2",
+         "Effect":"Deny",
+         "Action": "s3:CreateBucket",
+         "Resource": "arn:aws:s3:::*",
+         "Condition": {
+             "StringNotLike": {
+                 "s3:LocationConstraint": "us-east-1"
+             }
+         }
+       }
+    ]
+}`
+	p, err := ParseConfig(strings.NewReader(policy1))
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	allowedActions := p.IsAllowedActions("testbucket", "", map[string][]string{
+		"LocationConstraint": []string{"us-east-1"},
+	})
+
+	if !allowedActions.Match(CreateBucketAction) {
+		t.Fatal("expected success for CreateBucket, but failed to match")
+	}
+
+	allowedActions = p.IsAllowedActions("testbucket", "", map[string][]string{
+		"LocationConstraint": []string{"us-east-2"},
+	})
+
+	if allowedActions.Match(CreateBucketAction) {
+		t.Fatal("expected no CreateBucket in allowed actions, but found instead")
+	}
+}
+
 func TestPolicyIsAllowed(t *testing.T) {
 	case1Policy := Policy{
 		Version: DefaultVersion,
