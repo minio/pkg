@@ -1,3 +1,4 @@
+//go:build linux || darwin || netbsd || solaris
 // +build linux darwin netbsd solaris
 
 // Copyright (c) 2015-2021 MinIO, Inc.

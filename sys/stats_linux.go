@@ -1,3 +1,4 @@
+//go:build linux && !arm && !386
 // +build linux,!arm,!386
 
 // Copyright (c) 2015-2021 MinIO, Inc.

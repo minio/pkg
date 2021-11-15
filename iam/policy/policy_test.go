@@ -108,7 +108,7 @@ func TestPolicyIsAllowedActions(t *testing.T) {
 	}
 
 	allowedActions := p.IsAllowedActions("testbucket", "", map[string][]string{
-		"LocationConstraint": []string{"us-east-1"},
+		"LocationConstraint": {"us-east-1"},
 	})
 
 	if !allowedActions.Match(CreateBucketAction) {
@@ -116,7 +116,7 @@ func TestPolicyIsAllowedActions(t *testing.T) {
 	}
 
 	allowedActions = p.IsAllowedActions("testbucket", "", map[string][]string{
-		"LocationConstraint": []string{"us-east-2"},
+		"LocationConstraint": {"us-east-2"},
 	})
 
 	if allowedActions.Match(CreateBucketAction) {
