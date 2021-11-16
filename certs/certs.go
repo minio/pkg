@@ -227,7 +227,7 @@ func (m *Manager) ReloadCerts() {
 // watchSymlinks starts an endless loop reloading the
 // certFile and keyFile periodically.
 func (m *Manager) watchSymlinks(watch pair, reload <-chan struct{}) {
-	t := time.NewTimer(time.Hour)
+	t := time.NewTimer(15 * time.Minute)
 	defer t.Stop()
 	for {
 		select {
