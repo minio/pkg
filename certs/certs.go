@@ -187,7 +187,7 @@ func (m *Manager) watchSymlinks(certFile, keyFile string) {
 		select {
 		case <-m.ctx.Done():
 			return // Once stopped exits this routine.
-		case <-time.After(24 * time.Hour):
+		case <-time.After(15 * time.Minute):
 			certificate, err := m.loadX509KeyPair(certFile, keyFile)
 			if err != nil {
 				continue
