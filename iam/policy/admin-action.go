@@ -68,6 +68,8 @@ const (
 	ServiceRestartAdminAction = "admin:ServiceRestart"
 	// ServiceStopAdminAction - allow stopping MinIO service.
 	ServiceStopAdminAction = "admin:ServiceStop"
+	// ServiceFreezeAdminAction - allow freeze/unfreeze MinIO service.
+	ServiceFreezeAdminAction = "admin:ServiceFreeze"
 
 	// ConfigUpdateAdminAction - allow MinIO config management
 	ConfigUpdateAdminAction = "admin:ConfigUpdate"
@@ -157,9 +159,6 @@ const (
 	// ListTierAction - allow listing remote tiers
 	ListTierAction = "admin:ListTier"
 
-	// ListPoolsAction - list pools action
-	ListPoolsAction = "admin:ListPools"
-
 	// AllAdminActions - provides all admin permissions
 	AllAdminActions = "admin:*"
 )
@@ -181,6 +180,7 @@ var supportedAdminActions = map[AdminAction]struct{}{
 	ServerUpdateAdminAction:         {},
 	ServiceRestartAdminAction:       {},
 	ServiceStopAdminAction:          {},
+	ServiceFreezeAdminAction:        {},
 	ConfigUpdateAdminAction:         {},
 	CreateUserAdminAction:           {},
 	DeleteUserAdminAction:           {},
@@ -209,7 +209,7 @@ var supportedAdminActions = map[AdminAction]struct{}{
 	GetBucketTargetAction:           {},
 	SetTierAction:                   {},
 	ListTierAction:                  {},
-	ListPoolsAction:                 {},
+	DecommissionAdminAction:         {},
 	AllAdminActions:                 {},
 }
 
@@ -241,6 +241,7 @@ func createAdminActionConditionKeyMap() map[Action]condition.KeySet {
 		ServerUpdateAdminAction:         condition.NewKeySet(allSupportedAdminKeys...),
 		ServiceRestartAdminAction:       condition.NewKeySet(allSupportedAdminKeys...),
 		ServiceStopAdminAction:          condition.NewKeySet(allSupportedAdminKeys...),
+		ServiceFreezeAdminAction:        condition.NewKeySet(allSupportedAdminKeys...),
 		ConfigUpdateAdminAction:         condition.NewKeySet(allSupportedAdminKeys...),
 		CreateUserAdminAction:           condition.NewKeySet(allSupportedAdminKeys...),
 		DeleteUserAdminAction:           condition.NewKeySet(allSupportedAdminKeys...),
@@ -269,7 +270,7 @@ func createAdminActionConditionKeyMap() map[Action]condition.KeySet {
 		GetBucketTargetAction:       condition.NewKeySet(allSupportedAdminKeys...),
 		SetTierAction:               condition.NewKeySet(allSupportedAdminKeys...),
 		ListTierAction:              condition.NewKeySet(allSupportedAdminKeys...),
-		ListPoolsAction:             condition.NewKeySet(allSupportedAdminKeys...),
+		DecommissionAdminAction:     condition.NewKeySet(allSupportedAdminKeys...),
 	}
 }
 
