@@ -24,6 +24,7 @@ import (
 	"errors"
 	"fmt"
 	"os"
+	"os/signal"
 	"path/filepath"
 	"sync"
 	"time"
@@ -57,8 +58,8 @@ type Manager struct {
 	defaultCert  pair
 
 	loadX509KeyPair LoadX509KeyPairFunc
-	events          chan notify.EventInfo
-	ctx             context.Context
+	done            <-chan struct{}
+	reloadCerts     []chan struct{}
 }
 
 // pair represents a certificate and private key file tuple.
@@ -91,13 +92,11 @@ func NewManager(ctx context.Context, certFile, keyFile string, loadX509KeyPair L
 			CertFile: certFile,
 		},
 		loadX509KeyPair: loadX509KeyPair,
-		events:          make(chan notify.EventInfo, 1),
-		ctx:             ctx,
+		done:            ctx.Done(),
 	}
 	if err := manager.AddCertificate(certFile, keyFile); err != nil {
 		return nil, err
 	}
-	go manager.watchFileEvents()
 	return manager, nil
 }
 
@@ -164,83 +163,128 @@ func (m *Manager) AddCertificate(certFile, keyFile string) (err error) {
 	m.certificates[p] = &certificate
 
 	if certFileIsLink && keyFileIsLink {
-		go m.watchSymlinks(certFile, keyFile)
+		go m.watchSymlinks(p, m.reloader())
 	} else {
 		// Windows doesn't allow for watching file changes but instead allows
 		// for directory changes only, while we can still watch for changes
 		// on files on other platforms. Watch parent directory on all platforms
 		// for simplicity.
-		if err = notify.Watch(filepath.Dir(certFile), m.events, eventWrite...); err != nil {
+		events := make(chan notify.EventInfo, 1)
+
+		if err = notify.Watch(filepath.Dir(certFile), events, eventWrite...); err != nil {
 			return err
 		}
-		if err = notify.Watch(filepath.Dir(keyFile), m.events, eventWrite...); err != nil {
+		if err = notify.Watch(filepath.Dir(keyFile), events, eventWrite...); err != nil {
 			return err
 		}
+		go m.watchFileEvents(p, events, m.reloader())
 	}
 	return nil
 }
 
+// reloader creates and registers a reloader.
+// m must be locked when called.
+func (m *Manager) reloader() <-chan struct{} {
+	ch := make(chan struct{}, 1)
+	m.reloadCerts = append(m.reloadCerts, ch)
+	return ch
+}
+
+// ReloadOnSignal specifies one or more signals that will trigger certificates reloading.
+// If called multiple times with the same signal certificates
+func (m *Manager) ReloadOnSignal(sig ...os.Signal) {
+	if len(sig) == 0 {
+		return
+	}
+	ch := make(chan os.Signal, 1)
+	signal.Notify(ch, sig...)
+	go func() {
+		for {
+			select {
+			case <-m.done:
+				signal.Stop(ch)
+				return
+			case <-ch:
+				m.ReloadCerts()
+			}
+		}
+	}()
+}
+
+// ReloadCerts will forcefully reload all certs.
+func (m *Manager) ReloadCerts() {
+	m.lock.RLock()
+	defer m.lock.RUnlock()
+	for _, ch := range m.reloadCerts {
+		// Non-blocking
+		select {
+		case ch <- struct{}{}:
+		default:
+		}
+	}
+}
+
 // watchSymlinks starts an endless loop reloading the
 // certFile and keyFile periodically.
-func (m *Manager) watchSymlinks(certFile, keyFile string) {
+func (m *Manager) watchSymlinks(watch pair, reload <-chan struct{}) {
+	t := time.NewTimer(15 * time.Minute)
+	defer t.Stop()
 	for {
 		select {
-		case <-m.ctx.Done():
+		case <-m.done:
 			return // Once stopped exits this routine.
-		case <-time.After(24 * time.Hour):
-			certificate, err := m.loadX509KeyPair(certFile, keyFile)
+		case <-t.C:
+		case <-reload:
+		}
+		certificate, err := m.loadX509KeyPair(watch.CertFile, watch.KeyFile)
+		if err != nil {
+			continue
+		}
+		if certificate.Leaf == nil { // This is a performance optimisation
+			certificate.Leaf, err = x509.ParseCertificate(certificate.Certificate[0])
 			if err != nil {
 				continue
 			}
-			if certificate.Leaf == nil { // This is a performance optimisation
-				certificate.Leaf, err = x509.ParseCertificate(certificate.Certificate[0])
-				if err != nil {
-					continue
-				}
-			}
-
-			p := pair{
-				CertFile: certFile,
-				KeyFile:  keyFile,
-			}
-			m.lock.Lock()
-			m.certificates[p] = &certificate
-			m.lock.Unlock()
 		}
+
+		m.lock.Lock()
+		m.certificates[watch] = &certificate
+		m.lock.Unlock()
 	}
 }
 
 // watchFileEvents starts an endless loop waiting for file systems events.
 // Once an event occurs it reloads the private key and certificate that
 // has changed, if any.
-func (m *Manager) watchFileEvents() {
+func (m *Manager) watchFileEvents(watch pair, events chan notify.EventInfo, reload <-chan struct{}) {
 	for {
 		select {
-		case <-m.ctx.Done():
+		case <-m.done:
 			return
-		case event := <-m.events:
+		case event := <-events:
 			if !isWriteEvent(event.Event()) {
 				continue
 			}
-
-			for pair := range m.certificates {
-				if p := event.Path(); pair.KeyFile == p || pair.CertFile == p {
-					certificate, err := m.loadX509KeyPair(pair.CertFile, pair.KeyFile)
-					if err != nil {
-						continue
-					}
-					if certificate.Leaf == nil { // This is performance optimisation
-						certificate.Leaf, err = x509.ParseCertificate(certificate.Certificate[0])
-						if err != nil {
-							continue
-						}
-					}
-					m.lock.Lock()
-					m.certificates[pair] = &certificate
-					m.lock.Unlock()
-				}
+			p := event.Path()
+			if watch.KeyFile != p && watch.CertFile != p {
+				continue
+			}
+		case <-reload:
+		}
+		// Do reload
+		certificate, err := m.loadX509KeyPair(watch.CertFile, watch.KeyFile)
+		if err != nil {
+			continue
+		}
+		if certificate.Leaf == nil { // This is performance optimisation
+			certificate.Leaf, err = x509.ParseCertificate(certificate.Certificate[0])
+			if err != nil {
+				continue
 			}
 		}
+		m.lock.Lock()
+		m.certificates[watch] = &certificate
+		m.lock.Unlock()
 	}
 }
 
