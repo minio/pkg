@@ -183,3 +183,19 @@ func ParseConfig(reader io.Reader, bucketName string) (*Policy, error) {
 	err := policy.Validate(bucketName)
 	return &policy, err
 }
+
+// Equals returns true if the two policies are identical
+func (policy *Policy) Equals(p Policy) bool {
+	if policy.ID != p.ID || policy.Version != p.Version {
+		return false
+	}
+	if len(policy.Statements) != len(p.Statements) {
+		return false
+	}
+	for i, st := range policy.Statements {
+		if !p.Statements[i].Equals(st) {
+			return false
+		}
+	}
+	return true
+}
