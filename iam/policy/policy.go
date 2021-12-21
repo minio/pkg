@@ -277,3 +277,19 @@ func ParseConfig(reader io.Reader) (*Policy, error) {
 
 	return &iamp, iamp.Validate()
 }
+
+// Equals returns true if the two policies are identical
+func (iamp *Policy) Equals(p Policy) bool {
+	if iamp.ID != p.ID || iamp.Version != p.Version {
+		return false
+	}
+	if len(iamp.Statements) != len(p.Statements) {
+		return false
+	}
+	for i, st := range iamp.Statements {
+		if !p.Statements[i].Equals(st) {
+			return false
+		}
+	}
+	return true
+}
