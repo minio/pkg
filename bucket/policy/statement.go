@@ -36,6 +36,9 @@ type Statement struct {
 
 // Equals checks if two statements are equal
 func (statement Statement) Equals(st Statement) bool {
+	if statement.SID != "" && statement.SID == st.SID {
+		return true
+	}
 	if statement.Effect != st.Effect {
 		return false
 	}
