@@ -223,10 +223,14 @@ func (iamp Policy) Merge(input Policy) Policy {
 		mergedPolicy.Version = input.Version
 	}
 	for _, st := range iamp.Statements {
-		mergedPolicy.Statements = append(mergedPolicy.Statements, st.Clone())
+		var newSt Statement = st.Clone()
+		newSt.SID = st.SID
+		mergedPolicy.Statements = append(mergedPolicy.Statements, newSt)
 	}
 	for _, st := range input.Statements {
-		mergedPolicy.Statements = append(mergedPolicy.Statements, st.Clone())
+		var newSt Statement = st.Clone()
+		newSt.SID = st.SID
+		mergedPolicy.Statements = append(mergedPolicy.Statements, newSt)
 	}
 	mergedPolicy.dropDuplicateStatements()
 	return mergedPolicy
