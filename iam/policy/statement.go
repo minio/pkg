@@ -157,6 +157,7 @@ func (statement Statement) Clone() Statement {
 // NewStatement - creates new statement.
 func NewStatement(sid policy.ID, effect policy.Effect, actionSet ActionSet, resourceSet ResourceSet, conditions condition.Functions) Statement {
 	return Statement{
+		SID:        sid,
 		Effect:     effect,
 		Actions:    actionSet,
 		Resources:  resourceSet,
