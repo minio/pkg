@@ -166,13 +166,14 @@ func (statement Statement) Validate(bucketName string) error {
 
 // Clone clones Statement structure
 func (statement Statement) Clone() Statement {
-	return NewStatement(statement.Effect, statement.Principal.Clone(),
+	return NewStatement(statement.SID, statement.Effect, statement.Principal.Clone(),
 		statement.Actions.Clone(), statement.Resources.Clone(), statement.Conditions.Clone())
 }
 
 // NewStatement - creates new statement.
-func NewStatement(effect Effect, principal Principal, actionSet ActionSet, resourceSet ResourceSet, conditions condition.Functions) Statement {
+func NewStatement(sid ID, effect Effect, principal Principal, actionSet ActionSet, resourceSet ResourceSet, conditions condition.Functions) Statement {
 	return Statement{
+		SID:        sid,
 		Effect:     effect,
 		Principal:  principal,
 		Actions:    actionSet,

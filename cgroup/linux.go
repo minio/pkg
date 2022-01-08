@@ -79,7 +79,7 @@ func GetEntries(pid int) (CGEntries, error) {
 // returns a procCGroup which is a parsed list of all
 // the line by line entires from /proc/<pid>/cgroup.
 func parseProcCGroup(r io.Reader) (CGEntries, error) {
-	var cgEntries = CGEntries{}
+	cgEntries := CGEntries{}
 
 	// Start reading cgroup categories line by line
 	// and process them into procCGroup structure.
@@ -111,7 +111,6 @@ func parseProcCGroup(r io.Reader) (CGEntries, error) {
 // if cgroup manager is configured we should just rely on `cgm` cli
 // to fetch all the values for us.
 func getManagerKernValue(cname, path, kernParam string) (limit uint64, err error) {
-
 	cmd := exec.Command("cgm", "getvalue", cname, path, kernParam)
 	var out bytes.Buffer
 	cmd.Stdout = &out

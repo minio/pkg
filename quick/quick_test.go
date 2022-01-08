@@ -61,7 +61,7 @@ func TestReadVersionErr(t *testing.T) {
 		t.Fatal("Unexpected should fail in initialization for bad input")
 	}
 
-	err = ioutil.WriteFile("test.json", []byte("{ \"version\":2,"), 0644)
+	err = ioutil.WriteFile("test.json", []byte("{ \"version\":2,"), 0o644)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -71,7 +71,7 @@ func TestReadVersionErr(t *testing.T) {
 		t.Fatal("Unexpected should fail to fetch version")
 	}
 
-	err = ioutil.WriteFile("test.json", []byte("{ \"version\":2 }"), 0644)
+	err = ioutil.WriteFile("test.json", []byte("{ \"version\":2 }"), 0o644)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -84,7 +84,7 @@ func TestReadVersionErr(t *testing.T) {
 
 func TestSaveFailOnDir(t *testing.T) {
 	defer os.RemoveAll("test-1.json")
-	err := os.MkdirAll("test-1.json", 0644)
+	err := os.MkdirAll("test-1.json", 0o644)
 	if err != nil {
 		t.Fatal(err)
 	}

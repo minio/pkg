@@ -121,7 +121,6 @@ func saveFileConfig(filename string, v interface{}) error {
 	}
 	// Save data.
 	return writeFile(filename, dataBytes)
-
 }
 
 func saveFileConfigEtcd(filename string, clnt *etcd.Client, v interface{}) error {

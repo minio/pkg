@@ -27,7 +27,7 @@ import (
 )
 
 func TestStatementIsAllowed(t *testing.T) {
-	case1Statement := NewStatement(
+	case1Statement := NewStatement("",
 		Allow,
 		NewPrincipal("*"),
 		NewActionSet(GetBucketLocationAction, PutObjectAction),
@@ -35,7 +35,7 @@ func TestStatementIsAllowed(t *testing.T) {
 		condition.NewFunctions(),
 	)
 
-	case2Statement := NewStatement(
+	case2Statement := NewStatement("",
 		Allow,
 		NewPrincipal("*"),
 		NewActionSet(GetObjectAction, PutObjectAction),
@@ -55,7 +55,7 @@ func TestStatementIsAllowed(t *testing.T) {
 		t.Fatalf("unexpected error. %v\n", err)
 	}
 
-	case3Statement := NewStatement(
+	case3Statement := NewStatement("",
 		Allow,
 		NewPrincipal("*"),
 		NewActionSet(GetObjectAction, PutObjectAction),
@@ -63,7 +63,7 @@ func TestStatementIsAllowed(t *testing.T) {
 		condition.NewFunctions(func1),
 	)
 
-	case4Statement := NewStatement(
+	case4Statement := NewStatement("",
 		Deny,
 		NewPrincipal("*"),
 		NewActionSet(GetObjectAction, PutObjectAction),
@@ -196,7 +196,7 @@ func TestStatementIsValid(t *testing.T) {
 		expectErr bool
 	}{
 		// Invalid effect error.
-		{NewStatement(
+		{NewStatement("",
 			Effect("foo"),
 			NewPrincipal("*"),
 			NewActionSet(GetBucketLocationAction, PutObjectAction),
@@ -204,7 +204,7 @@ func TestStatementIsValid(t *testing.T) {
 			condition.NewFunctions(),
 		), true},
 		// Invalid principal error.
-		{NewStatement(
+		{NewStatement("",
 			Allow,
 			NewPrincipal(),
 			NewActionSet(GetBucketLocationAction, PutObjectAction),
@@ -212,7 +212,7 @@ func TestStatementIsValid(t *testing.T) {
 			condition.NewFunctions(),
 		), true},
 		// Empty actions error.
-		{NewStatement(
+		{NewStatement("",
 			Allow,
 			NewPrincipal("*"),
 			NewActionSet(),
@@ -220,7 +220,7 @@ func TestStatementIsValid(t *testing.T) {
 			condition.NewFunctions(),
 		), true},
 		// Empty resources error.
-		{NewStatement(
+		{NewStatement("",
 			Allow,
 			NewPrincipal("*"),
 			NewActionSet(GetBucketLocationAction, PutObjectAction),
@@ -228,7 +228,7 @@ func TestStatementIsValid(t *testing.T) {
 			condition.NewFunctions(),
 		), true},
 		// Unsupported resource found for object action.
-		{NewStatement(
+		{NewStatement("",
 			Allow,
 			NewPrincipal("*"),
 			NewActionSet(GetBucketLocationAction, PutObjectAction),
@@ -236,7 +236,7 @@ func TestStatementIsValid(t *testing.T) {
 			condition.NewFunctions(),
 		), true},
 		// Unsupported resource found for bucket action.
-		{NewStatement(
+		{NewStatement("",
 			Allow,
 			NewPrincipal("*"),
 			NewActionSet(GetBucketLocationAction, PutObjectAction),
@@ -244,14 +244,14 @@ func TestStatementIsValid(t *testing.T) {
 			condition.NewFunctions(),
 		), true},
 		// Unsupported condition key for action.
-		{NewStatement(
+		{NewStatement("",
 			Allow,
 			NewPrincipal("*"),
 			NewActionSet(GetObjectAction, PutObjectAction),
 			NewResourceSet(NewResource("mybucket", "myobject*")),
 			condition.NewFunctions(func1, func2),
 		), true},
-		{NewStatement(
+		{NewStatement("",
 			Deny,
 			NewPrincipal("*"),
 			NewActionSet(GetObjectAction, PutObjectAction),
@@ -271,7 +271,7 @@ func TestStatementIsValid(t *testing.T) {
 }
 
 func TestStatementMarshalJSON(t *testing.T) {
-	case1Statement := NewStatement(
+	case1Statement := NewStatement("",
 		Allow,
 		NewPrincipal("*"),
 		NewActionSet(PutObjectAction),
@@ -288,7 +288,7 @@ func TestStatementMarshalJSON(t *testing.T) {
 	if err != nil {
 		t.Fatalf("unexpected error. %v\n", err)
 	}
-	case2Statement := NewStatement(
+	case2Statement := NewStatement("",
 		Allow,
 		NewPrincipal("*"),
 		NewActionSet(PutObjectAction),
@@ -304,7 +304,7 @@ func TestStatementMarshalJSON(t *testing.T) {
 	if err != nil {
 		t.Fatalf("unexpected error. %v\n", err)
 	}
-	case3Statement := NewStatement(
+	case3Statement := NewStatement("",
 		Deny,
 		NewPrincipal("*"),
 		NewActionSet(PutObjectAction),
@@ -313,7 +313,7 @@ func TestStatementMarshalJSON(t *testing.T) {
 	)
 	case3Data := []byte(`{"Effect":"Deny","Principal":{"AWS":["*"]},"Action":["s3:PutObject"],"Resource":["arn:aws:s3:::mybucket/myobject*"],"Condition":{"Null":{"s3:x-amz-server-side-encryption":[false]}}}`)
 
-	case4Statement := NewStatement(
+	case4Statement := NewStatement("",
 		Allow,
 		NewPrincipal("*"),
 		NewActionSet(GetObjectAction, PutObjectAction),
@@ -357,7 +357,7 @@ func TestStatementUnmarshalJSON(t *testing.T) {
     "Action": "s3:PutObject",
     "Resource": "arn:aws:s3:::mybucket/myobject*"
 }`)
-	case1Statement := NewStatement(
+	case1Statement := NewStatement("",
 		Allow,
 		NewPrincipal("*"),
 		NewActionSet(PutObjectAction),
@@ -384,7 +384,7 @@ func TestStatementUnmarshalJSON(t *testing.T) {
 	if err != nil {
 		t.Fatalf("unexpected error. %v\n", err)
 	}
-	case2Statement := NewStatement(
+	case2Statement := NewStatement("",
 		Allow,
 		NewPrincipal("*"),
 		NewActionSet(PutObjectAction),
@@ -415,7 +415,7 @@ func TestStatementUnmarshalJSON(t *testing.T) {
 	if err != nil {
 		t.Fatalf("unexpected error. %v\n", err)
 	}
-	case3Statement := NewStatement(
+	case3Statement := NewStatement("",
 		Deny,
 		NewPrincipal("*"),
 		NewActionSet(PutObjectAction, GetObjectAction),
@@ -522,7 +522,7 @@ func TestStatementUnmarshalJSON(t *testing.T) {
 }
 
 func TestStatementValidate(t *testing.T) {
-	case1Statement := NewStatement(
+	case1Statement := NewStatement("",
 		Allow,
 		NewPrincipal("*"),
 		NewActionSet(PutObjectAction),
@@ -544,7 +544,7 @@ func TestStatementValidate(t *testing.T) {
 	if err != nil {
 		t.Fatalf("unexpected error. %v\n", err)
 	}
-	case2Statement := NewStatement(
+	case2Statement := NewStatement("",
 		Allow,
 		NewPrincipal("*"),
 		NewActionSet(GetObjectAction, PutObjectAction),

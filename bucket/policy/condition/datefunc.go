@@ -114,7 +114,6 @@ func valueToTime(n string, values ValueSet) (v time.Time, err error) {
 	}
 
 	return v, nil
-
 }
 
 func newDateFunc(n string, key Key, values ValueSet, cond condition) (Function, error) {

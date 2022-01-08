@@ -99,7 +99,6 @@ func TestHasEllipses(t *testing.T) {
 			true,
 		},
 		{
-
 			[]string{
 				"mydisk-{1...4}{1..2.}",
 			},
@@ -119,7 +118,7 @@ func TestHasEllipses(t *testing.T) {
 
 // Test tests find ellipses patterns.
 func TestFindEllipsesPatterns(t *testing.T) {
-	var testCases = []struct {
+	testCases := []struct {
 		pattern string
 		success bool
 		want    [][]string

@@ -142,7 +142,6 @@ func toLicenseInfo(token jwt.Token) (LicenseInfo, error) {
 		Plan:            plan,
 		ExpiresAt:       token.Expiration(),
 	}, nil
-
 }
 
 // Verify verifies the license key and validates the claims present in it.

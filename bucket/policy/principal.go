@@ -94,7 +94,6 @@ func (p *Principal) UnmarshalJSON(data []byte) error {
 // Clone clones Principal structure
 func (p Principal) Clone() Principal {
 	return NewPrincipal(p.AWS.ToSlice()...)
-
 }
 
 // NewPrincipal - creates new Principal.

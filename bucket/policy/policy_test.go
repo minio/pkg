@@ -30,25 +30,27 @@ func TestPolicyIsAllowed(t *testing.T) {
 	case1Policy := Policy{
 		Version: DefaultVersion,
 		Statements: []Statement{
-			NewStatement(
+			NewStatement("",
 				Allow,
 				NewPrincipal("*"),
 				NewActionSet(GetBucketLocationAction, PutObjectAction),
 				NewResourceSet(NewResource("*", "")),
 				condition.NewFunctions(),
-			)},
+			),
+		},
 	}
 
 	case2Policy := Policy{
 		Version: DefaultVersion,
 		Statements: []Statement{
-			NewStatement(
+			NewStatement("",
 				Allow,
 				NewPrincipal("*"),
 				NewActionSet(GetObjectAction, PutObjectAction),
 				NewResourceSet(NewResource("mybucket", "/myobject*")),
 				condition.NewFunctions(),
-			)},
+			),
+		},
 	}
 
 	_, IPNet, err := net.ParseCIDR("192.168.1.0/24")
@@ -66,25 +68,27 @@ func TestPolicyIsAllowed(t *testing.T) {
 	case3Policy := Policy{
 		Version: DefaultVersion,
 		Statements: []Statement{
-			NewStatement(
+			NewStatement("",
 				Allow,
 				NewPrincipal("*"),
 				NewActionSet(GetObjectAction, PutObjectAction),
 				NewResourceSet(NewResource("mybucket", "/myobject*")),
 				condition.NewFunctions(func1),
-			)},
+			),
+		},
 	}
 
 	case4Policy := Policy{
 		Version: DefaultVersion,
 		Statements: []Statement{
-			NewStatement(
+			NewStatement("",
 				Deny,
 				NewPrincipal("*"),
 				NewActionSet(GetObjectAction, PutObjectAction),
 				NewResourceSet(NewResource("mybucket", "/myobject*")),
 				condition.NewFunctions(func1),
-			)},
+			),
+		},
 	}
 
 	anonGetBucketLocationArgs := Args{
@@ -189,7 +193,7 @@ func TestPolicyIsEmpty(t *testing.T) {
 	case1Policy := Policy{
 		Version: DefaultVersion,
 		Statements: []Statement{
-			NewStatement(
+			NewStatement("",
 				Allow,
 				NewPrincipal("*"),
 				NewActionSet(PutObjectAction),
@@ -225,7 +229,7 @@ func TestPolicyIsValid(t *testing.T) {
 	case1Policy := Policy{
 		Version: DefaultVersion,
 		Statements: []Statement{
-			NewStatement(
+			NewStatement("",
 				Allow,
 				NewPrincipal("*"),
 				NewActionSet(PutObjectAction),
@@ -238,14 +242,14 @@ func TestPolicyIsValid(t *testing.T) {
 	case2Policy := Policy{
 		Version: DefaultVersion,
 		Statements: []Statement{
-			NewStatement(
+			NewStatement("",
 				Allow,
 				NewPrincipal("*"),
 				NewActionSet(PutObjectAction),
 				NewResourceSet(NewResource("mybucket", "/myobject*")),
 				condition.NewFunctions(),
 			),
-			NewStatement(
+			NewStatement("",
 				Deny,
 				NewPrincipal("*"),
 				NewActionSet(GetObjectAction),
@@ -258,14 +262,14 @@ func TestPolicyIsValid(t *testing.T) {
 	case3Policy := Policy{
 		Version: DefaultVersion,
 		Statements: []Statement{
-			NewStatement(
+			NewStatement("",
 				Allow,
 				NewPrincipal("*"),
 				NewActionSet(PutObjectAction),
 				NewResourceSet(NewResource("mybucket", "/myobject*")),
 				condition.NewFunctions(),
 			),
-			NewStatement(
+			NewStatement("",
 				Deny,
 				NewPrincipal("*"),
 				NewActionSet(PutObjectAction),
@@ -293,14 +297,14 @@ func TestPolicyIsValid(t *testing.T) {
 	case4Policy := Policy{
 		Version: DefaultVersion,
 		Statements: []Statement{
-			NewStatement(
+			NewStatement("",
 				Allow,
 				NewPrincipal("*"),
 				NewActionSet(PutObjectAction),
 				NewResourceSet(NewResource("mybucket", "/myobject*")),
 				condition.NewFunctions(func1),
 			),
-			NewStatement(
+			NewStatement("",
 				Deny,
 				NewPrincipal("*"),
 				NewActionSet(PutObjectAction),
@@ -313,7 +317,7 @@ func TestPolicyIsValid(t *testing.T) {
 	case5Policy := Policy{
 		Version: "17-10-2012",
 		Statements: []Statement{
-			NewStatement(
+			NewStatement("",
 				Allow,
 				NewPrincipal("*"),
 				NewActionSet(PutObjectAction),
@@ -327,7 +331,7 @@ func TestPolicyIsValid(t *testing.T) {
 		ID:      "MyPolicyForMyBucket1",
 		Version: DefaultVersion,
 		Statements: []Statement{
-			NewStatement(
+			NewStatement("",
 				Allow,
 				NewPrincipal("*"),
 				NewActionSet(GetObjectAction, PutObjectAction),
@@ -340,14 +344,14 @@ func TestPolicyIsValid(t *testing.T) {
 	case7Policy := Policy{
 		Version: DefaultVersion,
 		Statements: []Statement{
-			NewStatement(
+			NewStatement("",
 				Allow,
 				NewPrincipal("*"),
 				NewActionSet(PutObjectAction),
 				NewResourceSet(NewResource("mybucket", "/myobject*")),
 				condition.NewFunctions(),
 			),
-			NewStatement(
+			NewStatement("",
 				Deny,
 				NewPrincipal("*"),
 				NewActionSet(PutObjectAction),
@@ -360,14 +364,14 @@ func TestPolicyIsValid(t *testing.T) {
 	case8Policy := Policy{
 		Version: DefaultVersion,
 		Statements: []Statement{
-			NewStatement(
+			NewStatement("",
 				Allow,
 				NewPrincipal("*"),
 				NewActionSet(PutObjectAction),
 				NewResourceSet(NewResource("mybucket", "/myobject*")),
 				condition.NewFunctions(),
 			),
-			NewStatement(
+			NewStatement("",
 				Allow,
 				NewPrincipal("*"),
 				NewActionSet(PutObjectAction),
@@ -413,7 +417,7 @@ func TestPolicyMarshalJSON(t *testing.T) {
 		ID:      "MyPolicyForMyBucket1",
 		Version: DefaultVersion,
 		Statements: []Statement{
-			NewStatement(
+			NewStatement("",
 				Allow,
 				NewPrincipal("*"),
 				NewActionSet(PutObjectAction),
@@ -440,14 +444,14 @@ func TestPolicyMarshalJSON(t *testing.T) {
 	case2Policy := Policy{
 		Version: DefaultVersion,
 		Statements: []Statement{
-			NewStatement(
+			NewStatement("",
 				Allow,
 				NewPrincipal("*"),
 				NewActionSet(PutObjectAction),
 				NewResourceSet(NewResource("mybucket", "/myobject*")),
 				condition.NewFunctions(),
 			),
-			NewStatement(
+			NewStatement("",
 				Deny,
 				NewPrincipal("*"),
 				NewActionSet(GetObjectAction),
@@ -462,14 +466,14 @@ func TestPolicyMarshalJSON(t *testing.T) {
 		ID:      "MyPolicyForMyBucket1",
 		Version: DefaultVersion,
 		Statements: []Statement{
-			NewStatement(
+			NewStatement("",
 				Allow,
 				NewPrincipal("Q3AM3UQ867SPQQA43P2F"),
 				NewActionSet(PutObjectAction),
 				NewResourceSet(NewResource("mybucket", "/myobject*")),
 				condition.NewFunctions(),
 			),
-			NewStatement(
+			NewStatement("",
 				Allow,
 				NewPrincipal("*"),
 				NewActionSet(PutObjectAction),
@@ -484,14 +488,14 @@ func TestPolicyMarshalJSON(t *testing.T) {
 		ID:      "MyPolicyForMyBucket1",
 		Version: DefaultVersion,
 		Statements: []Statement{
-			NewStatement(
+			NewStatement("",
 				Allow,
 				NewPrincipal("*"),
 				NewActionSet(PutObjectAction),
 				NewResourceSet(NewResource("mybucket", "/myobject*")),
 				condition.NewFunctions(),
 			),
-			NewStatement(
+			NewStatement("",
 				Allow,
 				NewPrincipal("*"),
 				NewActionSet(GetObjectAction),
@@ -506,14 +510,14 @@ func TestPolicyMarshalJSON(t *testing.T) {
 		ID:      "MyPolicyForMyBucket1",
 		Version: DefaultVersion,
 		Statements: []Statement{
-			NewStatement(
+			NewStatement("",
 				Allow,
 				NewPrincipal("*"),
 				NewActionSet(PutObjectAction),
 				NewResourceSet(NewResource("mybucket", "/myobject*")),
 				condition.NewFunctions(),
 			),
-			NewStatement(
+			NewStatement("",
 				Allow,
 				NewPrincipal("*"),
 				NewActionSet(PutObjectAction),
@@ -540,14 +544,14 @@ func TestPolicyMarshalJSON(t *testing.T) {
 		ID:      "MyPolicyForMyBucket1",
 		Version: DefaultVersion,
 		Statements: []Statement{
-			NewStatement(
+			NewStatement("",
 				Allow,
 				NewPrincipal("*"),
 				NewActionSet(PutObjectAction),
 				NewResourceSet(NewResource("mybucket", "/myobject*")),
 				condition.NewFunctions(func1),
 			),
-			NewStatement(
+			NewStatement("",
 				Allow,
 				NewPrincipal("*"),
 				NewActionSet(PutObjectAction),
@@ -562,7 +566,7 @@ func TestPolicyMarshalJSON(t *testing.T) {
 		ID:      "MyPolicyForMyBucket1",
 		Version: DefaultVersion,
 		Statements: []Statement{
-			NewStatement(
+			NewStatement("",
 				Allow,
 				NewPrincipal("*"),
 				NewActionSet(GetBucketLocationAction),
@@ -577,7 +581,7 @@ func TestPolicyMarshalJSON(t *testing.T) {
 		ID:      "MyPolicyForMyBucket1",
 		Version: DefaultVersion,
 		Statements: []Statement{
-			NewStatement(
+			NewStatement("",
 				Allow,
 				NewPrincipal("*"),
 				NewActionSet(GetBucketLocationAction),
@@ -599,7 +603,7 @@ func TestPolicyMarshalJSON(t *testing.T) {
 		ID:      "MyPolicyForMyBucket1",
 		Version: DefaultVersion,
 		Statements: []Statement{
-			NewStatement(
+			NewStatement("",
 				Allow,
 				NewPrincipal("*"),
 				NewActionSet(GetObjectAction, PutObjectAction),
@@ -659,7 +663,7 @@ func TestPolicyUnmarshalJSON(t *testing.T) {
 		ID:      "MyPolicyForMyBucket1",
 		Version: DefaultVersion,
 		Statements: []Statement{
-			NewStatement(
+			NewStatement("",
 				Allow,
 				NewPrincipal("*"),
 				NewActionSet(PutObjectAction),
@@ -707,14 +711,14 @@ func TestPolicyUnmarshalJSON(t *testing.T) {
 	case2Policy := Policy{
 		Version: DefaultVersion,
 		Statements: []Statement{
-			NewStatement(
+			NewStatement("",
 				Allow,
 				NewPrincipal("*"),
 				NewActionSet(PutObjectAction),
 				NewResourceSet(NewResource("mybucket", "/myobject*")),
 				condition.NewFunctions(),
 			),
-			NewStatement(
+			NewStatement("",
 				Deny,
 				NewPrincipal("*"),
 				NewActionSet(GetObjectAction),
@@ -750,14 +754,14 @@ func TestPolicyUnmarshalJSON(t *testing.T) {
 		ID:      "MyPolicyForMyBucket1",
 		Version: DefaultVersion,
 		Statements: []Statement{
-			NewStatement(
+			NewStatement("",
 				Allow,
 				NewPrincipal("Q3AM3UQ867SPQQA43P2F"),
 				NewActionSet(PutObjectAction),
 				NewResourceSet(NewResource("mybucket", "/myobject*")),
 				condition.NewFunctions(),
 			),
-			NewStatement(
+			NewStatement("",
 				Allow,
 				NewPrincipal("*"),
 				NewActionSet(PutObjectAction),
@@ -789,14 +793,14 @@ func TestPolicyUnmarshalJSON(t *testing.T) {
 		ID:      "MyPolicyForMyBucket1",
 		Version: DefaultVersion,
 		Statements: []Statement{
-			NewStatement(
+			NewStatement("",
 				Allow,
 				NewPrincipal("*"),
 				NewActionSet(PutObjectAction),
 				NewResourceSet(NewResource("mybucket", "/myobject*")),
 				condition.NewFunctions(),
 			),
-			NewStatement(
+			NewStatement("",
 				Allow,
 				NewPrincipal("*"),
 				NewActionSet(GetObjectAction),
@@ -828,14 +832,14 @@ func TestPolicyUnmarshalJSON(t *testing.T) {
 		ID:      "MyPolicyForMyBucket1",
 		Version: DefaultVersion,
 		Statements: []Statement{
-			NewStatement(
+			NewStatement("",
 				Allow,
 				NewPrincipal("*"),
 				NewActionSet(PutObjectAction),
 				NewResourceSet(NewResource("mybucket", "/myobject*")),
 				condition.NewFunctions(),
 			),
-			NewStatement(
+			NewStatement("",
 				Allow,
 				NewPrincipal("*"),
 				NewActionSet(PutObjectAction),
@@ -889,14 +893,14 @@ func TestPolicyUnmarshalJSON(t *testing.T) {
 		ID:      "MyPolicyForMyBucket1",
 		Version: DefaultVersion,
 		Statements: []Statement{
-			NewStatement(
+			NewStatement("",
 				Allow,
 				NewPrincipal("*"),
 				NewActionSet(PutObjectAction),
 				NewResourceSet(NewResource("mybucket", "/myobject*")),
 				condition.NewFunctions(func1),
 			),
-			NewStatement(
+			NewStatement("",
 				Allow,
 				NewPrincipal("*"),
 				NewActionSet(PutObjectAction),
@@ -923,7 +927,7 @@ func TestPolicyUnmarshalJSON(t *testing.T) {
 		ID:      "MyPolicyForMyBucket1",
 		Version: DefaultVersion,
 		Statements: []Statement{
-			NewStatement(
+			NewStatement("",
 				Allow,
 				NewPrincipal("*"),
 				NewActionSet(GetBucketLocationAction),
@@ -950,7 +954,7 @@ func TestPolicyUnmarshalJSON(t *testing.T) {
 		ID:      "MyPolicyForMyBucket1",
 		Version: DefaultVersion,
 		Statements: []Statement{
-			NewStatement(
+			NewStatement("",
 				Allow,
 				NewPrincipal("*"),
 				NewActionSet(GetBucketLocationAction),
@@ -996,7 +1000,7 @@ func TestPolicyUnmarshalJSON(t *testing.T) {
 		ID:      "MyPolicyForMyBucket1",
 		Version: DefaultVersion,
 		Statements: []Statement{
-			NewStatement(
+			NewStatement("",
 				Allow,
 				NewPrincipal("*"),
 				NewActionSet(PutObjectAction),
@@ -1029,14 +1033,14 @@ func TestPolicyUnmarshalJSON(t *testing.T) {
 		ID:      "MyPolicyForMyBucket1",
 		Version: DefaultVersion,
 		Statements: []Statement{
-			NewStatement(
+			NewStatement("",
 				Allow,
 				NewPrincipal("*"),
 				NewActionSet(PutObjectAction),
 				NewResourceSet(NewResource("mybucket", "myobject*")),
 				condition.NewFunctions(),
 			),
-			NewStatement(
+			NewStatement("",
 				Deny,
 				NewPrincipal("*"),
 				NewActionSet(PutObjectAction),
@@ -1088,7 +1092,7 @@ func TestPolicyValidate(t *testing.T) {
 	case1Policy := Policy{
 		Version: DefaultVersion,
 		Statements: []Statement{
-			NewStatement(
+			NewStatement("",
 				Allow,
 				NewPrincipal("*"),
 				NewActionSet(PutObjectAction),
@@ -1116,7 +1120,7 @@ func TestPolicyValidate(t *testing.T) {
 		ID:      "MyPolicyForMyBucket1",
 		Version: DefaultVersion,
 		Statements: []Statement{
-			NewStatement(
+			NewStatement("",
 				Allow,
 				NewPrincipal("*"),
 				NewActionSet(GetObjectAction, PutObjectAction),

@@ -42,18 +42,14 @@ const (
 	webEnvSchemeSecure = "env+tls"
 )
 
-var (
-	globalRootCAs *x509.CertPool
-)
+var globalRootCAs *x509.CertPool
 
 // RegisterGlobalCAs register the global root CAs
 func RegisterGlobalCAs(CAs *x509.CertPool) {
 	globalRootCAs = CAs
 }
 
-var (
-	hostKeys = regexp.MustCompile("^(https?://)(.*?):(.*?)@(.*?)$")
-)
+var hostKeys = regexp.MustCompile("^(https?://)(.*?):(.*?)@(.*?)$")
 
 func fetchHTTPConstituentParts(u *url.URL) (username string, password string, envURL string, err error) {
 	envURL = u.String()

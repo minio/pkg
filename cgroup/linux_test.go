@@ -114,7 +114,6 @@ func TestProcCGroup(t *testing.T) {
 	if path != "/user.slice/user-1000.slice/session-1.scope" {
 		t.Fatal("Path component cannot be empty")
 	}
-
 }
 
 // Tests cgroup memory limit path construction.

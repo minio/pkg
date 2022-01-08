@@ -54,7 +54,6 @@ func getMemoryLimit() (sysLimit uint64, err error) {
 
 	// Final system limit.
 	return sysLimit, nil
-
 }
 
 // Get physical RAM size of the node.

@@ -112,7 +112,7 @@ func CreateFile(name string) (*File, error) {
 	// ioutil.TempFile() fails if parent directory is missing.
 	// Create parent directory to avoid such error.
 	dname := filepath.Dir(name)
-	if err := os.MkdirAll(dname, 0700); err != nil {
+	if err := os.MkdirAll(dname, 0o700); err != nil {
 		return nil, err
 	}
 
@@ -122,7 +122,7 @@ func CreateFile(name string) (*File, error) {
 		return nil, err
 	}
 
-	if err = os.Chmod(tmpfile.Name(), 0600); err != nil {
+	if err = os.Chmod(tmpfile.Name(), 0o600); err != nil {
 		if rerr := os.Remove(tmpfile.Name()); rerr != nil {
 			err = rerr
 		}

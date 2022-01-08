@@ -119,7 +119,6 @@ func valueToInt(n string, values ValueSet) (v int, err error) {
 	}
 
 	return v, nil
-
 }
 
 func newNumericFunc(n string, key Key, values ValueSet, cond condition) (Function, error) {

@@ -28,14 +28,14 @@ import (
 )
 
 func TestStatementIsAllowed(t *testing.T) {
-	case1Statement := NewStatement(
+	case1Statement := NewStatement("",
 		policy.Allow,
 		NewActionSet(GetBucketLocationAction, PutObjectAction),
 		NewResourceSet(NewResource("*", "")),
 		condition.NewFunctions(),
 	)
 
-	case2Statement := NewStatement(
+	case2Statement := NewStatement("",
 		policy.Allow,
 		NewActionSet(GetObjectAction, PutObjectAction),
 		NewResourceSet(NewResource("mybucket", "/myobject*")),
@@ -54,14 +54,14 @@ func TestStatementIsAllowed(t *testing.T) {
 		t.Fatalf("unexpected error. %v\n", err)
 	}
 
-	case3Statement := NewStatement(
+	case3Statement := NewStatement("",
 		policy.Allow,
 		NewActionSet(GetObjectAction, PutObjectAction),
 		NewResourceSet(NewResource("mybucket", "/myobject*")),
 		condition.NewFunctions(func1),
 	)
 
-	case4Statement := NewStatement(
+	case4Statement := NewStatement("",
 		policy.Deny,
 		NewActionSet(GetObjectAction, PutObjectAction),
 		NewResourceSet(NewResource("mybucket", "/myobject*")),
@@ -199,58 +199,58 @@ func TestStatementIsValid(t *testing.T) {
 		expectErr bool
 	}{
 		// Invalid effect error.
-		{NewStatement(
+		{NewStatement("",
 			policy.Effect("foo"),
 			NewActionSet(GetBucketLocationAction, PutObjectAction),
 			NewResourceSet(NewResource("*", "")),
 			condition.NewFunctions(),
 		), true},
 		// Empty actions error.
-		{NewStatement(
+		{NewStatement("",
 			policy.Allow,
 			NewActionSet(),
 			NewResourceSet(NewResource("*", "")),
 			condition.NewFunctions(),
 		), true},
 		// Empty resources error.
-		{NewStatement(
+		{NewStatement("",
 			policy.Allow,
 			NewActionSet(GetBucketLocationAction, PutObjectAction),
 			NewResourceSet(),
 			condition.NewFunctions(),
 		), true},
 		// Unsupported conditions for GetObject
-		{NewStatement(
+		{NewStatement("",
 			policy.Allow,
 			NewActionSet(GetObjectAction, PutObjectAction),
 			NewResourceSet(NewResource("mybucket", "myobject*")),
 			condition.NewFunctions(func1, func2),
 		), true},
-		{NewStatement(
+		{NewStatement("",
 			policy.Allow,
 			NewActionSet(GetBucketLocationAction, PutObjectAction),
 			NewResourceSet(NewResource("mybucket", "myobject*")),
 			condition.NewFunctions(),
 		), false},
-		{NewStatement(
+		{NewStatement("",
 			policy.Allow,
 			NewActionSet(GetBucketLocationAction, PutObjectAction),
 			NewResourceSet(NewResource("mybucket", "")),
 			condition.NewFunctions(),
 		), false},
-		{NewStatement(
+		{NewStatement("",
 			policy.Deny,
 			NewActionSet(GetObjectAction, PutObjectAction),
 			NewResourceSet(NewResource("mybucket", "myobject*")),
 			condition.NewFunctions(func1),
 		), false},
-		{NewStatement(
+		{NewStatement("",
 			policy.Allow,
 			NewActionSet(CreateUserAdminAction, DeleteUserAdminAction),
 			nil,
 			condition.NewFunctions(func2, func3),
 		), true},
-		{NewStatement(
+		{NewStatement("",
 			policy.Allow,
 			NewActionSet(CreateUserAdminAction, DeleteUserAdminAction),
 			nil,
@@ -275,7 +275,7 @@ func TestStatementUnmarshalJSONAndValidate(t *testing.T) {
     "Action": "s3:PutObject",
     "Resource": "arn:aws:s3:::mybucket/myobject*"
 }`)
-	case1Statement := NewStatement(
+	case1Statement := NewStatement("",
 		policy.Allow,
 		NewActionSet(PutObjectAction),
 		NewResourceSet(NewResource("mybucket", "/myobject*")),
@@ -300,7 +300,7 @@ func TestStatementUnmarshalJSONAndValidate(t *testing.T) {
 	if err != nil {
 		t.Fatalf("unexpected error. %v\n", err)
 	}
-	case2Statement := NewStatement(
+	case2Statement := NewStatement("",
 		policy.Allow,
 		NewActionSet(PutObjectAction),
 		NewResourceSet(NewResource("mybucket", "/myobject*")),
@@ -327,7 +327,7 @@ func TestStatementUnmarshalJSONAndValidate(t *testing.T) {
 	if err != nil {
 		t.Fatalf("unexpected error. %v\n", err)
 	}
-	case3Statement := NewStatement(
+	case3Statement := NewStatement("",
 		policy.Deny,
 		NewActionSet(PutObjectAction, GetObjectAction),
 		NewResourceSet(NewResource("mybucket", "/myobject*")),
@@ -422,7 +422,7 @@ func TestStatementUnmarshalJSONAndValidate(t *testing.T) {
 }
 
 func TestStatementValidate(t *testing.T) {
-	case1Statement := NewStatement(
+	case1Statement := NewStatement("",
 		policy.Allow,
 		NewActionSet(PutObjectAction),
 		NewResourceSet(NewResource("mybucket", "/myobject*")),
@@ -443,7 +443,7 @@ func TestStatementValidate(t *testing.T) {
 	if err != nil {
 		t.Fatalf("unexpected error. %v\n", err)
 	}
-	case2Statement := NewStatement(
+	case2Statement := NewStatement("",
 		policy.Allow,
 		NewActionSet(GetObjectAction, PutObjectAction),
 		NewResourceSet(NewResource("mybucket", "myobject*")),

@@ -156,7 +156,7 @@ func (p Pattern) Expand() []string {
 
 // HasEllipses - returns true if input arg has ellipses type pattern.
 func HasEllipses(args ...string) bool {
-	var ok = true
+	ok := true
 	for _, arg := range args {
 		ok = ok && (strings.Count(arg, ellipses) > 0 || (strings.Count(arg, openBraces) > 0 && strings.Count(arg, closeBraces) > 0))
 	}

@@ -22,7 +22,5 @@ package certs
 
 import "github.com/rjeczalik/notify"
 
-var (
-	// eventWrite contains the notify events that will cause a write
-	eventWrite = []notify.Event{notify.Create, notify.Write}
-)
+// eventWrite contains the notify events that will cause a write
+var eventWrite = []notify.Event{notify.Create, notify.Write}

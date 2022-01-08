@@ -302,7 +302,7 @@ func (a actionConditionKeyMap) Lookup(action Action) condition.KeySet {
 		commonKeys = append(commonKeys, keyName.ToKey())
 	}
 
-	var ckeysMerged = condition.NewKeySet(commonKeys...)
+	ckeysMerged := condition.NewKeySet(commonKeys...)
 	for act, ckey := range a {
 		if action.Match(act) {
 			ckeysMerged.Merge(ckey)

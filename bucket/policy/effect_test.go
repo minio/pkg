@@ -40,7 +40,6 @@ func TestEffectIsAllowed(t *testing.T) {
 			t.Fatalf("case %v: expected: %v, got: %v\n", i+1, testCase.expectedResult, result)
 		}
 	}
-
 }
 
 func TestEffectIsValid(t *testing.T) {

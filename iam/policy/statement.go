@@ -61,6 +61,7 @@ func (statement Statement) IsAllowed(args Args) bool {
 
 	return statement.Effect.IsAllowed(check())
 }
+
 func (statement Statement) isAdmin() bool {
 	for action := range statement.Actions {
 		if AdminAction(action).IsValid() {
@@ -149,12 +150,12 @@ func (statement Statement) Equals(st Statement) bool {
 
 // Clone clones Statement structure
 func (statement Statement) Clone() Statement {
-	return NewStatement(statement.Effect, statement.Actions.Clone(),
+	return NewStatement(statement.SID, statement.Effect, statement.Actions.Clone(),
 		statement.Resources.Clone(), statement.Conditions.Clone())
 }
 
 // NewStatement - creates new statement.
-func NewStatement(effect policy.Effect, actionSet ActionSet, resourceSet ResourceSet, conditions condition.Functions) Statement {
+func NewStatement(sid policy.ID, effect policy.Effect, actionSet ActionSet, resourceSet ResourceSet, conditions condition.Functions) Statement {
 	return Statement{
 		Effect:     effect,
 		Actions:    actionSet,

@@ -81,15 +81,21 @@ func TestResourceSetAdd(t *testing.T) {
 		resource       Resource
 		expectedResult ResourceSet
 	}{
-		{NewResourceSet(), NewResource("mybucket", "/myobject*"),
-			NewResourceSet(NewResource("mybucket", "/myobject*"))},
-		{NewResourceSet(NewResource("mybucket", "/myobject*")),
+		{
+			NewResourceSet(), NewResource("mybucket", "/myobject*"),
+			NewResourceSet(NewResource("mybucket", "/myobject*")),
+		},
+		{
+			NewResourceSet(NewResource("mybucket", "/myobject*")),
 			NewResource("mybucket", "/yourobject*"),
 			NewResourceSet(NewResource("mybucket", "/myobject*"),
-				NewResource("mybucket", "/yourobject*"))},
-		{NewResourceSet(NewResource("mybucket", "/myobject*")),
+				NewResource("mybucket", "/yourobject*")),
+		},
+		{
+			NewResourceSet(NewResource("mybucket", "/myobject*")),
 			NewResource("mybucket", "/myobject*"),
-			NewResourceSet(NewResource("mybucket", "/myobject*"))},
+			NewResourceSet(NewResource("mybucket", "/myobject*")),
+		},
 	}
 
 	for i, testCase := range testCases {
@@ -109,9 +115,11 @@ func TestResourceSetIntersection(t *testing.T) {
 	}{
 		{NewResourceSet(), NewResourceSet(NewResource("mybucket", "/myobject*")), NewResourceSet()},
 		{NewResourceSet(NewResource("mybucket", "/myobject*")), NewResourceSet(), NewResourceSet()},
-		{NewResourceSet(NewResource("mybucket", "/myobject*")),
+		{
+			NewResourceSet(NewResource("mybucket", "/myobject*")),
 			NewResourceSet(NewResource("mybucket", "/myobject*"), NewResource("mybucket", "/yourobject*")),
-			NewResourceSet(NewResource("mybucket", "/myobject*"))},
+			NewResourceSet(NewResource("mybucket", "/myobject*")),
+		},
 	}
 
 	for i, testCase := range testCases {
@@ -129,10 +137,14 @@ func TestResourceSetMarshalJSON(t *testing.T) {
 		expectedResult []byte
 		expectErr      bool
 	}{
-		{NewResourceSet(NewResource("mybucket", "/myobject*")),
-			[]byte(`["arn:aws:s3:::mybucket/myobject*"]`), false},
-		{NewResourceSet(NewResource("mybucket", "/photos/myobject*")),
-			[]byte(`["arn:aws:s3:::mybucket/photos/myobject*"]`), false},
+		{
+			NewResourceSet(NewResource("mybucket", "/myobject*")),
+			[]byte(`["arn:aws:s3:::mybucket/myobject*"]`), false,
+		},
+		{
+			NewResourceSet(NewResource("mybucket", "/photos/myobject*")),
+			[]byte(`["arn:aws:s3:::mybucket/photos/myobject*"]`), false,
+		},
 		{NewResourceSet(), nil, true},
 	}
 
@@ -194,10 +206,14 @@ func TestResourceSetUnmarshalJSON(t *testing.T) {
 		expectedResult ResourceSet
 		expectErr      bool
 	}{
-		{[]byte(`"arn:aws:s3:::mybucket/myobject*"`),
-			NewResourceSet(NewResource("mybucket", "/myobject*")), false},
-		{[]byte(`"arn:aws:s3:::mybucket/photos/myobject*"`),
-			NewResourceSet(NewResource("mybucket", "/photos/myobject*")), false},
+		{
+			[]byte(`"arn:aws:s3:::mybucket/myobject*"`),
+			NewResourceSet(NewResource("mybucket", "/myobject*")), false,
+		},
+		{
+			[]byte(`"arn:aws:s3:::mybucket/photos/myobject*"`),
+			NewResourceSet(NewResource("mybucket", "/photos/myobject*")), false,
+		},
 		{[]byte(`"arn:aws:s3:::mybucket"`), NewResourceSet(NewResource("mybucket", "")), false},
 		{[]byte(`"mybucket/myobject*"`), nil, true},
 	}

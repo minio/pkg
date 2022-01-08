@@ -26,7 +26,7 @@ import (
 func BenchmarkReader(b *testing.B) {
 	const size = 100000
 
-	var buf = make([]byte, size)
+	buf := make([]byte, size)
 	src := New()
 	b.SetBytes(size)
 	b.ReportAllocs()
@@ -45,7 +45,7 @@ func BenchmarkReader(b *testing.B) {
 func BenchmarkMathRand(b *testing.B) {
 	const size = 100000
 
-	var buf = make([]byte, size)
+	buf := make([]byte, size)
 	src := rand.New(rand.NewSource(0))
 	b.SetBytes(size)
 	b.ReportAllocs()
