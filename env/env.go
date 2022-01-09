@@ -66,16 +66,13 @@ func Get(key, defaultValue string) string {
 	privateMutex.RLock()
 	ok := envOff
 	privateMutex.RUnlock()
-	if ok {
-		return defaultValue
-	}
-	if v, _, _, err := LookupEnv(key); err == nil {
-		if v == "" {
-			return defaultValue
+	if !ok {
+		v, _, _, _ := LookupEnv(key)
+		if v != "" {
+			return strings.TrimSpace(v)
 		}
-		return v
 	}
-	return defaultValue
+	return strings.TrimSpace(defaultValue)
 }
 
 // GetInt returns an integer if found in the environment
