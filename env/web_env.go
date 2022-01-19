@@ -92,7 +92,7 @@ func getEnvValueFromHTTP(urlStr, envKey string) (string, string, string, error) 
 
 	// Adding a timeout of 6.5 seconds to deal with k3s slow dns resolution caused in turn by
 	// CoreDNS 6 second default timeout.
-	ctx, cancel := context.WithTimeout(context.Background(), 6.5*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), 6500*time.Millisecond)
 	defer cancel()
 
 	req, err := http.NewRequestWithContext(ctx, http.MethodGet, envURL+"?key="+envKey, nil)
