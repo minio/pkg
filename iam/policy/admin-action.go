@@ -93,6 +93,8 @@ const (
 	SiteReplicationAddAction = "admin:SiteReplicationAdd"
 	// SiteReplicationDisableAction - allow disabling a cluster from replication
 	SiteReplicationDisableAction = "admin:SiteReplicationDisable"
+	// SiteReplicationRemoveAction - allow removing a cluster from replication
+	SiteReplicationRemoveAction = "admin:SiteReplicationRemove"
 	// SiteReplicationInfoAction - allow getting site replication info
 	SiteReplicationInfoAction = "admin:SiteReplicationInfo"
 	// SiteReplicationOperationAction - allow performing site replication
@@ -210,6 +212,11 @@ var supportedAdminActions = map[AdminAction]struct{}{
 	SetTierAction:                   {},
 	ListTierAction:                  {},
 	DecommissionAdminAction:         {},
+	SiteReplicationAddAction:        {},
+	SiteReplicationDisableAction:    {},
+	SiteReplicationInfoAction:       {},
+	SiteReplicationOperationAction:  {},
+	SiteReplicationRemoveAction:     {},
 	AllAdminActions:                 {},
 }
 
@@ -259,18 +266,23 @@ func createAdminActionConditionKeyMap() map[Action]condition.KeySet {
 		RemoveServiceAccountAdminAction: condition.NewKeySet(allSupportedAdminKeys...),
 		ListServiceAccountsAdminAction:  condition.NewKeySet(allSupportedAdminKeys...),
 
-		CreatePolicyAdminAction:     condition.NewKeySet(allSupportedAdminKeys...),
-		DeletePolicyAdminAction:     condition.NewKeySet(allSupportedAdminKeys...),
-		GetPolicyAdminAction:        condition.NewKeySet(allSupportedAdminKeys...),
-		AttachPolicyAdminAction:     condition.NewKeySet(allSupportedAdminKeys...),
-		ListUserPoliciesAdminAction: condition.NewKeySet(allSupportedAdminKeys...),
-		SetBucketQuotaAdminAction:   condition.NewKeySet(allSupportedAdminKeys...),
-		GetBucketQuotaAdminAction:   condition.NewKeySet(allSupportedAdminKeys...),
-		SetBucketTargetAction:       condition.NewKeySet(allSupportedAdminKeys...),
-		GetBucketTargetAction:       condition.NewKeySet(allSupportedAdminKeys...),
-		SetTierAction:               condition.NewKeySet(allSupportedAdminKeys...),
-		ListTierAction:              condition.NewKeySet(allSupportedAdminKeys...),
-		DecommissionAdminAction:     condition.NewKeySet(allSupportedAdminKeys...),
+		CreatePolicyAdminAction:        condition.NewKeySet(allSupportedAdminKeys...),
+		DeletePolicyAdminAction:        condition.NewKeySet(allSupportedAdminKeys...),
+		GetPolicyAdminAction:           condition.NewKeySet(allSupportedAdminKeys...),
+		AttachPolicyAdminAction:        condition.NewKeySet(allSupportedAdminKeys...),
+		ListUserPoliciesAdminAction:    condition.NewKeySet(allSupportedAdminKeys...),
+		SetBucketQuotaAdminAction:      condition.NewKeySet(allSupportedAdminKeys...),
+		GetBucketQuotaAdminAction:      condition.NewKeySet(allSupportedAdminKeys...),
+		SetBucketTargetAction:          condition.NewKeySet(allSupportedAdminKeys...),
+		GetBucketTargetAction:          condition.NewKeySet(allSupportedAdminKeys...),
+		SetTierAction:                  condition.NewKeySet(allSupportedAdminKeys...),
+		ListTierAction:                 condition.NewKeySet(allSupportedAdminKeys...),
+		DecommissionAdminAction:        condition.NewKeySet(allSupportedAdminKeys...),
+		SiteReplicationAddAction:       condition.NewKeySet(allSupportedAdminKeys...),
+		SiteReplicationDisableAction:   condition.NewKeySet(allSupportedAdminKeys...),
+		SiteReplicationInfoAction:      condition.NewKeySet(allSupportedAdminKeys...),
+		SiteReplicationOperationAction: condition.NewKeySet(allSupportedAdminKeys...),
+		SiteReplicationRemoveAction:    condition.NewKeySet(allSupportedAdminKeys...),
 	}
 }
 
