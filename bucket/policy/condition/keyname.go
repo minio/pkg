@@ -52,6 +52,11 @@ func (key KeyName) ToKey() Key {
 	return NewKey(key, "")
 }
 
+// String converts Key to string
+func (key KeyName) String() string {
+	return string(key)
+}
+
 // Condition key names.
 const (
 	// S3XAmzCopySource - key representing x-amz-copy-source HTTP header applicable to PutObject API only.
@@ -147,6 +152,9 @@ const (
 	ExistingObjectTag    KeyName = "s3:ExistingObjectTag"
 	RequestObjectTagKeys KeyName = "s3:RequestObjectTagKeys"
 	RequestObjectTag     KeyName = "s3:RequestObjectTag"
+
+	// MinIO specific conditions for admin actions
+	AdminBucket KeyName = "admin:bucket"
 )
 
 // JWT claims supported substitutions.
@@ -249,6 +257,7 @@ var AllSupportedKeys = append([]KeyName{
 	AWSUsername,
 	LDAPUser,
 	LDAPUsername,
+	AdminBucket,
 	// Add new supported condition keys.
 }, JWTKeys...)
 
