@@ -39,6 +39,9 @@ func TestKeyIsValid(t *testing.T) {
 		{S3MaxKeys.ToKey(), true},
 		{AWSReferer.ToKey(), true},
 		{AWSSourceIP.ToKey(), true},
+		{ExistingObjectTag.ToKey(), true},
+		{RequestObjectTagKeys.ToKey(), false},
+		{RequestObjectTag.ToKey(), false},
 		{Key{name: "foo"}, false},
 	}
 

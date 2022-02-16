@@ -336,6 +336,7 @@ func createActionConditionKeyMap() map[Action]condition.KeySet {
 			append([]condition.Key{
 				condition.S3XAmzServerSideEncryption.ToKey(),
 				condition.S3XAmzServerSideEncryptionCustomerAlgorithm.ToKey(),
+				condition.ExistingObjectTag.ToKey(),
 			}, commonKeys...)...),
 
 		HeadBucketAction: condition.NewKeySet(commonKeys...),
@@ -374,6 +375,7 @@ func createActionConditionKeyMap() map[Action]condition.KeySet {
 				condition.S3ObjectLockRetainUntilDate.ToKey(),
 				condition.S3ObjectLockMode.ToKey(),
 				condition.S3ObjectLockLegalHold.ToKey(),
+				condition.ExistingObjectTag.ToKey(),
 			}, commonKeys...)...),
 
 		// https://docs.aws.amazon.com/AmazonS3/latest/dev/list_amazons3.html
