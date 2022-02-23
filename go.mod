@@ -11,7 +11,7 @@ require (
 	github.com/mattn/go-colorable v0.1.8
 	github.com/mattn/go-isatty v0.0.13
 	github.com/minio/madmin-go v1.1.23
-	github.com/minio/minio-go/v7 v7.0.20
+	github.com/minio/minio-go/v7 v7.0.23
 	github.com/montanaflynn/stats v0.6.6
 	github.com/rjeczalik/notify v0.9.2
 	go.etcd.io/etcd/client/v3 v3.5.0-beta.4
