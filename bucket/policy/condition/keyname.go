@@ -249,6 +249,7 @@ var AllSupportedKeys = append([]KeyName{
 	AWSUsername,
 	LDAPUser,
 	LDAPUsername,
+	ExistingObjectTag,
 	// Add new supported condition keys.
 }, JWTKeys...)
 
@@ -269,6 +270,7 @@ var CommonKeys = append([]KeyName{
 	AWSUsername,
 	LDAPUser,
 	LDAPUsername,
+	ExistingObjectTag,
 }, JWTKeys...)
 
 // AllSupportedAdminKeys - is list of all admin supported keys.
