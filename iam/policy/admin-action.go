@@ -175,6 +175,7 @@ var supportedAdminActions = map[AdminAction]struct{}{
 	PrometheusAdminAction:           {},
 	TraceAdminAction:                {},
 	ConsoleLogAdminAction:           {},
+	KMSCreateKeyAdminAction:         {},
 	KMSKeyStatusAdminAction:         {},
 	ServerInfoAdminAction:           {},
 	HealthInfoAdminAction:           {},
