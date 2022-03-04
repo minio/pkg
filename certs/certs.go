@@ -56,6 +56,7 @@ type Manager struct {
 	lock         sync.RWMutex
 	certificates map[pair]*tls.Certificate // Mapping: certificate file name => TLS certificates
 	defaultCert  pair
+	duration     time.Duration
 
 	loadX509KeyPair LoadX509KeyPairFunc
 	done            <-chan struct{}
@@ -93,11 +94,19 @@ func NewManager(ctx context.Context, certFile, keyFile string, loadX509KeyPair L
 		},
 		loadX509KeyPair: loadX509KeyPair,
 		done:            ctx.Done(),
+		duration:        1 * time.Minute,
 	}
 	if err := manager.AddCertificate(certFile, keyFile); err != nil {
 		return nil, err
 	}
 	return manager, nil
+}
+
+// UpdateReloadDuration set custom symlink reload duration
+func (m *Manager) UpdateReloadDuration(t time.Duration) {
+	m.lock.Lock()
+	m.duration = t
+	m.lock.Unlock()
 }
 
 // AddCertificate adds the TLS certificate in certFile resp. keyFile
@@ -227,8 +236,9 @@ func (m *Manager) ReloadCerts() {
 // watchSymlinks starts an endless loop reloading the
 // certFile and keyFile periodically.
 func (m *Manager) watchSymlinks(watch pair, reload <-chan struct{}) {
-	t := time.NewTimer(15 * time.Minute)
+	t := time.NewTimer(m.duration)
 	defer t.Stop()
+
 	for {
 		select {
 		case <-m.done:
@@ -236,10 +246,14 @@ func (m *Manager) watchSymlinks(watch pair, reload <-chan struct{}) {
 		case <-t.C:
 		case <-reload:
 		}
+
+		t.Reset(m.duration) // Reset timer for new duration
+
 		certificate, err := m.loadX509KeyPair(watch.CertFile, watch.KeyFile)
 		if err != nil {
 			continue
 		}
+
 		if certificate.Leaf == nil { // This is a performance optimisation
 			certificate.Leaf, err = x509.ParseCertificate(certificate.Certificate[0])
 			if err != nil {
