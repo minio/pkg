@@ -29,6 +29,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/minio/pkg/env"
 	"github.com/rjeczalik/notify"
 )
 
@@ -62,6 +63,8 @@ type Manager struct {
 	done            <-chan struct{}
 	reloadCerts     []chan struct{}
 }
+
+var isk8s = env.Get("KUBERNETES_SERVICE_HOST", "") != ""
 
 // pair represents a certificate and private key file tuple.
 type pair struct {
@@ -171,7 +174,7 @@ func (m *Manager) AddCertificate(certFile, keyFile string) (err error) {
 	}
 	m.certificates[p] = &certificate
 
-	if certFileIsLink && keyFileIsLink {
+	if certFileIsLink && keyFileIsLink || isk8s {
 		go m.watchSymlinks(p, m.reloader())
 	} else {
 		// Windows doesn't allow for watching file changes but instead allows
