@@ -10,7 +10,7 @@ require (
 	github.com/lestrrat-go/jwx v1.2.0
 	github.com/mattn/go-colorable v0.1.8
 	github.com/mattn/go-isatty v0.0.13
-	github.com/minio/madmin-go v1.3.5
+	github.com/minio/madmin-go v1.3.11
 	github.com/minio/minio-go/v7 v7.0.23
 	github.com/montanaflynn/stats v0.6.6
 	github.com/rjeczalik/notify v0.9.2
@@ -36,7 +36,6 @@ require (
 	github.com/lestrrat-go/iter v1.0.1 // indirect
 	github.com/lestrrat-go/option v1.0.0 // indirect
 	github.com/mattn/go-runewidth v0.0.4 // indirect
-	github.com/minio/argon2 v1.0.0 // indirect
 	github.com/minio/sha256-simd v1.0.0 // indirect
 	github.com/mitchellh/go-homedir v1.1.0 // indirect
 	github.com/modern-go/concurrent v0.0.0-20180306012644-bacd9c7ef1dd // indirect
