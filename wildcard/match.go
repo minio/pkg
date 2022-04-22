@@ -18,8 +18,9 @@
 package wildcard
 
 // MatchSimple - finds whether the text matches/satisfies the pattern string.
-// supports only '*' wildcard in the pattern.
-// considers a file system path as a flat name space.
+// supports '*' wildcard in the pattern and ? for single characters.
+// Only difference to Match is that `?` at the end is optional,
+// meaning `a?` pattern will match name `a`.
 func MatchSimple(pattern, name string) bool {
 	if pattern == "" {
 		return name == pattern
@@ -27,7 +28,7 @@ func MatchSimple(pattern, name string) bool {
 	if pattern == "*" {
 		return true
 	}
-	// Does only wildcard '*' match.
+	// Do an extended wildcard '*' and '?' match.
 	return deepMatchRune([]rune(name), []rune(pattern), true)
 }
 
@@ -42,7 +43,7 @@ func Match(pattern, name string) (matched bool) {
 	if pattern == "*" {
 		return true
 	}
-	// Does extended wildcard '*' and '?' match.
+	// Do an extended wildcard '*' and '?' match.
 	return deepMatchRune([]rune(name), []rune(pattern), false)
 }
 
@@ -54,8 +55,8 @@ func deepMatchRune(str, pattern []rune, simple bool) bool {
 				return false
 			}
 		case '?':
-			if len(str) == 0 && !simple {
-				return false
+			if len(str) == 0 {
+				return simple
 			}
 		case '*':
 			return deepMatchRune(str, pattern[1:], simple) ||
