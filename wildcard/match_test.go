@@ -369,8 +369,14 @@ func TestMatch(t *testing.T) {
 			text:    "my-bucket/mnopqanda",
 			matched: false,
 		},
+		// Test case - 53:
+		{
+			pattern: "a?",
+			text:    "a",
+			matched: false,
+		},
 	}
-	// Iterating over the test cases, call the function under test and asert the output.
+	// Iterating over the test cases, call the function under test and assert the output.
 	for i, testCase := range testCases {
 		actualResult := wildcard.Match(testCase.pattern, testCase.text)
 		if testCase.matched != actualResult {
@@ -514,26 +520,32 @@ func TestMatchSimple(t *testing.T) {
 			text:    "my-bucket/odo",
 			matched: false,
 		},
-		// Test case - 11.
+		// Test case - 19.
 		{
 			pattern: "my-bucket/oo?*",
 			text:    "my-bucket/oo???",
 			matched: true,
 		},
-		// Test case - 12:
+		// Test case - 20:
 		{
 			pattern: "my-bucket/oo??*",
 			text:    "my-bucket/odo",
 			matched: false,
 		},
-		// Test case - 13:
+		// Test case - 21:
 		{
 			pattern: "?h?*",
 			text:    "?h?hello",
 			matched: true,
 		},
+		// Test case - 22:
+		{
+			pattern: "a?",
+			text:    "a",
+			matched: true,
+		},
 	}
-	// Iterating over the test cases, call the function under test and asert the output.
+	// Iterating over the test cases, call the function under test and assert the output.
 	for i, testCase := range testCases {
 		actualResult := wildcard.MatchSimple(testCase.pattern, testCase.text)
 		if testCase.matched != actualResult {
