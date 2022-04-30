@@ -22,6 +22,50 @@ import (
 	"testing"
 )
 
+func TestURLHostnameAndPort(t *testing.T) {
+	tests := []struct {
+		in   string // URL.Host field
+		host string
+		port string
+	}{
+		{"foo.com:80", "foo.com", "80"},
+		{"foo.com", "foo.com", ""},
+		{"foo.com:", "foo.com", ""},
+		{"FOO.COM", "FOO.COM", ""}, // no canonicalization
+		{"1.2.3.4", "1.2.3.4", ""},
+		{"1.2.3.4:80", "1.2.3.4", "80"},
+		{"[1:2:3:4]", "1:2:3:4", ""},
+		{"[1:2:3:4]:80", "1:2:3:4", "80"},
+		{"[::1]:80", "::1", "80"},
+		{"[::1]", "::1", ""},
+		{"[::1]:", "::1", ""},
+		{"localhost", "localhost", ""},
+		{"localhost:443", "localhost", "443"},
+		{"some.super.long.domain.example.org:8080", "some.super.long.domain.example.org", "8080"},
+		{"[2001:0db8:85a3:0000:0000:8a2e:0370:7334]:17000", "2001:0db8:85a3:0000:0000:8a2e:0370:7334", "17000"},
+		{"[2001:0db8:85a3:0000:0000:8a2e:0370:7334]", "2001:0db8:85a3:0000:0000:8a2e:0370:7334", ""},
+
+		// Ensure that even when not valid, Host is one of "Hostname",
+		// "Hostname:Port", "[Hostname]" or "[Hostname]:Port".
+		// See https://golang.org/issue/29098.
+		{"[minio.io]:80", "minio.io", "80"},
+		{"minio.io]:80", "minio.io]", "80"},
+		{"minio.io:80_invalid_port", "minio.io:80_invalid_port", ""},
+		{"[::1]extra]:80", "::1]extra", "80"},
+		{"minio.io]extra:extra", "minio.io]extra:extra", ""},
+	}
+	for _, tt := range tests {
+		u := URL{Host: tt.in}
+		host, port := u.Hostname(), u.Port()
+		if host != tt.host {
+			t.Errorf("Hostname for Host %q = %q; want %q", tt.in, host, tt.host)
+		}
+		if port != tt.port {
+			t.Errorf("Port for Host %q = %q; want %q", tt.in, port, tt.port)
+		}
+	}
+}
+
 func TestURLIsEmpty(t *testing.T) {
 	testCases := []struct {
 		url            URL
