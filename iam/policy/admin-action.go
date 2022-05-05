@@ -154,6 +154,13 @@ const (
 	// GetBucketTargetAction - allow getting bucket targets
 	GetBucketTargetAction = "admin:GetBucketTarget"
 
+	// Bucket import/export admin Actions
+
+	// ImportBucketMetadataAction - allow importing bucket metadata
+	ImportBucketMetadataAction = "admin:ImportBucketMetadata"
+	// ExportBucketMetadataAction - allow exporting bucket metadata
+	ExportBucketMetadataAction = "admin:ExportBucketMetadata"
+
 	// Remote Tier admin Actions
 
 	// SetTierAction - allow adding/editing a remote tier
@@ -218,6 +225,8 @@ var supportedAdminActions = map[AdminAction]struct{}{
 	SiteReplicationInfoAction:       {},
 	SiteReplicationOperationAction:  {},
 	SiteReplicationRemoveAction:     {},
+	ImportBucketMetadataAction:      {},
+	ExportBucketMetadataAction:      {},
 	AllAdminActions:                 {},
 }
 
@@ -284,6 +293,8 @@ func createAdminActionConditionKeyMap() map[Action]condition.KeySet {
 		SiteReplicationInfoAction:      condition.NewKeySet(allSupportedAdminKeys...),
 		SiteReplicationOperationAction: condition.NewKeySet(allSupportedAdminKeys...),
 		SiteReplicationRemoveAction:    condition.NewKeySet(allSupportedAdminKeys...),
+		ImportBucketMetadataAction:     condition.NewKeySet(allSupportedAdminKeys...),
+		ExportBucketMetadataAction:     condition.NewKeySet(allSupportedAdminKeys...),
 	}
 }
 
