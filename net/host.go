@@ -102,7 +102,14 @@ func ParseHost(s string) (*Host, error) {
 			return false
 		}
 
-		for _, label := range strings.Split(host, ".") {
+		labels := strings.Split(host, ".")
+		for i, label := range labels {
+			if i+1 == len(labels) && label == "" {
+				// Allow only `.` at the end of the FQDN
+				// such as 'test.example.com.' should be
+				// treated similar to 'test.example.com'
+				continue
+			}
 			if len(label) < 1 || len(label) > 63 {
 				return false
 			}
