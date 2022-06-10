@@ -168,6 +168,13 @@ const (
 	// ListTierAction - allow listing remote tiers
 	ListTierAction = "admin:ListTier"
 
+	// Migrate IAM admin Actions
+
+	// ExportIAMAction - allow exporting of all IAM info
+	ExportIAMAction = "admin:ExportIAM"
+	// ImportIAMAction - allow importing IAM info to MinIO
+	ImportIAMAction = "admin:ImportIAM"
+
 	// AllAdminActions - provides all admin permissions
 	AllAdminActions = "admin:*"
 )
@@ -227,6 +234,8 @@ var supportedAdminActions = map[AdminAction]struct{}{
 	SiteReplicationRemoveAction:     {},
 	ImportBucketMetadataAction:      {},
 	ExportBucketMetadataAction:      {},
+	ExportIAMAction:                 {},
+	ImportIAMAction:                 {},
 	AllAdminActions:                 {},
 }
 
@@ -295,6 +304,8 @@ func createAdminActionConditionKeyMap() map[Action]condition.KeySet {
 		SiteReplicationRemoveAction:    condition.NewKeySet(allSupportedAdminKeys...),
 		ImportBucketMetadataAction:     condition.NewKeySet(allSupportedAdminKeys...),
 		ExportBucketMetadataAction:     condition.NewKeySet(allSupportedAdminKeys...),
+		ExportIAMAction:                condition.NewKeySet(allSupportedAdminKeys...),
+		ImportIAMAction:                condition.NewKeySet(allSupportedAdminKeys...),
 	}
 }
 
