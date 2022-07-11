@@ -45,6 +45,7 @@ type LicenseInfo struct {
 	DeploymentID    string    // Cluster deployment ID
 	StorageCapacity int64     // Storage capacity used in TB
 	Plan            string    // Subnet plan
+	IssuedAt        time.Time // Time of license issue
 	ExpiresAt       time.Time // Time of license expiry
 }
 
@@ -54,6 +55,7 @@ const (
 	deploymentID = "did"
 	organization = "org"
 	capacity     = "cap"
+	issuedAt     = "iat"
 	plan         = "plan"
 )
 
@@ -133,6 +135,10 @@ func toLicenseInfo(token jwt.Token) (LicenseInfo, error) {
 	if !ok {
 		return LicenseInfo{}, errors.New("Invalid plan in claims")
 	}
+	iAt, ok := claims[issuedAt].(time.Time)
+	if !ok {
+		return LicenseInfo{}, errors.New("Invalid issuedAt in claims")
+	}
 	return LicenseInfo{
 		Email:           token.Subject(),
 		Organization:    orgName,
@@ -140,6 +146,7 @@ func toLicenseInfo(token jwt.Token) (LicenseInfo, error) {
 		DeploymentID:    depUUID,
 		StorageCapacity: int64(storageCap),
 		Plan:            plan,
+		IssuedAt:        iAt,
 		ExpiresAt:       token.Expiration(),
 	}, nil
 }
