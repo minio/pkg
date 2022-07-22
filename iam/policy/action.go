@@ -365,6 +365,8 @@ func createActionConditionKeyMap() actionConditionKeyMap {
 				condition.S3ObjectLockRetainUntilDate.ToKey(),
 				condition.S3ObjectLockMode.ToKey(),
 				condition.S3ObjectLockLegalHold.ToKey(),
+				condition.RequestObjectTagKeys.ToKey(),
+				condition.RequestObjectTag.ToKey(),
 			}, commonKeys...)...),
 
 		// https://docs.aws.amazon.com/AmazonS3/latest/dev/list_amazons3.html
@@ -408,6 +410,8 @@ func createActionConditionKeyMap() actionConditionKeyMap {
 		PutObjectTaggingAction: condition.NewKeySet(
 			append([]condition.Key{
 				condition.S3VersionID.ToKey(),
+				condition.RequestObjectTagKeys.ToKey(),
+				condition.RequestObjectTag.ToKey(),
 			}, commonKeys...)...),
 		GetObjectTaggingAction: condition.NewKeySet(
 			append([]condition.Key{
@@ -416,11 +420,15 @@ func createActionConditionKeyMap() actionConditionKeyMap {
 		DeleteObjectTaggingAction: condition.NewKeySet(
 			append([]condition.Key{
 				condition.S3VersionID.ToKey(),
+				condition.RequestObjectTagKeys.ToKey(),
+				condition.RequestObjectTag.ToKey(),
 			}, commonKeys...)...),
 
 		PutObjectVersionTaggingAction: condition.NewKeySet(
 			append([]condition.Key{
 				condition.S3VersionID.ToKey(),
+				condition.RequestObjectTagKeys.ToKey(),
+				condition.RequestObjectTag.ToKey(),
 			}, commonKeys...)...),
 		GetObjectVersionAction: condition.NewKeySet(
 			append([]condition.Key{
@@ -437,6 +445,8 @@ func createActionConditionKeyMap() actionConditionKeyMap {
 		DeleteObjectVersionTaggingAction: condition.NewKeySet(
 			append([]condition.Key{
 				condition.S3VersionID.ToKey(),
+				condition.RequestObjectTagKeys.ToKey(),
+				condition.RequestObjectTag.ToKey(),
 			}, commonKeys...)...),
 		ReplicateObjectAction: condition.NewKeySet(
 			append([]condition.Key{
