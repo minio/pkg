@@ -31,6 +31,8 @@ const (
 	// DecommissionAdminAction - allows decomissioning of pools
 	DecommissionAdminAction = "admin:Decommission"
 
+	// RebalanceAdminAction - allows rebalancing of pools
+	RebalanceAdminAction = "admin:Rebalance"
 	// Service Actions
 
 	// StorageInfoAdminAction - allow listing server info
@@ -227,6 +229,7 @@ var supportedAdminActions = map[AdminAction]struct{}{
 	SetTierAction:                   {},
 	ListTierAction:                  {},
 	DecommissionAdminAction:         {},
+	RebalanceAdminAction:            {},
 	SiteReplicationAddAction:        {},
 	SiteReplicationDisableAction:    {},
 	SiteReplicationInfoAction:       {},
@@ -297,6 +300,7 @@ func createAdminActionConditionKeyMap() map[Action]condition.KeySet {
 		SetTierAction:                  condition.NewKeySet(allSupportedAdminKeys...),
 		ListTierAction:                 condition.NewKeySet(allSupportedAdminKeys...),
 		DecommissionAdminAction:        condition.NewKeySet(allSupportedAdminKeys...),
+		RebalanceAdminAction:           condition.NewKeySet(allSupportedAdminKeys...),
 		SiteReplicationAddAction:       condition.NewKeySet(allSupportedAdminKeys...),
 		SiteReplicationDisableAction:   condition.NewKeySet(allSupportedAdminKeys...),
 		SiteReplicationInfoAction:      condition.NewKeySet(allSupportedAdminKeys...),
