@@ -53,6 +53,32 @@ const (
 	ConsoleLogAdminAction = "admin:ConsoleLog"
 	// KMSCreateKeyAdminAction - allow creating a new KMS master key
 	KMSCreateKeyAdminAction = "admin:KMSCreateKey"
+	// KMSDeleteKeyAdminAction - allow deleting a KMS master key
+	KMSDeleteKeyAdminAction = "admin:KMSDeleteKey"
+	// KMSListKeysAdminAction - allow getting list of KMS keys
+	KMSListKeysAdminAction = "admin:KMSListKeys"
+	// KMSImportKeyAdminAction - allow importing KMS key
+	KMSImportKeyAdminAction = "admin:KMSImportKey"
+	// KMSDescribePolicyAdminAction - allow getting KMS policy
+	KMSDescribePolicyAdminAction = "admin:KMSDescribePolicy"
+	// KMSAssignPolicyAdminAction - allow assigning an identity to a KMS policy
+	KMSAssignPolicyAdminAction = "admin:KMSAssignPolicy"
+	// KMSDeletePolicyAdminAction - allow deleting a policy
+	KMSDeletePolicyAdminAction = "admin:KMSDeletePolicy"
+	// KMSSetPolicyAdminAction - allow creating or updating a policy
+	KMSSetPolicyAdminAction = "admin:KMSSetPolicy"
+	// KMSGetPolicyAdminAction - allow getting a policy
+	KMSGetPolicyAdminAction = "admin:KMSGetPolicy"
+	// KMSListPoliciesAdminAction - allow getting list of KMS policies
+	KMSListPoliciesAdminAction = "admin:KMSListPolicies"
+	// KMSDescribeIdentityAdminAction - allow getting KMS identity
+	KMSDescribeIdentityAdminAction = "admin:KMSDescribeIdentity"
+	// KMSDescribeSelfIdentityAdminAction - allow getting self KMS identity
+	KMSDescribeSelfIdentityAdminAction = "admin:KMSDescribeSelfIdentity"
+	// KMSDeleteIdentityAdminAction - allow deleting a policy
+	KMSDeleteIdentityAdminAction = "admin:KMSDeleteIdentity"
+	// KMSListIdentitiesAdminAction - allow getting list of KMS identities
+	KMSListIdentitiesAdminAction = "admin:KMSListIdentities"
 	// KMSKeyStatusAdminAction - allow getting KMS key status
 	KMSKeyStatusAdminAction = "admin:KMSKeyStatus"
 	// ServerInfoAdminAction - allow listing server info
@@ -183,63 +209,76 @@ const (
 
 // List of all supported admin actions.
 var supportedAdminActions = map[AdminAction]struct{}{
-	HealAdminAction:                 {},
-	StorageInfoAdminAction:          {},
-	DataUsageInfoAdminAction:        {},
-	TopLocksAdminAction:             {},
-	ProfilingAdminAction:            {},
-	PrometheusAdminAction:           {},
-	TraceAdminAction:                {},
-	ConsoleLogAdminAction:           {},
-	KMSCreateKeyAdminAction:         {},
-	KMSKeyStatusAdminAction:         {},
-	ServerInfoAdminAction:           {},
-	HealthInfoAdminAction:           {},
-	BandwidthMonitorAction:          {},
-	ServerUpdateAdminAction:         {},
-	ServiceRestartAdminAction:       {},
-	ServiceStopAdminAction:          {},
-	ServiceFreezeAdminAction:        {},
-	ConfigUpdateAdminAction:         {},
-	CreateUserAdminAction:           {},
-	DeleteUserAdminAction:           {},
-	ListUsersAdminAction:            {},
-	EnableUserAdminAction:           {},
-	DisableUserAdminAction:          {},
-	GetUserAdminAction:              {},
-	AddUserToGroupAdminAction:       {},
-	RemoveUserFromGroupAdminAction:  {},
-	GetGroupAdminAction:             {},
-	ListGroupsAdminAction:           {},
-	EnableGroupAdminAction:          {},
-	DisableGroupAdminAction:         {},
-	CreateServiceAccountAdminAction: {},
-	UpdateServiceAccountAdminAction: {},
-	RemoveServiceAccountAdminAction: {},
-	ListServiceAccountsAdminAction:  {},
-	CreatePolicyAdminAction:         {},
-	DeletePolicyAdminAction:         {},
-	GetPolicyAdminAction:            {},
-	AttachPolicyAdminAction:         {},
-	ListUserPoliciesAdminAction:     {},
-	SetBucketQuotaAdminAction:       {},
-	GetBucketQuotaAdminAction:       {},
-	SetBucketTargetAction:           {},
-	GetBucketTargetAction:           {},
-	SetTierAction:                   {},
-	ListTierAction:                  {},
-	DecommissionAdminAction:         {},
-	RebalanceAdminAction:            {},
-	SiteReplicationAddAction:        {},
-	SiteReplicationDisableAction:    {},
-	SiteReplicationInfoAction:       {},
-	SiteReplicationOperationAction:  {},
-	SiteReplicationRemoveAction:     {},
-	ImportBucketMetadataAction:      {},
-	ExportBucketMetadataAction:      {},
-	ExportIAMAction:                 {},
-	ImportIAMAction:                 {},
-	AllAdminActions:                 {},
+	HealAdminAction:                    {},
+	StorageInfoAdminAction:             {},
+	DataUsageInfoAdminAction:           {},
+	TopLocksAdminAction:                {},
+	ProfilingAdminAction:               {},
+	PrometheusAdminAction:              {},
+	TraceAdminAction:                   {},
+	ConsoleLogAdminAction:              {},
+	KMSCreateKeyAdminAction:            {},
+	KMSDeleteKeyAdminAction:            {},
+	KMSListKeysAdminAction:             {},
+	KMSImportKeyAdminAction:            {},
+	KMSDescribePolicyAdminAction:       {},
+	KMSAssignPolicyAdminAction:         {},
+	KMSDeletePolicyAdminAction:         {},
+	KMSSetPolicyAdminAction:            {},
+	KMSGetPolicyAdminAction:            {},
+	KMSListPoliciesAdminAction:         {},
+	KMSDescribeIdentityAdminAction:     {},
+	KMSDescribeSelfIdentityAdminAction: {},
+	KMSDeleteIdentityAdminAction:       {},
+	KMSListIdentitiesAdminAction:       {},
+	KMSKeyStatusAdminAction:            {},
+	ServerInfoAdminAction:              {},
+	HealthInfoAdminAction:              {},
+	BandwidthMonitorAction:             {},
+	ServerUpdateAdminAction:            {},
+	ServiceRestartAdminAction:          {},
+	ServiceStopAdminAction:             {},
+	ServiceFreezeAdminAction:           {},
+	ConfigUpdateAdminAction:            {},
+	CreateUserAdminAction:              {},
+	DeleteUserAdminAction:              {},
+	ListUsersAdminAction:               {},
+	EnableUserAdminAction:              {},
+	DisableUserAdminAction:             {},
+	GetUserAdminAction:                 {},
+	AddUserToGroupAdminAction:          {},
+	RemoveUserFromGroupAdminAction:     {},
+	GetGroupAdminAction:                {},
+	ListGroupsAdminAction:              {},
+	EnableGroupAdminAction:             {},
+	DisableGroupAdminAction:            {},
+	CreateServiceAccountAdminAction:    {},
+	UpdateServiceAccountAdminAction:    {},
+	RemoveServiceAccountAdminAction:    {},
+	ListServiceAccountsAdminAction:     {},
+	CreatePolicyAdminAction:            {},
+	DeletePolicyAdminAction:            {},
+	GetPolicyAdminAction:               {},
+	AttachPolicyAdminAction:            {},
+	ListUserPoliciesAdminAction:        {},
+	SetBucketQuotaAdminAction:          {},
+	GetBucketQuotaAdminAction:          {},
+	SetBucketTargetAction:              {},
+	GetBucketTargetAction:              {},
+	SetTierAction:                      {},
+	ListTierAction:                     {},
+	DecommissionAdminAction:            {},
+	RebalanceAdminAction:               {},
+	SiteReplicationAddAction:           {},
+	SiteReplicationDisableAction:       {},
+	SiteReplicationInfoAction:          {},
+	SiteReplicationOperationAction:     {},
+	SiteReplicationRemoveAction:        {},
+	ImportBucketMetadataAction:         {},
+	ExportBucketMetadataAction:         {},
+	ExportIAMAction:                    {},
+	ImportIAMAction:                    {},
+	AllAdminActions:                    {},
 }
 
 // IsValid - checks if action is valid or not.
