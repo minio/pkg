@@ -71,6 +71,15 @@ func (statement Statement) isAdmin() bool {
 	return false
 }
 
+func (statement Statement) isKMS() bool {
+	for action := range statement.Actions {
+		if KMSAction(action).IsValid() {
+			return true
+		}
+	}
+	return false
+}
+
 // isValid - checks whether statement is valid or not.
 func (statement Statement) isValid() error {
 	if !statement.Effect.IsValid() {
@@ -91,6 +100,13 @@ func (statement Statement) isValid() error {
 			if !keyDiff.IsEmpty() {
 				return Errorf("unsupported condition keys '%v' used for action '%v'", keyDiff, action)
 			}
+		}
+		return nil
+	}
+
+	if statement.isKMS() {
+		if err := statement.Actions.ValidateKMS(); err != nil {
+			return err
 		}
 		return nil
 	}

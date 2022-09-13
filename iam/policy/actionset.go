@@ -132,6 +132,14 @@ func (actionSet ActionSet) ToAdminSlice() []AdminAction {
 	return actions
 }
 
+// ToKMSSlice - returns slice of kms actions from the action set.
+func (actionSet ActionSet) ToKMSSlice() (actions []KMSAction) {
+	for action := range actionSet {
+		actions = append(actions, KMSAction(action))
+	}
+	return actions
+}
+
 // UnmarshalJSON - decodes JSON data to ActionSet.
 func (actionSet *ActionSet) UnmarshalJSON(data []byte) error {
 	var sset set.StringSet
@@ -156,6 +164,16 @@ func (actionSet ActionSet) ValidateAdmin() error {
 	for _, action := range actionSet.ToAdminSlice() {
 		if !action.IsValid() {
 			return Errorf("unsupported admin action '%v'", action)
+		}
+	}
+	return nil
+}
+
+// ValidateKMS checks if all actions are valid KMS actions
+func (actionSet ActionSet) ValidateKMS() error {
+	for _, action := range actionSet.ToKMSSlice() {
+		if !action.IsValid() {
+			return Errorf("unsupported KMS action '%v'", action)
 		}
 	}
 	return nil
