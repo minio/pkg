@@ -22,37 +22,37 @@ type KMSAction string
 
 const (
 	// KMSCreateKeyAction - allow creating a new KMS master key
-	KMSCreateKeyAction = "kms:KMSCreateKey"
+	KMSCreateKeyAction = "kms:CreateKey"
 	// KMSDeleteKeyAction - allow deleting a KMS master key
-	KMSDeleteKeyAction = "kms:KMSDeleteKey"
+	KMSDeleteKeyAction = "kms:DeleteKey"
 	// KMSListKeysAction - allow getting list of KMS keys
-	KMSListKeysAction = "kms:KMSListKeys"
+	KMSListKeysAction = "kms:ListKeys"
 	// KMSImportKeyAction - allow importing KMS key
-	KMSImportKeyAction = "kms:KMSImportKey"
+	KMSImportKeyAction = "kms:ImportKey"
 	// KMSDescribePolicyAction - allow getting KMS policy
-	KMSDescribePolicyAction = "kms:KMSDescribePolicy"
+	KMSDescribePolicyAction = "kms:DescribePolicy"
 	// KMSAssignPolicyAction - allow assigning an identity to a KMS policy
-	KMSAssignPolicyAction = "kms:KMSAssignPolicy"
+	KMSAssignPolicyAction = "kms:AssignPolicy"
 	// KMSDeletePolicyAction - allow deleting a policy
-	KMSDeletePolicyAction = "kms:KMSDeletePolicy"
+	KMSDeletePolicyAction = "kms:DeletePolicy"
 	// KMSSetPolicyAction - allow creating or updating a policy
-	KMSSetPolicyAction = "kms:KMSSetPolicy"
+	KMSSetPolicyAction = "kms:SetPolicy"
 	// KMSGetPolicyAction - allow getting a policy
-	KMSGetPolicyAction = "kms:KMSGetPolicy"
+	KMSGetPolicyAction = "kms:GetPolicy"
 	// KMSListPoliciesAction - allow getting list of KMS policies
-	KMSListPoliciesAction = "kms:KMSListPolicies"
+	KMSListPoliciesAction = "kms:ListPolicies"
 	// KMSDescribeIdentityAction - allow getting KMS identity
-	KMSDescribeIdentityAction = "kms:KMSDescribeIdentity"
+	KMSDescribeIdentityAction = "kms:DescribeIdentity"
 	// KMSDescribeSelfIdentityAction - allow getting self KMS identity
-	KMSDescribeSelfIdentityAction = "kms:KMSDescribeSelfIdentity"
+	KMSDescribeSelfIdentityAction = "kms:DescribeSelfIdentity"
 	// KMSDeleteIdentityAction - allow deleting a policy
-	KMSDeleteIdentityAction = "kms:KMSDeleteIdentity"
+	KMSDeleteIdentityAction = "kms:DeleteIdentity"
 	// KMSListIdentitiesAction - allow getting list of KMS identities
-	KMSListIdentitiesAction = "kms:KMSListIdentities"
+	KMSListIdentitiesAction = "kms:ListIdentities"
 	// KMSKeyStatusAction - allow getting KMS key status
-	KMSKeyStatusAction = "kms:KMSKeyStatus"
+	KMSKeyStatusAction = "kms:KeyStatus"
 	// KMSStatusAction - allow getting KMS status
-	KMSStatusAction = "kms:KMSStatus"
+	KMSStatusAction = "kms:Status"
 	// AllKMSActions - provides all admin permissions
 	AllKMSActions = "kms:*"
 )
