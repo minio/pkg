@@ -97,6 +97,8 @@ const (
 	SiteReplicationDisableAction = "admin:SiteReplicationDisable"
 	// SiteReplicationRemoveAction - allow removing a cluster from replication
 	SiteReplicationRemoveAction = "admin:SiteReplicationRemove"
+	// SiteReplicationResyncAction - allow resyncing cluster data to another site
+	SiteReplicationResyncAction = "admin:SiteReplicationResync"
 	// SiteReplicationInfoAction - allow getting site replication info
 	SiteReplicationInfoAction = "admin:SiteReplicationInfo"
 	// SiteReplicationOperationAction - allow performing site replication
@@ -235,11 +237,13 @@ var supportedAdminActions = map[AdminAction]struct{}{
 	SiteReplicationInfoAction:       {},
 	SiteReplicationOperationAction:  {},
 	SiteReplicationRemoveAction:     {},
-	ImportBucketMetadataAction:      {},
-	ExportBucketMetadataAction:      {},
-	ExportIAMAction:                 {},
-	ImportIAMAction:                 {},
-	AllAdminActions:                 {},
+	SiteReplicationResyncAction:     {},
+
+	ImportBucketMetadataAction: {},
+	ExportBucketMetadataAction: {},
+	ExportIAMAction:            {},
+	ImportIAMAction:            {},
+	AllAdminActions:            {},
 }
 
 // IsValid - checks if action is valid or not.
@@ -306,10 +310,12 @@ func createAdminActionConditionKeyMap() map[Action]condition.KeySet {
 		SiteReplicationInfoAction:      condition.NewKeySet(allSupportedAdminKeys...),
 		SiteReplicationOperationAction: condition.NewKeySet(allSupportedAdminKeys...),
 		SiteReplicationRemoveAction:    condition.NewKeySet(allSupportedAdminKeys...),
-		ImportBucketMetadataAction:     condition.NewKeySet(allSupportedAdminKeys...),
-		ExportBucketMetadataAction:     condition.NewKeySet(allSupportedAdminKeys...),
-		ExportIAMAction:                condition.NewKeySet(allSupportedAdminKeys...),
-		ImportIAMAction:                condition.NewKeySet(allSupportedAdminKeys...),
+		SiteReplicationResyncAction:    condition.NewKeySet(allSupportedAdminKeys...),
+
+		ImportBucketMetadataAction: condition.NewKeySet(allSupportedAdminKeys...),
+		ExportBucketMetadataAction: condition.NewKeySet(allSupportedAdminKeys...),
+		ExportIAMAction:            condition.NewKeySet(allSupportedAdminKeys...),
+		ImportIAMAction:            condition.NewKeySet(allSupportedAdminKeys...),
 	}
 }
 
