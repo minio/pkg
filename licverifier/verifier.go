@@ -47,6 +47,7 @@ type LicenseInfo struct {
 	Plan            string    // Subnet plan
 	IssuedAt        time.Time // Time of license issue
 	ExpiresAt       time.Time // Time of license expiry
+	APIKey          string    // Subnet account API Key
 }
 
 // license key JSON field names
@@ -57,6 +58,7 @@ const (
 	capacity     = "cap"
 	issuedAt     = "iat"
 	plan         = "plan"
+	apiKey       = "apiKey"
 )
 
 // parse PEM encoded PKCS1 or PKCS8 public key
@@ -139,6 +141,10 @@ func toLicenseInfo(token jwt.Token) (LicenseInfo, error) {
 	if !ok {
 		return LicenseInfo{}, errors.New("Invalid issuedAt in claims")
 	}
+
+	// apiKey is optional as it's not present in older licenses
+	apiKey, _ := claims[apiKey].(string)
+
 	return LicenseInfo{
 		Email:           token.Subject(),
 		Organization:    orgName,
@@ -148,6 +154,7 @@ func toLicenseInfo(token jwt.Token) (LicenseInfo, error) {
 		Plan:            plan,
 		IssuedAt:        iAt,
 		ExpiresAt:       token.Expiration(),
+		APIKey:          apiKey,
 	}, nil
 }
 
