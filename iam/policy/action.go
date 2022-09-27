@@ -182,6 +182,12 @@ const (
 	// GetObjectVersionForReplicationAction  - GetObjectVersionForReplication REST API action
 	GetObjectVersionForReplicationAction = "s3:GetObjectVersionForReplication"
 
+	// RestoreObjectAction - RestoreObject REST API action
+	RestoreObjectAction = "s3:RestoreObject"
+	// ResetBucketReplicationStateAction - MinIO extension API ResetBucketReplicationState to reset replication state
+	// on a bucket
+	ResetBucketReplicationStateAction = "s3:ResetBucketReplicationState"
+
 	// AllActions - all API actions
 	AllActions = "s3:*"
 )
@@ -239,6 +245,8 @@ var supportedActions = map[Action]struct{}{
 	ReplicateDeleteAction:                  {},
 	ReplicateTagsAction:                    {},
 	GetObjectVersionForReplicationAction:   {},
+	RestoreObjectAction:                    {},
+	ResetBucketReplicationStateAction:      {},
 	AllActions:                             {},
 }
 
@@ -267,6 +275,8 @@ var supportedObjectActions = map[Action]struct{}{
 	ReplicateDeleteAction:                {},
 	ReplicateTagsAction:                  {},
 	GetObjectVersionForReplicationAction: {},
+	RestoreObjectAction:                  {},
+	ResetBucketReplicationStateAction:    {},
 }
 
 // isObjectAction - returns whether action is object type or not.
@@ -333,6 +343,7 @@ func createActionConditionKeyMap() actionConditionKeyMap {
 				condition.S3XAmzServerSideEncryption.ToKey(),
 				condition.S3XAmzServerSideEncryptionCustomerAlgorithm.ToKey(),
 				condition.S3VersionID.ToKey(),
+				condition.ExistingObjectTag.ToKey(),
 			}, commonKeys...)...),
 
 		ListBucketAction: condition.NewKeySet(
@@ -405,6 +416,8 @@ func createActionConditionKeyMap() actionConditionKeyMap {
 				condition.S3ObjectLockRetainUntilDate.ToKey(),
 				condition.S3ObjectLockMode.ToKey(),
 				condition.S3ObjectLockLegalHold.ToKey(),
+				condition.RequestObjectTagKeys.ToKey(),
+				condition.RequestObjectTag.ToKey(),
 			}, commonKeys...)...),
 
 		PutObjectTaggingAction: condition.NewKeySet(
@@ -416,6 +429,7 @@ func createActionConditionKeyMap() actionConditionKeyMap {
 		GetObjectTaggingAction: condition.NewKeySet(
 			append([]condition.Key{
 				condition.S3VersionID.ToKey(),
+				condition.ExistingObjectTag.ToKey(),
 			}, commonKeys...)...),
 		DeleteObjectTaggingAction: condition.NewKeySet(
 			append([]condition.Key{
@@ -433,10 +447,12 @@ func createActionConditionKeyMap() actionConditionKeyMap {
 		GetObjectVersionAction: condition.NewKeySet(
 			append([]condition.Key{
 				condition.S3VersionID.ToKey(),
+				condition.ExistingObjectTag.ToKey(),
 			}, commonKeys...)...),
 		GetObjectVersionTaggingAction: condition.NewKeySet(
 			append([]condition.Key{
 				condition.S3VersionID.ToKey(),
+				condition.ExistingObjectTag.ToKey(),
 			}, commonKeys...)...),
 		DeleteObjectVersionAction: condition.NewKeySet(
 			append([]condition.Key{
@@ -451,18 +467,26 @@ func createActionConditionKeyMap() actionConditionKeyMap {
 		ReplicateObjectAction: condition.NewKeySet(
 			append([]condition.Key{
 				condition.S3VersionID.ToKey(),
+				condition.ExistingObjectTag.ToKey(),
 			}, commonKeys...)...),
 		ReplicateDeleteAction: condition.NewKeySet(
 			append([]condition.Key{
 				condition.S3VersionID.ToKey(),
+				condition.ExistingObjectTag.ToKey(),
 			}, commonKeys...)...),
 		ReplicateTagsAction: condition.NewKeySet(
 			append([]condition.Key{
 				condition.S3VersionID.ToKey(),
+				condition.ExistingObjectTag.ToKey(),
 			}, commonKeys...)...),
 		GetObjectVersionForReplicationAction: condition.NewKeySet(
 			append([]condition.Key{
 				condition.S3VersionID.ToKey(),
+				condition.ExistingObjectTag.ToKey(),
 			}, commonKeys...)...),
+		GetReplicationConfigurationAction: condition.NewKeySet(commonKeys...),
+		PutReplicationConfigurationAction: condition.NewKeySet(commonKeys...),
+		RestoreObjectAction:               condition.NewKeySet(commonKeys...),
+		ResetBucketReplicationStateAction: condition.NewKeySet(commonKeys...),
 	}
 }

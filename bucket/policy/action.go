@@ -336,6 +336,8 @@ func createActionConditionKeyMap() map[Action]condition.KeySet {
 			append([]condition.Key{
 				condition.S3XAmzServerSideEncryption.ToKey(),
 				condition.S3XAmzServerSideEncryptionCustomerAlgorithm.ToKey(),
+				condition.S3VersionID.ToKey(),
+				condition.ExistingObjectTag.ToKey(),
 			}, commonKeys...)...),
 
 		HeadBucketAction: condition.NewKeySet(commonKeys...),
@@ -401,6 +403,8 @@ func createActionConditionKeyMap() map[Action]condition.KeySet {
 				condition.S3ObjectLockRetainUntilDate.ToKey(),
 				condition.S3ObjectLockMode.ToKey(),
 				condition.S3ObjectLockLegalHold.ToKey(),
+				condition.RequestObjectTagKeys.ToKey(),
+				condition.RequestObjectTag.ToKey(),
 			}, commonKeys...)...),
 
 		GetBucketObjectLockConfigurationAction: condition.NewKeySet(commonKeys...),
@@ -416,7 +420,10 @@ func createActionConditionKeyMap() map[Action]condition.KeySet {
 				condition.RequestObjectTagKeys.ToKey(),
 				condition.RequestObjectTag.ToKey(),
 			}, commonKeys...)...),
-		GetObjectTaggingAction: condition.NewKeySet(commonKeys...),
+		GetObjectTaggingAction: condition.NewKeySet(
+			append([]condition.Key{
+				condition.ExistingObjectTag.ToKey(),
+			}, commonKeys...)...),
 		DeleteObjectTaggingAction: condition.NewKeySet(
 			append([]condition.Key{
 				condition.RequestObjectTagKeys.ToKey(),
@@ -431,10 +438,12 @@ func createActionConditionKeyMap() map[Action]condition.KeySet {
 		GetObjectVersionAction: condition.NewKeySet(
 			append([]condition.Key{
 				condition.S3VersionID.ToKey(),
+				condition.ExistingObjectTag.ToKey(),
 			}, commonKeys...)...),
 		GetObjectVersionTaggingAction: condition.NewKeySet(
 			append([]condition.Key{
 				condition.S3VersionID.ToKey(),
+				condition.ExistingObjectTag.ToKey(),
 			}, commonKeys...)...),
 		DeleteObjectVersionAction: condition.NewKeySet(
 			append([]condition.Key{
@@ -446,14 +455,30 @@ func createActionConditionKeyMap() map[Action]condition.KeySet {
 				condition.RequestObjectTagKeys.ToKey(),
 				condition.RequestObjectTag.ToKey(),
 			}, commonKeys...)...),
-		GetReplicationConfigurationAction:    condition.NewKeySet(commonKeys...),
-		PutReplicationConfigurationAction:    condition.NewKeySet(commonKeys...),
-		ReplicateObjectAction:                condition.NewKeySet(commonKeys...),
-		ReplicateDeleteAction:                condition.NewKeySet(commonKeys...),
-		ReplicateTagsAction:                  condition.NewKeySet(commonKeys...),
-		GetObjectVersionForReplicationAction: condition.NewKeySet(commonKeys...),
-		RestoreObjectAction:                  condition.NewKeySet(commonKeys...),
-		ResetBucketReplicationStateAction:    condition.NewKeySet(commonKeys...),
+		GetReplicationConfigurationAction: condition.NewKeySet(commonKeys...),
+		PutReplicationConfigurationAction: condition.NewKeySet(commonKeys...),
+		ReplicateObjectAction: condition.NewKeySet(
+			append([]condition.Key{
+				condition.S3VersionID.ToKey(),
+				condition.ExistingObjectTag.ToKey(),
+			}, commonKeys...)...),
+		ReplicateDeleteAction: condition.NewKeySet(
+			append([]condition.Key{
+				condition.S3VersionID.ToKey(),
+				condition.ExistingObjectTag.ToKey(),
+			}, commonKeys...)...),
+		ReplicateTagsAction: condition.NewKeySet(
+			append([]condition.Key{
+				condition.S3VersionID.ToKey(),
+				condition.ExistingObjectTag.ToKey(),
+			}, commonKeys...)...),
+		GetObjectVersionForReplicationAction: condition.NewKeySet(
+			append([]condition.Key{
+				condition.S3VersionID.ToKey(),
+				condition.ExistingObjectTag.ToKey(),
+			}, commonKeys...)...),
+		RestoreObjectAction:               condition.NewKeySet(commonKeys...),
+		ResetBucketReplicationStateAction: condition.NewKeySet(commonKeys...),
 	}
 }
 
