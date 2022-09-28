@@ -154,6 +154,18 @@ func (iamp Policy) IsAllowedActions(bucketName, objectName string, conditionValu
 			actionSet.Add(admAction)
 		}
 	}
+	for action := range supportedKMSActions {
+		kmsAction := Action(action)
+		if iamp.IsAllowed(Args{
+			BucketName:      bucketName,
+			ObjectName:      objectName,
+			Action:          kmsAction,
+			ConditionValues: conditionValues,
+		}) {
+			actionSet.Add(kmsAction)
+		}
+	}
+
 	return actionSet
 }
 
