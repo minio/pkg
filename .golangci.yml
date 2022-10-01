@@ -15,14 +15,10 @@ linters:
     - revive
     - ineffassign
     - gosimple
-    - deadcode
-    - structcheck
     - gomodguard
     - gofmt
     - unused
-    - structcheck
     - unconvert
-    - varcheck
 
 issues:
   exclude-use-default: false

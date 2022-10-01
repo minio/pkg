@@ -26,10 +26,11 @@ import (
 // nullFunc - Null condition function. It checks whether Key is not present in given
 // values or not.
 // For example,
-//   1. if Key = S3XAmzCopySource and Value = true, at evaluate() it returns whether
-//      S3XAmzCopySource is NOT in given value map or not.
-//   2. if Key = S3XAmzCopySource and Value = false, at evaluate() it returns whether
-//      S3XAmzCopySource is in given value map or not.
+//  1. if Key = S3XAmzCopySource and Value = true, at evaluate() it returns whether
+//     S3XAmzCopySource is NOT in given value map or not.
+//  2. if Key = S3XAmzCopySource and Value = false, at evaluate() it returns whether
+//     S3XAmzCopySource is in given value map or not.
+//
 // https://docs.aws.amazon.com/IAM/latest/UserGuide/reference_policies_elements_condition_operators.html#Conditions_Null
 type nullFunc struct {
 	k     Key

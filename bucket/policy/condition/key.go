@@ -133,16 +133,27 @@ func (set KeySet) Merge(mset KeySet) {
 	}
 }
 
+// Match matches the input key name with current keySet
+func (set KeySet) Match(key Key) bool {
+	_, ok := set[key]
+	if ok {
+		return true
+	}
+	_, ok = set[key.name.ToKey()]
+	return ok
+}
+
 // Difference - returns a key set contains difference of two keys.
 // Example:
-//     keySet1 := ["one", "two", "three"]
-//     keySet2 := ["two", "four", "three"]
-//     keySet1.Difference(keySet2) == ["one"]
+//
+//	keySet1 := ["one", "two", "three"]
+//	keySet2 := ["two", "four", "three"]
+//	keySet1.Difference(keySet2) == ["one"]
 func (set KeySet) Difference(sset KeySet) KeySet {
 	nset := make(KeySet)
 
 	for k := range set {
-		if _, ok := sset[k]; !ok {
+		if !sset.Match(k) {
 			nset.Add(k)
 		}
 	}

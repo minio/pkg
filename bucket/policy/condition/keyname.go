@@ -249,7 +249,9 @@ var AllSupportedKeys = append([]KeyName{
 	AWSUsername,
 	LDAPUser,
 	LDAPUsername,
+	RequestObjectTag,
 	ExistingObjectTag,
+	RequestObjectTagKeys,
 	// Add new supported condition keys.
 }, JWTKeys...)
 

@@ -423,6 +423,7 @@ func createActionConditionKeyMap() actionConditionKeyMap {
 		PutObjectTaggingAction: condition.NewKeySet(
 			append([]condition.Key{
 				condition.S3VersionID.ToKey(),
+				condition.ExistingObjectTag.ToKey(),
 				condition.RequestObjectTagKeys.ToKey(),
 				condition.RequestObjectTag.ToKey(),
 			}, commonKeys...)...),
@@ -434,13 +435,13 @@ func createActionConditionKeyMap() actionConditionKeyMap {
 		DeleteObjectTaggingAction: condition.NewKeySet(
 			append([]condition.Key{
 				condition.S3VersionID.ToKey(),
-				condition.RequestObjectTagKeys.ToKey(),
-				condition.RequestObjectTag.ToKey(),
+				condition.ExistingObjectTag.ToKey(),
 			}, commonKeys...)...),
 
 		PutObjectVersionTaggingAction: condition.NewKeySet(
 			append([]condition.Key{
 				condition.S3VersionID.ToKey(),
+				condition.ExistingObjectTag.ToKey(),
 				condition.RequestObjectTagKeys.ToKey(),
 				condition.RequestObjectTag.ToKey(),
 			}, commonKeys...)...),
@@ -461,8 +462,7 @@ func createActionConditionKeyMap() actionConditionKeyMap {
 		DeleteObjectVersionTaggingAction: condition.NewKeySet(
 			append([]condition.Key{
 				condition.S3VersionID.ToKey(),
-				condition.RequestObjectTagKeys.ToKey(),
-				condition.RequestObjectTag.ToKey(),
+				condition.ExistingObjectTag.ToKey(),
 			}, commonKeys...)...),
 		ReplicateObjectAction: condition.NewKeySet(
 			append([]condition.Key{

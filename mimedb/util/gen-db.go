@@ -70,7 +70,7 @@ type mimeEntry struct {
 
 type mimeDB map[string]mimeEntry
 
-//  JSON data from gobindata and parse them into extDB.
+// JSON data from gobindata and parse them into extDB.
 func convertDB(jsonFile string) (mimeDB, error) {
 	// Structure of JSON data from mime-db project.
 	type dbEntry struct {
