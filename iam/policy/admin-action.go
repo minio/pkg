@@ -158,6 +158,9 @@ const (
 	// GetBucketTargetAction - allow getting bucket targets
 	GetBucketTargetAction = "admin:GetBucketTarget"
 
+	// ReplicationDiff - allow computing the unreplicated objects in a bucket
+	ReplicationDiff = "admin:ReplicationDiff"
+
 	// Bucket import/export admin Actions
 
 	// ImportBucketMetadataAction - allow importing bucket metadata
@@ -228,6 +231,7 @@ var supportedAdminActions = map[AdminAction]struct{}{
 	GetBucketQuotaAdminAction:       {},
 	SetBucketTargetAction:           {},
 	GetBucketTargetAction:           {},
+	ReplicationDiff:                 {},
 	SetTierAction:                   {},
 	ListTierAction:                  {},
 	DecommissionAdminAction:         {},
@@ -301,6 +305,7 @@ func createAdminActionConditionKeyMap() map[Action]condition.KeySet {
 		GetBucketQuotaAdminAction:      condition.NewKeySet(allSupportedAdminKeys...),
 		SetBucketTargetAction:          condition.NewKeySet(allSupportedAdminKeys...),
 		GetBucketTargetAction:          condition.NewKeySet(allSupportedAdminKeys...),
+		ReplicationDiff:                condition.NewKeySet(allSupportedAdminKeys...),
 		SetTierAction:                  condition.NewKeySet(allSupportedAdminKeys...),
 		ListTierAction:                 condition.NewKeySet(allSupportedAdminKeys...),
 		DecommissionAdminAction:        condition.NewKeySet(allSupportedAdminKeys...),
