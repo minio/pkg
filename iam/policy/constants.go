@@ -118,6 +118,13 @@ var DefaultPolicies = []struct {
 				{
 					SID:        policy.ID(""),
 					Effect:     policy.Allow,
+					Actions:    NewActionSet(AllKMSActions),
+					Resources:  NewResourceSet(),
+					Conditions: condition.NewFunctions(),
+				},
+				{
+					SID:        policy.ID(""),
+					Effect:     policy.Allow,
 					Actions:    NewActionSet(AllActions),
 					Resources:  NewResourceSet(NewResource("*", "")),
 					Conditions: condition.NewFunctions(),

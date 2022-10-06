@@ -52,7 +52,7 @@ func (statement Statement) IsAllowed(args Args) bool {
 		}
 
 		// For admin statements, resource match can be ignored.
-		if !statement.Resources.Match(resource, args.ConditionValues) && !statement.isAdmin() {
+		if !statement.Resources.Match(resource, args.ConditionValues) && !statement.isAdmin() && !statement.isKMS() {
 			return false
 		}
 
