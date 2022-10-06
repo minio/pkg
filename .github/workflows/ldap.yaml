@@ -1,0 +1,52 @@
+name: LDAP Config Validator
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+# This ensures that previous jobs for the PR are canceled when the PR is
+# updated.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.head_ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  ldap-config-validator:
+    name: Test LDAP configuration validator (Go ${{ matrix.go-version }})
+    runs-on: ubuntu-latest
+    services:
+      openldap:
+        image: quay.io/minio/openldap
+        ports:
+          - "389:389"
+          - "636:636"
+        env:
+          LDAP_ORGANIZATION: "MinIO Inc"
+          LDAP_DOMAIN: "min.io"
+          LDAP_ADMIN_PASSWORD: "admin"
+    strategy:
+      matrix:
+        go-version: [1.18.x]
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-go@v3
+        with:
+          go-version: ${{ matrix.go-version }}
+          check-latest: true
+      - uses: actions/cache@v2
+        with:
+          path: |
+            ~/.cache/go-build
+            ~/go/pkg/mod
+          key: ${{ runner.os }}-${{ matrix.go-version }}-go-${{ hashFiles('**/go.sum') }}
+          restore-keys: |
+            ${{ runner.os }}-${{ matrix.go-version }}-go-
+      - name: Test with LDAP server
+        env:
+          LDAP_TEST_SERVER: "localhost:389"
+        run: make test
