@@ -53,6 +53,16 @@ const (
 	KMSKeyStatusAction = "kms:KeyStatus"
 	// KMSStatusAction - allow getting KMS status
 	KMSStatusAction = "kms:Status"
+	// KMSAPIAction - allow getting a list of supported API endpoints
+	KMSAPIAction = "kms:API"
+	// KMSMetricsAction - allow getting server metrics in the Prometheus exposition format
+	KMSMetricsAction = "kms:Metrics"
+	// KMSVersionAction - allow getting version information
+	KMSVersionAction = "kms:Version"
+	// KMSAuditLogAction - subscribes to the audit log
+	KMSAuditLogAction = "kms:AuditLog"
+	// KMSErrorLogAction - subscribes to the error log
+	KMSErrorLogAction = "kms:ErrorLog"
 	// AllKMSActions - provides all admin permissions
 	AllKMSActions = "kms:*"
 )
@@ -74,6 +84,12 @@ var supportedKMSActions = map[KMSAction]struct{}{
 	KMSDeleteIdentityAction:       {},
 	KMSListIdentitiesAction:       {},
 	KMSKeyStatusAction:            {},
+	KMSStatusAction:               {},
+	KMSAPIAction:                  {},
+	KMSMetricsAction:              {},
+	KMSVersionAction:              {},
+	KMSAuditLogAction:             {},
+	KMSErrorLogAction:             {},
 	AllKMSActions:                 {},
 }
 
