@@ -182,6 +182,11 @@ const (
 	// ImportIAMAction - allow importing IAM info to MinIO
 	ImportIAMAction = "admin:ImportIAM"
 
+	// Batch Job APIs
+	ListBatchJobsAction    = "admin:ListBatchJobs"
+	DescribeBatchJobAction = "admin:DescribeBatchJob"
+	StartBatchJobAction    = "admin:StartBatchJob"
+
 	// AllAdminActions - provides all admin permissions
 	AllAdminActions = "admin:*"
 )
@@ -247,7 +252,12 @@ var supportedAdminActions = map[AdminAction]struct{}{
 	ExportBucketMetadataAction: {},
 	ExportIAMAction:            {},
 	ImportIAMAction:            {},
-	AllAdminActions:            {},
+
+	ListBatchJobsAction:    {},
+	DescribeBatchJobAction: {},
+	StartBatchJobAction:    {},
+
+	AllAdminActions: {},
 }
 
 // IsValid - checks if action is valid or not.
@@ -321,6 +331,10 @@ func createAdminActionConditionKeyMap() map[Action]condition.KeySet {
 		ExportBucketMetadataAction: condition.NewKeySet(allSupportedAdminKeys...),
 		ExportIAMAction:            condition.NewKeySet(allSupportedAdminKeys...),
 		ImportIAMAction:            condition.NewKeySet(allSupportedAdminKeys...),
+
+		ListBatchJobsAction:    condition.NewKeySet(allSupportedAdminKeys...),
+		DescribeBatchJobAction: condition.NewKeySet(allSupportedAdminKeys...),
+		StartBatchJobAction:    condition.NewKeySet(allSupportedAdminKeys...),
 	}
 }
 
