@@ -39,6 +39,7 @@ type LicenseVerifier struct {
 
 // LicenseInfo holds customer metadata present in the license key.
 type LicenseInfo struct {
+	LicenseID       string    // Unique id of the license
 	Email           string    // Email of the license key requestor
 	Organization    string    // Subnet organization name
 	AccountID       int64     // Subnet account id
@@ -52,6 +53,7 @@ type LicenseInfo struct {
 
 // license key JSON field names
 const (
+	licenseID    = "lid"
 	accountID    = "aid"
 	deploymentID = "did"
 	organization = "org"
@@ -125,6 +127,10 @@ func toLicenseInfo(token jwt.Token) (LicenseInfo, error) {
 	// so don't fail if it's not found.
 	depUUID, _ := claims[deploymentID].(string)
 
+	// license id may not be present in older licenses.
+	// so don't fail if it's not found.
+	licID, _ := claims[licenseID].(string)
+
 	orgName, ok := claims[organization].(string)
 	if !ok {
 		return LicenseInfo{}, errors.New("Invalid organization in claims")
@@ -146,6 +152,7 @@ func toLicenseInfo(token jwt.Token) (LicenseInfo, error) {
 	apiKey, _ := claims[apiKey].(string)
 
 	return LicenseInfo{
+		LicenseID:       licID,
 		Email:           token.Subject(),
 		Organization:    orgName,
 		AccountID:       int64(accID),
