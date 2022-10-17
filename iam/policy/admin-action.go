@@ -183,9 +183,15 @@ const (
 	ImportIAMAction = "admin:ImportIAM"
 
 	// Batch Job APIs
-	ListBatchJobsAction    = "admin:ListBatchJobs"
+
+	// ListBatchJobsAction allow listing current active jobs
+	ListBatchJobsAction = "admin:ListBatchJobs"
+
+	// DescribeBatchJobAction allow getting batch job YAML
 	DescribeBatchJobAction = "admin:DescribeBatchJob"
-	StartBatchJobAction    = "admin:StartBatchJob"
+
+	// StartBatchJobAction allow submitting a batch job
+	StartBatchJobAction = "admin:StartBatchJob"
 
 	// AllAdminActions - provides all admin permissions
 	AllAdminActions = "admin:*"
