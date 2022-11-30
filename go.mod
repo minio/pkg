@@ -11,7 +11,7 @@ require (
 	github.com/lestrrat-go/jwx v1.2.25
 	github.com/mattn/go-colorable v0.1.13
 	github.com/mattn/go-isatty v0.0.16
-	github.com/minio/madmin-go v1.6.6
+	github.com/minio/madmin-go/v2 v2.0.0
 	github.com/minio/minio-go/v7 v7.0.41
 	github.com/montanaflynn/stats v0.6.6
 	github.com/rjeczalik/notify v0.9.2
@@ -30,7 +30,6 @@ require (
 	github.com/goccy/go-json v0.9.11 // indirect
 	github.com/gogo/protobuf v1.3.2 // indirect
 	github.com/golang/protobuf v1.5.2 // indirect
-	github.com/google/uuid v1.3.0 // indirect
 	github.com/json-iterator/go v1.1.12 // indirect
 	github.com/kr/text v0.2.0 // indirect
 	github.com/lestrrat-go/backoff/v2 v2.0.8 // indirect
