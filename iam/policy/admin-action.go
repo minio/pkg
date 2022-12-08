@@ -144,6 +144,9 @@ const (
 	GetPolicyAdminAction = "admin:GetPolicy"
 	// AttachPolicyAdminAction - allows attaching a policy to a user/group
 	AttachPolicyAdminAction = "admin:AttachUserOrGroupPolicy"
+	// UpdatePolicyAssociationAction - allows to add/remove policy association
+	// on a user or group.
+	UpdatePolicyAssociationAction = "admin:UpdatePolicyAssociation"
 	// ListUserPoliciesAdminAction - allows listing user policies
 	ListUserPoliciesAdminAction = "admin:ListUserPolicies"
 
