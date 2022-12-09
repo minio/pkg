@@ -43,7 +43,7 @@ func TestConfigValidator(t *testing.T) {
 				v := Config{Enabled: true}
 				return v
 			}(),
-			expectedResult: ConnectivityError,
+			expectedResult: ConnectionParamMisconfigured,
 		},
 		{
 			cfg: func() Config {
@@ -243,6 +243,22 @@ func TestConfigValidator(t *testing.T) {
 				return v
 			}(),
 			expectedResult: UserSearchParamsMisconfigured,
+		},
+		{
+			cfg: func() Config {
+				v := Config{Enabled: true}
+				v.ServerAddr = ldapServer
+				v.SRVRecordName = "thingy" // Bad SRV record name.
+				v.ServerInsecure = true
+				v.LookupBindDN = "cn=admin,dc=min,dc=io"
+				v.LookupBindPassword = "admin"
+				v.UserDNSearchFilter = "(uid=%s)"
+				v.UserDNSearchBaseDistName = "dc=min,dc=io"
+				v.GroupSearchBaseDistName = "ou=swengg,dc=min,dc=io"
+				v.GroupSearchFilter = "(&(objectclass=groupofnames)(member=%d))"
+				return v
+			}(),
+			expectedResult: ConnectionParamMisconfigured,
 		},
 	}
 

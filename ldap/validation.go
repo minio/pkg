@@ -22,6 +22,7 @@ import (
 	"strings"
 
 	"github.com/go-ldap/ldap/v3"
+	"github.com/minio/minio-go/v7/pkg/set"
 )
 
 // Result - type for high-level names for the validation status of the config.
@@ -31,6 +32,7 @@ type Result string
 const (
 	ConfigOk                       Result = "Config OK"
 	ConnectivityError              Result = "LDAP Server Connection Error"
+	ConnectionParamMisconfigured   Result = "LDAP Server Connection Parameters Misconfigured"
 	LookupBindError                Result = "LDAP Lookup Bind Error"
 	UserSearchParamsMisconfigured  Result = "User Search Parameters Misconfigured"
 	GroupSearchParamsMisconfigured Result = "Group Search Parameters Misconfigured"
@@ -86,6 +88,8 @@ type UserLookupResult struct {
 	GroupDNMemberships []string
 }
 
+var validSRVRecordNames = set.CreateStringSet("ldap", "ldaps", "on")
+
 // Validate validates the LDAP configuration. It can be called with any subset
 // of configuration parameters provided by the user - it will return
 // information on what needs to be done to fix the problem if any.
@@ -101,9 +105,18 @@ func (l *Config) Validate() Validation {
 
 	if l.ServerAddr == "" {
 		return Validation{
-			Result:     ConnectivityError,
+			Result:     ConnectionParamMisconfigured,
 			Detail:     "Address is empty",
 			Suggestion: "Set a server address.",
+		}
+	}
+
+	if l.SRVRecordName != "" && !validSRVRecordNames.Contains(l.SRVRecordName) {
+		return Validation{
+			Result: ConnectionParamMisconfigured,
+			Detail: "SRV Record Name is invalid",
+			Suggestion: `If given, SRV Record Name must be one of "ldap", "ldaps" or "on".
+    Please refer to documentation for more details`,
 		}
 	}
 
@@ -115,8 +128,10 @@ func (l *Config) Validate() Validation {
 			ErrCause: err,
 			Suggestion: `Check:
     (1) server address
-    (2) TLS parameters, and
-    (3) LDAP server's TLS certificate is trusted by MinIO (when using TLS - highly recommended)`,
+    (2) TLS parameters,
+    (3) LDAP server's TLS certificate is trusted by MinIO (when using TLS - highly recommended)
+    (4) SRV Record lookup if given, and
+    (5) LDAP service is up and reachable`,
 		}
 	}
 	defer conn.Close()
