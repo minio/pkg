@@ -154,6 +154,96 @@ func TestConfigValidator(t *testing.T) {
 			}(),
 			expectedResult: ConfigOk,
 		},
+		{
+			cfg: func() Config {
+				v := Config{Enabled: true}
+				v.ServerAddr = ldapServer
+				v.ServerInsecure = true
+				v.LookupBindDN = "cn=admin,dc=min,dc=io"
+				v.LookupBindPassword = "admin"
+				v.UserDNSearchFilter = "(uid=%s)"
+				v.UserDNSearchBaseDistName = "min,dc=io" // not a valid DN
+				v.GroupSearchBaseDistName = "ou=swengg,dc=min,dc=io"
+				v.GroupSearchFilter = "(&(objectclass=groupofnames)(member=%d))"
+				return v
+			}(),
+			expectedResult: UserSearchParamsMisconfigured,
+		},
+		{
+			cfg: func() Config {
+				v := Config{Enabled: true}
+				v.ServerAddr = ldapServer
+				v.ServerInsecure = true
+				v.LookupBindDN = "cn=admin,dc=min,dc=io"
+				v.LookupBindPassword = "admin"
+				v.UserDNSearchFilter = "uid=%s" // not a valid filter
+				v.UserDNSearchBaseDistName = "dc=min,dc=io"
+				v.GroupSearchBaseDistName = "ou=swengg,dc=min,dc=io"
+				v.GroupSearchFilter = "(&(objectclass=groupofnames)(member=%d))"
+				return v
+			}(),
+			expectedResult: UserSearchParamsMisconfigured,
+		},
+		{ // Case 12
+			cfg: func() Config {
+				v := Config{Enabled: true}
+				v.ServerAddr = ldapServer
+				v.ServerInsecure = true
+				v.LookupBindDN = "cn=admin,dc=min,dc=io"
+				v.LookupBindPassword = "admin"
+				v.UserDNSearchFilter = "(uid=%s)"
+				v.UserDNSearchBaseDistName = "dc=min,dc=io"
+				v.GroupSearchBaseDistName = "a" // Not a valid DN
+				v.GroupSearchFilter = "(&(objectclass=groupofnames)(member=%d))"
+				return v
+			}(),
+			expectedResult: GroupSearchParamsMisconfigured,
+		},
+		{
+			cfg: func() Config {
+				v := Config{Enabled: true}
+				v.ServerAddr = ldapServer
+				v.ServerInsecure = true
+				v.LookupBindDN = "cn=admin,dc=min,dc=io"
+				v.LookupBindPassword = "admin"
+				v.UserDNSearchFilter = "(uid=%s)"
+				v.UserDNSearchBaseDistName = "dc=min,dc=io"
+				v.GroupSearchBaseDistName = "ou=swengg,dc=min,dc=io"
+				v.GroupSearchFilter = "member=%d" // Invalid search filter
+				return v
+			}(),
+			expectedResult: GroupSearchParamsMisconfigured,
+		},
+		{
+			cfg: func() Config {
+				v := Config{Enabled: true}
+				v.ServerAddr = ldapServer
+				v.ServerInsecure = true
+				v.LookupBindDN = "cn=admin,dc=min,dc=io"
+				v.LookupBindPassword = "admin"
+				v.UserDNSearchFilter = "(uid=%s)"
+				v.UserDNSearchBaseDistName = "dc=min,dc=io;adcio" // Invalid DN (multiple)
+				v.GroupSearchBaseDistName = "ou=swengg,dc=min,dc=io"
+				v.GroupSearchFilter = "(&(objectclass=groupofnames)(member=%d))"
+				return v
+			}(),
+			expectedResult: UserSearchParamsMisconfigured,
+		},
+		{ // Case 15
+			cfg: func() Config {
+				v := Config{Enabled: true}
+				v.ServerAddr = ldapServer
+				v.ServerInsecure = true
+				v.LookupBindDN = "cn=admin,dc=min,dc=io"
+				v.LookupBindPassword = "admin"
+				v.UserDNSearchFilter = "(uid=%s)"
+				v.UserDNSearchBaseDistName = "dc=min,dc=io;dc=io" // Overlapping subtrees
+				v.GroupSearchBaseDistName = "ou=swengg,dc=min,dc=io"
+				v.GroupSearchFilter = "(&(objectclass=groupofnames)(member=%d))"
+				return v
+			}(),
+			expectedResult: UserSearchParamsMisconfigured,
+		},
 	}
 
 	expectedDN := "uid=dillon,ou=people,ou=swengg,dc=min,dc=io"

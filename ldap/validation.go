@@ -20,6 +20,8 @@ package ldap
 import (
 	"fmt"
 	"strings"
+
+	"github.com/go-ldap/ldap/v3"
 )
 
 // Result - type for high-level names for the validation status of the config.
@@ -136,14 +138,32 @@ func (l *Config) Validate() Validation {
 	}
 
 	// Validate User Lookup parameters
-	if l.UserDNSearchBaseDistName == "" {
+	l.UserDNSearchBaseDistNames = splitAndTrim(l.UserDNSearchBaseDistName, dnDelimiter)
+	if len(l.UserDNSearchBaseDistNames) == 0 {
 		return Validation{
 			Result:     UserSearchParamsMisconfigured,
 			Detail:     "UserDN search base is empty",
 			Suggestion: "Set the UserDN search base to the DN of the directory subtree where users are present",
 		}
 	}
-	l.UserDNSearchBaseDistNames = strings.Split(l.UserDNSearchBaseDistName, dnDelimiter)
+
+	// Validate that given DNs parse successfully.
+	if badDN, err := validateDistinguishedNames(l.UserDNSearchBaseDistNames); err != nil {
+		return Validation{
+			Result:     UserSearchParamsMisconfigured,
+			Detail:     fmt.Sprintf("UserDN search base DN %s is not valid: %v", badDN, err),
+			Suggestion: "Set the UserDN search base to the DN of the directory subtree where users are present",
+		}
+	}
+
+	// Validate that BaseDNs represent non-overlapping subtrees.
+	if ancestor, descendant := checkForDNOverlaps(l.UserDNSearchBaseDistNames); ancestor != "" {
+		return Validation{
+			Result:     UserSearchParamsMisconfigured,
+			Detail:     fmt.Sprintf("User Search Base DN `%s` is an ancestor of `%s`", ancestor, descendant),
+			Suggestion: "No two base DNs may overlap - please remove one of them",
+		}
+	}
 
 	if l.UserDNSearchFilter == "" {
 		return Validation{
@@ -173,11 +193,21 @@ func (l *Config) Validate() Validation {
 		}
 	}
 
+	// Check that the LDAP filter compiles.
+	if err := compileFilter(l.UserDNSearchFilter); err != nil {
+		return Validation{
+			Result:     UserSearchParamsMisconfigured,
+			Detail:     fmt.Sprintf("User DN search filter `%s` failed to compile: %v", l.UserDNSearchFilter, err),
+			Suggestion: `Ensure that the User DN search filter is valid`,
+		}
+	}
+
 	// If group lookup is not configured, it's ok.
 	if l.GroupSearchBaseDistName != "" || l.GroupSearchFilter != "" {
 
-		// Validate Group Search parameters as they are given.
-		if l.GroupSearchBaseDistName == "" {
+		// Validate Group Search parameters.
+		l.GroupSearchBaseDistNames = splitAndTrim(l.GroupSearchBaseDistName, dnDelimiter)
+		if len(l.GroupSearchBaseDistNames) == 0 {
 			return Validation{
 				Result: GroupSearchParamsMisconfigured,
 				Detail: "Group Search Base DN is required.",
@@ -185,7 +215,24 @@ func (l *Config) Validate() Validation {
     Enter this value as the DN of the subtree where groups will be found.`,
 			}
 		}
-		l.GroupSearchBaseDistNames = strings.Split(l.GroupSearchBaseDistName, dnDelimiter)
+
+		// Validate that given DNs parse successfully.
+		if badDN, err := validateDistinguishedNames(l.GroupSearchBaseDistNames); err != nil {
+			return Validation{
+				Result:     GroupSearchParamsMisconfigured,
+				Detail:     fmt.Sprintf("Group Search Base DN %s is not valid: %v", badDN, err),
+				Suggestion: "Set the Group Search Base DN to the DN of the directory subtree where groups are present",
+			}
+		}
+
+		// Validate that BaseDNs represent non-overlapping subtrees.
+		if ancestor, descendant := checkForDNOverlaps(l.GroupSearchBaseDistNames); ancestor != "" {
+			return Validation{
+				Result:     GroupSearchParamsMisconfigured,
+				Detail:     fmt.Sprintf("Group Search Base DN `%s` is an ancestor of `%s`", ancestor, descendant),
+				Suggestion: "No two base DNs may overlap - please remove one of them",
+			}
+		}
 
 		if l.GroupSearchFilter == "" {
 			return Validation{
@@ -209,6 +256,16 @@ func (l *Config) Validate() Validation {
     Enter an LDAP search filter template using at least one of these.`,
 			}
 		}
+
+		// Check that the LDAP filter compiles.
+		if err := compileFilter(l.GroupSearchFilter); err != nil {
+			return Validation{
+				Result:     GroupSearchParamsMisconfigured,
+				Detail:     fmt.Sprintf("Group DN search filter `%s` failed to compile: %v", l.GroupSearchFilter, err),
+				Suggestion: `Ensure that the Group DN search filter is valid`,
+			}
+		}
+
 	}
 
 	return Validation{
@@ -286,4 +343,58 @@ func (l *Config) ValidateLookup(testUsername string) (*UserLookupResult, Validat
 			Result: ConfigOk,
 			Detail: "User lookup done.",
 		}
+}
+
+// Splits on given delimiter, trims leading/trailing whitespace and removes
+// empty values.
+func splitAndTrim(s, sep string) []string {
+	parts := strings.Split(s, sep)
+	var res []string
+	for i := range parts {
+		v := strings.TrimSpace(parts[i])
+		if len(v) == 0 {
+			continue
+		}
+		res = append(res, v)
+	}
+	return res
+}
+
+func validateDistinguishedNames(s []string) (string, error) {
+	for _, dn := range s {
+		if _, err := ldap.ParseDN(dn); err != nil {
+			return dn, err
+		}
+	}
+	return "", nil
+}
+
+// checks if given DNs overlap - returns the first pair of DNs having an overlap
+// or empty strings.
+func checkForDNOverlaps(s []string) (string, string) {
+	n := len(s)
+	for i := 0; i < n; i++ {
+		p, _ := ldap.ParseDN(s[i])
+		for j := i + 1; j < n; j++ {
+			c, _ := ldap.ParseDN(s[j])
+			if p.AncestorOf(c) {
+				return s[i], s[j]
+			} else if c.AncestorOf(p) {
+				return s[j], s[i]
+			}
+		}
+	}
+	return "", ""
+}
+
+const (
+	dummyUser = "a"
+	dummyDN   = "uid=a,dc=min,dc=io"
+)
+
+func compileFilter(s string) error {
+	s1 := strings.ReplaceAll(s, "%s", dummyUser)
+	s2 := strings.ReplaceAll(s1, "%d", dummyDN)
+	_, err := ldap.CompileFilter(s2)
+	return err
 }
