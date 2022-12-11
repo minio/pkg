@@ -488,5 +488,6 @@ func createActionConditionKeyMap() actionConditionKeyMap {
 		PutReplicationConfigurationAction: condition.NewKeySet(commonKeys...),
 		RestoreObjectAction:               condition.NewKeySet(commonKeys...),
 		ResetBucketReplicationStateAction: condition.NewKeySet(commonKeys...),
+		NotAction: condition.NewKeySet(commonKeys...)
 	}
 }
