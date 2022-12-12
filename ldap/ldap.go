@@ -41,6 +41,7 @@ type Config struct {
 
 	// E.g. "ldap.minio.io:636"
 	ServerAddr     string
+	SRVRecordName  string
 	TLSSkipVerify  bool // allows skipping TLS verification
 	ServerInsecure bool // allows plain text connection to LDAP server
 	ServerStartTLS bool // allows using StartTLS connection to LDAP server
@@ -67,30 +68,19 @@ func (l *Config) Clone() (cloned Config) {
 	return cloned
 }
 
-// Connect connect to ldap server.
-func (l *Config) Connect() (ldapConn *ldap.Conn, err error) {
-	if l == nil || !l.Enabled {
-		return nil, errors.New("LDAP is not configured")
-	}
-
-	_, _, err = net.SplitHostPort(l.ServerAddr)
-	if err != nil {
-		// User default LDAP port if none specified "636"
-		l.ServerAddr = net.JoinHostPort(l.ServerAddr, "636")
-	}
-
+func (l *Config) connect(ldapAddr string) (ldapConn *ldap.Conn, err error) {
 	tlsConfig := &tls.Config{
 		InsecureSkipVerify: l.TLSSkipVerify,
 		RootCAs:            l.RootCAs,
 	}
 
 	if l.ServerInsecure {
-		ldapConn, err = ldap.Dial("tcp", l.ServerAddr)
+		ldapConn, err = ldap.Dial("tcp", ldapAddr)
 	} else {
 		if l.ServerStartTLS {
-			ldapConn, err = ldap.Dial("tcp", l.ServerAddr)
+			ldapConn, err = ldap.Dial("tcp", ldapAddr)
 		} else {
-			ldapConn, err = ldap.DialTLS("tcp", l.ServerAddr, tlsConfig)
+			ldapConn, err = ldap.DialTLS("tcp", ldapAddr, tlsConfig)
 		}
 	}
 
@@ -102,6 +92,71 @@ func (l *Config) Connect() (ldapConn *ldap.Conn, err error) {
 	}
 
 	return ldapConn, err
+}
+
+// Connect connect to ldap server.
+func (l *Config) Connect() (ldapConn *ldap.Conn, err error) {
+	if l == nil || !l.Enabled {
+		return nil, errors.New("LDAP is not configured")
+	}
+
+	var srvService, srvProto, srvName string
+	switch l.SRVRecordName {
+	case "on":
+		srvName = l.ServerAddr
+	case "ldap", "ldaps":
+		srvService = l.SRVRecordName
+		srvProto = "tcp"
+		srvName = l.ServerAddr
+	case "":
+	default:
+		return nil, errors.New("Invalid SRV Record Name parameter")
+
+	}
+
+	if srvName == "" {
+		// No SRV Record lookup case.
+		ldapAddr := l.ServerAddr
+
+		_, _, err = net.SplitHostPort(ldapAddr)
+		if err != nil {
+			if strings.Contains(err.Error(), "missing port in address") {
+				// Use default LDAP port if none specified "636"
+				ldapAddr = net.JoinHostPort(ldapAddr, "636")
+			} else {
+				return nil, err
+			}
+		}
+
+		return l.connect(ldapAddr)
+	}
+
+	// SRV Record lookup is enabled.
+	_, addrs, err := net.LookupSRV(srvService, srvProto, srvName)
+	if err != nil {
+		return nil, fmt.Errorf("DNS SRV Record lookup error: %w", err)
+	}
+
+	var errs []error
+
+	// Return a connection to the first server to which we could connect.
+	for _, addr := range addrs {
+		ldapAddr := fmt.Sprintf("%s:%d", addr.Target, addr.Port)
+
+		ldapConn, err = l.connect(ldapAddr)
+		if err == nil {
+			return ldapConn, nil
+		}
+		errs = append(errs, err)
+	}
+
+	// If none of the servers could connect, we all the errors.
+	var errMsgs []string
+	for i, e := range errs {
+		errMsgs = append(errMsgs, fmt.Sprintf("Connect err to %s:%d - %v", addrs[i].Target, addrs[i].Port, e))
+	}
+	err = fmt.Errorf("Could not connect to any LDAP server: %s", strings.Join(errMsgs, "; "))
+	return nil, err
 }
 
 // LookupBind connects to LDAP server using the bind user credentials.
