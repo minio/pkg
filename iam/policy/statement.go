@@ -29,6 +29,7 @@ type Statement struct {
 	SID        policy.ID           `json:"Sid,omitempty"`
 	Effect     policy.Effect       `json:"Effect"`
 	Actions    ActionSet           `json:"Action"`
+	NotActions ActionSet           `json:"NotAction,omitempty"`
 	Resources  ResourceSet         `json:"Resource,omitempty"`
 	Conditions condition.Functions `json:"Condition,omitempty"`
 }
@@ -36,7 +37,8 @@ type Statement struct {
 // IsAllowed - checks given policy args is allowed to continue the Rest API.
 func (statement Statement) IsAllowed(args Args) bool {
 	check := func() bool {
-		if !statement.Actions.Match(args.Action) {
+		if (!statement.Actions.Match(args.Action) && !statement.Actions.IsEmpty()) ||
+			statement.NotActions.Match(args.Action) {
 			return false
 		}
 
@@ -86,7 +88,7 @@ func (statement Statement) isValid() error {
 		return Errorf("invalid Effect %v", statement.Effect)
 	}
 
-	if len(statement.Actions) == 0 {
+	if len(statement.Actions) == 0 && len(statement.NotActions) == 0 {
 		return Errorf("Action must not be empty")
 	}
 
@@ -155,6 +157,9 @@ func (statement Statement) Equals(st Statement) bool {
 	if !statement.Actions.Equals(st.Actions) {
 		return false
 	}
+	if !statement.NotActions.Equals(st.NotActions) {
+		return false
+	}
 	if !statement.Resources.Equals(st.Resources) {
 		return false
 	}
@@ -166,8 +171,14 @@ func (statement Statement) Equals(st Statement) bool {
 
 // Clone clones Statement structure
 func (statement Statement) Clone() Statement {
-	return NewStatement(statement.SID, statement.Effect, statement.Actions.Clone(),
-		statement.Resources.Clone(), statement.Conditions.Clone())
+	return Statement{
+		SID:        statement.SID,
+		Effect:     statement.Effect,
+		Actions:    statement.Actions,
+		NotActions: statement.NotActions,
+		Resources:  statement.Resources,
+		Conditions: statement.Conditions,
+	}
 }
 
 // NewStatement - creates new statement.
