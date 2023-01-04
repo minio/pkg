@@ -76,6 +76,14 @@ func TestStatementIsAllowed(t *testing.T) {
 		Conditions: condition.NewFunctions(),
 	}
 
+	case6Statement := Statement{
+		SID:        "",
+		Effect:     policy.Deny,
+		NotActions: NewActionSet(GetObjectAction),
+		Resources:  NewResourceSet(NewResource("mybucket", "/myobject*")),
+		Conditions: condition.NewFunctions(func1),
+	}
+
 	anonGetBucketLocationArgs := Args{
 		AccountName:     "Q3AM3UQ867SPQQA43P2F",
 		Action:          GetBucketLocationAction,
@@ -161,12 +169,19 @@ func TestStatementIsAllowed(t *testing.T) {
 		{case4Statement, putObjectActionArgs, false},
 		{case4Statement, getObjectActionArgs, true},
 
-		{case5Statement, getObjectActionArgs, false},
-		{case5Statement, anonGetObjectActionArgs, false},
-		{case5Statement, putObjectActionArgs, true},
-		{case5Statement, anonPutObjectActionArgs, true},
-		{case5Statement, getBucketLocationArgs, true},
 		{case5Statement, anonGetBucketLocationArgs, true},
+		{case5Statement, anonPutObjectActionArgs, true},
+		{case5Statement, anonGetObjectActionArgs, false},
+		{case5Statement, getBucketLocationArgs, true},
+		{case5Statement, getObjectActionArgs, false},
+		{case5Statement, putObjectActionArgs, true},
+
+		{case6Statement, anonGetBucketLocationArgs, true},
+		{case6Statement, anonPutObjectActionArgs, false},
+		{case6Statement, anonGetObjectActionArgs, true},
+		{case6Statement, getBucketLocationArgs, true},
+		{case6Statement, putObjectActionArgs, false},
+		{case6Statement, getObjectActionArgs, true},
 	}
 
 	for i, testCase := range testCases {
