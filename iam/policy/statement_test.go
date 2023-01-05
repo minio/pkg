@@ -68,21 +68,21 @@ func TestStatementIsAllowed(t *testing.T) {
 		condition.NewFunctions(func1),
 	)
 
-	case5Statement := Statement{
-		SID:        "",
-		Effect:     policy.Allow,
-		NotActions: NewActionSet(GetObjectAction, CreateBucketAction),
-		Resources:  NewResourceSet(NewResource("mybucket", "/myobject*"), NewResource("mybucket", "")),
-		Conditions: condition.NewFunctions(),
-	}
+	case5Statement := NewStatementWithNotAction(
+		"",
+		policy.Allow,
+		NewActionSet(GetObjectAction, CreateBucketAction),
+		NewResourceSet(NewResource("mybucket", "/myobject*"), NewResource("mybucket", "")),
+		condition.NewFunctions(),
+	)
 
-	case6Statement := Statement{
-		SID:        "",
-		Effect:     policy.Deny,
-		NotActions: NewActionSet(GetObjectAction),
-		Resources:  NewResourceSet(NewResource("mybucket", "/myobject*")),
-		Conditions: condition.NewFunctions(func1),
-	}
+	case6Statement := NewStatementWithNotAction(
+		"",
+		policy.Deny,
+		NewActionSet(GetObjectAction),
+		NewResourceSet(NewResource("mybucket", "/myobject*")),
+		condition.NewFunctions(func1),
+	)
 
 	anonGetBucketLocationArgs := Args{
 		AccountName:     "Q3AM3UQ867SPQQA43P2F",

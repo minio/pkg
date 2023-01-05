@@ -191,3 +191,14 @@ func NewStatement(sid policy.ID, effect policy.Effect, actionSet ActionSet, reso
 		Conditions: conditions,
 	}
 }
+
+// NewStatementWithNotAction - creates new statement with NotAction.
+func NewStatementWithNotAction(sid policy.ID, effect policy.Effect, notActions ActionSet, resources ResourceSet, conditions condition.Functions) Statement {
+	return Statement{
+		SID:        sid,
+		Effect:     effect,
+		NotActions: notActions,
+		Resources:  resources,
+		Conditions: conditions,
+	}
+}
