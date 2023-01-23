@@ -7,12 +7,12 @@ require (
 	github.com/fatih/color v1.13.0
 	github.com/fatih/structs v1.1.0
 	github.com/go-ldap/ldap/v3 v3.4.4
-	github.com/gorilla/mux v1.8.0
 	github.com/lestrrat-go/jwx v1.2.25
 	github.com/mattn/go-colorable v0.1.13
 	github.com/mattn/go-isatty v0.0.16
 	github.com/minio/madmin-go/v2 v2.0.0
 	github.com/minio/minio-go/v7 v7.0.41
+	github.com/minio/mux v1.8.2
 	github.com/montanaflynn/stats v0.6.6
 	github.com/rjeczalik/notify v0.9.2
 	go.etcd.io/etcd/client/v3 v3.5.5

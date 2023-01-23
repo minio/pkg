@@ -25,7 +25,7 @@ import (
 	"os"
 	"testing"
 
-	"github.com/gorilla/mux"
+	"github.com/minio/mux"
 )
 
 func GetenvHandler(w http.ResponseWriter, r *http.Request) {
