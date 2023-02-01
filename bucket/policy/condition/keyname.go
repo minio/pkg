@@ -27,7 +27,7 @@ import (
 // for more information about available condition keys.
 type KeyName string
 
-// Name - returns key name which is stripped value of prefixes "aws:" and "s3:"
+// Name - returns key name which is stripped value of prefixes "aws:", "s3:", "jwt:" and "ldap:"
 func (key KeyName) Name() string {
 	name := string(key)
 	switch {
@@ -137,6 +137,9 @@ const (
 	// AWSUsername - user friendly name, in MinIO this value is same as your user Access Key.
 	AWSUsername KeyName = "aws:username"
 
+	// AWSGroups - groups for any authenticating Access Key.
+	AWSGroups KeyName = "aws:groups"
+
 	// S3SignatureVersion - identifies the version of AWS Signature that you want to support for authenticated requests.
 	S3SignatureVersion KeyName = "s3:signatureversion"
 
@@ -185,11 +188,14 @@ const (
 )
 
 const (
-	// LDAPUser - LDAP username, in MinIO this value is equal to your authenticating LDAP user.
+	// LDAPUser - LDAP username, in MinIO this value is equal to your authenticating LDAP user DN.
 	LDAPUser KeyName = "ldap:user"
 
-	// LDAPUsername - LDAP username, in MinIO is the authenticated simply user.
+	// LDAPUsername - LDAP username, in MinIO is the authenticated simple user.
 	LDAPUsername KeyName = "ldap:username"
+
+	// LDAPGroups - LDAP groups, in MinIO this value is equal LDAP Group DNs for the authenticating user.
+	LDAPGroups KeyName = "ldap:groups"
 )
 
 // JWTKeys - Supported JWT keys, non-exhaustive list please
@@ -247,8 +253,10 @@ var AllSupportedKeys = append([]KeyName{
 	AWSPrincipalType,
 	AWSUserID,
 	AWSUsername,
+	AWSGroups,
 	LDAPUser,
 	LDAPUsername,
+	LDAPGroups,
 	RequestObjectTag,
 	ExistingObjectTag,
 	RequestObjectTagKeys,
@@ -270,17 +278,26 @@ var CommonKeys = append([]KeyName{
 	AWSPrincipalType,
 	AWSUserID,
 	AWSUsername,
+	AWSGroups,
 	LDAPUser,
 	LDAPUsername,
+	LDAPGroups,
 }, JWTKeys...)
 
 // AllSupportedAdminKeys - is list of all admin supported keys.
-var AllSupportedAdminKeys = []KeyName{
+var AllSupportedAdminKeys = append([]KeyName{
 	AWSReferer,
 	AWSSourceIP,
 	AWSUserAgent,
 	AWSSecureTransport,
 	AWSCurrentTime,
 	AWSEpochTime,
+	AWSPrincipalType,
+	AWSUserID,
+	AWSUsername,
+	AWSGroups,
+	LDAPUser,
+	LDAPUsername,
+	LDAPGroups,
 	// Add new supported condition keys.
-}
+}, JWTKeys...)
