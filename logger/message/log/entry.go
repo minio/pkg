@@ -1,9 +1,10 @@
 package log
 
 import (
-	"github.com/minio/madmin-go/v2"
 	"strings"
 	"time"
+
+	"github.com/minio/madmin-go/v2"
 )
 
 // ObjectVersion object version key/versionId
