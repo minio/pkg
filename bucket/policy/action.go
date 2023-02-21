@@ -209,8 +209,8 @@ var supportedObjectActions = map[Action]struct{}{
 	ResetBucketReplicationStateAction:    {},
 }
 
-// isObjectAction - returns whether action is object type or not.
-func (action Action) isObjectAction() bool {
+// IsObjectAction - returns whether action is object type or not.
+func (action Action) IsObjectAction() bool {
 	_, ok := supportedObjectActions[action]
 	return ok
 }

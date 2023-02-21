@@ -103,7 +103,7 @@ func (statement Statement) isValid() error {
 	}
 
 	for action := range statement.Actions {
-		if action.isObjectAction() {
+		if action.IsObjectAction() {
 			if !statement.Resources.objectResourceExists() {
 				return Errorf("unsupported Resource found %v for action %v", statement.Resources, action)
 			}
