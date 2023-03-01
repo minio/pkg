@@ -45,7 +45,7 @@ type Entry struct {
 		OutputBytes             int64           `json:"tx"`
 		HeaderBytes             int64           `json:"txHeaders,omitempty"`
 		TimeToFirstByte         string          `json:"timeToFirstByte,omitempty"`
-		TimeToFirstByteWithUnit string          `json:"timeToFirstByte(ns),omitempty"`
+		TimeToFirstByteInNS string          `json:"timeToFirstByteInNS,omitempty"`
 		TimeToResponse          string          `json:"timeToResponse,omitempty"`
 		TimeToResponseWithUnit  string          `json:"timeToResponse(ns),omitempty"`
 	} `json:"api"`
