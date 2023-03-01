@@ -47,7 +47,7 @@ type Entry struct {
 		TimeToFirstByte         string          `json:"timeToFirstByte,omitempty"`
 		TimeToFirstByteInNS string          `json:"timeToFirstByteInNS,omitempty"`
 		TimeToResponse          string          `json:"timeToResponse,omitempty"`
-		TimeToResponseWithUnit  string          `json:"timeToResponse(ns),omitempty"`
+		TimeToResponseInNS  string          `json:"timeToResponseInNS,omitempty"`
 	} `json:"api"`
 	RemoteHost string                 `json:"remotehost,omitempty"`
 	RequestID  string                 `json:"requestID,omitempty"`
