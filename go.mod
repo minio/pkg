@@ -10,13 +10,13 @@ require (
 	github.com/lestrrat-go/jwx v1.2.25
 	github.com/mattn/go-colorable v0.1.13
 	github.com/mattn/go-isatty v0.0.17
-	github.com/minio/madmin-go/v2 v2.0.13
+	github.com/minio/madmin-go/v2 v2.0.15
 	github.com/minio/minio-go/v7 v7.0.49
 	github.com/minio/mux v1.8.2
 	github.com/montanaflynn/stats v0.7.0
 	github.com/rjeczalik/notify v0.9.3
 	go.etcd.io/etcd/client/v3 v3.5.7
-	golang.org/x/sys v0.5.0
+	golang.org/x/sys v0.6.0
 	gopkg.in/yaml.v2 v2.4.0
 )
 
@@ -46,13 +46,12 @@ require (
 	github.com/niemeyer/pretty v0.0.0-20200227124842-a10e7caefd8e // indirect
 	github.com/philhofer/fwd v1.1.2 // indirect
 	github.com/pkg/errors v0.9.1 // indirect
-	github.com/pmezard/go-difflib v1.0.1-0.20181226105442-5d4384ee4fb2 // indirect
 	github.com/power-devops/perfstat v0.0.0-20221212215047-62379fc7944b // indirect
 	github.com/prometheus/procfs v0.9.0 // indirect
 	github.com/rivo/uniseg v0.4.4 // indirect
 	github.com/rs/xid v1.4.0 // indirect
 	github.com/secure-io/sio-go v0.3.1 // indirect
-	github.com/shirou/gopsutil/v3 v3.23.1 // indirect
+	github.com/shirou/gopsutil/v3 v3.23.2 // indirect
 	github.com/tinylib/msgp v1.1.8 // indirect
 	github.com/tklauser/go-sysconf v0.3.11 // indirect
 	github.com/tklauser/numcpus v0.6.0 // indirect
@@ -62,11 +61,11 @@ require (
 	go.uber.org/atomic v1.10.0 // indirect
 	go.uber.org/multierr v1.9.0 // indirect
 	go.uber.org/zap v1.24.0 // indirect
-	golang.org/x/crypto v0.6.0 // indirect
-	golang.org/x/net v0.7.0 // indirect
+	golang.org/x/crypto v0.7.0 // indirect
+	golang.org/x/net v0.8.0 // indirect
 	golang.org/x/sync v0.1.0 // indirect
-	golang.org/x/text v0.7.0 // indirect
-	google.golang.org/genproto v0.0.0-20230216225411-c8e22ba71e44 // indirect
+	golang.org/x/text v0.8.0 // indirect
+	google.golang.org/genproto v0.0.0-20230303212802-e74f57abe488 // indirect
 	google.golang.org/grpc v1.53.0 // indirect
 	google.golang.org/protobuf v1.28.1 // indirect
 	gopkg.in/check.v1 v1.0.0-20200227125254-8fa46927fb4f // indirect
