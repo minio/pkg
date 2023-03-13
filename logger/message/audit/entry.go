@@ -35,17 +35,19 @@ type Entry struct {
 	// time for backward compatibility with k8s Operator.
 	Trigger string `json:"trigger"`
 	API     struct {
-		Name            string          `json:"name,omitempty"`
-		Bucket          string          `json:"bucket,omitempty"`
-		Object          string          `json:"object,omitempty"`
-		Objects         []ObjectVersion `json:"objects,omitempty"`
-		Status          string          `json:"status,omitempty"`
-		StatusCode      int             `json:"statusCode,omitempty"`
-		InputBytes      int64           `json:"rx"`
-		OutputBytes     int64           `json:"tx"`
-		HeaderBytes     int64           `json:"txHeaders,omitempty"`
-		TimeToFirstByte string          `json:"timeToFirstByte,omitempty"`
-		TimeToResponse  string          `json:"timeToResponse,omitempty"`
+		Name                string          `json:"name,omitempty"`
+		Bucket              string          `json:"bucket,omitempty"`
+		Object              string          `json:"object,omitempty"`
+		Objects             []ObjectVersion `json:"objects,omitempty"`
+		Status              string          `json:"status,omitempty"`
+		StatusCode          int             `json:"statusCode,omitempty"`
+		InputBytes          int64           `json:"rx"`
+		OutputBytes         int64           `json:"tx"`
+		HeaderBytes         int64           `json:"txHeaders,omitempty"`
+		TimeToFirstByte     string          `json:"timeToFirstByte,omitempty"`
+		TimeToFirstByteInNS string          `json:"timeToFirstByteInNS,omitempty"`
+		TimeToResponse      string          `json:"timeToResponse,omitempty"`
+		TimeToResponseInNS  string          `json:"timeToResponseInNS,omitempty"`
 	} `json:"api"`
 	RemoteHost string                 `json:"remotehost,omitempty"`
 	RequestID  string                 `json:"requestID,omitempty"`
