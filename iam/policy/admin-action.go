@@ -199,6 +199,9 @@ const (
 	// StartBatchJobAction allow submitting a batch job
 	StartBatchJobAction = "admin:StartBatchJob"
 
+	// CancelBatchJobAction allow canceling a batch job
+	CancelBatchJobAction = "admin:CancelBatchJob"
+
 	// AllAdminActions - provides all admin permissions
 	AllAdminActions = "admin:*"
 )
@@ -269,6 +272,7 @@ var supportedAdminActions = map[AdminAction]struct{}{
 	ListBatchJobsAction:    {},
 	DescribeBatchJobAction: {},
 	StartBatchJobAction:    {},
+	CancelBatchJobAction:   {},
 
 	AllAdminActions: {},
 }
@@ -349,6 +353,7 @@ func createAdminActionConditionKeyMap() map[Action]condition.KeySet {
 		ListBatchJobsAction:    condition.NewKeySet(allSupportedAdminKeys...),
 		DescribeBatchJobAction: condition.NewKeySet(allSupportedAdminKeys...),
 		StartBatchJobAction:    condition.NewKeySet(allSupportedAdminKeys...),
+		CancelBatchJobAction:   condition.NewKeySet(allSupportedAdminKeys...),
 	}
 }
 
