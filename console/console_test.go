@@ -31,7 +31,7 @@ func TestSetColor(t *testing.T) {
 	}
 }
 
-func TestColorLock(t *testing.T) {
+func TestColorLock(_ *testing.T) {
 	Lock()
 	Print("") // Test for deadlocks.
 	Unlock()

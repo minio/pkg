@@ -131,7 +131,7 @@ func newDateFunc(n string, key Key, values ValueSet, cond condition) (Function, 
 }
 
 // newDateEqualsFunc - returns new DateEquals function.
-func newDateEqualsFunc(key Key, values ValueSet, qualifier string) (Function, error) {
+func newDateEqualsFunc(key Key, values ValueSet, _ string) (Function, error) {
 	return newDateFunc(dateEquals, key, values, equals)
 }
 
@@ -141,7 +141,7 @@ func NewDateEqualsFunc(key Key, value time.Time) (Function, error) {
 }
 
 // newDateNotEqualsFunc - returns new DateNotEquals function.
-func newDateNotEqualsFunc(key Key, values ValueSet, qualifier string) (Function, error) {
+func newDateNotEqualsFunc(key Key, values ValueSet, _ string) (Function, error) {
 	return newDateFunc(dateNotEquals, key, values, notEquals)
 }
 
@@ -151,7 +151,7 @@ func NewDateNotEqualsFunc(key Key, value time.Time) (Function, error) {
 }
 
 // newDateGreaterThanFunc - returns new DateGreaterThan function.
-func newDateGreaterThanFunc(key Key, values ValueSet, qualifier string) (Function, error) {
+func newDateGreaterThanFunc(key Key, values ValueSet, _ string) (Function, error) {
 	return newDateFunc(dateGreaterThan, key, values, greaterThan)
 }
 
@@ -161,7 +161,7 @@ func NewDateGreaterThanFunc(key Key, value time.Time) (Function, error) {
 }
 
 // newDateGreaterThanEqualsFunc - returns new DateGreaterThanEquals function.
-func newDateGreaterThanEqualsFunc(key Key, values ValueSet, qualifier string) (Function, error) {
+func newDateGreaterThanEqualsFunc(key Key, values ValueSet, _ string) (Function, error) {
 	return newDateFunc(dateGreaterThanEquals, key, values, greaterThanEquals)
 }
 
@@ -171,7 +171,7 @@ func NewDateGreaterThanEqualsFunc(key Key, value time.Time) (Function, error) {
 }
 
 // newDateLessThanFunc - returns new DateLessThan function.
-func newDateLessThanFunc(key Key, values ValueSet, qualifier string) (Function, error) {
+func newDateLessThanFunc(key Key, values ValueSet, _ string) (Function, error) {
 	return newDateFunc(dateLessThan, key, values, lessThan)
 }
 
@@ -181,7 +181,7 @@ func NewDateLessThanFunc(key Key, value time.Time) (Function, error) {
 }
 
 // newDateLessThanEqualsFunc - returns new DateLessThanEquals function.
-func newDateLessThanEqualsFunc(key Key, values ValueSet, qualifier string) (Function, error) {
+func newDateLessThanEqualsFunc(key Key, values ValueSet, _ string) (Function, error) {
 	return newDateFunc(dateLessThanEquals, key, values, lessThanEquals)
 }
 

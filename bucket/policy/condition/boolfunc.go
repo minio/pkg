@@ -72,7 +72,7 @@ func (f booleanFunc) clone() Function {
 	}
 }
 
-func newBooleanFunc(key Key, values ValueSet, qualifier string) (Function, error) {
+func newBooleanFunc(key Key, values ValueSet, _ string) (Function, error) {
 	if !key.Is(AWSSecureTransport) {
 		return nil, fmt.Errorf("only %v key is allowed for %v condition", AWSSecureTransport, boolean)
 	}

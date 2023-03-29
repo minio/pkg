@@ -153,7 +153,7 @@ func newIPAddrFunc(n string, key Key, values []*net.IPNet, negate bool) (Functio
 }
 
 // newIPAddressFunc - returns new IP address function.
-func newIPAddressFunc(key Key, values ValueSet, qualifier string) (Function, error) {
+func newIPAddressFunc(key Key, values ValueSet, _ string) (Function, error) {
 	IPNets, err := valuesToIPNets(ipAddress, values)
 	if err != nil {
 		return nil, err
@@ -168,7 +168,7 @@ func NewIPAddressFunc(key Key, IPNets ...*net.IPNet) (Function, error) {
 }
 
 // newNotIPAddressFunc - returns new Not IP address function.
-func newNotIPAddressFunc(key Key, values ValueSet, qualifier string) (Function, error) {
+func newNotIPAddressFunc(key Key, values ValueSet, _ string) (Function, error) {
 	IPNets, err := valuesToIPNets(notIPAddress, values)
 	if err != nil {
 		return nil, err

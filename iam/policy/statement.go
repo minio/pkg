@@ -107,10 +107,7 @@ func (statement Statement) isValid() error {
 	}
 
 	if statement.isKMS() {
-		if err := statement.Actions.ValidateKMS(); err != nil {
-			return err
-		}
-		return nil
+		return statement.Actions.ValidateKMS()
 	}
 
 	if !statement.SID.IsValid() {
