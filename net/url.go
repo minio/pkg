@@ -26,6 +26,7 @@ import (
 	"net/url"
 	"path"
 	"strings"
+	"syscall"
 )
 
 // URL - improved JSON friendly url.URL.
@@ -250,4 +251,22 @@ func IsNetworkOrHostDown(err error, expectTimeouts bool) bool {
 		return true
 	}
 	return false
+}
+
+// IsConnResetErr - Checks for "connection reset" errors.
+func IsConnResetErr(err error) bool {
+	if strings.Contains(err.Error(), "connection reset by peer") {
+		return true
+	}
+	// incase if error message is wrapped.
+	return errors.Is(err, syscall.ECONNRESET)
+}
+
+// IsConnRefusedErr - Checks for "connection refused" errors.
+func IsConnRefusedErr(err error) bool {
+	if strings.Contains(err.Error(), "connection refused") {
+		return true
+	}
+	// incase if error message is wrapped.
+	return errors.Is(err, syscall.ECONNREFUSED)
 }

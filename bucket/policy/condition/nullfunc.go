@@ -79,7 +79,7 @@ func (f nullFunc) clone() Function {
 	}
 }
 
-func newNullFunc(key Key, values ValueSet, qualifier string) (Function, error) {
+func newNullFunc(key Key, values ValueSet, _ string) (Function, error) {
 	if len(values) != 1 {
 		return nil, fmt.Errorf("only one value is allowed for Null condition")
 	}

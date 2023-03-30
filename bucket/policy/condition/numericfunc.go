@@ -136,7 +136,7 @@ func newNumericFunc(n string, key Key, values ValueSet, cond condition) (Functio
 }
 
 // newNumericEqualsFunc - returns new NumericEquals function.
-func newNumericEqualsFunc(key Key, values ValueSet, qualifier string) (Function, error) {
+func newNumericEqualsFunc(key Key, values ValueSet, _ string) (Function, error) {
 	return newNumericFunc(numericEquals, key, values, equals)
 }
 
@@ -146,7 +146,7 @@ func NewNumericEqualsFunc(key Key, value int) (Function, error) {
 }
 
 // newNumericNotEqualsFunc - returns new NumericNotEquals function.
-func newNumericNotEqualsFunc(key Key, values ValueSet, qualifier string) (Function, error) {
+func newNumericNotEqualsFunc(key Key, values ValueSet, _ string) (Function, error) {
 	return newNumericFunc(numericNotEquals, key, values, notEquals)
 }
 
@@ -156,7 +156,7 @@ func NewNumericNotEqualsFunc(key Key, value int) (Function, error) {
 }
 
 // newNumericGreaterThanFunc - returns new NumericGreaterThan function.
-func newNumericGreaterThanFunc(key Key, values ValueSet, qualifier string) (Function, error) {
+func newNumericGreaterThanFunc(key Key, values ValueSet, _ string) (Function, error) {
 	return newNumericFunc(numericGreaterThan, key, values, greaterThan)
 }
 
@@ -166,7 +166,7 @@ func NewNumericGreaterThanFunc(key Key, value int) (Function, error) {
 }
 
 // newNumericGreaterThanEqualsFunc - returns new NumericGreaterThanEquals function.
-func newNumericGreaterThanEqualsFunc(key Key, values ValueSet, qualifier string) (Function, error) {
+func newNumericGreaterThanEqualsFunc(key Key, values ValueSet, _ string) (Function, error) {
 	return newNumericFunc(numericGreaterThanEquals, key, values, greaterThanEquals)
 }
 
@@ -176,7 +176,7 @@ func NewNumericGreaterThanEqualsFunc(key Key, value int) (Function, error) {
 }
 
 // newNumericLessThanFunc - returns new NumericLessThan function.
-func newNumericLessThanFunc(key Key, values ValueSet, qualifier string) (Function, error) {
+func newNumericLessThanFunc(key Key, values ValueSet, _ string) (Function, error) {
 	return newNumericFunc(numericLessThan, key, values, lessThan)
 }
 
@@ -186,7 +186,7 @@ func NewNumericLessThanFunc(key Key, value int) (Function, error) {
 }
 
 // newNumericLessThanEqualsFunc - returns new NumericLessThanEquals function.
-func newNumericLessThanEqualsFunc(key Key, values ValueSet, qualifier string) (Function, error) {
+func newNumericLessThanEqualsFunc(key Key, values ValueSet, _ string) (Function, error) {
 	return newNumericFunc(numericLessThanEquals, key, values, lessThanEquals)
 }
 
