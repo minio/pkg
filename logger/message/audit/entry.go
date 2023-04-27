@@ -31,6 +31,10 @@ type Entry struct {
 	DeploymentID string    `json:"deploymentid,omitempty"`
 	Time         time.Time `json:"time"`
 	Event        string    `json:"event"`
+
+	// Class of audit message - S3, admin ops, bucket management
+	Type string `json:"type,omitempty"`
+
 	// deprecated replaced by 'Event', kept here for some
 	// time for backward compatibility with k8s Operator.
 	Trigger string `json:"trigger"`
@@ -52,6 +56,8 @@ type Entry struct {
 	RemoteHost string                 `json:"remotehost,omitempty"`
 	RequestID  string                 `json:"requestID,omitempty"`
 	UserAgent  string                 `json:"userAgent,omitempty"`
+	ReqPath    string                 `json:"requestPath,omitempty"`
+	ReqHost    string                 `json:"requestHost,omitempty"`
 	ReqClaims  map[string]interface{} `json:"requestClaims,omitempty"`
 	ReqQuery   map[string]string      `json:"requestQuery,omitempty"`
 	ReqHeader  map[string]string      `json:"requestHeader,omitempty"`
