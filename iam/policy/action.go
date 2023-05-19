@@ -1,4 +1,4 @@
-// Copyright (c) 2015-2021 MinIO, Inc.
+// Copyright (c) 2015-2023 MinIO, Inc.
 //
 // This file is part of MinIO Object Storage stack
 //
@@ -188,6 +188,9 @@ const (
 	// on a bucket
 	ResetBucketReplicationStateAction = "s3:ResetBucketReplicationState"
 
+	// PutObjectFanOutAction - PutObject like API action but allows PostUpload() fan-out.
+	PutObjectFanOutAction = "s3:PutObjectFanOut"
+
 	// AllActions - all API actions
 	AllActions = "s3:*"
 )
@@ -247,6 +250,7 @@ var supportedActions = map[Action]struct{}{
 	GetObjectVersionForReplicationAction:   {},
 	RestoreObjectAction:                    {},
 	ResetBucketReplicationStateAction:      {},
+	PutObjectFanOutAction:                  {},
 	AllActions:                             {},
 }
 
@@ -276,7 +280,7 @@ var supportedObjectActions = map[Action]struct{}{
 	ReplicateTagsAction:                  {},
 	GetObjectVersionForReplicationAction: {},
 	RestoreObjectAction:                  {},
-	ResetBucketReplicationStateAction:    {},
+	PutObjectFanOutAction:                {},
 }
 
 // isObjectAction - returns whether action is object type or not.
@@ -488,5 +492,6 @@ func createActionConditionKeyMap() actionConditionKeyMap {
 		PutReplicationConfigurationAction: condition.NewKeySet(commonKeys...),
 		RestoreObjectAction:               condition.NewKeySet(commonKeys...),
 		ResetBucketReplicationStateAction: condition.NewKeySet(commonKeys...),
+		PutObjectFanOutAction:             condition.NewKeySet(commonKeys...),
 	}
 }
