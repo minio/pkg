@@ -24,6 +24,7 @@ import (
 	"fmt"
 	"net"
 	"net/url"
+	"os"
 	"path"
 	"strings"
 	"syscall"
@@ -224,6 +225,15 @@ func IsNetworkOrHostDown(err error, expectTimeouts bool) bool {
 	if errors.As(err, &e) {
 		if e.Timeout() {
 			return true
+		}
+	}
+
+	// If write to an closed connection, It will make this error
+	if e, ok := err.(*net.OpError); ok {
+		if e.Op == "write" && e.Net == "tcp" {
+			if es, ok := e.Err.(*os.SyscallError); ok && es.Syscall == "wsasend" {
+				return true
+			}
 		}
 	}
 
