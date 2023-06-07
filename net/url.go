@@ -229,9 +229,10 @@ func IsNetworkOrHostDown(err error, expectTimeouts bool) bool {
 	}
 
 	// If write to an closed connection, It will make this error
-	if e, ok := err.(*net.OpError); ok {
-		if e.Op == "write" && e.Net == "tcp" {
-			if es, ok := e.Err.(*os.SyscallError); ok && es.Syscall == "wsasend" {
+	var opErr = &net.OpError{}
+	if errors.As(err, &opErr) {
+		if opErr.Op == "write" && opErr.Net == "tcp" {
+			if es, ok := opErr.Err.(*os.SyscallError); ok && es.Syscall == "wsasend" {
 				return true
 			}
 		}
