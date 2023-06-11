@@ -139,6 +139,11 @@ func TestFunctionsMarshalJSON(t *testing.T) {
 		t.Fatalf("unexpected error. %v\n", err)
 	}
 
+	func3SSEKMS, err := newStringNotEqualsFunc(S3XAmzServerSideEncryption.ToKey(), NewValueSet(NewStringValue("aws:kms")), "")
+	if err != nil {
+		t.Fatalf("unexpected error. %v\n", err)
+	}
+
 	func4, err := newNotIPAddressFunc(AWSSourceIP.ToKey(),
 		NewValueSet(NewStringValue("10.1.10.0/24")), "")
 	if err != nil {
@@ -162,6 +167,7 @@ func TestFunctionsMarshalJSON(t *testing.T) {
 	}
 
 	case1Result := []byte(`{"IpAddress":{"aws:SourceIp":["192.168.1.0/24"]},"NotIpAddress":{"aws:SourceIp":["10.1.10.0/24"]},"Null":{"s3:x-amz-server-side-encryption-customer-algorithm":[true]},"StringEquals":{"s3:x-amz-copy-source":["mybucket/myobject"]},"StringLike":{"s3:x-amz-metadata-directive":["REPL*"]},"StringNotEquals":{"s3:x-amz-server-side-encryption":["AES256"]},"StringNotLike":{"s3:x-amz-storage-class":["STANDARD"]}}`)
+	case1ResultKMS := []byte(`{"IpAddress":{"aws:SourceIp":["192.168.1.0/24"]},"NotIpAddress":{"aws:SourceIp":["10.1.10.0/24"]},"Null":{"s3:x-amz-server-side-encryption-customer-algorithm":[true]},"StringEquals":{"s3:x-amz-copy-source":["mybucket/myobject"]},"StringLike":{"s3:x-amz-metadata-directive":["REPL*"]},"StringNotEquals":{"s3:x-amz-server-side-encryption":["aws:kms"]},"StringNotLike":{"s3:x-amz-storage-class":["STANDARD"]}}`)
 
 	case2Result := []byte(`{"Null":{"s3:x-amz-server-side-encryption-customer-algorithm":[true]}}`)
 
@@ -171,6 +177,7 @@ func TestFunctionsMarshalJSON(t *testing.T) {
 		expectErr      bool
 	}{
 		{NewFunctions(func1, func2, func3, func4, func5, func6, func7), case1Result, false},
+		{NewFunctions(func1, func2, func3SSEKMS, func4, func5, func6, func7), case1ResultKMS, false},
 		{NewFunctions(func6), case2Result, false},
 		{NewFunctions(), []byte(`{}`), false},
 		{nil, []byte(`{}`), false},
