@@ -192,8 +192,12 @@ func validateStringValues(n string, key Key, values set.StringSet) error {
 		}
 
 		switch {
-		case key.Is(S3XAmzServerSideEncryption), key.Is(S3XAmzServerSideEncryptionCustomerAlgorithm):
+		case key.Is(S3XAmzServerSideEncryptionCustomerAlgorithm):
 			if s != "AES256" {
+				return fmt.Errorf("invalid value '%v' for '%v' for %v condition", s, S3XAmzServerSideEncryptionCustomerAlgorithm, n)
+			}
+		case key.Is(S3XAmzServerSideEncryption):
+			if s != "AES256" && s != "aws:kms" {
 				return fmt.Errorf("invalid value '%v' for '%v' for %v condition", s, S3XAmzServerSideEncryption, n)
 			}
 		case key.Is(S3XAmzMetadataDirective):
