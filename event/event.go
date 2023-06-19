@@ -17,7 +17,7 @@
 
 package event
 
-import "github.com/minio/madmin-go/v2"
+import "github.com/minio/madmin-go/v3"
 
 // Identity represents access key who caused the event.
 type Identity struct {

@@ -1,6 +1,6 @@
 module github.com/minio/pkg
 
-go 1.17
+go 1.19
 
 require (
 	github.com/cheggaaa/pb v1.0.29
@@ -10,7 +10,7 @@ require (
 	github.com/lestrrat-go/jwx v1.2.25
 	github.com/mattn/go-colorable v0.1.13
 	github.com/mattn/go-isatty v0.0.17
-	github.com/minio/madmin-go/v2 v2.0.15
+	github.com/minio/madmin-go/v3 v3.0.1
 	github.com/minio/minio-go/v7 v7.0.49
 	github.com/minio/mux v1.8.2
 	github.com/montanaflynn/stats v0.7.0
