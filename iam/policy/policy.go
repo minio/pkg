@@ -245,16 +245,33 @@ func (iamp Policy) Merge(input Policy) Policy {
 }
 
 func (iamp *Policy) dropDuplicateStatements() {
-redo:
+	dups := make(map[int]struct{})
 	for i := range iamp.Statements {
-		for _, statement := range iamp.Statements[i+1:] {
-			if !iamp.Statements[i].Equals(statement) {
+		if _, ok := dups[i]; ok {
+			// i is already a duplicate of some statement, so we do not need to
+			// compare with it.
+			continue
+		}
+		for j := i + 1; j < len(iamp.Statements); j++ {
+			if !iamp.Statements[i].Equals(iamp.Statements[j]) {
 				continue
 			}
-			iamp.Statements = append(iamp.Statements[:i], iamp.Statements[i+1:]...)
-			goto redo
+
+			// save duplicate statement index for removal.
+			dups[j] = struct{}{}
 		}
 	}
+
+	// remove duplicate items from the slice.
+	var c int
+	for i := range iamp.Statements {
+		if _, ok := dups[i]; ok {
+			continue
+		}
+		iamp.Statements[c] = iamp.Statements[i]
+		c++
+	}
+	iamp.Statements = iamp.Statements[:c]
 }
 
 // UnmarshalJSON - decodes JSON data to Iamp.
