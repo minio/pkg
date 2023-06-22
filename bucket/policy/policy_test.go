@@ -1225,20 +1225,19 @@ func TestPolicyMerge(t *testing.T) {
 			t.Fatalf("case %v: unexpected error: %v", i+1, err)
 		}
 
-		var clonedPolicy Policy
-		clonedPolicy = clonedPolicy.Merge(p)
+		mergedPolicy := MergePolicies(p)
 
-		j, err := json.Marshal(clonedPolicy)
+		j, err := json.Marshal(mergedPolicy)
 		if err != nil {
 			t.Fatalf("case %v: unexpected error: %v", i+1, err)
 		}
 
-		err = json.Unmarshal(j, &clonedPolicy)
+		err = json.Unmarshal(j, &mergedPolicy)
 		if err != nil {
 			t.Fatalf("case %v: unexpected error: %v", i+1, err)
 		}
 
-		if !clonedPolicy.Statements[0].Equals(p.Statements[0]) {
+		if !mergedPolicy.Statements[0].Equals(p.Statements[0]) {
 			t.Fatalf("case %v: different policy outcome", i+1)
 		}
 	}
