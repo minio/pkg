@@ -102,23 +102,20 @@ func (policy Policy) MarshalJSON() ([]byte, error) {
 	return json.Marshal(subPolicy(policy))
 }
 
-// Merge merges two policies documents and drop
-// duplicate statements if any.
-func (policy Policy) Merge(input Policy) Policy {
-	var mergedPolicy Policy
-	if policy.Version != "" {
-		mergedPolicy.Version = policy.Version
-	} else {
-		mergedPolicy.Version = input.Version
+// MergePolicies merges all the given policies into a single policy dropping any
+// duplicate statements.
+func MergePolicies(inputs ...Policy) Policy {
+	var merged Policy
+	for _, p := range inputs {
+		if merged.Version == "" {
+			merged.Version = p.Version
+		}
+		for _, st := range p.Statements {
+			merged.Statements = append(merged.Statements, st.Clone())
+		}
 	}
-	for _, st := range policy.Statements {
-		mergedPolicy.Statements = append(mergedPolicy.Statements, st.Clone())
-	}
-	for _, st := range input.Statements {
-		mergedPolicy.Statements = append(mergedPolicy.Statements, st.Clone())
-	}
-	mergedPolicy.dropDuplicateStatements()
-	return mergedPolicy
+	merged.dropDuplicateStatements()
+	return merged
 }
 
 func (policy *Policy) dropDuplicateStatements() {

@@ -1433,3 +1433,122 @@ func TestPolicyValidate(t *testing.T) {
 		}
 	}
 }
+
+func TestMergePolicies(t *testing.T) {
+	p1 := Policy{
+		Version: DefaultVersion,
+		Statements: []Statement{
+			NewStatement(
+				"",
+				policy.Deny,
+				NewActionSet(AllAdminActions),
+				ResourceSet{},
+				condition.NewFunctions(),
+			),
+			NewStatement(
+				"",
+				policy.Allow,
+				NewActionSet(AllActions),
+				NewResourceSet(NewResource("*", "")),
+				condition.NewFunctions(),
+			),
+		},
+	}
+
+	// p2 is a subset of p1
+	p2 := Policy{
+		Version: DefaultVersion,
+		Statements: []Statement{
+			NewStatement(
+				"",
+				policy.Deny,
+				NewActionSet(AllAdminActions),
+				ResourceSet{},
+				condition.NewFunctions(),
+			),
+		},
+	}
+
+	p3 := Policy{
+		ID:      "MyPolicyForMyBucket1",
+		Version: DefaultVersion,
+		Statements: []Statement{
+			NewStatement(
+				"",
+				policy.Allow,
+				NewActionSet(GetBucketLocationAction),
+				NewResourceSet(NewResource("mybucket", "")),
+				condition.NewFunctions(),
+			),
+		},
+	}
+
+	testCases := []struct {
+		inputs   []Policy
+		expected Policy
+	}{
+		{
+			inputs:   nil,
+			expected: Policy{},
+		},
+		{
+			inputs:   []Policy{},
+			expected: Policy{},
+		},
+		{
+			inputs:   []Policy{p1},
+			expected: p1,
+		},
+		{
+			inputs:   []Policy{p1, p1},
+			expected: p1,
+		},
+		{
+			inputs:   []Policy{p1, p1, p1},
+			expected: p1,
+		},
+		{ // case 6
+			inputs:   []Policy{p1, p2},
+			expected: p1,
+		},
+		{
+			inputs:   []Policy{p1, p2, p1},
+			expected: p1,
+		},
+		{
+			inputs: []Policy{p1, p2, p3},
+			expected: Policy{
+				Version: DefaultVersion,
+				Statements: []Statement{
+					NewStatement(
+						"",
+						policy.Deny,
+						NewActionSet(AllAdminActions),
+						ResourceSet{},
+						condition.NewFunctions(),
+					),
+					NewStatement(
+						"",
+						policy.Allow,
+						NewActionSet(AllActions),
+						NewResourceSet(NewResource("*", "")),
+						condition.NewFunctions(),
+					),
+					NewStatement(
+						"",
+						policy.Allow,
+						NewActionSet(GetBucketLocationAction),
+						NewResourceSet(NewResource("mybucket", "")),
+						condition.NewFunctions(),
+					),
+				},
+			},
+		},
+	}
+	for i, testCase := range testCases {
+		got := MergePolicies(testCase.inputs...)
+		if !got.Equals(testCase.expected) {
+			t.Errorf("Case %d: expected: %v, got %v", i+1, got, testCase.expected)
+		}
+	}
+}
