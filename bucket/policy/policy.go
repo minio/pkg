@@ -122,16 +122,33 @@ func (policy Policy) Merge(input Policy) Policy {
 }
 
 func (policy *Policy) dropDuplicateStatements() {
-redo:
+	dups := make(map[int]struct{})
 	for i := range policy.Statements {
-		for _, statement := range policy.Statements[i+1:] {
-			if !policy.Statements[i].Equals(statement) {
+		if _, ok := dups[i]; ok {
+			// i is already a duplicate of some statement, so we do not need to
+			// compare with it.
+			continue
+		}
+		for j := i + 1; j < len(policy.Statements); j++ {
+			if !policy.Statements[i].Equals(policy.Statements[j]) {
 				continue
 			}
-			policy.Statements = append(policy.Statements[:i], policy.Statements[i+1:]...)
-			goto redo
+
+			// save duplicate statement index for removal.
+			dups[j] = struct{}{}
 		}
 	}
+
+	// remove duplicate items from the slice.
+	var c int
+	for i := range policy.Statements {
+		if _, ok := dups[i]; ok {
+			continue
+		}
+		policy.Statements[c] = policy.Statements[i]
+		c++
+	}
+	policy.Statements = policy.Statements[:c]
 }
 
 // UnmarshalJSON - decodes JSON data to Policy.
