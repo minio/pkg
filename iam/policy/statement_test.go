@@ -31,14 +31,14 @@ func TestStatementIsAllowed(t *testing.T) {
 	case1Statement := NewStatement("",
 		policy.Allow,
 		NewActionSet(GetBucketLocationAction, PutObjectAction),
-		NewResourceSet(NewResource("*", "")),
+		NewResourceSet(NewResource("*")),
 		condition.NewFunctions(),
 	)
 
 	case2Statement := NewStatement("",
 		policy.Allow,
 		NewActionSet(GetObjectAction, PutObjectAction),
-		NewResourceSet(NewResource("mybucket", "/myobject*")),
+		NewResourceSet(NewResource("mybucket/myobject*")),
 		condition.NewFunctions(),
 	)
 
@@ -57,14 +57,14 @@ func TestStatementIsAllowed(t *testing.T) {
 	case3Statement := NewStatement("",
 		policy.Allow,
 		NewActionSet(GetObjectAction, PutObjectAction),
-		NewResourceSet(NewResource("mybucket", "/myobject*")),
+		NewResourceSet(NewResource("mybucket/myobject*")),
 		condition.NewFunctions(func1),
 	)
 
 	case4Statement := NewStatement("",
 		policy.Deny,
 		NewActionSet(GetObjectAction, PutObjectAction),
-		NewResourceSet(NewResource("mybucket", "/myobject*")),
+		NewResourceSet(NewResource("mybucket/myobject*")),
 		condition.NewFunctions(func1),
 	)
 
@@ -72,7 +72,7 @@ func TestStatementIsAllowed(t *testing.T) {
 		"",
 		policy.Allow,
 		NewActionSet(GetObjectAction, CreateBucketAction),
-		NewResourceSet(NewResource("mybucket", "/myobject*"), NewResource("mybucket", "")),
+		NewResourceSet(NewResource("mybucket/myobject*"), NewResource("mybucket")),
 		condition.NewFunctions(),
 	)
 
@@ -80,7 +80,7 @@ func TestStatementIsAllowed(t *testing.T) {
 		"",
 		policy.Deny,
 		NewActionSet(GetObjectAction),
-		NewResourceSet(NewResource("mybucket", "/myobject*")),
+		NewResourceSet(NewResource("mybucket/myobject*")),
 		condition.NewFunctions(func1),
 	)
 
@@ -232,14 +232,14 @@ func TestStatementIsValid(t *testing.T) {
 		{NewStatement("",
 			policy.Effect("foo"),
 			NewActionSet(GetBucketLocationAction, PutObjectAction),
-			NewResourceSet(NewResource("*", "")),
+			NewResourceSet(NewResource("*")),
 			condition.NewFunctions(),
 		), true},
 		// Empty actions error.
 		{NewStatement("",
 			policy.Allow,
 			NewActionSet(),
-			NewResourceSet(NewResource("*", "")),
+			NewResourceSet(NewResource("*")),
 			condition.NewFunctions(),
 		), true},
 		// Empty resources error.
@@ -253,25 +253,25 @@ func TestStatementIsValid(t *testing.T) {
 		{NewStatement("",
 			policy.Allow,
 			NewActionSet(GetObjectAction, PutObjectAction),
-			NewResourceSet(NewResource("mybucket", "myobject*")),
+			NewResourceSet(NewResource("mybucket/myobject*")),
 			condition.NewFunctions(func1, func2),
 		), true},
 		{NewStatement("",
 			policy.Allow,
 			NewActionSet(GetBucketLocationAction, PutObjectAction),
-			NewResourceSet(NewResource("mybucket", "myobject*")),
+			NewResourceSet(NewResource("mybucket/myobject*")),
 			condition.NewFunctions(),
 		), false},
 		{NewStatement("",
 			policy.Allow,
 			NewActionSet(GetBucketLocationAction, PutObjectAction),
-			NewResourceSet(NewResource("mybucket", "")),
+			NewResourceSet(NewResource("mybucket")),
 			condition.NewFunctions(),
 		), false},
 		{NewStatement("",
 			policy.Deny,
 			NewActionSet(GetObjectAction, PutObjectAction),
-			NewResourceSet(NewResource("mybucket", "myobject*")),
+			NewResourceSet(NewResource("mybucket/myobject*")),
 			condition.NewFunctions(func1),
 		), false},
 		{NewStatement("",
@@ -290,7 +290,7 @@ func TestStatementIsValid(t *testing.T) {
 			SID:        "",
 			Effect:     policy.Allow,
 			NotActions: NewActionSet(GetObjectAction),
-			Resources:  NewResourceSet(NewResource("mybucket", "myobject*")),
+			Resources:  NewResourceSet(NewResource("mybucket/myobject*")),
 			Conditions: condition.NewFunctions(),
 		}, false},
 	}
@@ -315,7 +315,7 @@ func TestStatementUnmarshalJSONAndValidate(t *testing.T) {
 	case1Statement := NewStatement("",
 		policy.Allow,
 		NewActionSet(PutObjectAction),
-		NewResourceSet(NewResource("mybucket", "/myobject*")),
+		NewResourceSet(NewResource("mybucket/myobject*")),
 		condition.NewFunctions(),
 	)
 	case1Statement.SID = "SomeId1"
@@ -340,7 +340,7 @@ func TestStatementUnmarshalJSONAndValidate(t *testing.T) {
 	case2Statement := NewStatement("",
 		policy.Allow,
 		NewActionSet(PutObjectAction),
-		NewResourceSet(NewResource("mybucket", "/myobject*")),
+		NewResourceSet(NewResource("mybucket/myobject*")),
 		condition.NewFunctions(func1),
 	)
 
@@ -367,7 +367,7 @@ func TestStatementUnmarshalJSONAndValidate(t *testing.T) {
 	case3Statement := NewStatement("",
 		policy.Deny,
 		NewActionSet(PutObjectAction, GetObjectAction),
-		NewResourceSet(NewResource("mybucket", "/myobject*")),
+		NewResourceSet(NewResource("mybucket/myobject*")),
 		condition.NewFunctions(func2),
 	)
 
@@ -425,7 +425,7 @@ func TestStatementUnmarshalJSONAndValidate(t *testing.T) {
 	case11Statement := Statement{
 		Effect:     policy.Deny,
 		NotActions: NewActionSet(GetObjectAction, PutObjectAction),
-		Resources:  NewResourceSet(NewResource("mybucket", "/myobject*")),
+		Resources:  NewResourceSet(NewResource("mybucket/myobject*")),
 		Conditions: condition.NewFunctions(),
 	}
 
@@ -478,7 +478,7 @@ func TestStatementValidate(t *testing.T) {
 	case1Statement := NewStatement("",
 		policy.Allow,
 		NewActionSet(PutObjectAction),
-		NewResourceSet(NewResource("mybucket", "/myobject*")),
+		NewResourceSet(NewResource("mybucket/myobject*")),
 		condition.NewFunctions(),
 	)
 
@@ -499,7 +499,7 @@ func TestStatementValidate(t *testing.T) {
 	case2Statement := NewStatement("",
 		policy.Allow,
 		NewActionSet(GetObjectAction, PutObjectAction),
-		NewResourceSet(NewResource("mybucket", "myobject*")),
+		NewResourceSet(NewResource("mybucket/myobject*")),
 		condition.NewFunctions(func1, func2),
 	)
 

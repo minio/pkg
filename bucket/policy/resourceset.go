@@ -73,7 +73,7 @@ func (resourceSet ResourceSet) Equals(sresourceSet ResourceSet) bool {
 	return true
 }
 
-// Intersection - returns resouces available in both ResourcsSet.
+// Intersection - returns resources available in both ResourceSet.
 func (resourceSet ResourceSet) Intersection(sset ResourceSet) ResourceSet {
 	nset := NewResourceSet()
 	for k := range resourceSet {
@@ -97,6 +97,16 @@ func (resourceSet ResourceSet) MarshalJSON() ([]byte, error) {
 	}
 
 	return json.Marshal(resources)
+}
+
+// MatchResource matches object name with resource patterns only.
+func (resourceSet ResourceSet) MatchResource(resource string) bool {
+	for r := range resourceSet {
+		if r.MatchResource(resource) {
+			return true
+		}
+	}
+	return false
 }
 
 // Match - matches object name with anyone of resource pattern in resource set.

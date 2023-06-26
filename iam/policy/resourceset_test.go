@@ -19,7 +19,6 @@ package iampolicy
 
 import (
 	"encoding/json"
-	"fmt"
 	"reflect"
 	"testing"
 )
@@ -29,16 +28,16 @@ func TestResourceSetBucketResourceExists(t *testing.T) {
 		resourceSet    ResourceSet
 		expectedResult bool
 	}{
-		{NewResourceSet(NewResource("*", "")), true},
-		{NewResourceSet(NewResource("mybucket", "")), true},
-		{NewResourceSet(NewResource("mybucket*", "")), true},
-		{NewResourceSet(NewResource("mybucket?0", "")), true},
-		{NewResourceSet(NewResource("mybucket", "/2010/photos/*"), NewResource("mybucket", "")), true},
-		{NewResourceSet(NewResource("", "*")), false},
-		{NewResourceSet(NewResource("*", "*")), false},
-		{NewResourceSet(NewResource("mybucket", "*")), false},
-		{NewResourceSet(NewResource("mybucket*", "/myobject")), false},
-		{NewResourceSet(NewResource("mybucket?0", "/2010/photos/*")), false},
+		{NewResourceSet(NewResource("*")), true},
+		{NewResourceSet(NewResource("mybucket")), true},
+		{NewResourceSet(NewResource("mybucket*")), true},
+		{NewResourceSet(NewResource("mybucket?0")), true},
+		{NewResourceSet(NewResource("mybucket/2010/photos/*"),
+			NewResource("mybucket")), true},
+		{NewResourceSet(NewResource("*/*")), false},
+		{NewResourceSet(NewResource("mybucket/*")), false},
+		{NewResourceSet(NewResource("mybucket*/myobject")), false},
+		{NewResourceSet(NewResource("mybucket?0/2010/photos/*")), false},
 	}
 
 	for i, testCase := range testCases {
@@ -55,16 +54,15 @@ func TestResourceSetObjectResourceExists(t *testing.T) {
 		resourceSet    ResourceSet
 		expectedResult bool
 	}{
-		{NewResourceSet(NewResource("*", "")), true},
-		{NewResourceSet(NewResource("mybucket*", "")), true},
-		{NewResourceSet(NewResource("", "*")), true},
-		{NewResourceSet(NewResource("*", "*")), true},
-		{NewResourceSet(NewResource("mybucket", "*")), true},
-		{NewResourceSet(NewResource("mybucket*", "/myobject")), true},
-		{NewResourceSet(NewResource("mybucket?0", "/2010/photos/*")), true},
-		{NewResourceSet(NewResource("mybucket", ""), NewResource("mybucket", "/2910/photos/*")), true},
-		{NewResourceSet(NewResource("mybucket", "")), false},
-		{NewResourceSet(NewResource("mybucket?0", "")), false},
+		{NewResourceSet(NewResource("*")), true},
+		{NewResourceSet(NewResource("mybucket*")), true},
+		{NewResourceSet(NewResource("*/*")), true},
+		{NewResourceSet(NewResource("mybucket/*")), true},
+		{NewResourceSet(NewResource("mybucket*/myobject")), true},
+		{NewResourceSet(NewResource("mybucket?0/2010/photos/*")), true},
+		{NewResourceSet(NewResource("mybucket"), NewResource("mybucket/2910/photos/*")), true},
+		{NewResourceSet(NewResource("mybucket")), false},
+		{NewResourceSet(NewResource("mybucket?0")), false},
 	}
 
 	for i, testCase := range testCases {
@@ -83,19 +81,19 @@ func TestResourceSetAdd(t *testing.T) {
 		expectedResult ResourceSet
 	}{
 		{
-			NewResourceSet(), NewResource("mybucket", "/myobject*"),
-			NewResourceSet(NewResource("mybucket", "/myobject*")),
+			NewResourceSet(), NewResource("mybucket/myobject*"),
+			NewResourceSet(NewResource("mybucket/myobject*")),
 		},
 		{
-			NewResourceSet(NewResource("mybucket", "/myobject*")),
-			NewResource("mybucket", "/yourobject*"),
-			NewResourceSet(NewResource("mybucket", "/myobject*"),
-				NewResource("mybucket", "/yourobject*")),
+			NewResourceSet(NewResource("mybucket/myobject*")),
+			NewResource("mybucket/yourobject*"),
+			NewResourceSet(NewResource("mybucket/myobject*"),
+				NewResource("mybucket/yourobject*")),
 		},
 		{
-			NewResourceSet(NewResource("mybucket", "/myobject*")),
-			NewResource("mybucket", "/myobject*"),
-			NewResourceSet(NewResource("mybucket", "/myobject*")),
+			NewResourceSet(NewResource("mybucket/myobject*")),
+			NewResource("mybucket/myobject*"),
+			NewResourceSet(NewResource("mybucket/myobject*")),
 		},
 	}
 
@@ -114,12 +112,12 @@ func TestResourceSetIntersection(t *testing.T) {
 		setToIntersect ResourceSet
 		expectedResult ResourceSet
 	}{
-		{NewResourceSet(), NewResourceSet(NewResource("mybucket", "/myobject*")), NewResourceSet()},
-		{NewResourceSet(NewResource("mybucket", "/myobject*")), NewResourceSet(), NewResourceSet()},
+		{NewResourceSet(), NewResourceSet(NewResource("mybucket/myobject*")), NewResourceSet()},
+		{NewResourceSet(NewResource("mybucket/myobject*")), NewResourceSet(), NewResourceSet()},
 		{
-			NewResourceSet(NewResource("mybucket", "/myobject*")),
-			NewResourceSet(NewResource("mybucket", "/myobject*"), NewResource("mybucket", "/yourobject*")),
-			NewResourceSet(NewResource("mybucket", "/myobject*")),
+			NewResourceSet(NewResource("mybucket/myobject*")),
+			NewResourceSet(NewResource("mybucket/myobject*"), NewResource("mybucket/yourobject*")),
+			NewResourceSet(NewResource("mybucket/myobject*")),
 		},
 	}
 
@@ -139,11 +137,11 @@ func TestResourceSetMarshalJSON(t *testing.T) {
 		expectErr      bool
 	}{
 		{
-			NewResourceSet(NewResource("mybucket", "/myobject*")),
+			NewResourceSet(NewResource("mybucket/myobject*")),
 			[]byte(`["arn:aws:s3:::mybucket/myobject*"]`), false,
 		},
 		{
-			NewResourceSet(NewResource("mybucket", "/photos/myobject*")),
+			NewResourceSet(NewResource("mybucket/photos/myobject*")),
 			[]byte(`["arn:aws:s3:::mybucket/photos/myobject*"]`), false,
 		},
 		{NewResourceSet(), nil, true},
@@ -171,35 +169,31 @@ func TestResourceSetMatch(t *testing.T) {
 		resource       string
 		expectedResult bool
 	}{
-		{NewResourceSet(NewResource("*", "")), "mybucket", true},
-		{NewResourceSet(NewResource("*", "")), "mybucket/myobject", true},
-		{NewResourceSet(NewResource("mybucket*", "")), "mybucket", true},
-		{NewResourceSet(NewResource("mybucket*", "")), "mybucket/myobject", true},
-		{NewResourceSet(NewResource("", "*")), "/myobject", true},
-		{NewResourceSet(NewResource("*", "*")), "mybucket/myobject", true},
-		{NewResourceSet(NewResource("mybucket", "*")), "mybucket/myobject", true},
-		{NewResourceSet(NewResource("mybucket*", "/myobject")), "mybucket/myobject", true},
-		{NewResourceSet(NewResource("mybucket*", "/myobject")), "mybucket100/myobject", true},
-		{NewResourceSet(NewResource("mybucket?0", "/2010/photos/*")), "mybucket20/2010/photos/1.jpg", true},
-		{NewResourceSet(NewResource("mybucket", "")), "mybucket", true},
-		{NewResourceSet(NewResource("mybucket?0", "")), "mybucket30", true},
-		{NewResourceSet(NewResource("mybucket?0", "/2010/photos/*"),
-			NewResource("mybucket", "/2010/photos/*")), "mybucket/2010/photos/1.jpg", true},
-		{NewResourceSet(NewResource("", "*")), "mybucket/myobject", false},
-		{NewResourceSet(NewResource("*", "*")), "mybucket", false},
-		{NewResourceSet(NewResource("mybucket", "*")), "mybucket10/myobject", false},
-		{NewResourceSet(NewResource("mybucket", "")), "mybucket/myobject", false},
+		{NewResourceSet(NewResource("*")), "mybucket", true},
+		{NewResourceSet(NewResource("*")), "mybucket/myobject", true},
+		{NewResourceSet(NewResource("mybucket*")), "mybucket", true},
+		{NewResourceSet(NewResource("mybucket*")), "mybucket/myobject", true},
+		{NewResourceSet(NewResource("*/*")), "mybucket/myobject", true},
+		{NewResourceSet(NewResource("mybucket/*")), "mybucket/myobject", true},
+		{NewResourceSet(NewResource("mybucket*/myobject")), "mybucket/myobject", true},
+		{NewResourceSet(NewResource("mybucket*/myobject")), "mybucket100/myobject", true},
+		{NewResourceSet(NewResource("mybucket?0/2010/photos/*")), "mybucket20/2010/photos/1.jpg", true},
+		{NewResourceSet(NewResource("mybucket")), "mybucket", true},
+		{NewResourceSet(NewResource("mybucket?0")), "mybucket30", true},
+		{NewResourceSet(NewResource("mybucket?0/2010/photos/*"),
+			NewResource("mybucket/2010/photos/*")), "mybucket/2010/photos/1.jpg", true},
+		{NewResourceSet(NewResource("*/*")), "mybucket", false},
+		{NewResourceSet(NewResource("mybucket/*")), "mybucket10/myobject", false},
+		{NewResourceSet(NewResource("mybucket")), "mybucket/myobject", false},
 		{NewResourceSet(), "mybucket/myobject", false},
 	}
 
 	for i, testCase := range testCases {
-		testCase := testCase
-		t.Run(fmt.Sprintf("Test%d", i+1), func(t *testing.T) {
-			result := testCase.resourceSet.Match(testCase.resource, nil)
-			if result != testCase.expectedResult {
-				t.Errorf("case %v: expected: %v, got: %v", i+1, testCase.expectedResult, result)
-			}
-		})
+		result := testCase.resourceSet.Match(testCase.resource, nil)
+
+		if result != testCase.expectedResult {
+			t.Fatalf("case %v: expected: %v, got: %v", i+1, testCase.expectedResult, result)
+		}
 	}
 }
 
@@ -211,13 +205,13 @@ func TestResourceSetUnmarshalJSON(t *testing.T) {
 	}{
 		{
 			[]byte(`"arn:aws:s3:::mybucket/myobject*"`),
-			NewResourceSet(NewResource("mybucket", "/myobject*")), false,
+			NewResourceSet(NewResource("mybucket/myobject*")), false,
 		},
 		{
 			[]byte(`"arn:aws:s3:::mybucket/photos/myobject*"`),
-			NewResourceSet(NewResource("mybucket", "/photos/myobject*")), false,
+			NewResourceSet(NewResource("mybucket/photos/myobject*")), false,
 		},
-		{[]byte(`"arn:aws:s3:::mybucket"`), NewResourceSet(NewResource("mybucket", "")), false},
+		{[]byte(`"arn:aws:s3:::mybucket"`), NewResourceSet(NewResource("mybucket")), false},
 		{[]byte(`"mybucket/myobject*"`), nil, true},
 	}
 
@@ -243,9 +237,8 @@ func TestResourceSetValidate(t *testing.T) {
 		resourceSet ResourceSet
 		expectErr   bool
 	}{
-		{NewResourceSet(NewResource("mybucket", "/myobject*")), false},
-		{NewResourceSet(NewResource("", "/myobject*")), false},
-		{NewResourceSet(NewResource("", "")), true},
+		{NewResourceSet(NewResource("mybucket/myobject*")), false},
+		{NewResourceSet(NewResource("/")), true},
 	}
 
 	for i, testCase := range testCases {
