@@ -19,7 +19,6 @@ package iampolicy
 
 import (
 	"encoding/json"
-	"fmt"
 	"reflect"
 	"testing"
 )
@@ -79,7 +78,7 @@ func TestResourceIsValid(t *testing.T) {
 	}{
 		{NewResource("*"), true},
 		{NewResource("mybucket*"), true},
-		{NewResource("*"), true},
+		{NewResource("*/*"), true},
 		{NewResource("mybucket/*"), true},
 		{NewResource("mybucket*/myobject"), true},
 		{NewResource("mybucket?0/2010/photos/*"), true},
@@ -124,13 +123,11 @@ func TestResourceMatch(t *testing.T) {
 	}
 
 	for i, testCase := range testCases {
-		testCase := testCase
-		t.Run(fmt.Sprintf("Test%d", i+1), func(t *testing.T) {
-			result := testCase.resource.Match(testCase.objectName, nil)
-			if result != testCase.expectedResult {
-				t.Errorf("case %v: expected: %v, got: %v", i+1, testCase.expectedResult, result)
-			}
-		})
+		result := testCase.resource.Match(testCase.objectName, nil)
+
+		if result != testCase.expectedResult {
+			t.Fatalf("case %v: expected: %v, got: %v", i+1, testCase.expectedResult, result)
+		}
 	}
 }
 
@@ -218,6 +215,33 @@ func TestResourceValidate(t *testing.T) {
 
 		if expectErr != testCase.expectErr {
 			t.Fatalf("case %v: error: expected: %v, got: %v", i+1, testCase.expectErr, expectErr)
+		}
+	}
+}
+
+func TestResourceValidateBucket(t *testing.T) {
+	testCases := []struct {
+		resource   Resource
+		bucketName string
+		expectErr  bool
+	}{
+		{NewResource("mybucket/myobject*"), "mybucket", false},
+		{NewResource("/myobject*"), "yourbucket", true},
+		{NewResource("mybucket/myobject*"), "yourbucket", true},
+		{NewResource("mybucket*a/myobject*"), "mybucket-east-a", false},
+
+		// Following test cases **should validate** successfully - they are
+		// corner cases for the given patterns and buckets.
+		{NewResource("mybucket*a/myobject*"), "mybucket", false},
+		{NewResource("mybucket*a/myobject*"), "mybucket22", false},
+	}
+
+	for i, testCase := range testCases {
+		err := testCase.resource.ValidateBucket(testCase.bucketName)
+		expectErr := (err != nil)
+
+		if expectErr != testCase.expectErr {
+			t.Errorf("case %v: error: expected: %v, got: %v", i+1, testCase.expectErr, expectErr)
 		}
 	}
 }

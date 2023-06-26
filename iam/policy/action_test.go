@@ -35,7 +35,7 @@ func TestActionIsObjectAction(t *testing.T) {
 	}
 
 	for i, testCase := range testCases {
-		result := testCase.action.isObjectAction()
+		result := testCase.action.IsObjectAction()
 
 		if testCase.expectedResult != result {
 			t.Fatalf("case %v: expected: %v, got: %v", i+1, testCase.expectedResult, result)

@@ -15,7 +15,7 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-package policy
+package iampolicy
 
 // Effect - policy statement effect Allow or Deny.
 type Effect string

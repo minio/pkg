@@ -20,14 +20,13 @@ package iampolicy
 import (
 	"strings"
 
-	"github.com/minio/pkg/bucket/policy"
-	"github.com/minio/pkg/bucket/policy/condition"
+	"github.com/minio/pkg/iam/policy/condition"
 )
 
 // Statement - iam policy statement.
 type Statement struct {
-	SID        policy.ID           `json:"Sid,omitempty"`
-	Effect     policy.Effect       `json:"Effect"`
+	SID        ID                  `json:"Sid,omitempty"`
+	Effect     Effect              `json:"Effect"`
 	Actions    ActionSet           `json:"Action"`
 	NotActions ActionSet           `json:"NotAction,omitempty"`
 	Resources  ResourceSet         `json:"Resource,omitempty"`
@@ -127,12 +126,12 @@ func (statement Statement) isValid() error {
 	}
 
 	for action := range statement.Actions {
-		if !statement.Resources.objectResourceExists() && !statement.Resources.bucketResourceExists() {
+		if !statement.Resources.ObjectResourceExists() && !statement.Resources.BucketResourceExists() {
 			return Errorf("unsupported Resource found %v for action %v", statement.Resources, action)
 		}
 
 		keys := statement.Conditions.Keys()
-		keyDiff := keys.Difference(iamActionConditionKeyMap.Lookup(action))
+		keyDiff := keys.Difference(IAMActionConditionKeyMap.Lookup(action))
 		if !keyDiff.IsEmpty() {
 			return Errorf("unsupported condition keys '%v' used for action '%v'", keyDiff, action)
 		}
@@ -179,7 +178,7 @@ func (statement Statement) Clone() Statement {
 }
 
 // NewStatement - creates new statement.
-func NewStatement(sid policy.ID, effect policy.Effect, actionSet ActionSet, resourceSet ResourceSet, conditions condition.Functions) Statement {
+func NewStatement(sid ID, effect Effect, actionSet ActionSet, resourceSet ResourceSet, conditions condition.Functions) Statement {
 	return Statement{
 		SID:        sid,
 		Effect:     effect,
@@ -190,7 +189,7 @@ func NewStatement(sid policy.ID, effect policy.Effect, actionSet ActionSet, reso
 }
 
 // NewStatementWithNotAction - creates new statement with NotAction.
-func NewStatementWithNotAction(sid policy.ID, effect policy.Effect, notActions ActionSet, resources ResourceSet, conditions condition.Functions) Statement {
+func NewStatementWithNotAction(sid ID, effect Effect, notActions ActionSet, resources ResourceSet, conditions condition.Functions) Statement {
 	return Statement{
 		SID:        sid,
 		Effect:     effect,

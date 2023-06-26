@@ -23,7 +23,6 @@ import (
 	"strings"
 
 	"github.com/minio/minio-go/v7/pkg/set"
-	"github.com/minio/pkg/bucket/policy"
 )
 
 // DefaultVersion - default policy version as per AWS S3 specification.
@@ -112,7 +111,7 @@ func (a Args) GetRoleArn() string {
 
 // Policy - iam bucket iamp.
 type Policy struct {
-	ID         policy.ID `json:"ID,omitempty"`
+	ID         ID `json:"ID,omitempty"`
 	Version    string
 	Statements []Statement `json:"Statement"`
 }
@@ -173,7 +172,7 @@ func (iamp Policy) IsAllowedActions(bucketName, objectName string, conditionValu
 func (iamp Policy) IsAllowed(args Args) bool {
 	// Check all deny statements. If any one statement denies, return false.
 	for _, statement := range iamp.Statements {
-		if statement.Effect == policy.Deny {
+		if statement.Effect == Deny {
 			if !statement.IsAllowed(args) {
 				return false
 			}
@@ -196,7 +195,7 @@ func (iamp Policy) IsAllowed(args Args) bool {
 
 	// Check all allow statements. If any one statement allows, return true.
 	for _, statement := range iamp.Statements {
-		if statement.Effect == policy.Allow {
+		if statement.Effect == Allow {
 			if statement.IsAllowed(args) {
 				return true
 			}

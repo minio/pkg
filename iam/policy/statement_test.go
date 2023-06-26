@@ -23,20 +23,19 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/minio/pkg/bucket/policy"
-	"github.com/minio/pkg/bucket/policy/condition"
+	"github.com/minio/pkg/iam/policy/condition"
 )
 
 func TestStatementIsAllowed(t *testing.T) {
 	case1Statement := NewStatement("",
-		policy.Allow,
+		Allow,
 		NewActionSet(GetBucketLocationAction, PutObjectAction),
 		NewResourceSet(NewResource("*")),
 		condition.NewFunctions(),
 	)
 
 	case2Statement := NewStatement("",
-		policy.Allow,
+		Allow,
 		NewActionSet(GetObjectAction, PutObjectAction),
 		NewResourceSet(NewResource("mybucket/myobject*")),
 		condition.NewFunctions(),
@@ -55,14 +54,14 @@ func TestStatementIsAllowed(t *testing.T) {
 	}
 
 	case3Statement := NewStatement("",
-		policy.Allow,
+		Allow,
 		NewActionSet(GetObjectAction, PutObjectAction),
 		NewResourceSet(NewResource("mybucket/myobject*")),
 		condition.NewFunctions(func1),
 	)
 
 	case4Statement := NewStatement("",
-		policy.Deny,
+		Deny,
 		NewActionSet(GetObjectAction, PutObjectAction),
 		NewResourceSet(NewResource("mybucket/myobject*")),
 		condition.NewFunctions(func1),
@@ -70,7 +69,7 @@ func TestStatementIsAllowed(t *testing.T) {
 
 	case5Statement := NewStatementWithNotAction(
 		"",
-		policy.Allow,
+		Allow,
 		NewActionSet(GetObjectAction, CreateBucketAction),
 		NewResourceSet(NewResource("mybucket/myobject*"), NewResource("mybucket")),
 		condition.NewFunctions(),
@@ -78,7 +77,7 @@ func TestStatementIsAllowed(t *testing.T) {
 
 	case6Statement := NewStatementWithNotAction(
 		"",
-		policy.Deny,
+		Deny,
 		NewActionSet(GetObjectAction),
 		NewResourceSet(NewResource("mybucket/myobject*")),
 		condition.NewFunctions(func1),
@@ -230,65 +229,65 @@ func TestStatementIsValid(t *testing.T) {
 	}{
 		// Invalid effect error.
 		{NewStatement("",
-			policy.Effect("foo"),
+			Effect("foo"),
 			NewActionSet(GetBucketLocationAction, PutObjectAction),
 			NewResourceSet(NewResource("*")),
 			condition.NewFunctions(),
 		), true},
 		// Empty actions error.
 		{NewStatement("",
-			policy.Allow,
+			Allow,
 			NewActionSet(),
 			NewResourceSet(NewResource("*")),
 			condition.NewFunctions(),
 		), true},
 		// Empty resources error.
 		{NewStatement("",
-			policy.Allow,
+			Allow,
 			NewActionSet(GetBucketLocationAction, PutObjectAction),
 			NewResourceSet(),
 			condition.NewFunctions(),
 		), true},
 		// Unsupported conditions for GetObject
 		{NewStatement("",
-			policy.Allow,
+			Allow,
 			NewActionSet(GetObjectAction, PutObjectAction),
 			NewResourceSet(NewResource("mybucket/myobject*")),
 			condition.NewFunctions(func1, func2),
 		), true},
 		{NewStatement("",
-			policy.Allow,
+			Allow,
 			NewActionSet(GetBucketLocationAction, PutObjectAction),
 			NewResourceSet(NewResource("mybucket/myobject*")),
 			condition.NewFunctions(),
 		), false},
 		{NewStatement("",
-			policy.Allow,
+			Allow,
 			NewActionSet(GetBucketLocationAction, PutObjectAction),
 			NewResourceSet(NewResource("mybucket")),
 			condition.NewFunctions(),
 		), false},
 		{NewStatement("",
-			policy.Deny,
+			Deny,
 			NewActionSet(GetObjectAction, PutObjectAction),
 			NewResourceSet(NewResource("mybucket/myobject*")),
 			condition.NewFunctions(func1),
 		), false},
 		{NewStatement("",
-			policy.Allow,
+			Allow,
 			NewActionSet(CreateUserAdminAction, DeleteUserAdminAction),
 			nil,
 			condition.NewFunctions(func2, func3),
 		), true},
 		{NewStatement("",
-			policy.Allow,
+			Allow,
 			NewActionSet(CreateUserAdminAction, DeleteUserAdminAction),
 			nil,
 			condition.NewFunctions(),
 		), false},
 		{Statement{
 			SID:        "",
-			Effect:     policy.Allow,
+			Effect:     Allow,
 			NotActions: NewActionSet(GetObjectAction),
 			Resources:  NewResourceSet(NewResource("mybucket/myobject*")),
 			Conditions: condition.NewFunctions(),
@@ -313,7 +312,7 @@ func TestStatementUnmarshalJSONAndValidate(t *testing.T) {
     "Resource": "arn:aws:s3:::mybucket/myobject*"
 }`)
 	case1Statement := NewStatement("",
-		policy.Allow,
+		Allow,
 		NewActionSet(PutObjectAction),
 		NewResourceSet(NewResource("mybucket/myobject*")),
 		condition.NewFunctions(),
@@ -338,7 +337,7 @@ func TestStatementUnmarshalJSONAndValidate(t *testing.T) {
 		t.Fatalf("unexpected error. %v\n", err)
 	}
 	case2Statement := NewStatement("",
-		policy.Allow,
+		Allow,
 		NewActionSet(PutObjectAction),
 		NewResourceSet(NewResource("mybucket/myobject*")),
 		condition.NewFunctions(func1),
@@ -365,7 +364,7 @@ func TestStatementUnmarshalJSONAndValidate(t *testing.T) {
 		t.Fatalf("unexpected error. %v\n", err)
 	}
 	case3Statement := NewStatement("",
-		policy.Deny,
+		Deny,
 		NewActionSet(PutObjectAction, GetObjectAction),
 		NewResourceSet(NewResource("mybucket/myobject*")),
 		condition.NewFunctions(func2),
@@ -423,7 +422,7 @@ func TestStatementUnmarshalJSONAndValidate(t *testing.T) {
     "Resource": "arn:aws:s3:::mybucket/myobject*"
 }`)
 	case11Statement := Statement{
-		Effect:     policy.Deny,
+		Effect:     Deny,
 		NotActions: NewActionSet(GetObjectAction, PutObjectAction),
 		Resources:  NewResourceSet(NewResource("mybucket/myobject*")),
 		Conditions: condition.NewFunctions(),
@@ -476,7 +475,7 @@ func TestStatementUnmarshalJSONAndValidate(t *testing.T) {
 
 func TestStatementValidate(t *testing.T) {
 	case1Statement := NewStatement("",
-		policy.Allow,
+		Allow,
 		NewActionSet(PutObjectAction),
 		NewResourceSet(NewResource("mybucket/myobject*")),
 		condition.NewFunctions(),
@@ -497,7 +496,7 @@ func TestStatementValidate(t *testing.T) {
 		t.Fatalf("unexpected error. %v\n", err)
 	}
 	case2Statement := NewStatement("",
-		policy.Allow,
+		Allow,
 		NewActionSet(GetObjectAction, PutObjectAction),
 		NewResourceSet(NewResource("mybucket/myobject*")),
 		condition.NewFunctions(func1, func2),

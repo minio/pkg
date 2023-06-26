@@ -1,4 +1,4 @@
-// Copyright (c) 2015-2021 MinIO, Inc.
+// Copyright (c) 2015-2023 MinIO, Inc.
 //
 // This file is part of MinIO Object Storage stack
 //
@@ -15,27 +15,16 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-package policy
+package iampolicy
 
 import (
-	"testing"
+	"unicode/utf8"
 )
 
-func TestIDIsValid(t *testing.T) {
-	testCases := []struct {
-		id             ID
-		expectedResult bool
-	}{
-		{ID("DenyEncryptionSt1"), true},
-		{ID(""), true},
-		{ID("aa\xe2"), false},
-	}
+// ID - policy ID.
+type ID string
 
-	for i, testCase := range testCases {
-		result := testCase.id.IsValid()
-
-		if result != testCase.expectedResult {
-			t.Errorf("case %v: result: expected: %v, got: %v\n", i+1, testCase.expectedResult, result)
-		}
-	}
+// IsValid - checks if ID is valid or not.
+func (id ID) IsValid() bool {
+	return utf8.ValidString(string(id))
 }
