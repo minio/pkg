@@ -90,13 +90,23 @@ func (r *Resource) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
-// Validate - validates Resource is for given bucket or not.
+// Validate - validates that given bucketName is matched by Resource.
 func (r Resource) Validate(bucketName string) error {
 	if !r.IsValid() {
 		return Errorf("invalid resource")
 	}
 
-	if !wildcard.Match(r.BucketName, bucketName) {
+	// For the resource to match the bucket, there are two cases:
+	//
+	//   1. the whole resource pattern must match the bucket name (e.g.
+	//   `example*a` matches bucket 'example-east-a'), or
+	//
+	//   2. bucket name followed by '/' must match as a prefix of the resource
+	//   pattern (e.g. `example*a` includes resources in a bucket 'example22'
+	//   for example the object `example22/2023/a` is matched by this resource).
+	if !wildcard.Match(r.Pattern, bucketName) &&
+		!wildcard.MatchAsPatternPrefix(r.Pattern, bucketName+"/") {
+
 		return Errorf("bucket name does not match")
 	}
 

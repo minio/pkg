@@ -1,4 +1,4 @@
-// Copyright (c) 2015-2021 MinIO, Inc.
+// Copyright (c) 2015-2023 MinIO, Inc.
 //
 // This file is part of MinIO Object Storage stack
 //
@@ -66,4 +66,37 @@ func deepMatchRune(str, pattern []rune, simple bool) bool {
 		pattern = pattern[1:]
 	}
 	return len(str) == 0 && len(pattern) == 0
+}
+
+// MatchAsPatternPrefix matches text as a prefix of the given pattern. Examples:
+//
+//	| Pattern | Text    | Match Result |
+//	====================================
+//	| abc*    | ab      | True         |
+//	| abc*    | abd     | False        |
+//	| abc*c   | abcd    | True         |
+//	| ab*??d  | abxxc   | True         |
+//	| ab*??d  | abxc    | True         |
+//	| ab??d   | abxc    | True         |
+//	| ab??d   | abc     | True         |
+//	| ab??d   | abcxdd  | False        |
+//
+// This function is only useful in some special situations.
+func MatchAsPatternPrefix(pattern, text string) bool {
+	return matchAsPatternPrefix([]rune(pattern), []rune(text))
+}
+
+func matchAsPatternPrefix(pattern, text []rune) bool {
+	for i := 0; i < len(text) && i < len(pattern); i++ {
+		if pattern[i] == '*' {
+			return true
+		}
+		if pattern[i] == '?' {
+			continue
+		}
+		if pattern[i] != text[i] {
+			return false
+		}
+	}
+	return len(text) <= len(pattern)
 }

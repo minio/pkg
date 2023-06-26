@@ -1,4 +1,4 @@
-// Copyright (c) 2015-2021 MinIO, Inc.
+// Copyright (c) 2015-2023 MinIO, Inc.
 //
 // This file is part of MinIO Object Storage stack
 //
@@ -15,12 +15,10 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-package wildcard_test
+package wildcard
 
 import (
 	"testing"
-
-	"github.com/minio/pkg/wildcard"
 )
 
 // TestMatch - Tests validate the logic of wild card matching.
@@ -378,7 +376,7 @@ func TestMatch(t *testing.T) {
 	}
 	// Iterating over the test cases, call the function under test and assert the output.
 	for i, testCase := range testCases {
-		actualResult := wildcard.Match(testCase.pattern, testCase.text)
+		actualResult := Match(testCase.pattern, testCase.text)
 		if testCase.matched != actualResult {
 			t.Errorf("Test %d: Expected the result to be `%v`, but instead found it to be `%v`", i+1, testCase.matched, actualResult)
 		}
@@ -547,7 +545,102 @@ func TestMatchSimple(t *testing.T) {
 	}
 	// Iterating over the test cases, call the function under test and assert the output.
 	for i, testCase := range testCases {
-		actualResult := wildcard.MatchSimple(testCase.pattern, testCase.text)
+		actualResult := MatchSimple(testCase.pattern, testCase.text)
+		if testCase.matched != actualResult {
+			t.Errorf("Test %d: Expected the result to be `%v`, but instead found it to be `%v`", i+1, testCase.matched, actualResult)
+		}
+	}
+}
+
+func TestMatchAsPatternPrefix(t *testing.T) {
+	testCases := []struct {
+		pattern string
+		text    string
+		matched bool
+	}{
+		{
+			pattern: "",
+			text:    "",
+			matched: true,
+		},
+		{
+			pattern: "a",
+			text:    "",
+			matched: true,
+		},
+		{ // case 3
+			pattern: "a",
+			text:    "b",
+			matched: false,
+		},
+		{
+			pattern: "",
+			text:    "b",
+			matched: false,
+		},
+		{
+			pattern: "abc",
+			text:    "ab",
+			matched: true,
+		},
+		{ // case 6
+			pattern: "ab*",
+			text:    "ab",
+			matched: true,
+		},
+		{
+			pattern: "abc*",
+			text:    "ab",
+			matched: true,
+		},
+		{
+			pattern: "abc?",
+			text:    "ab",
+			matched: true,
+		},
+		{
+			pattern: "abc*",
+			text:    "abd",
+			matched: false,
+		},
+		{ // case 10
+			pattern: "abc*c",
+			text:    "abcd",
+			matched: true,
+		},
+		{
+			pattern: "ab*??d",
+			text:    "abxxc",
+			matched: true,
+		},
+		{
+			pattern: "ab*??",
+			text:    "abxc",
+			matched: true,
+		},
+		{
+			pattern: "ab??",
+			text:    "abxc",
+			matched: true,
+		},
+		{
+			pattern: "ab??",
+			text:    "abx",
+			matched: true,
+		},
+		{ // case 15
+			pattern: "ab??d",
+			text:    "abcxd",
+			matched: true,
+		},
+		{
+			pattern: "ab??d",
+			text:    "abcxdd",
+			matched: false,
+		},
+	}
+	for i, testCase := range testCases {
+		actualResult := MatchAsPatternPrefix(testCase.pattern, testCase.text)
 		if testCase.matched != actualResult {
 			t.Errorf("Test %d: Expected the result to be `%v`, but instead found it to be `%v`", i+1, testCase.matched, actualResult)
 		}
