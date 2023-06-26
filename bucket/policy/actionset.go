@@ -1,4 +1,4 @@
-// Copyright (c) 2015-2021 MinIO, Inc.
+// Copyright (c) 2015-2023 MinIO, Inc.
 //
 // This file is part of MinIO Object Storage stack
 //
@@ -28,6 +28,11 @@ import (
 // ActionSet - set of actions.
 type ActionSet map[Action]struct{}
 
+// Clone clones ActionSet structure
+func (actionSet ActionSet) Clone() ActionSet {
+	return NewActionSet(actionSet.ToSlice()...)
+}
+
 // Add - add action to the set.
 func (actionSet ActionSet) Add(action Action) {
 	actionSet[action] = struct{}{}
@@ -37,6 +42,11 @@ func (actionSet ActionSet) Add(action Action) {
 func (actionSet ActionSet) Contains(action Action) bool {
 	_, found := actionSet[action]
 	return found
+}
+
+// IsEmpty - returns if the current action set is empty
+func (actionSet ActionSet) IsEmpty() bool {
+	return len(actionSet) == 0
 }
 
 // Equals - checks whether given action set is equal to current action set or not.
@@ -94,12 +104,8 @@ func (actionSet ActionSet) ToSlice() []Action {
 	for action := range actionSet {
 		actions = append(actions, action)
 	}
-	return actions
-}
 
-// Clone clones ActionSet structure
-func (actionSet ActionSet) Clone() ActionSet {
-	return NewActionSet(actionSet.ToSlice()...)
+	return actions
 }
 
 // UnmarshalJSON - decodes JSON data to ActionSet.
@@ -115,14 +121,19 @@ func (actionSet *ActionSet) UnmarshalJSON(data []byte) error {
 
 	*actionSet = make(ActionSet)
 	for _, s := range sset.ToSlice() {
-		action, err := parseAction(s)
-		if err != nil {
-			return err
-		}
-
-		actionSet.Add(action)
+		actionSet.Add(Action(s))
 	}
 
+	return nil
+}
+
+// Validate checks if all actions are valid
+func (actionSet ActionSet) Validate() error {
+	for _, action := range actionSet.ToSlice() {
+		if !action.IsValid() {
+			return Errorf("unsupported action '%v'", action)
+		}
+	}
 	return nil
 }
 

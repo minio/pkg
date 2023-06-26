@@ -1,4 +1,4 @@
-// Copyright (c) 2015-2021 MinIO, Inc.
+// Copyright (c) 2015-2023 MinIO, Inc.
 //
 // This file is part of MinIO Object Storage stack
 //
@@ -36,6 +36,12 @@ func (actionSet ActionSet) Clone() ActionSet {
 // Add - add action to the set.
 func (actionSet ActionSet) Add(action Action) {
 	actionSet[action] = struct{}{}
+}
+
+// Contains - checks given action exists in the action set.
+func (actionSet ActionSet) Contains(action Action) bool {
+	_, found := actionSet[action]
+	return found
 }
 
 // IsEmpty - returns if the current action set is empty
@@ -96,7 +102,7 @@ func (actionSet ActionSet) Intersection(sset ActionSet) ActionSet {
 // MarshalJSON - encodes ActionSet to JSON data.
 func (actionSet ActionSet) MarshalJSON() ([]byte, error) {
 	if len(actionSet) == 0 {
-		return nil, Errorf("empty action set")
+		return nil, Errorf("empty actions not allowed")
 	}
 
 	return json.Marshal(actionSet.ToSlice())
@@ -148,7 +154,7 @@ func (actionSet *ActionSet) UnmarshalJSON(data []byte) error {
 	}
 
 	if len(sset) == 0 {
-		return Errorf("empty action set")
+		return Errorf("empty actions not allowed")
 	}
 
 	*actionSet = make(ActionSet)

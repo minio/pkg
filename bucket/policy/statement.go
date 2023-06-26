@@ -103,7 +103,7 @@ func (statement Statement) isValid() error {
 	}
 
 	for action := range statement.Actions {
-		if action.IsObjectAction() {
+		if action.isObjectAction() {
 			if !statement.Resources.objectResourceExists() {
 				return Errorf("unsupported Resource found %v for action %v", statement.Resources, action)
 			}
@@ -114,7 +114,7 @@ func (statement Statement) isValid() error {
 		}
 
 		keys := statement.Conditions.Keys()
-		keyDiff := keys.Difference(actionConditionKeyMap[action])
+		keyDiff := keys.Difference(iamActionConditionKeyMap.Lookup(action))
 		if !keyDiff.IsEmpty() {
 			return Errorf("unsupported condition keys '%v' used for action '%v'", keyDiff, action)
 		}
