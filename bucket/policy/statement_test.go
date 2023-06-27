@@ -31,7 +31,7 @@ func TestStatementIsAllowed(t *testing.T) {
 		Allow,
 		NewPrincipal("*"),
 		NewActionSet(GetBucketLocationAction, PutObjectAction),
-		NewResourceSet(NewResource("*", "")),
+		NewResourceSet(NewResource("*")),
 		condition.NewFunctions(),
 	)
 
@@ -39,7 +39,7 @@ func TestStatementIsAllowed(t *testing.T) {
 		Allow,
 		NewPrincipal("*"),
 		NewActionSet(GetObjectAction, PutObjectAction),
-		NewResourceSet(NewResource("mybucket", "/myobject*")),
+		NewResourceSet(NewResource("mybucket/myobject*")),
 		condition.NewFunctions(),
 	)
 
@@ -59,7 +59,7 @@ func TestStatementIsAllowed(t *testing.T) {
 		Allow,
 		NewPrincipal("*"),
 		NewActionSet(GetObjectAction, PutObjectAction),
-		NewResourceSet(NewResource("mybucket", "/myobject*")),
+		NewResourceSet(NewResource("mybucket/myobject*")),
 		condition.NewFunctions(func1),
 	)
 
@@ -67,7 +67,7 @@ func TestStatementIsAllowed(t *testing.T) {
 		Deny,
 		NewPrincipal("*"),
 		NewActionSet(GetObjectAction, PutObjectAction),
-		NewResourceSet(NewResource("mybucket", "/myobject*")),
+		NewResourceSet(NewResource("mybucket/myobject*")),
 		condition.NewFunctions(func1),
 	)
 
@@ -200,7 +200,7 @@ func TestStatementIsValid(t *testing.T) {
 			Effect("foo"),
 			NewPrincipal("*"),
 			NewActionSet(GetBucketLocationAction, PutObjectAction),
-			NewResourceSet(NewResource("*", "")),
+			NewResourceSet(NewResource("*")),
 			condition.NewFunctions(),
 		), true},
 		// Invalid principal error.
@@ -208,7 +208,7 @@ func TestStatementIsValid(t *testing.T) {
 			Allow,
 			NewPrincipal(),
 			NewActionSet(GetBucketLocationAction, PutObjectAction),
-			NewResourceSet(NewResource("*", "")),
+			NewResourceSet(NewResource("*")),
 			condition.NewFunctions(),
 		), true},
 		// Empty actions error.
@@ -216,7 +216,7 @@ func TestStatementIsValid(t *testing.T) {
 			Allow,
 			NewPrincipal("*"),
 			NewActionSet(),
-			NewResourceSet(NewResource("*", "")),
+			NewResourceSet(NewResource("*")),
 			condition.NewFunctions(),
 		), true},
 		// Empty resources error.
@@ -232,7 +232,7 @@ func TestStatementIsValid(t *testing.T) {
 			Allow,
 			NewPrincipal("*"),
 			NewActionSet(GetBucketLocationAction, PutObjectAction),
-			NewResourceSet(NewResource("mybucket", "")),
+			NewResourceSet(NewResource("mybucket")),
 			condition.NewFunctions(),
 		), true},
 		// Unsupported resource found for bucket action.
@@ -240,7 +240,7 @@ func TestStatementIsValid(t *testing.T) {
 			Allow,
 			NewPrincipal("*"),
 			NewActionSet(GetBucketLocationAction, PutObjectAction),
-			NewResourceSet(NewResource("mybucket", "myobject*")),
+			NewResourceSet(NewResource("mybucket/myobject*")),
 			condition.NewFunctions(),
 		), true},
 		// Unsupported condition key for action.
@@ -248,14 +248,14 @@ func TestStatementIsValid(t *testing.T) {
 			Allow,
 			NewPrincipal("*"),
 			NewActionSet(GetObjectAction, PutObjectAction),
-			NewResourceSet(NewResource("mybucket", "myobject*")),
+			NewResourceSet(NewResource("mybucket/myobject*")),
 			condition.NewFunctions(func1, func2),
 		), true},
 		{NewStatement("",
 			Deny,
 			NewPrincipal("*"),
 			NewActionSet(GetObjectAction, PutObjectAction),
-			NewResourceSet(NewResource("mybucket", "myobject*")),
+			NewResourceSet(NewResource("mybucket/myobject*")),
 			condition.NewFunctions(func1),
 		), false},
 	}
@@ -275,7 +275,7 @@ func TestStatementMarshalJSON(t *testing.T) {
 		Allow,
 		NewPrincipal("*"),
 		NewActionSet(PutObjectAction),
-		NewResourceSet(NewResource("mybucket", "/myobject*")),
+		NewResourceSet(NewResource("mybucket/myobject*")),
 		condition.NewFunctions(),
 	)
 	case1Statement.SID = "SomeId1"
@@ -292,7 +292,7 @@ func TestStatementMarshalJSON(t *testing.T) {
 		Allow,
 		NewPrincipal("*"),
 		NewActionSet(PutObjectAction),
-		NewResourceSet(NewResource("mybucket", "/myobject*")),
+		NewResourceSet(NewResource("mybucket/myobject*")),
 		condition.NewFunctions(func1),
 	)
 	case2Data := []byte(`{"Effect":"Allow","Principal":{"AWS":["*"]},"Action":["s3:PutObject"],"Resource":["arn:aws:s3:::mybucket/myobject*"],"Condition":{"Null":{"s3:x-amz-copy-source":[true]}}}`)
@@ -308,7 +308,7 @@ func TestStatementMarshalJSON(t *testing.T) {
 		Deny,
 		NewPrincipal("*"),
 		NewActionSet(PutObjectAction),
-		NewResourceSet(NewResource("mybucket", "/myobject*")),
+		NewResourceSet(NewResource("mybucket/myobject*")),
 		condition.NewFunctions(func2),
 	)
 	case3Data := []byte(`{"Effect":"Deny","Principal":{"AWS":["*"]},"Action":["s3:PutObject"],"Resource":["arn:aws:s3:::mybucket/myobject*"],"Condition":{"Null":{"s3:x-amz-server-side-encryption":[false]}}}`)
@@ -317,7 +317,7 @@ func TestStatementMarshalJSON(t *testing.T) {
 		Allow,
 		NewPrincipal("*"),
 		NewActionSet(GetObjectAction, PutObjectAction),
-		NewResourceSet(NewResource("mybucket", "myobject*")),
+		NewResourceSet(NewResource("mybucket/myobject*")),
 		condition.NewFunctions(func1, func2),
 	)
 
@@ -361,7 +361,7 @@ func TestStatementUnmarshalJSON(t *testing.T) {
 		Allow,
 		NewPrincipal("*"),
 		NewActionSet(PutObjectAction),
-		NewResourceSet(NewResource("mybucket", "/myobject*")),
+		NewResourceSet(NewResource("mybucket/myobject*")),
 		condition.NewFunctions(),
 	)
 	case1Statement.SID = "SomeId1"
@@ -388,7 +388,7 @@ func TestStatementUnmarshalJSON(t *testing.T) {
 		Allow,
 		NewPrincipal("*"),
 		NewActionSet(PutObjectAction),
-		NewResourceSet(NewResource("mybucket", "/myobject*")),
+		NewResourceSet(NewResource("mybucket/myobject*")),
 		condition.NewFunctions(func1),
 	)
 
@@ -419,7 +419,7 @@ func TestStatementUnmarshalJSON(t *testing.T) {
 		Deny,
 		NewPrincipal("*"),
 		NewActionSet(PutObjectAction, GetObjectAction),
-		NewResourceSet(NewResource("mybucket", "/myobject*")),
+		NewResourceSet(NewResource("mybucket/myobject*")),
 		condition.NewFunctions(func2),
 	)
 
@@ -526,7 +526,7 @@ func TestStatementValidate(t *testing.T) {
 		Allow,
 		NewPrincipal("*"),
 		NewActionSet(PutObjectAction),
-		NewResourceSet(NewResource("mybucket", "/myobject*")),
+		NewResourceSet(NewResource("mybucket/myobject*")),
 		condition.NewFunctions(),
 	)
 
@@ -548,7 +548,7 @@ func TestStatementValidate(t *testing.T) {
 		Allow,
 		NewPrincipal("*"),
 		NewActionSet(GetObjectAction, PutObjectAction),
-		NewResourceSet(NewResource("mybucket", "myobject*")),
+		NewResourceSet(NewResource("mybucket/myobject*")),
 		condition.NewFunctions(func1, func2),
 	)
 

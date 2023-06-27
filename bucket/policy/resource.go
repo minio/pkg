@@ -19,6 +19,7 @@ package policy
 
 import (
 	"encoding/json"
+	"path"
 	"strings"
 
 	"github.com/minio/pkg/bucket/policy/condition"
@@ -30,33 +31,45 @@ const ResourceARNPrefix = "arn:aws:s3:::"
 
 // Resource - resource in policy statement.
 type Resource struct {
-	BucketName string
-	Pattern    string
+	Pattern string
 }
 
 func (r Resource) isBucketPattern() bool {
-	return !strings.Contains(r.Pattern, "/")
+	return !strings.Contains(r.Pattern, "/") || r.Pattern == "*"
 }
 
 func (r Resource) isObjectPattern() bool {
-	return strings.Contains(r.Pattern, "/") || strings.Contains(r.BucketName, "*")
+	return strings.Contains(r.Pattern, "/") || strings.Contains(r.Pattern, "*")
 }
 
 // IsValid - checks whether Resource is valid or not.
 func (r Resource) IsValid() bool {
-	return r.BucketName != "" && r.Pattern != ""
-}
-
-// Match - matches object name with resource pattern.
-func (r Resource) Match(resource string, conditionValues map[string][]string) bool {
-	pattern := r.Pattern
-	for _, key := range condition.CommonKeys {
-		// Empty values are not supported for policy variables.
-		if rvalues, ok := conditionValues[key.Name()]; ok && rvalues[0] != "" {
-			pattern = strings.Replace(pattern, key.VarName(), rvalues[0], -1)
-		}
+	if strings.HasPrefix(r.Pattern, "/") {
+		return false
 	}
 
+	return r.Pattern != ""
+}
+
+// MatchResource matches object name with resource pattern only.
+func (r Resource) MatchResource(resource string) bool {
+	return r.Match(resource, nil)
+}
+
+// Match - matches object name with resource pattern, including specific conditionals.
+func (r Resource) Match(resource string, conditionValues map[string][]string) bool {
+	pattern := r.Pattern
+	if len(conditionValues) != 0 {
+		for _, key := range condition.CommonKeys {
+			// Empty values are not supported for policy variables.
+			if rvalues, ok := conditionValues[key.Name()]; ok && rvalues[0] != "" {
+				pattern = strings.Replace(pattern, key.VarName(), rvalues[0], -1)
+			}
+		}
+	}
+	if cp := path.Clean(resource); cp != "." && cp == pattern {
+		return true
+	}
 	return wildcard.Match(pattern, resource)
 }
 
@@ -120,31 +133,18 @@ func parseResource(s string) (Resource, error) {
 	}
 
 	pattern := strings.TrimPrefix(s, ResourceARNPrefix)
-	tokens := strings.SplitN(pattern, "/", 2)
-	bucketName := tokens[0]
-	if bucketName == "" {
-		return Resource{}, Errorf("invalid resource format '%v'", s)
+	if strings.HasPrefix(pattern, "/") {
+		return Resource{}, Errorf("invalid resource '%v' - starts with '/' will not match a bucket", s)
 	}
 
 	return Resource{
-		BucketName: bucketName,
-		Pattern:    pattern,
+		Pattern: pattern,
 	}, nil
 }
 
 // NewResource - creates new resource.
-func NewResource(bucketName, keyName string) Resource {
-	pattern := bucketName
-	if keyName != "" {
-		if !strings.HasPrefix(keyName, "/") {
-			pattern += "/"
-		}
-
-		pattern += keyName
-	}
-
+func NewResource(pattern string) Resource {
 	return Resource{
-		BucketName: bucketName,
-		Pattern:    pattern,
+		Pattern: pattern,
 	}
 }
