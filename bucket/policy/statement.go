@@ -98,8 +98,16 @@ func (statement Statement) isValid() error {
 		return Errorf("Action must not be empty")
 	}
 
+	if !statement.SID.IsValid() {
+		return Errorf("invalid SID %v", statement.SID)
+	}
+
 	if len(statement.Resources) == 0 {
 		return Errorf("Resource must not be empty")
+	}
+
+	if err := statement.Actions.Validate(); err != nil {
+		return err
 	}
 
 	for action := range statement.Actions {

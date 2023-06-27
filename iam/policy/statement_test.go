@@ -261,13 +261,13 @@ func TestStatementIsValid(t *testing.T) {
 			NewActionSet(GetBucketLocationAction, PutObjectAction),
 			NewResourceSet(NewResource("mybucket/myobject*")),
 			condition.NewFunctions(),
-		), false},
+		), true},
 		{NewStatement("",
 			policy.Allow,
 			NewActionSet(GetBucketLocationAction, PutObjectAction),
 			NewResourceSet(NewResource("mybucket")),
 			condition.NewFunctions(),
-		), false},
+		), true},
 		{NewStatement("",
 			policy.Deny,
 			NewActionSet(GetObjectAction, PutObjectAction),
@@ -300,7 +300,7 @@ func TestStatementIsValid(t *testing.T) {
 		expectErr := (err != nil)
 
 		if expectErr != testCase.expectErr {
-			t.Fatalf("case %v: error: expected: %v, got: %v", i+1, testCase.expectErr, expectErr)
+			t.Errorf("case %v: error: expected: %v, got: %v (err=%v)", i+1, testCase.expectErr, expectErr, err)
 		}
 	}
 }

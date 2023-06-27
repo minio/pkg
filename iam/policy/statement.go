@@ -127,8 +127,14 @@ func (statement Statement) isValid() error {
 	}
 
 	for action := range statement.Actions {
-		if !statement.Resources.objectResourceExists() && !statement.Resources.bucketResourceExists() {
-			return Errorf("unsupported Resource found %v for action %v", statement.Resources, action)
+		if action.isObjectAction() {
+			if !statement.Resources.objectResourceExists() {
+				return Errorf("unsupported Resource found %v for action %v", statement.Resources, action)
+			}
+		} else {
+			if !statement.Resources.bucketResourceExists() {
+				return Errorf("unsupported Resource found %v for action %v", statement.Resources, action)
+			}
 		}
 
 		keys := statement.Conditions.Keys()
