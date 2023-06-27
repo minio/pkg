@@ -209,6 +209,12 @@ func TestResourceValidate(t *testing.T) {
 		{NewResource("mybucket", "/myobject*"), "mybucket", false},
 		{NewResource("", "/myobject*"), "yourbucket", true},
 		{NewResource("mybucket", "/myobject*"), "yourbucket", true},
+		{NewResource("mybucket*a", "/myobject*"), "mybucket-east-a", false},
+
+		// Following test cases **should validate** successfully - they are
+		// corner cases for the given patterns and buckets.
+		{NewResource("mybucket*a", "/myobject*"), "mybucket", false},
+		{NewResource("mybucket*a", "/myobject*"), "mybucket22", false},
 	}
 
 	for i, testCase := range testCases {
@@ -216,7 +222,7 @@ func TestResourceValidate(t *testing.T) {
 		expectErr := (err != nil)
 
 		if expectErr != testCase.expectErr {
-			t.Fatalf("case %v: error: expected: %v, got: %v", i+1, testCase.expectErr, expectErr)
+			t.Errorf("case %v: error: expected: %v, got: %v", i+1, testCase.expectErr, expectErr)
 		}
 	}
 }
