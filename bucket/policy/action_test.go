@@ -18,8 +18,6 @@
 package policy
 
 import (
-	"encoding/json"
-	"reflect"
 	"testing"
 )
 
@@ -37,7 +35,7 @@ func TestActionIsObjectAction(t *testing.T) {
 	}
 
 	for i, testCase := range testCases {
-		result := testCase.action.IsObjectAction()
+		result := testCase.action.isObjectAction()
 
 		if testCase.expectedResult != result {
 			t.Fatalf("case %v: expected: %v, got: %v", i+1, testCase.expectedResult, result)
@@ -59,59 +57,6 @@ func TestActionIsValid(t *testing.T) {
 
 		if testCase.expectedResult != result {
 			t.Fatalf("case %v: expected: %v, got: %v", i+1, testCase.expectedResult, result)
-		}
-	}
-}
-
-func TestActionMarshalJSON(t *testing.T) {
-	testCases := []struct {
-		action         Action
-		expectedResult []byte
-		expectErr      bool
-	}{
-		{PutObjectAction, []byte(`"s3:PutObject"`), false},
-		{Action("foo"), nil, true},
-	}
-
-	for i, testCase := range testCases {
-		result, err := json.Marshal(testCase.action)
-		expectErr := (err != nil)
-
-		if testCase.expectErr != expectErr {
-			t.Fatalf("case %v: error: expected: %v, got: %v", i+1, testCase.expectErr, expectErr)
-		}
-
-		if !testCase.expectErr {
-			if !reflect.DeepEqual(result, testCase.expectedResult) {
-				t.Fatalf("case %v: result: expected: %v, got: %v", i+1, testCase.expectedResult, result)
-			}
-		}
-	}
-}
-
-func TestActionUnmarshalJSON(t *testing.T) {
-	testCases := []struct {
-		data           []byte
-		expectedResult Action
-		expectErr      bool
-	}{
-		{[]byte(`"s3:PutObject"`), PutObjectAction, false},
-		{[]byte(`"foo"`), Action(""), true},
-	}
-
-	for i, testCase := range testCases {
-		var result Action
-		err := json.Unmarshal(testCase.data, &result)
-		expectErr := (err != nil)
-
-		if testCase.expectErr != expectErr {
-			t.Fatalf("case %v: error: expected: %v, got: %v", i+1, testCase.expectErr, expectErr)
-		}
-
-		if !testCase.expectErr {
-			if testCase.expectedResult != result {
-				t.Fatalf("case %v: result: expected: %v, got: %v", i+1, testCase.expectedResult, result)
-			}
 		}
 	}
 }
