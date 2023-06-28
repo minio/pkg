@@ -49,6 +49,26 @@ func (actionSet ActionSet) IsEmpty() bool {
 	return len(actionSet) == 0
 }
 
+// Match - matches object name with anyone of action pattern in action set.
+func (actionSet ActionSet) Match(action Action) bool {
+	for r := range actionSet {
+		if r.Match(action) {
+			return true
+		}
+
+		// This is a special case where GetObjectVersion
+		// means GetObject is enabled implicitly.
+		switch r {
+		case GetObjectVersionAction:
+			if action == GetObjectAction {
+				return true
+			}
+		}
+	}
+
+	return false
+}
+
 // Equals - checks whether given action set is equal to current action set or not.
 func (actionSet ActionSet) Equals(sactionSet ActionSet) bool {
 	// If length of set is not equal to length of given set, the
