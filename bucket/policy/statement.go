@@ -30,28 +30,9 @@ type Statement struct {
 	Effect     Effect              `json:"Effect"`
 	Principal  Principal           `json:"Principal"`
 	Actions    ActionSet           `json:"Action"`
+	NotActions ActionSet           `json:"NotAction,omitempty"`
 	Resources  ResourceSet         `json:"Resource"`
 	Conditions condition.Functions `json:"Condition,omitempty"`
-}
-
-// Equals checks if two statements are equal
-func (statement Statement) Equals(st Statement) bool {
-	if statement.Effect != st.Effect {
-		return false
-	}
-	if !statement.Principal.Equals(st.Principal) {
-		return false
-	}
-	if !statement.Actions.Equals(st.Actions) {
-		return false
-	}
-	if !statement.Resources.Equals(st.Resources) {
-		return false
-	}
-	if !statement.Conditions.Equals(st.Conditions) {
-		return false
-	}
-	return true
 }
 
 // IsAllowed - checks given policy args is allowed to continue the Rest API.
@@ -61,7 +42,8 @@ func (statement Statement) IsAllowed(args Args) bool {
 			return false
 		}
 
-		if !statement.Actions.Contains(args.Action) {
+		if (!statement.Actions.Match(args.Action) && !statement.Actions.IsEmpty()) ||
+			statement.NotActions.Match(args.Action) {
 			return false
 		}
 
@@ -94,7 +76,7 @@ func (statement Statement) isValid() error {
 		return Errorf("invalid Principal %v", statement.Principal)
 	}
 
-	if len(statement.Actions) == 0 {
+	if len(statement.Actions) == 0 && len(statement.NotActions) == 0 {
 		return Errorf("Action must not be empty")
 	}
 
@@ -172,10 +154,40 @@ func (statement Statement) Validate(bucketName string) error {
 	return statement.Resources.Validate(bucketName)
 }
 
+// Equals checks if two statements are equal
+func (statement Statement) Equals(st Statement) bool {
+	if statement.Effect != st.Effect {
+		return false
+	}
+	if !statement.Principal.Equals(st.Principal) {
+		return false
+	}
+	if !statement.Actions.Equals(st.Actions) {
+		return false
+	}
+	if !statement.NotActions.Equals(st.NotActions) {
+		return false
+	}
+	if !statement.Resources.Equals(st.Resources) {
+		return false
+	}
+	if !statement.Conditions.Equals(st.Conditions) {
+		return false
+	}
+	return true
+}
+
 // Clone clones Statement structure
 func (statement Statement) Clone() Statement {
-	return NewStatement(statement.SID, statement.Effect, statement.Principal.Clone(),
-		statement.Actions.Clone(), statement.Resources.Clone(), statement.Conditions.Clone())
+	return Statement{
+		SID:        statement.SID,
+		Effect:     statement.Effect,
+		Principal:  statement.Principal.Clone(),
+		Actions:    statement.Actions.Clone(),
+		NotActions: statement.NotActions.Clone(),
+		Resources:  statement.Resources.Clone(),
+		Conditions: statement.Conditions.Clone(),
+	}
 }
 
 // NewStatement - creates new statement.
@@ -186,6 +198,18 @@ func NewStatement(sid ID, effect Effect, principal Principal, actionSet ActionSe
 		Principal:  principal,
 		Actions:    actionSet,
 		Resources:  resourceSet,
+		Conditions: conditions,
+	}
+}
+
+// NewStatementWithNotAction - creates new statement with NotAction.
+func NewStatementWithNotAction(sid ID, effect Effect, principal Principal, notActions ActionSet, resources ResourceSet, conditions condition.Functions) Statement {
+	return Statement{
+		SID:        sid,
+		Effect:     effect,
+		Principal:  principal,
+		NotActions: notActions,
+		Resources:  resources,
 		Conditions: conditions,
 	}
 }

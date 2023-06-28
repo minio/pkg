@@ -177,10 +177,10 @@ func (statement Statement) Clone() Statement {
 	return Statement{
 		SID:        statement.SID,
 		Effect:     statement.Effect,
-		Actions:    statement.Actions,
-		NotActions: statement.NotActions,
-		Resources:  statement.Resources,
-		Conditions: statement.Conditions,
+		Actions:    statement.Actions.Clone(),
+		NotActions: statement.NotActions.Clone(),
+		Resources:  statement.Resources.Clone(),
+		Conditions: statement.Conditions.Clone(),
 	}
 }
 
