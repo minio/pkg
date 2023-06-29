@@ -15,7 +15,7 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-package policy
+package iampolicy
 
 import (
 	"encoding/json"
@@ -23,32 +23,31 @@ import (
 	"reflect"
 	"testing"
 
-	iamp "github.com/minio/pkg/iam/policy"
 	"github.com/minio/pkg/iam/policy/condition"
 )
 
-func TestPolicyIsAllowed(t *testing.T) {
-	case1Policy := Policy{
+func TestBucketPolicyIsAllowed(t *testing.T) {
+	case1Policy := BucketPolicy{
 		Version: DefaultVersion,
-		Statements: []Statement{
-			NewStatement("",
-				iamp.Allow,
+		Statements: []BPStatement{
+			NewBPStatement("",
+				Allow,
 				NewPrincipal("*"),
-				iamp.NewActionSet(iamp.GetBucketLocationAction, iamp.PutObjectAction),
-				iamp.NewResourceSet(iamp.NewResource("*")),
+				NewActionSet(GetBucketLocationAction, PutObjectAction),
+				NewResourceSet(NewResource("*")),
 				condition.NewFunctions(),
 			),
 		},
 	}
 
-	case2Policy := Policy{
+	case2Policy := BucketPolicy{
 		Version: DefaultVersion,
-		Statements: []Statement{
-			NewStatement("",
-				iamp.Allow,
+		Statements: []BPStatement{
+			NewBPStatement("",
+				Allow,
 				NewPrincipal("*"),
-				iamp.NewActionSet(iamp.GetObjectAction, iamp.PutObjectAction),
-				iamp.NewResourceSet(iamp.NewResource("mybucket/myobject*")),
+				NewActionSet(GetObjectAction, PutObjectAction),
+				NewResourceSet(NewResource("mybucket/myobject*")),
 				condition.NewFunctions(),
 			),
 		},
@@ -66,42 +65,42 @@ func TestPolicyIsAllowed(t *testing.T) {
 		t.Fatalf("unexpected error. %v\n", err)
 	}
 
-	case3Policy := Policy{
+	case3Policy := BucketPolicy{
 		Version: DefaultVersion,
-		Statements: []Statement{
-			NewStatement("",
-				iamp.Allow,
+		Statements: []BPStatement{
+			NewBPStatement("",
+				Allow,
 				NewPrincipal("*"),
-				iamp.NewActionSet(iamp.GetObjectAction, iamp.PutObjectAction),
-				iamp.NewResourceSet(iamp.NewResource("mybucket/myobject*")),
+				NewActionSet(GetObjectAction, PutObjectAction),
+				NewResourceSet(NewResource("mybucket/myobject*")),
 				condition.NewFunctions(func1),
 			),
 		},
 	}
 
-	case4Policy := Policy{
+	case4Policy := BucketPolicy{
 		Version: DefaultVersion,
-		Statements: []Statement{
-			NewStatement("",
-				iamp.Deny,
+		Statements: []BPStatement{
+			NewBPStatement("",
+				Deny,
 				NewPrincipal("*"),
-				iamp.NewActionSet(iamp.GetObjectAction, iamp.PutObjectAction),
-				iamp.NewResourceSet(iamp.NewResource("mybucket/myobject*")),
+				NewActionSet(GetObjectAction, PutObjectAction),
+				NewResourceSet(NewResource("mybucket/myobject*")),
 				condition.NewFunctions(func1),
 			),
 		},
 	}
 
-	anonGetBucketLocationArgs := Args{
+	anonGetBucketLocationArgs := BucketPolicyArgs{
 		AccountName:     "Q3AM3UQ867SPQQA43P2F",
-		Action:          iamp.GetBucketLocationAction,
+		Action:          GetBucketLocationAction,
 		BucketName:      "mybucket",
 		ConditionValues: map[string][]string{},
 	}
 
-	anonPutObjectActionArgs := Args{
+	anonPutObjectActionArgs := BucketPolicyArgs{
 		AccountName: "Q3AM3UQ867SPQQA43P2F",
-		Action:      iamp.PutObjectAction,
+		Action:      PutObjectAction,
 		BucketName:  "mybucket",
 		ConditionValues: map[string][]string{
 			"x-amz-copy-source": {"mybucket/myobject"},
@@ -110,25 +109,25 @@ func TestPolicyIsAllowed(t *testing.T) {
 		ObjectName: "myobject",
 	}
 
-	anonGetObjectActionArgs := Args{
+	anonGetObjectActionArgs := BucketPolicyArgs{
 		AccountName:     "Q3AM3UQ867SPQQA43P2F",
-		Action:          iamp.GetObjectAction,
+		Action:          GetObjectAction,
 		BucketName:      "mybucket",
 		ConditionValues: map[string][]string{},
 		ObjectName:      "myobject",
 	}
 
-	getBucketLocationArgs := Args{
+	getBucketLocationArgs := BucketPolicyArgs{
 		AccountName:     "Q3AM3UQ867SPQQA43P2F",
-		Action:          iamp.GetBucketLocationAction,
+		Action:          GetBucketLocationAction,
 		BucketName:      "mybucket",
 		ConditionValues: map[string][]string{},
 		IsOwner:         true,
 	}
 
-	putObjectActionArgs := Args{
+	putObjectActionArgs := BucketPolicyArgs{
 		AccountName: "Q3AM3UQ867SPQQA43P2F",
-		Action:      iamp.PutObjectAction,
+		Action:      PutObjectAction,
 		BucketName:  "mybucket",
 		ConditionValues: map[string][]string{
 			"x-amz-copy-source": {"mybucket/myobject"},
@@ -138,9 +137,9 @@ func TestPolicyIsAllowed(t *testing.T) {
 		ObjectName: "myobject",
 	}
 
-	getObjectActionArgs := Args{
+	getObjectActionArgs := BucketPolicyArgs{
 		AccountName:     "Q3AM3UQ867SPQQA43P2F",
-		Action:          iamp.GetObjectAction,
+		Action:          GetObjectAction,
 		BucketName:      "mybucket",
 		ConditionValues: map[string][]string{},
 		IsOwner:         true,
@@ -148,8 +147,8 @@ func TestPolicyIsAllowed(t *testing.T) {
 	}
 
 	testCases := []struct {
-		policy         Policy
-		args           Args
+		policy         BucketPolicy
+		args           BucketPolicyArgs
 		expectedResult bool
 	}{
 		{case1Policy, anonGetBucketLocationArgs, true},
@@ -190,27 +189,27 @@ func TestPolicyIsAllowed(t *testing.T) {
 	}
 }
 
-func TestPolicyIsEmpty(t *testing.T) {
-	case1Policy := Policy{
+func TestBucketPolicyIsEmpty(t *testing.T) {
+	case1Policy := BucketPolicy{
 		Version: DefaultVersion,
-		Statements: []Statement{
-			NewStatement("",
-				iamp.Allow,
+		Statements: []BPStatement{
+			NewBPStatement("",
+				Allow,
 				NewPrincipal("*"),
-				iamp.NewActionSet(iamp.PutObjectAction),
-				iamp.NewResourceSet(iamp.NewResource("mybucket/myobject*")),
+				NewActionSet(PutObjectAction),
+				NewResourceSet(NewResource("mybucket/myobject*")),
 				condition.NewFunctions(),
 			),
 		},
 	}
 
-	case2Policy := Policy{
+	case2Policy := BucketPolicy{
 		ID:      "MyPolicyForMyBucket",
 		Version: DefaultVersion,
 	}
 
 	testCases := []struct {
-		policy         Policy
+		policy         BucketPolicy
 		expectedResult bool
 	}{
 		{case1Policy, false},
@@ -226,55 +225,55 @@ func TestPolicyIsEmpty(t *testing.T) {
 	}
 }
 
-func TestPolicyIsValid(t *testing.T) {
-	case1Policy := Policy{
+func TestBucketPolicyIsValid(t *testing.T) {
+	case1Policy := BucketPolicy{
 		Version: DefaultVersion,
-		Statements: []Statement{
-			NewStatement("",
-				iamp.Allow,
+		Statements: []BPStatement{
+			NewBPStatement("",
+				Allow,
 				NewPrincipal("*"),
-				iamp.NewActionSet(iamp.PutObjectAction),
-				iamp.NewResourceSet(iamp.NewResource("mybucket/myobject*")),
+				NewActionSet(PutObjectAction),
+				NewResourceSet(NewResource("mybucket/myobject*")),
 				condition.NewFunctions(),
 			),
 		},
 	}
 
-	case2Policy := Policy{
+	case2Policy := BucketPolicy{
 		Version: DefaultVersion,
-		Statements: []Statement{
-			NewStatement("",
-				iamp.Allow,
+		Statements: []BPStatement{
+			NewBPStatement("",
+				Allow,
 				NewPrincipal("*"),
-				iamp.NewActionSet(iamp.PutObjectAction),
-				iamp.NewResourceSet(iamp.NewResource("mybucket/myobject*")),
+				NewActionSet(PutObjectAction),
+				NewResourceSet(NewResource("mybucket/myobject*")),
 				condition.NewFunctions(),
 			),
-			NewStatement("",
-				iamp.Deny,
+			NewBPStatement("",
+				Deny,
 				NewPrincipal("*"),
-				iamp.NewActionSet(iamp.GetObjectAction),
-				iamp.NewResourceSet(iamp.NewResource("mybucket/myobject*")),
+				NewActionSet(GetObjectAction),
+				NewResourceSet(NewResource("mybucket/myobject*")),
 				condition.NewFunctions(),
 			),
 		},
 	}
 
-	case3Policy := Policy{
+	case3Policy := BucketPolicy{
 		Version: DefaultVersion,
-		Statements: []Statement{
-			NewStatement("",
-				iamp.Allow,
+		Statements: []BPStatement{
+			NewBPStatement("",
+				Allow,
 				NewPrincipal("*"),
-				iamp.NewActionSet(iamp.PutObjectAction),
-				iamp.NewResourceSet(iamp.NewResource("mybucket/myobject*")),
+				NewActionSet(PutObjectAction),
+				NewResourceSet(NewResource("mybucket/myobject*")),
 				condition.NewFunctions(),
 			),
-			NewStatement("",
-				iamp.Deny,
+			NewBPStatement("",
+				Deny,
 				NewPrincipal("*"),
-				iamp.NewActionSet(iamp.PutObjectAction),
-				iamp.NewResourceSet(iamp.NewResource("mybucket/yourobject*")),
+				NewActionSet(PutObjectAction),
+				NewResourceSet(NewResource("mybucket/yourobject*")),
 				condition.NewFunctions(),
 			),
 		},
@@ -295,95 +294,95 @@ func TestPolicyIsValid(t *testing.T) {
 		t.Fatalf("unexpected error. %v\n", err)
 	}
 
-	case4Policy := Policy{
+	case4Policy := BucketPolicy{
 		Version: DefaultVersion,
-		Statements: []Statement{
-			NewStatement("",
-				iamp.Allow,
+		Statements: []BPStatement{
+			NewBPStatement("",
+				Allow,
 				NewPrincipal("*"),
-				iamp.NewActionSet(iamp.PutObjectAction),
-				iamp.NewResourceSet(iamp.NewResource("mybucket/myobject*")),
+				NewActionSet(PutObjectAction),
+				NewResourceSet(NewResource("mybucket/myobject*")),
 				condition.NewFunctions(func1),
 			),
-			NewStatement("",
-				iamp.Deny,
+			NewBPStatement("",
+				Deny,
 				NewPrincipal("*"),
-				iamp.NewActionSet(iamp.PutObjectAction),
-				iamp.NewResourceSet(iamp.NewResource("mybucket/myobject*")),
+				NewActionSet(PutObjectAction),
+				NewResourceSet(NewResource("mybucket/myobject*")),
 				condition.NewFunctions(func2),
 			),
 		},
 	}
 
-	case5Policy := Policy{
+	case5Policy := BucketPolicy{
 		Version: "17-10-2012",
-		Statements: []Statement{
-			NewStatement("",
-				iamp.Allow,
+		Statements: []BPStatement{
+			NewBPStatement("",
+				Allow,
 				NewPrincipal("*"),
-				iamp.NewActionSet(iamp.PutObjectAction),
-				iamp.NewResourceSet(iamp.NewResource("mybucket/myobject*")),
+				NewActionSet(PutObjectAction),
+				NewResourceSet(NewResource("mybucket/myobject*")),
 				condition.NewFunctions(),
 			),
 		},
 	}
 
-	case6Policy := Policy{
+	case6Policy := BucketPolicy{
 		ID:      "MyPolicyForMyBucket1",
 		Version: DefaultVersion,
-		Statements: []Statement{
-			NewStatement("",
-				iamp.Allow,
+		Statements: []BPStatement{
+			NewBPStatement("",
+				Allow,
 				NewPrincipal("*"),
-				iamp.NewActionSet(iamp.GetObjectAction, iamp.PutObjectAction),
-				iamp.NewResourceSet(iamp.NewResource("mybucket/myobject*")),
+				NewActionSet(GetObjectAction, PutObjectAction),
+				NewResourceSet(NewResource("mybucket/myobject*")),
 				condition.NewFunctions(func1, func2),
 			),
 		},
 	}
 
-	case7Policy := Policy{
+	case7Policy := BucketPolicy{
 		Version: DefaultVersion,
-		Statements: []Statement{
-			NewStatement("",
-				iamp.Allow,
+		Statements: []BPStatement{
+			NewBPStatement("",
+				Allow,
 				NewPrincipal("*"),
-				iamp.NewActionSet(iamp.PutObjectAction),
-				iamp.NewResourceSet(iamp.NewResource("mybucket/myobject*")),
+				NewActionSet(PutObjectAction),
+				NewResourceSet(NewResource("mybucket/myobject*")),
 				condition.NewFunctions(),
 			),
-			NewStatement("",
-				iamp.Deny,
+			NewBPStatement("",
+				Deny,
 				NewPrincipal("*"),
-				iamp.NewActionSet(iamp.PutObjectAction),
-				iamp.NewResourceSet(iamp.NewResource("mybucket/myobject*")),
+				NewActionSet(PutObjectAction),
+				NewResourceSet(NewResource("mybucket/myobject*")),
 				condition.NewFunctions(),
 			),
 		},
 	}
 
-	case8Policy := Policy{
+	case8Policy := BucketPolicy{
 		Version: DefaultVersion,
-		Statements: []Statement{
-			NewStatement("",
-				iamp.Allow,
+		Statements: []BPStatement{
+			NewBPStatement("",
+				Allow,
 				NewPrincipal("*"),
-				iamp.NewActionSet(iamp.PutObjectAction),
-				iamp.NewResourceSet(iamp.NewResource("mybucket/myobject*")),
+				NewActionSet(PutObjectAction),
+				NewResourceSet(NewResource("mybucket/myobject*")),
 				condition.NewFunctions(),
 			),
-			NewStatement("",
-				iamp.Allow,
+			NewBPStatement("",
+				Allow,
 				NewPrincipal("*"),
-				iamp.NewActionSet(iamp.PutObjectAction),
-				iamp.NewResourceSet(iamp.NewResource("mybucket/myobject*")),
+				NewActionSet(PutObjectAction),
+				NewResourceSet(NewResource("mybucket/myobject*")),
 				condition.NewFunctions(),
 			),
 		},
 	}
 
 	testCases := []struct {
-		policy    Policy
+		policy    BucketPolicy
 		expectErr bool
 	}{
 		{case1Policy, false},
@@ -413,16 +412,16 @@ func TestPolicyIsValid(t *testing.T) {
 	}
 }
 
-func TestPolicyMarshalJSON(t *testing.T) {
-	case1Policy := Policy{
+func TestBucketPolicyMarshalJSON(t *testing.T) {
+	case1Policy := BucketPolicy{
 		ID:      "MyPolicyForMyBucket1",
 		Version: DefaultVersion,
-		Statements: []Statement{
-			NewStatement("",
-				iamp.Allow,
+		Statements: []BPStatement{
+			NewBPStatement("",
+				Allow,
 				NewPrincipal("*"),
-				iamp.NewActionSet(iamp.PutObjectAction),
-				iamp.NewResourceSet(iamp.NewResource("mybucket/myobject*")),
+				NewActionSet(PutObjectAction),
+				NewResourceSet(NewResource("mybucket/myobject*")),
 				condition.NewFunctions(),
 			),
 		},
@@ -442,87 +441,87 @@ func TestPolicyMarshalJSON(t *testing.T) {
 		t.Fatalf("unexpected error. %v\n", err)
 	}
 
-	case2Policy := Policy{
+	case2Policy := BucketPolicy{
 		Version: DefaultVersion,
-		Statements: []Statement{
-			NewStatement("",
-				iamp.Allow,
+		Statements: []BPStatement{
+			NewBPStatement("",
+				Allow,
 				NewPrincipal("*"),
-				iamp.NewActionSet(iamp.PutObjectAction),
-				iamp.NewResourceSet(iamp.NewResource("mybucket/myobject*")),
+				NewActionSet(PutObjectAction),
+				NewResourceSet(NewResource("mybucket/myobject*")),
 				condition.NewFunctions(),
 			),
-			NewStatement("",
-				iamp.Deny,
+			NewBPStatement("",
+				Deny,
 				NewPrincipal("*"),
-				iamp.NewActionSet(iamp.GetObjectAction),
-				iamp.NewResourceSet(iamp.NewResource("mybucket/yourobject*")),
+				NewActionSet(GetObjectAction),
+				NewResourceSet(NewResource("mybucket/yourobject*")),
 				condition.NewFunctions(func1),
 			),
 		},
 	}
 	case2Data := []byte(`{"Version":"2012-10-17","Statement":[{"Effect":"Allow","Principal":{"AWS":["*"]},"Action":["s3:PutObject"],"Resource":["arn:aws:s3:::mybucket/myobject*"]},{"Effect":"Deny","Principal":{"AWS":["*"]},"Action":["s3:GetObject"],"Resource":["arn:aws:s3:::mybucket/yourobject*"],"Condition":{"IpAddress":{"aws:SourceIp":["192.168.1.0/24"]}}}]}`)
 
-	case3Policy := Policy{
+	case3Policy := BucketPolicy{
 		ID:      "MyPolicyForMyBucket1",
 		Version: DefaultVersion,
-		Statements: []Statement{
-			NewStatement("",
-				iamp.Allow,
+		Statements: []BPStatement{
+			NewBPStatement("",
+				Allow,
 				NewPrincipal("Q3AM3UQ867SPQQA43P2F"),
-				iamp.NewActionSet(iamp.PutObjectAction),
-				iamp.NewResourceSet(iamp.NewResource("mybucket/myobject*")),
+				NewActionSet(PutObjectAction),
+				NewResourceSet(NewResource("mybucket/myobject*")),
 				condition.NewFunctions(),
 			),
-			NewStatement("",
-				iamp.Allow,
+			NewBPStatement("",
+				Allow,
 				NewPrincipal("*"),
-				iamp.NewActionSet(iamp.PutObjectAction),
-				iamp.NewResourceSet(iamp.NewResource("mybucket/myobject*")),
+				NewActionSet(PutObjectAction),
+				NewResourceSet(NewResource("mybucket/myobject*")),
 				condition.NewFunctions(),
 			),
 		},
 	}
 	case3Data := []byte(`{"ID":"MyPolicyForMyBucket1","Version":"2012-10-17","Statement":[{"Effect":"Allow","Principal":{"AWS":["Q3AM3UQ867SPQQA43P2F"]},"Action":["s3:PutObject"],"Resource":["arn:aws:s3:::mybucket/myobject*"]},{"Effect":"Allow","Principal":{"AWS":["*"]},"Action":["s3:PutObject"],"Resource":["arn:aws:s3:::mybucket/myobject*"]}]}`)
 
-	case4Policy := Policy{
+	case4Policy := BucketPolicy{
 		ID:      "MyPolicyForMyBucket1",
 		Version: DefaultVersion,
-		Statements: []Statement{
-			NewStatement("",
-				iamp.Allow,
+		Statements: []BPStatement{
+			NewBPStatement("",
+				Allow,
 				NewPrincipal("*"),
-				iamp.NewActionSet(iamp.PutObjectAction),
-				iamp.NewResourceSet(iamp.NewResource("mybucket/myobject*")),
+				NewActionSet(PutObjectAction),
+				NewResourceSet(NewResource("mybucket/myobject*")),
 				condition.NewFunctions(),
 			),
-			NewStatement("",
-				iamp.Allow,
+			NewBPStatement("",
+				Allow,
 				NewPrincipal("*"),
-				iamp.NewActionSet(iamp.GetObjectAction),
-				iamp.NewResourceSet(iamp.NewResource("mybucket/myobject*")),
+				NewActionSet(GetObjectAction),
+				NewResourceSet(NewResource("mybucket/myobject*")),
 				condition.NewFunctions(),
 			),
 		},
 	}
 	case4Data := []byte(`{"ID":"MyPolicyForMyBucket1","Version":"2012-10-17","Statement":[{"Effect":"Allow","Principal":{"AWS":["*"]},"Action":["s3:PutObject"],"Resource":["arn:aws:s3:::mybucket/myobject*"]},{"Effect":"Allow","Principal":{"AWS":["*"]},"Action":["s3:GetObject"],"Resource":["arn:aws:s3:::mybucket/myobject*"]}]}`)
 
-	case5Policy := Policy{
+	case5Policy := BucketPolicy{
 		ID:      "MyPolicyForMyBucket1",
 		Version: DefaultVersion,
-		Statements: []Statement{
-			NewStatement("",
-				iamp.Allow,
+		Statements: []BPStatement{
+			NewBPStatement("",
+				Allow,
 				NewPrincipal("*"),
-				iamp.NewActionSet(iamp.PutObjectAction),
-				iamp.NewResourceSet(iamp.NewResource("mybucket/myobject*")),
+				NewActionSet(PutObjectAction),
+				NewResourceSet(NewResource("mybucket/myobject*")),
 				condition.NewFunctions(),
 			),
-			NewStatement("",
-				iamp.Allow,
+			NewBPStatement("",
+				Allow,
 				NewPrincipal("*"),
-				iamp.NewActionSet(iamp.PutObjectAction),
-				iamp.NewResourceSet(iamp.NewResource("mybucket/yourobject*")),
+				NewActionSet(PutObjectAction),
+				NewResourceSet(NewResource("mybucket/yourobject*")),
 				condition.NewFunctions(),
 			),
 		},
@@ -541,52 +540,52 @@ func TestPolicyMarshalJSON(t *testing.T) {
 		t.Fatalf("unexpected error. %v\n", err)
 	}
 
-	case6Policy := Policy{
+	case6Policy := BucketPolicy{
 		ID:      "MyPolicyForMyBucket1",
 		Version: DefaultVersion,
-		Statements: []Statement{
-			NewStatement("",
-				iamp.Allow,
+		Statements: []BPStatement{
+			NewBPStatement("",
+				Allow,
 				NewPrincipal("*"),
-				iamp.NewActionSet(iamp.PutObjectAction),
-				iamp.NewResourceSet(iamp.NewResource("mybucket/myobject*")),
+				NewActionSet(PutObjectAction),
+				NewResourceSet(NewResource("mybucket/myobject*")),
 				condition.NewFunctions(func1),
 			),
-			NewStatement("",
-				iamp.Allow,
+			NewBPStatement("",
+				Allow,
 				NewPrincipal("*"),
-				iamp.NewActionSet(iamp.PutObjectAction),
-				iamp.NewResourceSet(iamp.NewResource("mybucket/myobject*")),
+				NewActionSet(PutObjectAction),
+				NewResourceSet(NewResource("mybucket/myobject*")),
 				condition.NewFunctions(func2),
 			),
 		},
 	}
 	case6Data := []byte(`{"ID":"MyPolicyForMyBucket1","Version":"2012-10-17","Statement":[{"Effect":"Allow","Principal":{"AWS":["*"]},"Action":["s3:PutObject"],"Resource":["arn:aws:s3:::mybucket/myobject*"],"Condition":{"IpAddress":{"aws:SourceIp":["192.168.1.0/24"]}}},{"Effect":"Allow","Principal":{"AWS":["*"]},"Action":["s3:PutObject"],"Resource":["arn:aws:s3:::mybucket/myobject*"],"Condition":{"IpAddress":{"aws:SourceIp":["192.168.2.0/24"]}}}]}`)
 
-	case7Policy := Policy{
+	case7Policy := BucketPolicy{
 		ID:      "MyPolicyForMyBucket1",
 		Version: DefaultVersion,
-		Statements: []Statement{
-			NewStatement("",
-				iamp.Allow,
+		Statements: []BPStatement{
+			NewBPStatement("",
+				Allow,
 				NewPrincipal("*"),
-				iamp.NewActionSet(iamp.GetBucketLocationAction),
-				iamp.NewResourceSet(iamp.NewResource("mybucket")),
+				NewActionSet(GetBucketLocationAction),
+				NewResourceSet(NewResource("mybucket")),
 				condition.NewFunctions(),
 			),
 		},
 	}
 	case7Data := []byte(`{"ID":"MyPolicyForMyBucket1","Version":"2012-10-17","Statement":[{"Effect":"Allow","Principal":{"AWS":["*"]},"Action":["s3:GetBucketLocation"],"Resource":["arn:aws:s3:::mybucket"]}]}`)
 
-	case8Policy := Policy{
+	case8Policy := BucketPolicy{
 		ID:      "MyPolicyForMyBucket1",
 		Version: DefaultVersion,
-		Statements: []Statement{
-			NewStatement("",
-				iamp.Allow,
+		Statements: []BPStatement{
+			NewBPStatement("",
+				Allow,
 				NewPrincipal("*"),
-				iamp.NewActionSet(iamp.GetBucketLocationAction),
-				iamp.NewResourceSet(iamp.NewResource("*")),
+				NewActionSet(GetBucketLocationAction),
+				NewResourceSet(NewResource("*")),
 				condition.NewFunctions(),
 			),
 		},
@@ -600,22 +599,22 @@ func TestPolicyMarshalJSON(t *testing.T) {
 	if err != nil {
 		t.Fatalf("unexpected error. %v\n", err)
 	}
-	case9Policy := Policy{
+	case9Policy := BucketPolicy{
 		ID:      "MyPolicyForMyBucket1",
 		Version: DefaultVersion,
-		Statements: []Statement{
-			NewStatement("",
-				iamp.Allow,
+		Statements: []BPStatement{
+			NewBPStatement("",
+				Allow,
 				NewPrincipal("*"),
-				iamp.NewActionSet(iamp.GetObjectAction, iamp.PutObjectAction),
-				iamp.NewResourceSet(iamp.NewResource("mybucket/myobject*")),
+				NewActionSet(GetObjectAction, PutObjectAction),
+				NewResourceSet(NewResource("mybucket/myobject*")),
 				condition.NewFunctions(func1, func2, func3),
 			),
 		},
 	}
 
 	testCases := []struct {
-		policy         Policy
+		policy         BucketPolicy
 		expectedResult []byte
 		expectErr      bool
 	}{
@@ -646,7 +645,7 @@ func TestPolicyMarshalJSON(t *testing.T) {
 	}
 }
 
-func TestPolicyUnmarshalJSON(t *testing.T) {
+func TestBucketPolicyUnmarshalJSON(t *testing.T) {
 	case1Data := []byte(`{
     "ID": "MyPolicyForMyBucket1",
     "Version": "2012-10-17",
@@ -660,15 +659,15 @@ func TestPolicyUnmarshalJSON(t *testing.T) {
         }
     ]
 }`)
-	case1Policy := Policy{
+	case1Policy := BucketPolicy{
 		ID:      "MyPolicyForMyBucket1",
 		Version: DefaultVersion,
-		Statements: []Statement{
-			NewStatement("",
-				iamp.Allow,
+		Statements: []BPStatement{
+			NewBPStatement("",
+				Allow,
 				NewPrincipal("*"),
-				iamp.NewActionSet(iamp.PutObjectAction),
-				iamp.NewResourceSet(iamp.NewResource("mybucket/myobject*")),
+				NewActionSet(PutObjectAction),
+				NewResourceSet(NewResource("mybucket/myobject*")),
 				condition.NewFunctions(),
 			),
 		},
@@ -709,21 +708,21 @@ func TestPolicyUnmarshalJSON(t *testing.T) {
 		t.Fatalf("unexpected error. %v\n", err)
 	}
 
-	case2Policy := Policy{
+	case2Policy := BucketPolicy{
 		Version: DefaultVersion,
-		Statements: []Statement{
-			NewStatement("",
-				iamp.Allow,
+		Statements: []BPStatement{
+			NewBPStatement("",
+				Allow,
 				NewPrincipal("*"),
-				iamp.NewActionSet(iamp.PutObjectAction),
-				iamp.NewResourceSet(iamp.NewResource("mybucket/myobject*")),
+				NewActionSet(PutObjectAction),
+				NewResourceSet(NewResource("mybucket/myobject*")),
 				condition.NewFunctions(),
 			),
-			NewStatement("",
-				iamp.Deny,
+			NewBPStatement("",
+				Deny,
 				NewPrincipal("*"),
-				iamp.NewActionSet(iamp.GetObjectAction),
-				iamp.NewResourceSet(iamp.NewResource("mybucket/yourobject*")),
+				NewActionSet(GetObjectAction),
+				NewResourceSet(NewResource("mybucket/yourobject*")),
 				condition.NewFunctions(func1),
 			),
 		},
@@ -751,22 +750,22 @@ func TestPolicyUnmarshalJSON(t *testing.T) {
         }
     ]
 }`)
-	case3Policy := Policy{
+	case3Policy := BucketPolicy{
 		ID:      "MyPolicyForMyBucket1",
 		Version: DefaultVersion,
-		Statements: []Statement{
-			NewStatement("",
-				iamp.Allow,
+		Statements: []BPStatement{
+			NewBPStatement("",
+				Allow,
 				NewPrincipal("Q3AM3UQ867SPQQA43P2F"),
-				iamp.NewActionSet(iamp.PutObjectAction),
-				iamp.NewResourceSet(iamp.NewResource("mybucket/myobject*")),
+				NewActionSet(PutObjectAction),
+				NewResourceSet(NewResource("mybucket/myobject*")),
 				condition.NewFunctions(),
 			),
-			NewStatement("",
-				iamp.Allow,
+			NewBPStatement("",
+				Allow,
 				NewPrincipal("*"),
-				iamp.NewActionSet(iamp.PutObjectAction),
-				iamp.NewResourceSet(iamp.NewResource("mybucket/myobject*")),
+				NewActionSet(PutObjectAction),
+				NewResourceSet(NewResource("mybucket/myobject*")),
 				condition.NewFunctions(),
 			),
 		},
@@ -790,22 +789,22 @@ func TestPolicyUnmarshalJSON(t *testing.T) {
         }
     ]
 }`)
-	case4Policy := Policy{
+	case4Policy := BucketPolicy{
 		ID:      "MyPolicyForMyBucket1",
 		Version: DefaultVersion,
-		Statements: []Statement{
-			NewStatement("",
-				iamp.Allow,
+		Statements: []BPStatement{
+			NewBPStatement("",
+				Allow,
 				NewPrincipal("*"),
-				iamp.NewActionSet(iamp.PutObjectAction),
-				iamp.NewResourceSet(iamp.NewResource("mybucket/myobject*")),
+				NewActionSet(PutObjectAction),
+				NewResourceSet(NewResource("mybucket/myobject*")),
 				condition.NewFunctions(),
 			),
-			NewStatement("",
-				iamp.Allow,
+			NewBPStatement("",
+				Allow,
 				NewPrincipal("*"),
-				iamp.NewActionSet(iamp.GetObjectAction),
-				iamp.NewResourceSet(iamp.NewResource("mybucket/myobject*")),
+				NewActionSet(GetObjectAction),
+				NewResourceSet(NewResource("mybucket/myobject*")),
 				condition.NewFunctions(),
 			),
 		},
@@ -829,22 +828,22 @@ func TestPolicyUnmarshalJSON(t *testing.T) {
         }
     ]
 }`)
-	case5Policy := Policy{
+	case5Policy := BucketPolicy{
 		ID:      "MyPolicyForMyBucket1",
 		Version: DefaultVersion,
-		Statements: []Statement{
-			NewStatement("",
-				iamp.Allow,
+		Statements: []BPStatement{
+			NewBPStatement("",
+				Allow,
 				NewPrincipal("*"),
-				iamp.NewActionSet(iamp.PutObjectAction),
-				iamp.NewResourceSet(iamp.NewResource("mybucket/myobject*")),
+				NewActionSet(PutObjectAction),
+				NewResourceSet(NewResource("mybucket/myobject*")),
 				condition.NewFunctions(),
 			),
-			NewStatement("",
-				iamp.Allow,
+			NewBPStatement("",
+				Allow,
 				NewPrincipal("*"),
-				iamp.NewActionSet(iamp.PutObjectAction),
-				iamp.NewResourceSet(iamp.NewResource("mybucket/yourobject*")),
+				NewActionSet(PutObjectAction),
+				NewResourceSet(NewResource("mybucket/yourobject*")),
 				condition.NewFunctions(),
 			),
 		},
@@ -890,22 +889,22 @@ func TestPolicyUnmarshalJSON(t *testing.T) {
 		t.Fatalf("unexpected error. %v\n", err)
 	}
 
-	case6Policy := Policy{
+	case6Policy := BucketPolicy{
 		ID:      "MyPolicyForMyBucket1",
 		Version: DefaultVersion,
-		Statements: []Statement{
-			NewStatement("",
-				iamp.Allow,
+		Statements: []BPStatement{
+			NewBPStatement("",
+				Allow,
 				NewPrincipal("*"),
-				iamp.NewActionSet(iamp.PutObjectAction),
-				iamp.NewResourceSet(iamp.NewResource("mybucket/myobject*")),
+				NewActionSet(PutObjectAction),
+				NewResourceSet(NewResource("mybucket/myobject*")),
 				condition.NewFunctions(func1),
 			),
-			NewStatement("",
-				iamp.Allow,
+			NewBPStatement("",
+				Allow,
 				NewPrincipal("*"),
-				iamp.NewActionSet(iamp.PutObjectAction),
-				iamp.NewResourceSet(iamp.NewResource("mybucket/myobject*")),
+				NewActionSet(PutObjectAction),
+				NewResourceSet(NewResource("mybucket/myobject*")),
 				condition.NewFunctions(func2),
 			),
 		},
@@ -924,15 +923,15 @@ func TestPolicyUnmarshalJSON(t *testing.T) {
     ]
 }`)
 
-	case7Policy := Policy{
+	case7Policy := BucketPolicy{
 		ID:      "MyPolicyForMyBucket1",
 		Version: DefaultVersion,
-		Statements: []Statement{
-			NewStatement("",
-				iamp.Allow,
+		Statements: []BPStatement{
+			NewBPStatement("",
+				Allow,
 				NewPrincipal("*"),
-				iamp.NewActionSet(iamp.GetBucketLocationAction),
-				iamp.NewResourceSet(iamp.NewResource("mybucket")),
+				NewActionSet(GetBucketLocationAction),
+				NewResourceSet(NewResource("mybucket")),
 				condition.NewFunctions(),
 			),
 		},
@@ -951,15 +950,15 @@ func TestPolicyUnmarshalJSON(t *testing.T) {
     ]
 }`)
 
-	case8Policy := Policy{
+	case8Policy := BucketPolicy{
 		ID:      "MyPolicyForMyBucket1",
 		Version: DefaultVersion,
-		Statements: []Statement{
-			NewStatement("",
-				iamp.Allow,
+		Statements: []BPStatement{
+			NewBPStatement("",
+				Allow,
 				NewPrincipal("*"),
-				iamp.NewActionSet(iamp.GetBucketLocationAction),
-				iamp.NewResourceSet(iamp.NewResource("*")),
+				NewActionSet(GetBucketLocationAction),
+				NewResourceSet(NewResource("*")),
 				condition.NewFunctions(),
 			),
 		},
@@ -997,15 +996,15 @@ func TestPolicyUnmarshalJSON(t *testing.T) {
     ]
 }`)
 
-	case10Policy := Policy{
+	case10Policy := BucketPolicy{
 		ID:      "MyPolicyForMyBucket1",
 		Version: DefaultVersion,
-		Statements: []Statement{
-			NewStatement("",
-				iamp.Allow,
+		Statements: []BPStatement{
+			NewBPStatement("",
+				Allow,
 				NewPrincipal("*"),
-				iamp.NewActionSet(iamp.PutObjectAction),
-				iamp.NewResourceSet(iamp.NewResource("mybucket/myobject*")),
+				NewActionSet(PutObjectAction),
+				NewResourceSet(NewResource("mybucket/myobject*")),
 				condition.NewFunctions(),
 			),
 		},
@@ -1030,22 +1029,22 @@ func TestPolicyUnmarshalJSON(t *testing.T) {
     ]
 }`)
 
-	case11Policy := Policy{
+	case11Policy := BucketPolicy{
 		ID:      "MyPolicyForMyBucket1",
 		Version: DefaultVersion,
-		Statements: []Statement{
-			NewStatement("",
-				iamp.Allow,
+		Statements: []BPStatement{
+			NewBPStatement("",
+				Allow,
 				NewPrincipal("*"),
-				iamp.NewActionSet(iamp.PutObjectAction),
-				iamp.NewResourceSet(iamp.NewResource("mybucket/myobject*")),
+				NewActionSet(PutObjectAction),
+				NewResourceSet(NewResource("mybucket/myobject*")),
 				condition.NewFunctions(),
 			),
-			NewStatement("",
-				iamp.Deny,
+			NewBPStatement("",
+				Deny,
 				NewPrincipal("*"),
-				iamp.NewActionSet(iamp.PutObjectAction),
-				iamp.NewResourceSet(iamp.NewResource("mybucket/myobject*")),
+				NewActionSet(PutObjectAction),
+				NewResourceSet(NewResource("mybucket/myobject*")),
 				condition.NewFunctions(),
 			),
 		},
@@ -1053,7 +1052,7 @@ func TestPolicyUnmarshalJSON(t *testing.T) {
 
 	testCases := []struct {
 		data           []byte
-		expectedResult Policy
+		expectedResult BucketPolicy
 		expectErr      bool
 	}{
 		{case1Data, case1Policy, false},
@@ -1065,7 +1064,7 @@ func TestPolicyUnmarshalJSON(t *testing.T) {
 		{case7Data, case7Policy, false},
 		{case8Data, case8Policy, false},
 		// Invalid version error.
-		{case9Data, Policy{}, true},
+		{case9Data, BucketPolicy{}, true},
 		// Duplicate statement success, duplicate statement removed.
 		{case10Data, case10Policy, false},
 		// Duplicate statement success (Effect differs).
@@ -1073,7 +1072,7 @@ func TestPolicyUnmarshalJSON(t *testing.T) {
 	}
 
 	for i, testCase := range testCases {
-		var result Policy
+		var result BucketPolicy
 		err := json.Unmarshal(testCase.data, &result)
 		expectErr := (err != nil)
 
@@ -1089,15 +1088,15 @@ func TestPolicyUnmarshalJSON(t *testing.T) {
 	}
 }
 
-func TestPolicyValidate(t *testing.T) {
-	case1Policy := Policy{
+func TestBucketPolicyValidate(t *testing.T) {
+	case1Policy := BucketPolicy{
 		Version: DefaultVersion,
-		Statements: []Statement{
-			NewStatement("",
-				iamp.Allow,
+		Statements: []BPStatement{
+			NewBPStatement("",
+				Allow,
 				NewPrincipal("*"),
-				iamp.NewActionSet(iamp.PutObjectAction),
-				iamp.NewResourceSet(iamp.NewResource("mybucket/myobject*")),
+				NewActionSet(PutObjectAction),
+				NewResourceSet(NewResource("mybucket/myobject*")),
 				condition.NewFunctions(),
 			),
 		},
@@ -1117,22 +1116,22 @@ func TestPolicyValidate(t *testing.T) {
 	if err != nil {
 		t.Fatalf("unexpected error. %v\n", err)
 	}
-	case2Policy := Policy{
+	case2Policy := BucketPolicy{
 		ID:      "MyPolicyForMyBucket1",
 		Version: DefaultVersion,
-		Statements: []Statement{
-			NewStatement("",
-				iamp.Allow,
+		Statements: []BPStatement{
+			NewBPStatement("",
+				Allow,
 				NewPrincipal("*"),
-				iamp.NewActionSet(iamp.GetObjectAction, iamp.PutObjectAction),
-				iamp.NewResourceSet(iamp.NewResource("mybucket/myobject*")),
+				NewActionSet(GetObjectAction, PutObjectAction),
+				NewResourceSet(NewResource("mybucket/myobject*")),
 				condition.NewFunctions(func1, func2),
 			),
 		},
 	}
 
 	testCases := []struct {
-		policy     Policy
+		policy     BucketPolicy
 		bucketName string
 		expectErr  bool
 	}{
@@ -1147,99 +1146,6 @@ func TestPolicyValidate(t *testing.T) {
 
 		if expectErr != testCase.expectErr {
 			t.Fatalf("case %v: error: expected: %v, got: %v", i+1, testCase.expectErr, expectErr)
-		}
-	}
-}
-
-func TestPolicyMerge(t *testing.T) {
-	testCases := []struct {
-		policy string
-	}{
-		{`{
-    "Version": "2012-10-17",
-    "Id": "S3PolicyId1",
-    "Statement": [
-        {
-            "Sid": "statement1",
-            "Effect": "Deny",
-            "Principal": "*",
-	    "Action":["s3:GetObject", "s3:PutObject"],
-	    "Resource": "arn:aws:s3:::awsexamplebucket1/*"
-        }
-    ]
-}`},
-		{`{
-    "Version": "2012-10-17",
-    "Id": "S3PolicyId1",
-    "Statement": [
-        {
-            "Sid": "statement1",
-            "Effect": "Allow",
-            "Principal": "*",
-            "Action":"s3:GetObject",
-            "Resource": "arn:aws:s3:::awsexamplebucket1/*",
-            "Condition" : {
-                "IpAddress" : {
-                    "aws:SourceIp": "192.0.2.0/24"
-                },
-                "NotIpAddress" : {
-                    "aws:SourceIp": "192.0.2.188/32"
-                }
-            }
-        }
-    ]
-}`},
-		{`{
-    "Version": "2012-10-17",
-    "Statement": [
-       {
-            "Sid": "cross-account permission to user in your own account",
-            "Effect": "Allow",
-            "Principal": {
-                "AWS": "arn:aws:iam::123456789012:user/Dave"
-            },
-            "Action": "s3:PutObject",
-            "Resource": "arn:aws:s3:::awsexamplebucket1/*"
-        },
-        {
-            "Sid": "Deny your user permission to upload object if copy source is not /bucket/folder",
-            "Effect": "Deny",
-            "Principal": {
-                "AWS": "arn:aws:iam::123456789012:user/Dave"
-            },
-            "Action": "s3:PutObject",
-            "Resource": "arn:aws:s3:::awsexamplebucket1/*",
-            "Condition": {
-                "StringNotLike": {
-                    "s3:x-amz-copy-source": "awsexamplebucket1/public/*"
-                }
-            }
-        }
-    ]
-}`},
-	}
-
-	for i, testCase := range testCases {
-		var p Policy
-		err := json.Unmarshal([]byte(testCase.policy), &p)
-		if err != nil {
-			t.Fatalf("case %v: unexpected error: %v", i+1, err)
-		}
-
-		mergedPolicy := MergePolicies(p)
-
-		j, err := json.Marshal(mergedPolicy)
-		if err != nil {
-			t.Fatalf("case %v: unexpected error: %v", i+1, err)
-		}
-
-		err = json.Unmarshal(j, &mergedPolicy)
-		if err != nil {
-			t.Fatalf("case %v: unexpected error: %v", i+1, err)
-		}
-
-		if !mergedPolicy.Statements[0].Equals(p.Statements[0]) {
-			t.Fatalf("case %v: different policy outcome", i+1)
 		}
 	}
 }

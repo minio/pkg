@@ -15,41 +15,36 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-package policy
+package iampolicy
 
 import (
 	"encoding/json"
 	"io"
-
-	iamp "github.com/minio/pkg/iam/policy"
 )
 
-// DefaultVersion - default policy version as per AWS S3 specification.
-const DefaultVersion = "2012-10-17"
-
-// Args - arguments to policy to check whether it is allowed
-type Args struct {
+// BucketPolicyArgs - arguments to policy to check whether it is allowed
+type BucketPolicyArgs struct {
 	AccountName     string              `json:"account"`
 	Groups          []string            `json:"groups"`
-	Action          iamp.Action         `json:"action"`
+	Action          Action              `json:"action"`
 	BucketName      string              `json:"bucket"`
 	ConditionValues map[string][]string `json:"conditions"`
 	IsOwner         bool                `json:"owner"`
 	ObjectName      string              `json:"object"`
 }
 
-// Policy - bucket policy.
-type Policy struct {
-	ID         iamp.ID `json:"ID,omitempty"`
+// BucketPolicy - bucket policy.
+type BucketPolicy struct {
+	ID         ID `json:"ID,omitempty"`
 	Version    string
-	Statements []Statement `json:"Statement"`
+	Statements []BPStatement `json:"Statement"`
 }
 
 // IsAllowed - checks given policy args is allowed to continue the Rest API.
-func (policy Policy) IsAllowed(args Args) bool {
+func (policy BucketPolicy) IsAllowed(args BucketPolicyArgs) bool {
 	// Check all deny statements. If any one statement denies, return false.
 	for _, statement := range policy.Statements {
-		if statement.Effect == iamp.Deny {
+		if statement.Effect == Deny {
 			if !statement.IsAllowed(args) {
 				return false
 			}
@@ -63,7 +58,7 @@ func (policy Policy) IsAllowed(args Args) bool {
 
 	// Check all allow statements. If any one statement allows, return true.
 	for _, statement := range policy.Statements {
-		if statement.Effect == iamp.Allow {
+		if statement.Effect == Allow {
 			if statement.IsAllowed(args) {
 				return true
 			}
@@ -74,12 +69,12 @@ func (policy Policy) IsAllowed(args Args) bool {
 }
 
 // IsEmpty - returns whether policy is empty or not.
-func (policy Policy) IsEmpty() bool {
+func (policy BucketPolicy) IsEmpty() bool {
 	return len(policy.Statements) == 0
 }
 
 // isValid - checks if Policy is valid or not.
-func (policy Policy) isValid() error {
+func (policy BucketPolicy) isValid() error {
 	if policy.Version != DefaultVersion && policy.Version != "" {
 		return Errorf("invalid version '%v'", policy.Version)
 	}
@@ -94,33 +89,17 @@ func (policy Policy) isValid() error {
 }
 
 // MarshalJSON - encodes Policy to JSON data.
-func (policy Policy) MarshalJSON() ([]byte, error) {
+func (policy BucketPolicy) MarshalJSON() ([]byte, error) {
 	if err := policy.isValid(); err != nil {
 		return nil, err
 	}
 
 	// subtype to avoid recursive call to MarshalJSON()
-	type subPolicy Policy
+	type subPolicy BucketPolicy
 	return json.Marshal(subPolicy(policy))
 }
 
-// MergePolicies merges all the given policies into a single policy dropping any
-// duplicate statements.
-func MergePolicies(inputs ...Policy) Policy {
-	var merged Policy
-	for _, p := range inputs {
-		if merged.Version == "" {
-			merged.Version = p.Version
-		}
-		for _, st := range p.Statements {
-			merged.Statements = append(merged.Statements, st.Clone())
-		}
-	}
-	merged.dropDuplicateStatements()
-	return merged
-}
-
-func (policy *Policy) dropDuplicateStatements() {
+func (policy *BucketPolicy) dropDuplicateStatements() {
 	dups := make(map[int]struct{})
 	for i := range policy.Statements {
 		if _, ok := dups[i]; ok {
@@ -151,15 +130,15 @@ func (policy *Policy) dropDuplicateStatements() {
 }
 
 // UnmarshalJSON - decodes JSON data to Policy.
-func (policy *Policy) UnmarshalJSON(data []byte) error {
+func (policy *BucketPolicy) UnmarshalJSON(data []byte) error {
 	// subtype to avoid recursive call to UnmarshalJSON()
-	type subPolicy Policy
+	type subPolicy BucketPolicy
 	var sp subPolicy
 	if err := json.Unmarshal(data, &sp); err != nil {
 		return err
 	}
 
-	p := Policy(sp)
+	p := BucketPolicy(sp)
 	if err := p.isValid(); err != nil {
 		return err
 	}
@@ -172,7 +151,7 @@ func (policy *Policy) UnmarshalJSON(data []byte) error {
 }
 
 // Validate - validates all statements are for given bucket or not.
-func (policy Policy) Validate(bucketName string) error {
+func (policy BucketPolicy) Validate(bucketName string) error {
 	if err := policy.isValid(); err != nil {
 		return err
 	}
@@ -186,9 +165,9 @@ func (policy Policy) Validate(bucketName string) error {
 	return nil
 }
 
-// ParseConfig - parses data in given reader to Policy.
-func ParseConfig(reader io.Reader, bucketName string) (*Policy, error) {
-	var policy Policy
+// ParseBucketPolicyConfig - parses data in given reader to Policy.
+func ParseBucketPolicyConfig(reader io.Reader, bucketName string) (*BucketPolicy, error) {
+	var policy BucketPolicy
 
 	decoder := json.NewDecoder(reader)
 	decoder.DisallowUnknownFields()
@@ -201,7 +180,7 @@ func ParseConfig(reader io.Reader, bucketName string) (*Policy, error) {
 }
 
 // Equals returns true if the two policies are identical
-func (policy *Policy) Equals(p Policy) bool {
+func (policy *BucketPolicy) Equals(p BucketPolicy) bool {
 	if policy.ID != p.ID || policy.Version != p.Version {
 		return false
 	}
