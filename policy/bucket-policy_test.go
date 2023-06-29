@@ -15,7 +15,7 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-package iampolicy
+package policy
 
 import (
 	"encoding/json"
@@ -23,7 +23,7 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/minio/pkg/iam/policy/condition"
+	"github.com/minio/pkg/v2/policy/condition"
 )
 
 func TestBucketPolicyIsAllowed(t *testing.T) {

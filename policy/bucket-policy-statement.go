@@ -15,27 +15,32 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-package iampolicy
+package policy
 
 import (
 	"strings"
 
-	"github.com/minio/pkg/iam/policy/condition"
+	"github.com/minio/pkg/v2/policy/condition"
 )
 
-// Statement - iam policy statement.
-type Statement struct {
+// BPStatement - policy statement.
+type BPStatement struct {
 	SID        ID                  `json:"Sid,omitempty"`
 	Effect     Effect              `json:"Effect"`
+	Principal  Principal           `json:"Principal"`
 	Actions    ActionSet           `json:"Action"`
 	NotActions ActionSet           `json:"NotAction,omitempty"`
-	Resources  ResourceSet         `json:"Resource,omitempty"`
+	Resources  ResourceSet         `json:"Resource"`
 	Conditions condition.Functions `json:"Condition,omitempty"`
 }
 
 // IsAllowed - checks given policy args is allowed to continue the Rest API.
-func (statement Statement) IsAllowed(args Args) bool {
+func (statement BPStatement) IsAllowed(args BucketPolicyArgs) bool {
 	check := func() bool {
+		if !statement.Principal.Match(args.AccountName) {
+			return false
+		}
+
 		if (!statement.Actions.Match(args.Action) && !statement.Actions.IsEmpty()) ||
 			statement.NotActions.Match(args.Action) {
 			return false
@@ -48,12 +53,9 @@ func (statement Statement) IsAllowed(args Args) bool {
 			}
 
 			resource += args.ObjectName
-		} else {
-			resource += "/"
 		}
 
-		// For admin statements, resource match can be ignored.
-		if !statement.Resources.Match(resource, args.ConditionValues) && !statement.isAdmin() && !statement.isKMS() {
+		if !statement.Resources.Match(resource, args.ConditionValues) {
 			return false
 		}
 
@@ -63,71 +65,33 @@ func (statement Statement) IsAllowed(args Args) bool {
 	return statement.Effect.IsAllowed(check())
 }
 
-func (statement Statement) isAdmin() bool {
-	for action := range statement.Actions {
-		if AdminAction(action).IsValid() {
-			return true
-		}
-	}
-	return false
-}
-
-func (statement Statement) isKMS() bool {
-	for action := range statement.Actions {
-		if KMSAction(action).IsValid() {
-			return true
-		}
-	}
-	return false
-}
-
 // isValid - checks whether statement is valid or not.
-func (statement Statement) isValid() error {
+func (statement BPStatement) isValid() error {
 	if !statement.Effect.IsValid() {
 		return Errorf("invalid Effect %v", statement.Effect)
+	}
+
+	if !statement.Principal.IsValid() {
+		return Errorf("invalid Principal %v", statement.Principal)
 	}
 
 	if len(statement.Actions) == 0 && len(statement.NotActions) == 0 {
 		return Errorf("Action must not be empty")
 	}
 
-	if statement.isAdmin() {
-		if err := statement.Actions.ValidateAdmin(); err != nil {
-			return err
-		}
-		for action := range statement.Actions {
-			keys := statement.Conditions.Keys()
-			keyDiff := keys.Difference(adminActionConditionKeyMap[action])
-			if !keyDiff.IsEmpty() {
-				return Errorf("unsupported condition keys '%v' used for action '%v'", keyDiff, action)
-			}
-		}
-		return nil
-	}
-
-	if statement.isKMS() {
-		return statement.Actions.ValidateKMS()
-	}
-
-	if !statement.SID.IsValid() {
-		return Errorf("invalid SID %v", statement.SID)
-	}
-
 	if len(statement.Resources) == 0 {
 		return Errorf("Resource must not be empty")
 	}
 
-	if err := statement.Resources.Validate(); err != nil {
-		return err
-	}
-
-	if err := statement.Actions.Validate(); err != nil {
-		return err
-	}
-
 	for action := range statement.Actions {
-		if !statement.Resources.ObjectResourceExists() && !statement.Resources.BucketResourceExists() {
-			return Errorf("unsupported Resource found %v for action %v", statement.Resources, action)
+		if action.IsObjectAction() {
+			if !statement.Resources.ObjectResourceExists() {
+				return Errorf("unsupported Resource found %v for action %v", statement.Resources, action)
+			}
+		} else {
+			if !statement.Resources.BucketResourceExists() {
+				return Errorf("unsupported Resource found %v for action %v", statement.Resources, action)
+			}
 		}
 
 		keys := statement.Conditions.Keys()
@@ -141,13 +105,20 @@ func (statement Statement) isValid() error {
 }
 
 // Validate - validates Statement is for given bucket or not.
-func (statement Statement) Validate() error {
-	return statement.isValid()
+func (statement BPStatement) Validate(bucketName string) error {
+	if err := statement.isValid(); err != nil {
+		return err
+	}
+
+	return statement.Resources.ValidateBucket(bucketName)
 }
 
 // Equals checks if two statements are equal
-func (statement Statement) Equals(st Statement) bool {
+func (statement BPStatement) Equals(st BPStatement) bool {
 	if statement.Effect != st.Effect {
+		return false
+	}
+	if !statement.Principal.Equals(st.Principal) {
 		return false
 	}
 	if !statement.Actions.Equals(st.Actions) {
@@ -166,10 +137,11 @@ func (statement Statement) Equals(st Statement) bool {
 }
 
 // Clone clones Statement structure
-func (statement Statement) Clone() Statement {
-	return Statement{
+func (statement BPStatement) Clone() BPStatement {
+	return BPStatement{
 		SID:        statement.SID,
 		Effect:     statement.Effect,
+		Principal:  statement.Principal.Clone(),
 		Actions:    statement.Actions.Clone(),
 		NotActions: statement.NotActions.Clone(),
 		Resources:  statement.Resources.Clone(),
@@ -177,22 +149,24 @@ func (statement Statement) Clone() Statement {
 	}
 }
 
-// NewStatement - creates new statement.
-func NewStatement(sid ID, effect Effect, actionSet ActionSet, resourceSet ResourceSet, conditions condition.Functions) Statement {
-	return Statement{
+// NewBPStatement - creates new statement.
+func NewBPStatement(sid ID, effect Effect, principal Principal, actionSet ActionSet, resourceSet ResourceSet, conditions condition.Functions) BPStatement {
+	return BPStatement{
 		SID:        sid,
 		Effect:     effect,
+		Principal:  principal,
 		Actions:    actionSet,
 		Resources:  resourceSet,
 		Conditions: conditions,
 	}
 }
 
-// NewStatementWithNotAction - creates new statement with NotAction.
-func NewStatementWithNotAction(sid ID, effect Effect, notActions ActionSet, resources ResourceSet, conditions condition.Functions) Statement {
-	return Statement{
+// NewBPStatementWithNotAction - creates new statement with NotAction.
+func NewBPStatementWithNotAction(sid ID, effect Effect, principal Principal, notActions ActionSet, resources ResourceSet, conditions condition.Functions) BPStatement {
+	return BPStatement{
 		SID:        sid,
 		Effect:     effect,
+		Principal:  principal,
 		NotActions: notActions,
 		Resources:  resources,
 		Conditions: conditions,
