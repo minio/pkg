@@ -20,6 +20,8 @@ package policy
 import (
 	"encoding/json"
 	"io"
+
+	iamp "github.com/minio/pkg/iam/policy"
 )
 
 // DefaultVersion - default policy version as per AWS S3 specification.
@@ -29,7 +31,7 @@ const DefaultVersion = "2012-10-17"
 type Args struct {
 	AccountName     string              `json:"account"`
 	Groups          []string            `json:"groups"`
-	Action          Action              `json:"action"`
+	Action          iamp.Action         `json:"action"`
 	BucketName      string              `json:"bucket"`
 	ConditionValues map[string][]string `json:"conditions"`
 	IsOwner         bool                `json:"owner"`
@@ -38,7 +40,7 @@ type Args struct {
 
 // Policy - bucket policy.
 type Policy struct {
-	ID         ID `json:"ID,omitempty"`
+	ID         iamp.ID `json:"ID,omitempty"`
 	Version    string
 	Statements []Statement `json:"Statement"`
 }
@@ -47,7 +49,7 @@ type Policy struct {
 func (policy Policy) IsAllowed(args Args) bool {
 	// Check all deny statements. If any one statement denies, return false.
 	for _, statement := range policy.Statements {
-		if statement.Effect == Deny {
+		if statement.Effect == iamp.Deny {
 			if !statement.IsAllowed(args) {
 				return false
 			}
@@ -61,7 +63,7 @@ func (policy Policy) IsAllowed(args Args) bool {
 
 	// Check all allow statements. If any one statement allows, return true.
 	for _, statement := range policy.Statements {
-		if statement.Effect == Allow {
+		if statement.Effect == iamp.Allow {
 			if statement.IsAllowed(args) {
 				return true
 			}

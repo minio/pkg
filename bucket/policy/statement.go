@@ -18,20 +18,20 @@
 package policy
 
 import (
-	"encoding/json"
 	"strings"
 
-	"github.com/minio/pkg/bucket/policy/condition"
+	iamp "github.com/minio/pkg/iam/policy"
+	"github.com/minio/pkg/iam/policy/condition"
 )
 
 // Statement - policy statement.
 type Statement struct {
-	SID        ID                  `json:"Sid,omitempty"`
-	Effect     Effect              `json:"Effect"`
+	SID        iamp.ID             `json:"Sid,omitempty"`
+	Effect     iamp.Effect         `json:"Effect"`
 	Principal  Principal           `json:"Principal"`
-	Actions    ActionSet           `json:"Action"`
-	NotActions ActionSet           `json:"NotAction,omitempty"`
-	Resources  ResourceSet         `json:"Resource"`
+	Actions    iamp.ActionSet      `json:"Action"`
+	NotActions iamp.ActionSet      `json:"NotAction,omitempty"`
+	Resources  iamp.ResourceSet    `json:"Resource"`
 	Conditions condition.Functions `json:"Condition,omitempty"`
 }
 
@@ -85,54 +85,22 @@ func (statement Statement) isValid() error {
 	}
 
 	for action := range statement.Actions {
-		if action.isObjectAction() {
-			if !statement.Resources.objectResourceExists() {
+		if action.IsObjectAction() {
+			if !statement.Resources.ObjectResourceExists() {
 				return Errorf("unsupported Resource found %v for action %v", statement.Resources, action)
 			}
 		} else {
-			if !statement.Resources.bucketResourceExists() {
+			if !statement.Resources.BucketResourceExists() {
 				return Errorf("unsupported Resource found %v for action %v", statement.Resources, action)
 			}
 		}
 
 		keys := statement.Conditions.Keys()
-		keyDiff := keys.Difference(iamActionConditionKeyMap.Lookup(action))
+		keyDiff := keys.Difference(iamp.IAMActionConditionKeyMap.Lookup(action))
 		if !keyDiff.IsEmpty() {
 			return Errorf("unsupported condition keys '%v' used for action '%v'", keyDiff, action)
 		}
 	}
-
-	return nil
-}
-
-// MarshalJSON - encodes JSON data to Statement.
-func (statement Statement) MarshalJSON() ([]byte, error) {
-	if err := statement.isValid(); err != nil {
-		return nil, err
-	}
-
-	// subtype to avoid recursive call to MarshalJSON()
-	type subStatement Statement
-	ss := subStatement(statement)
-	return json.Marshal(ss)
-}
-
-// UnmarshalJSON - decodes JSON data to Statement.
-func (statement *Statement) UnmarshalJSON(data []byte) error {
-	// subtype to avoid recursive call to UnmarshalJSON()
-	type subStatement Statement
-	var ss subStatement
-
-	if err := json.Unmarshal(data, &ss); err != nil {
-		return err
-	}
-
-	s := Statement(ss)
-	if err := s.isValid(); err != nil {
-		return err
-	}
-
-	*statement = s
 
 	return nil
 }
@@ -143,7 +111,7 @@ func (statement Statement) Validate(bucketName string) error {
 		return err
 	}
 
-	return statement.Resources.Validate(bucketName)
+	return statement.Resources.ValidateBucket(bucketName)
 }
 
 // Equals checks if two statements are equal
@@ -183,7 +151,7 @@ func (statement Statement) Clone() Statement {
 }
 
 // NewStatement - creates new statement.
-func NewStatement(sid ID, effect Effect, principal Principal, actionSet ActionSet, resourceSet ResourceSet, conditions condition.Functions) Statement {
+func NewStatement(sid iamp.ID, effect iamp.Effect, principal Principal, actionSet iamp.ActionSet, resourceSet iamp.ResourceSet, conditions condition.Functions) Statement {
 	return Statement{
 		SID:        sid,
 		Effect:     effect,
@@ -195,7 +163,7 @@ func NewStatement(sid ID, effect Effect, principal Principal, actionSet ActionSe
 }
 
 // NewStatementWithNotAction - creates new statement with NotAction.
-func NewStatementWithNotAction(sid ID, effect Effect, principal Principal, notActions ActionSet, resources ResourceSet, conditions condition.Functions) Statement {
+func NewStatementWithNotAction(sid iamp.ID, effect iamp.Effect, principal Principal, notActions iamp.ActionSet, resources iamp.ResourceSet, conditions condition.Functions) Statement {
 	return Statement{
 		SID:        sid,
 		Effect:     effect,

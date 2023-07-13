@@ -26,8 +26,7 @@ import (
 	"time"
 
 	"github.com/minio/minio-go/v7/pkg/set"
-	"github.com/minio/pkg/bucket/policy"
-	"github.com/minio/pkg/bucket/policy/condition"
+	"github.com/minio/pkg/iam/policy/condition"
 )
 
 func TestGetPoliciesFromClaims(t *testing.T) {
@@ -130,7 +129,7 @@ func TestPolicyIsAllowed(t *testing.T) {
 		Statements: []Statement{
 			NewStatement(
 				"",
-				policy.Allow,
+				Allow,
 				NewActionSet(GetBucketLocationAction, PutObjectAction),
 				NewResourceSet(NewResource("*")),
 				condition.NewFunctions(),
@@ -143,7 +142,7 @@ func TestPolicyIsAllowed(t *testing.T) {
 		Statements: []Statement{
 			NewStatement(
 				"",
-				policy.Allow,
+				Allow,
 				NewActionSet(GetObjectAction, PutObjectAction),
 				NewResourceSet(NewResource("mybucket/myobject*")),
 				condition.NewFunctions(),
@@ -168,7 +167,7 @@ func TestPolicyIsAllowed(t *testing.T) {
 		Statements: []Statement{
 			NewStatement(
 				"",
-				policy.Allow,
+				Allow,
 				NewActionSet(GetObjectAction, PutObjectAction),
 				NewResourceSet(NewResource("mybucket/myobject*")),
 				condition.NewFunctions(func1),
@@ -181,7 +180,7 @@ func TestPolicyIsAllowed(t *testing.T) {
 		Statements: []Statement{
 			NewStatement(
 				"",
-				policy.Deny,
+				Deny,
 				NewActionSet(GetObjectAction, PutObjectAction),
 				NewResourceSet(NewResource("mybucket/myobject*")),
 				condition.NewFunctions(func1),
@@ -290,7 +289,7 @@ func TestPolicyIsEmpty(t *testing.T) {
 		Statements: []Statement{
 			NewStatement(
 				"",
-				policy.Allow,
+				Allow,
 				NewActionSet(PutObjectAction),
 				NewResourceSet(NewResource("mybucket/myobject*")),
 				condition.NewFunctions(),
@@ -326,7 +325,7 @@ func TestPolicyIsValid(t *testing.T) {
 		Statements: []Statement{
 			NewStatement(
 				"",
-				policy.Allow,
+				Allow,
 				NewActionSet(PutObjectAction),
 				NewResourceSet(NewResource("mybucket/myobject*")),
 				condition.NewFunctions(),
@@ -339,14 +338,14 @@ func TestPolicyIsValid(t *testing.T) {
 		Statements: []Statement{
 			NewStatement(
 				"",
-				policy.Allow,
+				Allow,
 				NewActionSet(PutObjectAction),
 				NewResourceSet(NewResource("mybucket/myobject*")),
 				condition.NewFunctions(),
 			),
 			NewStatement(
 				"",
-				policy.Deny,
+				Deny,
 				NewActionSet(GetObjectAction),
 				NewResourceSet(NewResource("mybucket/myobject*")),
 				condition.NewFunctions(),
@@ -359,14 +358,14 @@ func TestPolicyIsValid(t *testing.T) {
 		Statements: []Statement{
 			NewStatement(
 				"",
-				policy.Allow,
+				Allow,
 				NewActionSet(PutObjectAction),
 				NewResourceSet(NewResource("mybucket/myobject*")),
 				condition.NewFunctions(),
 			),
 			NewStatement(
 				"",
-				policy.Deny,
+				Deny,
 				NewActionSet(PutObjectAction),
 				NewResourceSet(NewResource("mybucket/yourobject*")),
 				condition.NewFunctions(),
@@ -394,14 +393,14 @@ func TestPolicyIsValid(t *testing.T) {
 		Statements: []Statement{
 			NewStatement(
 				"",
-				policy.Allow,
+				Allow,
 				NewActionSet(PutObjectAction),
 				NewResourceSet(NewResource("mybucket/myobject*")),
 				condition.NewFunctions(func1),
 			),
 			NewStatement(
 				"",
-				policy.Deny,
+				Deny,
 				NewActionSet(PutObjectAction),
 				NewResourceSet(NewResource("mybucket/myobject*")),
 				condition.NewFunctions(func2),
@@ -414,7 +413,7 @@ func TestPolicyIsValid(t *testing.T) {
 		Statements: []Statement{
 			NewStatement(
 				"",
-				policy.Allow,
+				Allow,
 				NewActionSet(PutObjectAction),
 				NewResourceSet(NewResource("mybucket/myobject*")),
 				condition.NewFunctions(),
@@ -428,7 +427,7 @@ func TestPolicyIsValid(t *testing.T) {
 		Statements: []Statement{
 			NewStatement(
 				"",
-				policy.Allow,
+				Allow,
 				NewActionSet(GetObjectAction, PutObjectAction),
 				NewResourceSet(NewResource("mybucket/myobject*")),
 				condition.NewFunctions(func1, func2),
@@ -441,14 +440,14 @@ func TestPolicyIsValid(t *testing.T) {
 		Statements: []Statement{
 			NewStatement(
 				"",
-				policy.Allow,
+				Allow,
 				NewActionSet(PutObjectAction),
 				NewResourceSet(NewResource("mybucket/myobject*")),
 				condition.NewFunctions(),
 			),
 			NewStatement(
 				"",
-				policy.Deny,
+				Deny,
 				NewActionSet(PutObjectAction),
 				NewResourceSet(NewResource("mybucket/myobject*")),
 				condition.NewFunctions(),
@@ -461,14 +460,14 @@ func TestPolicyIsValid(t *testing.T) {
 		Statements: []Statement{
 			NewStatement(
 				"",
-				policy.Allow,
+				Allow,
 				NewActionSet(PutObjectAction),
 				NewResourceSet(NewResource("mybucket/myobject*")),
 				condition.NewFunctions(),
 			),
 			NewStatement(
 				"",
-				policy.Allow,
+				Allow,
 				NewActionSet(PutObjectAction),
 				NewResourceSet(NewResource("mybucket/myobject*")),
 				condition.NewFunctions(),
@@ -779,7 +778,7 @@ func TestPolicyUnmarshalJSONAndValidate(t *testing.T) {
 		Statements: []Statement{
 			NewStatement(
 				"",
-				policy.Allow,
+				Allow,
 				NewActionSet(PutObjectAction),
 				NewResourceSet(NewResource("mybucket/myobject*")),
 				condition.NewFunctions(),
@@ -825,14 +824,14 @@ func TestPolicyUnmarshalJSONAndValidate(t *testing.T) {
 		Statements: []Statement{
 			NewStatement(
 				"",
-				policy.Allow,
+				Allow,
 				NewActionSet(PutObjectAction),
 				NewResourceSet(NewResource("mybucket/myobject*")),
 				condition.NewFunctions(),
 			),
 			NewStatement(
 				"",
-				policy.Deny,
+				Deny,
 				NewActionSet(GetObjectAction),
 				NewResourceSet(NewResource("mybucket/yourobject*")),
 				condition.NewFunctions(func1),
@@ -862,14 +861,14 @@ func TestPolicyUnmarshalJSONAndValidate(t *testing.T) {
 		Statements: []Statement{
 			NewStatement(
 				"",
-				policy.Allow,
+				Allow,
 				NewActionSet(GetObjectAction),
 				NewResourceSet(NewResource("mybucket/myobject*")),
 				condition.NewFunctions(),
 			),
 			NewStatement(
 				"",
-				policy.Allow,
+				Allow,
 				NewActionSet(PutObjectAction),
 				NewResourceSet(NewResource("mybucket/myobject*")),
 				condition.NewFunctions(),
@@ -899,14 +898,14 @@ func TestPolicyUnmarshalJSONAndValidate(t *testing.T) {
 		Statements: []Statement{
 			NewStatement(
 				"",
-				policy.Allow,
+				Allow,
 				NewActionSet(PutObjectAction),
 				NewResourceSet(NewResource("mybucket/myobject*")),
 				condition.NewFunctions(),
 			),
 			NewStatement(
 				"",
-				policy.Allow,
+				Allow,
 				NewActionSet(GetObjectAction),
 				NewResourceSet(NewResource("mybucket/myobject*")),
 				condition.NewFunctions(),
@@ -936,14 +935,14 @@ func TestPolicyUnmarshalJSONAndValidate(t *testing.T) {
 		Statements: []Statement{
 			NewStatement(
 				"",
-				policy.Allow,
+				Allow,
 				NewActionSet(PutObjectAction),
 				NewResourceSet(NewResource("mybucket/myobject*")),
 				condition.NewFunctions(),
 			),
 			NewStatement(
 				"",
-				policy.Allow,
+				Allow,
 				NewActionSet(PutObjectAction),
 				NewResourceSet(NewResource("mybucket/yourobject*")),
 				condition.NewFunctions(),
@@ -995,14 +994,14 @@ func TestPolicyUnmarshalJSONAndValidate(t *testing.T) {
 		Statements: []Statement{
 			NewStatement(
 				"",
-				policy.Allow,
+				Allow,
 				NewActionSet(PutObjectAction),
 				NewResourceSet(NewResource("mybucket/myobject*")),
 				condition.NewFunctions(func1),
 			),
 			NewStatement(
 				"",
-				policy.Allow,
+				Allow,
 				NewActionSet(PutObjectAction),
 				NewResourceSet(NewResource("mybucket/myobject*")),
 				condition.NewFunctions(func2),
@@ -1028,7 +1027,7 @@ func TestPolicyUnmarshalJSONAndValidate(t *testing.T) {
 		Statements: []Statement{
 			NewStatement(
 				"",
-				policy.Allow,
+				Allow,
 				NewActionSet(GetBucketLocationAction),
 				NewResourceSet(NewResource("mybucket")),
 				condition.NewFunctions(),
@@ -1054,7 +1053,7 @@ func TestPolicyUnmarshalJSONAndValidate(t *testing.T) {
 		Statements: []Statement{
 			NewStatement(
 				"",
-				policy.Allow,
+				Allow,
 				NewActionSet(GetBucketLocationAction),
 				NewResourceSet(NewResource("*")),
 				condition.NewFunctions(),
@@ -1096,7 +1095,7 @@ func TestPolicyUnmarshalJSONAndValidate(t *testing.T) {
 		Statements: []Statement{
 			NewStatement(
 				"",
-				policy.Allow,
+				Allow,
 				NewActionSet(PutObjectAction),
 				NewResourceSet(NewResource("mybucket/myobject*")),
 				condition.NewFunctions(),
@@ -1127,14 +1126,14 @@ func TestPolicyUnmarshalJSONAndValidate(t *testing.T) {
 		Statements: []Statement{
 			NewStatement(
 				"",
-				policy.Allow,
+				Allow,
 				NewActionSet(PutObjectAction),
 				NewResourceSet(NewResource("mybucket/myobject*")),
 				condition.NewFunctions(),
 			),
 			NewStatement(
 				"",
-				policy.Deny,
+				Deny,
 				NewActionSet(PutObjectAction),
 				NewResourceSet(NewResource("mybucket/myobject*")),
 				condition.NewFunctions(),
@@ -1177,14 +1176,14 @@ func TestPolicyUnmarshalJSONAndValidate(t *testing.T) {
 		Statements: []Statement{
 			NewStatement(
 				"",
-				policy.Allow,
+				Allow,
 				NewActionSet(AllActions),
 				NewResourceSet(NewResource("*")),
 				condition.NewFunctions(),
 			),
 			NewStatement(
 				"",
-				policy.Allow,
+				Allow,
 				NewActionSet(AllAdminActions),
 				ResourceSet{},
 				condition.NewFunctions(),
@@ -1233,21 +1232,21 @@ func TestPolicyUnmarshalJSONAndValidate(t *testing.T) {
 		Statements: []Statement{
 			NewStatement(
 				"",
-				policy.Allow,
+				Allow,
 				NewActionSet(AllActions),
 				NewResourceSet(NewResource("*")),
 				condition.NewFunctions(),
 			),
 			NewStatement(
 				"",
-				policy.Deny,
+				Deny,
 				NewActionSet(AllAdminActions),
 				ResourceSet{},
 				condition.NewFunctions(),
 			),
 			NewStatement(
 				"",
-				policy.Allow,
+				Allow,
 				NewActionSet(AllAdminActions),
 				ResourceSet{},
 				condition.NewFunctions(),
@@ -1290,14 +1289,14 @@ func TestPolicyUnmarshalJSONAndValidate(t *testing.T) {
 		Statements: []Statement{
 			NewStatement(
 				"",
-				policy.Allow,
+				Allow,
 				NewActionSet(AllActions),
 				NewResourceSet(NewResource("*")),
 				condition.NewFunctions(),
 			),
 			NewStatement(
 				"",
-				policy.Deny,
+				Deny,
 				NewActionSet(AllAdminActions),
 				ResourceSet{},
 				condition.NewFunctions(),
@@ -1365,7 +1364,7 @@ func TestPolicyValidate(t *testing.T) {
 		Statements: []Statement{
 			NewStatement(
 				"",
-				policy.Allow,
+				Allow,
 				NewActionSet(PutObjectAction),
 				NewResourceSet(NewResource("")),
 				condition.NewFunctions(),
@@ -1393,7 +1392,7 @@ func TestPolicyValidate(t *testing.T) {
 		Statements: []Statement{
 			NewStatement(
 				"",
-				policy.Allow,
+				Allow,
 				NewActionSet(GetObjectAction, PutObjectAction),
 				NewResourceSet(NewResource("mybucket/myobject*")),
 				condition.NewFunctions(func1, func2),
@@ -1407,7 +1406,7 @@ func TestPolicyValidate(t *testing.T) {
 		Statements: []Statement{
 			NewStatement(
 				"",
-				policy.Allow,
+				Allow,
 				NewActionSet(GetObjectAction, PutObjectAction),
 				NewResourceSet(NewResource("mybucket/myobject*")),
 				condition.NewFunctions(),
@@ -1440,14 +1439,14 @@ func TestMergePolicies(t *testing.T) {
 		Statements: []Statement{
 			NewStatement(
 				"",
-				policy.Deny,
+				Deny,
 				NewActionSet(AllAdminActions),
 				ResourceSet{},
 				condition.NewFunctions(),
 			),
 			NewStatement(
 				"",
-				policy.Allow,
+				Allow,
 				NewActionSet(AllActions),
 				NewResourceSet(NewResource("*")),
 				condition.NewFunctions(),
@@ -1461,7 +1460,7 @@ func TestMergePolicies(t *testing.T) {
 		Statements: []Statement{
 			NewStatement(
 				"",
-				policy.Deny,
+				Deny,
 				NewActionSet(AllAdminActions),
 				ResourceSet{},
 				condition.NewFunctions(),
@@ -1475,7 +1474,7 @@ func TestMergePolicies(t *testing.T) {
 		Statements: []Statement{
 			NewStatement(
 				"",
-				policy.Allow,
+				Allow,
 				NewActionSet(GetBucketLocationAction),
 				NewResourceSet(NewResource("mybucket")),
 				condition.NewFunctions(),
@@ -1522,21 +1521,21 @@ func TestMergePolicies(t *testing.T) {
 				Statements: []Statement{
 					NewStatement(
 						"",
-						policy.Deny,
+						Deny,
 						NewActionSet(AllAdminActions),
 						ResourceSet{},
 						condition.NewFunctions(),
 					),
 					NewStatement(
 						"",
-						policy.Allow,
+						Allow,
 						NewActionSet(AllActions),
 						NewResourceSet(NewResource("*")),
 						condition.NewFunctions(),
 					),
 					NewStatement(
 						"",
-						policy.Allow,
+						Allow,
 						NewActionSet(GetBucketLocationAction),
 						NewResourceSet(NewResource("mybucket")),
 						condition.NewFunctions(),

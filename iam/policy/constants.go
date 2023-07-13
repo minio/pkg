@@ -18,8 +18,7 @@
 package iampolicy
 
 import (
-	"github.com/minio/pkg/bucket/policy"
-	"github.com/minio/pkg/bucket/policy/condition"
+	"github.com/minio/pkg/iam/policy/condition"
 )
 
 // Policy claim constants
@@ -40,8 +39,8 @@ var DefaultPolicies = []struct {
 			Version: DefaultVersion,
 			Statements: []Statement{
 				{
-					SID:       policy.ID(""),
-					Effect:    policy.Allow,
+					SID:       ID(""),
+					Effect:    Allow,
 					Actions:   NewActionSet(AllActions),
 					Resources: NewResourceSet(NewResource("*")),
 				},
@@ -56,8 +55,8 @@ var DefaultPolicies = []struct {
 			Version: DefaultVersion,
 			Statements: []Statement{
 				{
-					SID:       policy.ID(""),
-					Effect:    policy.Allow,
+					SID:       ID(""),
+					Effect:    Allow,
 					Actions:   NewActionSet(GetBucketLocationAction, GetObjectAction),
 					Resources: NewResourceSet(NewResource("*")),
 				},
@@ -72,8 +71,8 @@ var DefaultPolicies = []struct {
 			Version: DefaultVersion,
 			Statements: []Statement{
 				{
-					SID:       policy.ID(""),
-					Effect:    policy.Allow,
+					SID:       ID(""),
+					Effect:    Allow,
 					Actions:   NewActionSet(PutObjectAction),
 					Resources: NewResourceSet(NewResource("*")),
 				},
@@ -88,8 +87,8 @@ var DefaultPolicies = []struct {
 			Version: DefaultVersion,
 			Statements: []Statement{
 				{
-					SID:    policy.ID(""),
-					Effect: policy.Allow,
+					SID:    ID(""),
+					Effect: Allow,
 					Actions: NewActionSet(ProfilingAdminAction,
 						TraceAdminAction, ConsoleLogAdminAction,
 						ServerInfoAdminAction, TopLocksAdminAction,
@@ -109,22 +108,22 @@ var DefaultPolicies = []struct {
 			Version: DefaultVersion,
 			Statements: []Statement{
 				{
-					SID:        policy.ID(""),
-					Effect:     policy.Allow,
+					SID:        ID(""),
+					Effect:     Allow,
 					Actions:    NewActionSet(AllAdminActions),
 					Resources:  NewResourceSet(),
 					Conditions: condition.NewFunctions(),
 				},
 				{
-					SID:        policy.ID(""),
-					Effect:     policy.Allow,
+					SID:        ID(""),
+					Effect:     Allow,
 					Actions:    NewActionSet(AllKMSActions),
 					Resources:  NewResourceSet(),
 					Conditions: condition.NewFunctions(),
 				},
 				{
-					SID:        policy.ID(""),
-					Effect:     policy.Allow,
+					SID:        ID(""),
+					Effect:     Allow,
 					Actions:    NewActionSet(AllActions),
 					Resources:  NewResourceSet(NewResource("*")),
 					Conditions: condition.NewFunctions(),

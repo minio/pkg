@@ -23,23 +23,24 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/minio/pkg/bucket/policy/condition"
+	iamp "github.com/minio/pkg/iam/policy"
+	"github.com/minio/pkg/iam/policy/condition"
 )
 
 func TestStatementIsAllowed(t *testing.T) {
 	case1Statement := NewStatement("",
-		Allow,
+		iamp.Allow,
 		NewPrincipal("*"),
-		NewActionSet(GetBucketLocationAction, PutObjectAction),
-		NewResourceSet(NewResource("*")),
+		iamp.NewActionSet(iamp.GetBucketLocationAction, iamp.PutObjectAction),
+		iamp.NewResourceSet(iamp.NewResource("*")),
 		condition.NewFunctions(),
 	)
 
 	case2Statement := NewStatement("",
-		Allow,
+		iamp.Allow,
 		NewPrincipal("*"),
-		NewActionSet(GetObjectAction, PutObjectAction),
-		NewResourceSet(NewResource("mybucket/myobject*")),
+		iamp.NewActionSet(iamp.GetObjectAction, iamp.PutObjectAction),
+		iamp.NewResourceSet(iamp.NewResource("mybucket/myobject*")),
 		condition.NewFunctions(),
 	)
 
@@ -56,49 +57,49 @@ func TestStatementIsAllowed(t *testing.T) {
 	}
 
 	case3Statement := NewStatement("",
-		Allow,
+		iamp.Allow,
 		NewPrincipal("*"),
-		NewActionSet(GetObjectAction, PutObjectAction),
-		NewResourceSet(NewResource("mybucket/myobject*")),
+		iamp.NewActionSet(iamp.GetObjectAction, iamp.PutObjectAction),
+		iamp.NewResourceSet(iamp.NewResource("mybucket/myobject*")),
 		condition.NewFunctions(func1),
 	)
 
 	case4Statement := NewStatement("",
-		Deny,
+		iamp.Deny,
 		NewPrincipal("*"),
-		NewActionSet(GetObjectAction, PutObjectAction),
-		NewResourceSet(NewResource("mybucket/myobject*")),
+		iamp.NewActionSet(iamp.GetObjectAction, iamp.PutObjectAction),
+		iamp.NewResourceSet(iamp.NewResource("mybucket/myobject*")),
 		condition.NewFunctions(func1),
 	)
 
 	case5Statement := NewStatementWithNotAction(
 		"",
-		Allow,
+		iamp.Allow,
 		NewPrincipal("*"),
-		NewActionSet(GetObjectAction, CreateBucketAction),
-		NewResourceSet(NewResource("mybucket/myobject*"), NewResource("mybucket")),
+		iamp.NewActionSet(iamp.GetObjectAction, iamp.CreateBucketAction),
+		iamp.NewResourceSet(iamp.NewResource("mybucket/myobject*"), iamp.NewResource("mybucket")),
 		condition.NewFunctions(),
 	)
 
 	case6Statement := NewStatementWithNotAction(
 		"",
-		Deny,
+		iamp.Deny,
 		NewPrincipal("*"),
-		NewActionSet(GetObjectAction),
-		NewResourceSet(NewResource("mybucket/myobject*")),
+		iamp.NewActionSet(iamp.GetObjectAction),
+		iamp.NewResourceSet(iamp.NewResource("mybucket/myobject*")),
 		condition.NewFunctions(func1),
 	)
 
 	anonGetBucketLocationArgs := Args{
 		AccountName:     "Q3AM3UQ867SPQQA43P2F",
-		Action:          GetBucketLocationAction,
+		Action:          iamp.GetBucketLocationAction,
 		BucketName:      "mybucket",
 		ConditionValues: map[string][]string{},
 	}
 
 	anonPutObjectActionArgs := Args{
 		AccountName: "Q3AM3UQ867SPQQA43P2F",
-		Action:      PutObjectAction,
+		Action:      iamp.PutObjectAction,
 		BucketName:  "mybucket",
 		ConditionValues: map[string][]string{
 			"x-amz-copy-source": {"mybucket/myobject"},
@@ -109,7 +110,7 @@ func TestStatementIsAllowed(t *testing.T) {
 
 	anonGetObjectActionArgs := Args{
 		AccountName:     "Q3AM3UQ867SPQQA43P2F",
-		Action:          GetObjectAction,
+		Action:          iamp.GetObjectAction,
 		BucketName:      "mybucket",
 		ConditionValues: map[string][]string{},
 		ObjectName:      "myobject",
@@ -117,7 +118,7 @@ func TestStatementIsAllowed(t *testing.T) {
 
 	getBucketLocationArgs := Args{
 		AccountName:     "Q3AM3UQ867SPQQA43P2F",
-		Action:          GetBucketLocationAction,
+		Action:          iamp.GetBucketLocationAction,
 		BucketName:      "mybucket",
 		ConditionValues: map[string][]string{},
 		IsOwner:         true,
@@ -125,7 +126,7 @@ func TestStatementIsAllowed(t *testing.T) {
 
 	putObjectActionArgs := Args{
 		AccountName: "Q3AM3UQ867SPQQA43P2F",
-		Action:      PutObjectAction,
+		Action:      iamp.PutObjectAction,
 		BucketName:  "mybucket",
 		ConditionValues: map[string][]string{
 			"x-amz-copy-source": {"mybucket/myobject"},
@@ -137,7 +138,7 @@ func TestStatementIsAllowed(t *testing.T) {
 
 	getObjectActionArgs := Args{
 		AccountName:     "Q3AM3UQ867SPQQA43P2F",
-		Action:          GetObjectAction,
+		Action:          iamp.GetObjectAction,
 		BucketName:      "mybucket",
 		ConditionValues: map[string][]string{},
 		IsOwner:         true,
@@ -229,73 +230,73 @@ func TestStatementIsValid(t *testing.T) {
 	}{
 		// Invalid effect error.
 		{NewStatement("",
-			Effect("foo"),
+			iamp.Effect("foo"),
 			NewPrincipal("*"),
-			NewActionSet(GetBucketLocationAction, PutObjectAction),
-			NewResourceSet(NewResource("*")),
+			iamp.NewActionSet(iamp.GetBucketLocationAction, iamp.PutObjectAction),
+			iamp.NewResourceSet(iamp.NewResource("*")),
 			condition.NewFunctions(),
 		), true},
 		// Invalid principal error.
 		{NewStatement("",
-			Allow,
+			iamp.Allow,
 			NewPrincipal(),
-			NewActionSet(GetBucketLocationAction, PutObjectAction),
-			NewResourceSet(NewResource("*")),
+			iamp.NewActionSet(iamp.GetBucketLocationAction, iamp.PutObjectAction),
+			iamp.NewResourceSet(iamp.NewResource("*")),
 			condition.NewFunctions(),
 		), true},
 		// Empty actions error.
 		{NewStatement("",
-			Allow,
+			iamp.Allow,
 			NewPrincipal("*"),
-			NewActionSet(),
-			NewResourceSet(NewResource("*")),
+			iamp.NewActionSet(),
+			iamp.NewResourceSet(iamp.NewResource("*")),
 			condition.NewFunctions(),
 		), true},
 		// Empty resources error.
 		{NewStatement("",
-			Allow,
+			iamp.Allow,
 			NewPrincipal("*"),
-			NewActionSet(GetBucketLocationAction, PutObjectAction),
-			NewResourceSet(),
+			iamp.NewActionSet(iamp.GetBucketLocationAction, iamp.PutObjectAction),
+			iamp.NewResourceSet(),
 			condition.NewFunctions(),
 		), true},
 		// Unsupported resource found for object action.
 		{NewStatement("",
-			Allow,
+			iamp.Allow,
 			NewPrincipal("*"),
-			NewActionSet(GetBucketLocationAction, PutObjectAction),
-			NewResourceSet(NewResource("mybucket")),
+			iamp.NewActionSet(iamp.GetBucketLocationAction, iamp.PutObjectAction),
+			iamp.NewResourceSet(iamp.NewResource("mybucket")),
 			condition.NewFunctions(),
 		), true},
 		// Unsupported resource found for bucket action.
 		{NewStatement("",
-			Allow,
+			iamp.Allow,
 			NewPrincipal("*"),
-			NewActionSet(GetBucketLocationAction, PutObjectAction),
-			NewResourceSet(NewResource("mybucket/myobject*")),
+			iamp.NewActionSet(iamp.GetBucketLocationAction, iamp.PutObjectAction),
+			iamp.NewResourceSet(iamp.NewResource("mybucket/myobject*")),
 			condition.NewFunctions(),
 		), true},
 		// Unsupported condition key for action.
 		{NewStatement("",
-			Allow,
+			iamp.Allow,
 			NewPrincipal("*"),
-			NewActionSet(GetObjectAction, PutObjectAction),
-			NewResourceSet(NewResource("mybucket/myobject*")),
+			iamp.NewActionSet(iamp.GetObjectAction, iamp.PutObjectAction),
+			iamp.NewResourceSet(iamp.NewResource("mybucket/myobject*")),
 			condition.NewFunctions(func1, func2),
 		), true},
 		{NewStatement("",
-			Deny,
+			iamp.Deny,
 			NewPrincipal("*"),
-			NewActionSet(GetObjectAction, PutObjectAction),
-			NewResourceSet(NewResource("mybucket/myobject*")),
+			iamp.NewActionSet(iamp.GetObjectAction, iamp.PutObjectAction),
+			iamp.NewResourceSet(iamp.NewResource("mybucket/myobject*")),
 			condition.NewFunctions(func1),
 		), false},
 		{Statement{
 			SID:        "",
-			Effect:     Allow,
+			Effect:     iamp.Allow,
 			Principal:  NewPrincipal("*"),
-			NotActions: NewActionSet(GetObjectAction),
-			Resources:  NewResourceSet(NewResource("mybucket/myobject*")),
+			NotActions: iamp.NewActionSet(iamp.GetObjectAction),
+			Resources:  iamp.NewResourceSet(iamp.NewResource("mybucket/myobject*")),
 			Conditions: condition.NewFunctions(),
 		}, false},
 	}
@@ -310,86 +311,7 @@ func TestStatementIsValid(t *testing.T) {
 	}
 }
 
-func TestStatementMarshalJSON(t *testing.T) {
-	case1Statement := NewStatement("",
-		Allow,
-		NewPrincipal("*"),
-		NewActionSet(PutObjectAction),
-		NewResourceSet(NewResource("mybucket/myobject*")),
-		condition.NewFunctions(),
-	)
-	case1Statement.SID = "SomeId1"
-	case1Data := []byte(`{"Sid":"SomeId1","Effect":"Allow","Principal":{"AWS":["*"]},"Action":["s3:PutObject"],"Resource":["arn:aws:s3:::mybucket/myobject*"]}`)
-
-	func1, err := condition.NewNullFunc(
-		condition.S3XAmzCopySource.ToKey(),
-		true,
-	)
-	if err != nil {
-		t.Fatalf("unexpected error. %v\n", err)
-	}
-	case2Statement := NewStatement("",
-		Allow,
-		NewPrincipal("*"),
-		NewActionSet(PutObjectAction),
-		NewResourceSet(NewResource("mybucket/myobject*")),
-		condition.NewFunctions(func1),
-	)
-	case2Data := []byte(`{"Effect":"Allow","Principal":{"AWS":["*"]},"Action":["s3:PutObject"],"Resource":["arn:aws:s3:::mybucket/myobject*"],"Condition":{"Null":{"s3:x-amz-copy-source":[true]}}}`)
-
-	func2, err := condition.NewNullFunc(
-		condition.S3XAmzServerSideEncryption.ToKey(),
-		false,
-	)
-	if err != nil {
-		t.Fatalf("unexpected error. %v\n", err)
-	}
-	case3Statement := NewStatement("",
-		Deny,
-		NewPrincipal("*"),
-		NewActionSet(PutObjectAction),
-		NewResourceSet(NewResource("mybucket/myobject*")),
-		condition.NewFunctions(func2),
-	)
-	case3Data := []byte(`{"Effect":"Deny","Principal":{"AWS":["*"]},"Action":["s3:PutObject"],"Resource":["arn:aws:s3:::mybucket/myobject*"],"Condition":{"Null":{"s3:x-amz-server-side-encryption":[false]}}}`)
-
-	case4Statement := NewStatement("",
-		Allow,
-		NewPrincipal("*"),
-		NewActionSet(GetObjectAction, PutObjectAction),
-		NewResourceSet(NewResource("mybucket/myobject*")),
-		condition.NewFunctions(func1, func2),
-	)
-
-	testCases := []struct {
-		statement      Statement
-		expectedResult []byte
-		expectErr      bool
-	}{
-		{case1Statement, case1Data, false},
-		{case2Statement, case2Data, false},
-		{case3Statement, case3Data, false},
-		// Invalid statement error.
-		{case4Statement, nil, true},
-	}
-
-	for i, testCase := range testCases {
-		result, err := json.Marshal(testCase.statement)
-		expectErr := (err != nil)
-
-		if expectErr != testCase.expectErr {
-			t.Fatalf("case %v: error: expected: %v, got: %v", i+1, testCase.expectErr, expectErr)
-		}
-
-		if !testCase.expectErr {
-			if !reflect.DeepEqual(result, testCase.expectedResult) {
-				t.Fatalf("case %v: result: expected: %v, got: %v", i+1, string(testCase.expectedResult), string(result))
-			}
-		}
-	}
-}
-
-func TestStatementUnmarshalJSON(t *testing.T) {
+func TestStatementUnmarshalJSONAndValidate(t *testing.T) {
 	case1Data := []byte(`{
     "Sid": "SomeId1",
     "Effect": "Allow",
@@ -398,10 +320,10 @@ func TestStatementUnmarshalJSON(t *testing.T) {
     "Resource": "arn:aws:s3:::mybucket/myobject*"
 }`)
 	case1Statement := NewStatement("",
-		Allow,
+		iamp.Allow,
 		NewPrincipal("*"),
-		NewActionSet(PutObjectAction),
-		NewResourceSet(NewResource("mybucket/myobject*")),
+		iamp.NewActionSet(iamp.PutObjectAction),
+		iamp.NewResourceSet(iamp.NewResource("mybucket/myobject*")),
 		condition.NewFunctions(),
 	)
 	case1Statement.SID = "SomeId1"
@@ -425,10 +347,10 @@ func TestStatementUnmarshalJSON(t *testing.T) {
 		t.Fatalf("unexpected error. %v\n", err)
 	}
 	case2Statement := NewStatement("",
-		Allow,
+		iamp.Allow,
 		NewPrincipal("*"),
-		NewActionSet(PutObjectAction),
-		NewResourceSet(NewResource("mybucket/myobject*")),
+		iamp.NewActionSet(iamp.PutObjectAction),
+		iamp.NewResourceSet(iamp.NewResource("mybucket/myobject*")),
 		condition.NewFunctions(func1),
 	)
 
@@ -456,10 +378,10 @@ func TestStatementUnmarshalJSON(t *testing.T) {
 		t.Fatalf("unexpected error. %v\n", err)
 	}
 	case3Statement := NewStatement("",
-		Deny,
+		iamp.Deny,
 		NewPrincipal("*"),
-		NewActionSet(PutObjectAction, GetObjectAction),
-		NewResourceSet(NewResource("mybucket/myobject*")),
+		iamp.NewActionSet(iamp.PutObjectAction, iamp.GetObjectAction),
+		iamp.NewResourceSet(iamp.NewResource("mybucket/myobject*")),
 		condition.NewFunctions(func2),
 	)
 
@@ -530,48 +452,54 @@ func TestStatementUnmarshalJSON(t *testing.T) {
     "Resource": "arn:aws:s3:::mybucket/myobject*"
 }`)
 	case11Statement := Statement{
-		Effect:     Deny,
+		Effect:     iamp.Deny,
 		Principal:  NewPrincipal("*"),
-		NotActions: NewActionSet(GetObjectAction, PutObjectAction),
-		Resources:  NewResourceSet(NewResource("mybucket/myobject*")),
+		NotActions: iamp.NewActionSet(iamp.GetObjectAction, iamp.PutObjectAction),
+		Resources:  iamp.NewResourceSet(iamp.NewResource("mybucket/myobject*")),
 		Conditions: condition.NewFunctions(),
 	}
 
 	testCases := []struct {
-		data           []byte
-		expectedResult Statement
-		expectErr      bool
+		data                []byte
+		expectedResult      Statement
+		expectUnmarshalErr  bool
+		bucket              string
+		expectValidationErr bool
 	}{
-		{case1Data, case1Statement, false},
-		{case2Data, case2Statement, false},
-		{case3Data, case3Statement, false},
+		{case1Data, case1Statement, false, "mybucket", false},
+		{case2Data, case2Statement, false, "mybucket", false},
+		{case3Data, case3Statement, false, "mybucket", false},
 		// JSON unmarshaling error.
-		{case4Data, Statement{}, true},
+		{case4Data, Statement{}, true, "mybucket", true},
 		// Invalid effect error.
-		{case5Data, Statement{}, true},
+		{case5Data, Statement{}, false, "mybucket", true},
 		// empty principal error.
-		{case6Data, Statement{}, true},
+		{case6Data, Statement{}, false, "mybucket", true},
 		// Empty action error.
-		{case7Data, Statement{}, true},
+		{case7Data, Statement{}, false, "mybucket", true},
 		// Empty resource error.
-		{case8Data, Statement{}, true},
+		{case8Data, Statement{}, false, "mybucket", true},
 		// Empty condition error.
-		{case9Data, Statement{}, true},
+		{case9Data, Statement{}, true, "mybucket", false},
 		// Unsupported condition key error.
-		{case10Data, Statement{}, true},
-		{case11Data, case11Statement, false},
+		{case10Data, Statement{}, false, "mybucket", true},
+		{case11Data, case11Statement, false, "mybucket", false},
 	}
 
 	for i, testCase := range testCases {
 		var result Statement
-		err := json.Unmarshal(testCase.data, &result)
-		expectErr := (err != nil)
+		expectErr := (json.Unmarshal(testCase.data, &result) != nil)
 
-		if expectErr != testCase.expectErr {
-			t.Fatalf("case %v: error: expected: %v, got: %v", i+1, testCase.expectErr, expectErr)
+		if expectErr != testCase.expectUnmarshalErr {
+			t.Errorf("case %v: error during unmarshal: expected: %v, got: %v", i+1, testCase.expectUnmarshalErr, expectErr)
 		}
 
-		if !testCase.expectErr {
+		expectErr = (result.Validate(testCase.bucket) != nil)
+		if expectErr != testCase.expectValidationErr {
+			t.Errorf("case %v: error during validation: expected: %v, got: %v", i+1, testCase.expectValidationErr, expectErr)
+		}
+
+		if !testCase.expectUnmarshalErr && !testCase.expectValidationErr {
 			if !reflect.DeepEqual(result, testCase.expectedResult) {
 				t.Fatalf("case %v: result: expected: %v, got: %v", i+1, testCase.expectedResult, result)
 			}
@@ -581,10 +509,10 @@ func TestStatementUnmarshalJSON(t *testing.T) {
 
 func TestStatementValidate(t *testing.T) {
 	case1Statement := NewStatement("",
-		Allow,
+		iamp.Allow,
 		NewPrincipal("*"),
-		NewActionSet(PutObjectAction),
-		NewResourceSet(NewResource("mybucket/myobject*")),
+		iamp.NewActionSet(iamp.PutObjectAction),
+		iamp.NewResourceSet(iamp.NewResource("mybucket/myobject*")),
 		condition.NewFunctions(),
 	)
 
@@ -603,10 +531,10 @@ func TestStatementValidate(t *testing.T) {
 		t.Fatalf("unexpected error. %v\n", err)
 	}
 	case2Statement := NewStatement("",
-		Allow,
+		iamp.Allow,
 		NewPrincipal("*"),
-		NewActionSet(GetObjectAction, PutObjectAction),
-		NewResourceSet(NewResource("mybucket/myobject*")),
+		iamp.NewActionSet(iamp.GetObjectAction, iamp.PutObjectAction),
+		iamp.NewResourceSet(iamp.NewResource("mybucket/myobject*")),
 		condition.NewFunctions(func1, func2),
 	)
 

@@ -18,7 +18,7 @@
 package iampolicy
 
 import (
-	"github.com/minio/pkg/bucket/policy/condition"
+	"github.com/minio/pkg/iam/policy/condition"
 	"github.com/minio/pkg/wildcard"
 )
 
@@ -284,8 +284,8 @@ var supportedObjectActions = map[Action]struct{}{
 	PutObjectFanOutAction:                {},
 }
 
-// isObjectAction - returns whether action is object type or not.
-func (action Action) isObjectAction() bool {
+// IsObjectAction - returns whether action is object type or not.
+func (action Action) IsObjectAction() bool {
 	for supAction := range supportedObjectActions {
 		if action.Match(supAction) {
 			return true
@@ -309,9 +309,11 @@ func (action Action) IsValid() bool {
 	return false
 }
 
-type actionConditionKeyMap map[Action]condition.KeySet
+// ActionConditionKeyMap is alias for the map type used here.
+type ActionConditionKeyMap map[Action]condition.KeySet
 
-func (a actionConditionKeyMap) Lookup(action Action) condition.KeySet {
+// Lookup - looks up the action in the condition key map.
+func (a ActionConditionKeyMap) Lookup(action Action) condition.KeySet {
 	commonKeys := []condition.Key{}
 	for _, keyName := range condition.CommonKeys {
 		commonKeys = append(commonKeys, keyName.ToKey())
@@ -326,10 +328,10 @@ func (a actionConditionKeyMap) Lookup(action Action) condition.KeySet {
 	return ckeysMerged
 }
 
-// iamActionConditionKeyMap - holds mapping of supported condition key for an action.
-var iamActionConditionKeyMap = createActionConditionKeyMap()
+// IAMActionConditionKeyMap - holds mapping of supported condition key for an action.
+var IAMActionConditionKeyMap = createActionConditionKeyMap()
 
-func createActionConditionKeyMap() actionConditionKeyMap {
+func createActionConditionKeyMap() ActionConditionKeyMap {
 	commonKeys := []condition.Key{}
 	for _, keyName := range condition.CommonKeys {
 		commonKeys = append(commonKeys, keyName.ToKey())
@@ -340,7 +342,7 @@ func createActionConditionKeyMap() actionConditionKeyMap {
 		allSupportedKeys = append(allSupportedKeys, keyName.ToKey())
 	}
 
-	return actionConditionKeyMap{
+	return ActionConditionKeyMap{
 		AllActions: condition.NewKeySet(allSupportedKeys...),
 
 		AbortMultipartUploadAction: condition.NewKeySet(commonKeys...),

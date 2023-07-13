@@ -28,8 +28,8 @@ import (
 // ResourceSet - set of resources in policy statement.
 type ResourceSet map[Resource]struct{}
 
-// bucketResourceExists - checks if at least one bucket resource exists in the set.
-func (resourceSet ResourceSet) bucketResourceExists() bool {
+// BucketResourceExists - checks if at least one bucket resource exists in the set.
+func (resourceSet ResourceSet) BucketResourceExists() bool {
 	for resource := range resourceSet {
 		if resource.isBucketPattern() {
 			return true
@@ -39,8 +39,8 @@ func (resourceSet ResourceSet) bucketResourceExists() bool {
 	return false
 }
 
-// objectResourceExists - checks if at least one object resource exists in the set.
-func (resourceSet ResourceSet) objectResourceExists() bool {
+// ObjectResourceExists - checks if at least one object resource exists in the set.
+func (resourceSet ResourceSet) ObjectResourceExists() bool {
 	for resource := range resourceSet {
 		if resource.isObjectPattern() {
 			return true
@@ -158,6 +158,17 @@ func (resourceSet *ResourceSet) UnmarshalJSON(data []byte) error {
 func (resourceSet ResourceSet) Validate() error {
 	for resource := range resourceSet {
 		if err := resource.Validate(); err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
+// ValidateBucket - validates ResourceSet is for given bucket or not.
+func (resourceSet ResourceSet) ValidateBucket(bucketName string) error {
+	for resource := range resourceSet {
+		if err := resource.ValidateBucket(bucketName); err != nil {
 			return err
 		}
 	}

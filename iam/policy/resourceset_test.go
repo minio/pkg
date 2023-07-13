@@ -41,7 +41,7 @@ func TestResourceSetBucketResourceExists(t *testing.T) {
 	}
 
 	for i, testCase := range testCases {
-		result := testCase.resourceSet.bucketResourceExists()
+		result := testCase.resourceSet.BucketResourceExists()
 
 		if result != testCase.expectedResult {
 			t.Fatalf("case %v: expected: %v, got: %v", i+1, testCase.expectedResult, result)
@@ -66,7 +66,7 @@ func TestResourceSetObjectResourceExists(t *testing.T) {
 	}
 
 	for i, testCase := range testCases {
-		result := testCase.resourceSet.objectResourceExists()
+		result := testCase.resourceSet.ObjectResourceExists()
 
 		if result != testCase.expectedResult {
 			t.Fatalf("case %v: expected: %v, got: %v", i+1, testCase.expectedResult, result)
@@ -243,6 +243,27 @@ func TestResourceSetValidate(t *testing.T) {
 
 	for i, testCase := range testCases {
 		err := testCase.resourceSet.Validate()
+		expectErr := (err != nil)
+
+		if expectErr != testCase.expectErr {
+			t.Fatalf("case %v: error: expected: %v, got: %v", i+1, testCase.expectErr, expectErr)
+		}
+	}
+}
+
+func TestResourceSetValidateBucket(t *testing.T) {
+	testCases := []struct {
+		resourceSet ResourceSet
+		bucketName  string
+		expectErr   bool
+	}{
+		{NewResourceSet(NewResource("mybucket/myobject*")), "mybucket", false},
+		{NewResourceSet(NewResource("/myobject*")), "yourbucket", true},
+		{NewResourceSet(NewResource("mybucket/myobject*")), "yourbucket", true},
+	}
+
+	for i, testCase := range testCases {
+		err := testCase.resourceSet.ValidateBucket(testCase.bucketName)
 		expectErr := (err != nil)
 
 		if expectErr != testCase.expectErr {
