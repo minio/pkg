@@ -51,7 +51,7 @@ func RegisterGlobalCAs(CAs *x509.CertPool) {
 
 var hostKeys = regexp.MustCompile("^(https?://)(.*?):(.*?)@(.*?)$")
 
-func fetchHTTPConstituentParts(u *url.URL) (username string, password string, envURL string, err error) {
+func fetchHTTPConstituentParts(u *url.URL) (username, password, envURL string, err error) {
 	envURL = u.String()
 	if hostKeys.MatchString(envURL) {
 		parts := hostKeys.FindStringSubmatch(envURL)
