@@ -15,28 +15,27 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-package policy
+package iampolicy
 
 import (
 	"strings"
 
-	iamp "github.com/minio/pkg/iam/policy"
 	"github.com/minio/pkg/iam/policy/condition"
 )
 
-// Statement - policy statement.
-type Statement struct {
-	SID        iamp.ID             `json:"Sid,omitempty"`
-	Effect     iamp.Effect         `json:"Effect"`
+// BPStatement - policy statement.
+type BPStatement struct {
+	SID        ID                  `json:"Sid,omitempty"`
+	Effect     Effect              `json:"Effect"`
 	Principal  Principal           `json:"Principal"`
-	Actions    iamp.ActionSet      `json:"Action"`
-	NotActions iamp.ActionSet      `json:"NotAction,omitempty"`
-	Resources  iamp.ResourceSet    `json:"Resource"`
+	Actions    ActionSet           `json:"Action"`
+	NotActions ActionSet           `json:"NotAction,omitempty"`
+	Resources  ResourceSet         `json:"Resource"`
 	Conditions condition.Functions `json:"Condition,omitempty"`
 }
 
 // IsAllowed - checks given policy args is allowed to continue the Rest API.
-func (statement Statement) IsAllowed(args Args) bool {
+func (statement BPStatement) IsAllowed(args BucketPolicyArgs) bool {
 	check := func() bool {
 		if !statement.Principal.Match(args.AccountName) {
 			return false
@@ -67,7 +66,7 @@ func (statement Statement) IsAllowed(args Args) bool {
 }
 
 // isValid - checks whether statement is valid or not.
-func (statement Statement) isValid() error {
+func (statement BPStatement) isValid() error {
 	if !statement.Effect.IsValid() {
 		return Errorf("invalid Effect %v", statement.Effect)
 	}
@@ -96,7 +95,7 @@ func (statement Statement) isValid() error {
 		}
 
 		keys := statement.Conditions.Keys()
-		keyDiff := keys.Difference(iamp.IAMActionConditionKeyMap.Lookup(action))
+		keyDiff := keys.Difference(IAMActionConditionKeyMap.Lookup(action))
 		if !keyDiff.IsEmpty() {
 			return Errorf("unsupported condition keys '%v' used for action '%v'", keyDiff, action)
 		}
@@ -106,7 +105,7 @@ func (statement Statement) isValid() error {
 }
 
 // Validate - validates Statement is for given bucket or not.
-func (statement Statement) Validate(bucketName string) error {
+func (statement BPStatement) Validate(bucketName string) error {
 	if err := statement.isValid(); err != nil {
 		return err
 	}
@@ -115,7 +114,7 @@ func (statement Statement) Validate(bucketName string) error {
 }
 
 // Equals checks if two statements are equal
-func (statement Statement) Equals(st Statement) bool {
+func (statement BPStatement) Equals(st BPStatement) bool {
 	if statement.Effect != st.Effect {
 		return false
 	}
@@ -138,8 +137,8 @@ func (statement Statement) Equals(st Statement) bool {
 }
 
 // Clone clones Statement structure
-func (statement Statement) Clone() Statement {
-	return Statement{
+func (statement BPStatement) Clone() BPStatement {
+	return BPStatement{
 		SID:        statement.SID,
 		Effect:     statement.Effect,
 		Principal:  statement.Principal.Clone(),
@@ -150,9 +149,9 @@ func (statement Statement) Clone() Statement {
 	}
 }
 
-// NewStatement - creates new statement.
-func NewStatement(sid iamp.ID, effect iamp.Effect, principal Principal, actionSet iamp.ActionSet, resourceSet iamp.ResourceSet, conditions condition.Functions) Statement {
-	return Statement{
+// NewBPStatement - creates new statement.
+func NewBPStatement(sid ID, effect Effect, principal Principal, actionSet ActionSet, resourceSet ResourceSet, conditions condition.Functions) BPStatement {
+	return BPStatement{
 		SID:        sid,
 		Effect:     effect,
 		Principal:  principal,
@@ -162,9 +161,9 @@ func NewStatement(sid iamp.ID, effect iamp.Effect, principal Principal, actionSe
 	}
 }
 
-// NewStatementWithNotAction - creates new statement with NotAction.
-func NewStatementWithNotAction(sid iamp.ID, effect iamp.Effect, principal Principal, notActions iamp.ActionSet, resources iamp.ResourceSet, conditions condition.Functions) Statement {
-	return Statement{
+// NewBPStatementWithNotAction - creates new statement with NotAction.
+func NewBPStatementWithNotAction(sid ID, effect Effect, principal Principal, notActions ActionSet, resources ResourceSet, conditions condition.Functions) BPStatement {
+	return BPStatement{
 		SID:        sid,
 		Effect:     effect,
 		Principal:  principal,

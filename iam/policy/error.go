@@ -39,7 +39,7 @@ func (e Error) Unwrap() error { return e.err }
 // Error 'error' compatible method.
 func (e Error) Error() string {
 	if e.err == nil {
-		return "iam: cause <nil>"
+		return "policy: cause <nil>"
 	}
 	return e.err.Error()
 }
