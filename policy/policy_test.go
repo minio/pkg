@@ -15,7 +15,7 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-package iampolicy
+package policy
 
 import (
 	"bytes"
@@ -26,7 +26,7 @@ import (
 	"time"
 
 	"github.com/minio/minio-go/v7/pkg/set"
-	"github.com/minio/pkg/iam/policy/condition"
+	"github.com/minio/pkg/v2/policy/condition"
 )
 
 func TestGetPoliciesFromClaims(t *testing.T) {

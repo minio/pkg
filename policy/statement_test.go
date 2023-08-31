@@ -15,7 +15,7 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-package iampolicy
+package policy
 
 import (
 	"encoding/json"
@@ -23,21 +23,19 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/minio/pkg/iam/policy/condition"
+	"github.com/minio/pkg/v2/policy/condition"
 )
 
-func TestBPStatementIsAllowed(t *testing.T) {
-	case1Statement := NewBPStatement("",
+func TestStatementIsAllowed(t *testing.T) {
+	case1Statement := NewStatement("",
 		Allow,
-		NewPrincipal("*"),
 		NewActionSet(GetBucketLocationAction, PutObjectAction),
 		NewResourceSet(NewResource("*")),
 		condition.NewFunctions(),
 	)
 
-	case2Statement := NewBPStatement("",
+	case2Statement := NewStatement("",
 		Allow,
-		NewPrincipal("*"),
 		NewActionSet(GetObjectAction, PutObjectAction),
 		NewResourceSet(NewResource("mybucket/myobject*")),
 		condition.NewFunctions(),
@@ -55,48 +53,44 @@ func TestBPStatementIsAllowed(t *testing.T) {
 		t.Fatalf("unexpected error. %v\n", err)
 	}
 
-	case3Statement := NewBPStatement("",
+	case3Statement := NewStatement("",
 		Allow,
-		NewPrincipal("*"),
 		NewActionSet(GetObjectAction, PutObjectAction),
 		NewResourceSet(NewResource("mybucket/myobject*")),
 		condition.NewFunctions(func1),
 	)
 
-	case4Statement := NewBPStatement("",
+	case4Statement := NewStatement("",
 		Deny,
-		NewPrincipal("*"),
 		NewActionSet(GetObjectAction, PutObjectAction),
 		NewResourceSet(NewResource("mybucket/myobject*")),
 		condition.NewFunctions(func1),
 	)
 
-	case5Statement := NewBPStatementWithNotAction(
+	case5Statement := NewStatementWithNotAction(
 		"",
 		Allow,
-		NewPrincipal("*"),
 		NewActionSet(GetObjectAction, CreateBucketAction),
 		NewResourceSet(NewResource("mybucket/myobject*"), NewResource("mybucket")),
 		condition.NewFunctions(),
 	)
 
-	case6Statement := NewBPStatementWithNotAction(
+	case6Statement := NewStatementWithNotAction(
 		"",
 		Deny,
-		NewPrincipal("*"),
 		NewActionSet(GetObjectAction),
 		NewResourceSet(NewResource("mybucket/myobject*")),
 		condition.NewFunctions(func1),
 	)
 
-	anonGetBucketLocationArgs := BucketPolicyArgs{
+	anonGetBucketLocationArgs := Args{
 		AccountName:     "Q3AM3UQ867SPQQA43P2F",
 		Action:          GetBucketLocationAction,
 		BucketName:      "mybucket",
 		ConditionValues: map[string][]string{},
 	}
 
-	anonPutObjectActionArgs := BucketPolicyArgs{
+	anonPutObjectActionArgs := Args{
 		AccountName: "Q3AM3UQ867SPQQA43P2F",
 		Action:      PutObjectAction,
 		BucketName:  "mybucket",
@@ -107,7 +101,7 @@ func TestBPStatementIsAllowed(t *testing.T) {
 		ObjectName: "myobject",
 	}
 
-	anonGetObjectActionArgs := BucketPolicyArgs{
+	anonGetObjectActionArgs := Args{
 		AccountName:     "Q3AM3UQ867SPQQA43P2F",
 		Action:          GetObjectAction,
 		BucketName:      "mybucket",
@@ -115,15 +109,14 @@ func TestBPStatementIsAllowed(t *testing.T) {
 		ObjectName:      "myobject",
 	}
 
-	getBucketLocationArgs := BucketPolicyArgs{
+	getBucketLocationArgs := Args{
 		AccountName:     "Q3AM3UQ867SPQQA43P2F",
 		Action:          GetBucketLocationAction,
 		BucketName:      "mybucket",
 		ConditionValues: map[string][]string{},
-		IsOwner:         true,
 	}
 
-	putObjectActionArgs := BucketPolicyArgs{
+	putObjectActionArgs := Args{
 		AccountName: "Q3AM3UQ867SPQQA43P2F",
 		Action:      PutObjectAction,
 		BucketName:  "mybucket",
@@ -131,22 +124,20 @@ func TestBPStatementIsAllowed(t *testing.T) {
 			"x-amz-copy-source": {"mybucket/myobject"},
 			"SourceIp":          {"192.168.1.10"},
 		},
-		IsOwner:    true,
 		ObjectName: "myobject",
 	}
 
-	getObjectActionArgs := BucketPolicyArgs{
+	getObjectActionArgs := Args{
 		AccountName:     "Q3AM3UQ867SPQQA43P2F",
 		Action:          GetObjectAction,
 		BucketName:      "mybucket",
 		ConditionValues: map[string][]string{},
-		IsOwner:         true,
 		ObjectName:      "myobject",
 	}
 
 	testCases := []struct {
-		statement      BPStatement
-		args           BucketPolicyArgs
+		statement      Statement
+		args           Args
 		expectedResult bool
 	}{
 		{case1Statement, anonGetBucketLocationArgs, true},
@@ -201,7 +192,7 @@ func TestBPStatementIsAllowed(t *testing.T) {
 	}
 }
 
-func TestBPStatementIsValid(t *testing.T) {
+func TestStatementIsValid(t *testing.T) {
 	_, IPNet1, err := net.ParseCIDR("192.168.1.0/24")
 	if err != nil {
 		t.Fatalf("unexpected error. %v\n", err)
@@ -223,77 +214,80 @@ func TestBPStatementIsValid(t *testing.T) {
 		t.Fatalf("unexpected error. %v\n", err)
 	}
 
+	func3, err := condition.NewStringEqualsFunc(
+		"",
+		condition.AWSUserAgent.ToKey(),
+		"NSPlayer",
+	)
+	if err != nil {
+		t.Fatalf("unexpected error. %v\n", err)
+	}
+
 	testCases := []struct {
-		statement BPStatement
+		statement Statement
 		expectErr bool
 	}{
 		// Invalid effect error.
-		{NewBPStatement("",
+		{NewStatement("",
 			Effect("foo"),
-			NewPrincipal("*"),
-			NewActionSet(GetBucketLocationAction, PutObjectAction),
-			NewResourceSet(NewResource("*")),
-			condition.NewFunctions(),
-		), true},
-		// Invalid principal error.
-		{NewBPStatement("",
-			Allow,
-			NewPrincipal(),
 			NewActionSet(GetBucketLocationAction, PutObjectAction),
 			NewResourceSet(NewResource("*")),
 			condition.NewFunctions(),
 		), true},
 		// Empty actions error.
-		{NewBPStatement("",
+		{NewStatement("",
 			Allow,
-			NewPrincipal("*"),
 			NewActionSet(),
 			NewResourceSet(NewResource("*")),
 			condition.NewFunctions(),
 		), true},
 		// Empty resources error.
-		{NewBPStatement("",
+		{NewStatement("",
 			Allow,
-			NewPrincipal("*"),
 			NewActionSet(GetBucketLocationAction, PutObjectAction),
 			NewResourceSet(),
 			condition.NewFunctions(),
 		), true},
-		// Unsupported resource found for object action.
-		{NewBPStatement("",
+		// Unsupported conditions for GetObject
+		{NewStatement("",
 			Allow,
-			NewPrincipal("*"),
-			NewActionSet(GetBucketLocationAction, PutObjectAction),
-			NewResourceSet(NewResource("mybucket")),
-			condition.NewFunctions(),
-		), true},
-		// Unsupported resource found for bucket action.
-		{NewBPStatement("",
-			Allow,
-			NewPrincipal("*"),
-			NewActionSet(GetBucketLocationAction, PutObjectAction),
-			NewResourceSet(NewResource("mybucket/myobject*")),
-			condition.NewFunctions(),
-		), true},
-		// Unsupported condition key for action.
-		{NewBPStatement("",
-			Allow,
-			NewPrincipal("*"),
 			NewActionSet(GetObjectAction, PutObjectAction),
 			NewResourceSet(NewResource("mybucket/myobject*")),
 			condition.NewFunctions(func1, func2),
 		), true},
-		{NewBPStatement("",
+		{NewStatement("",
+			Allow,
+			NewActionSet(GetBucketLocationAction, PutObjectAction),
+			NewResourceSet(NewResource("mybucket/myobject*")),
+			condition.NewFunctions(),
+		), false},
+		{NewStatement("",
+			Allow,
+			NewActionSet(GetBucketLocationAction, PutObjectAction),
+			NewResourceSet(NewResource("mybucket")),
+			condition.NewFunctions(),
+		), false},
+		{NewStatement("",
 			Deny,
-			NewPrincipal("*"),
 			NewActionSet(GetObjectAction, PutObjectAction),
 			NewResourceSet(NewResource("mybucket/myobject*")),
 			condition.NewFunctions(func1),
 		), false},
-		{BPStatement{
+		{NewStatement("",
+			Allow,
+			NewActionSet(CreateUserAdminAction, DeleteUserAdminAction),
+			nil,
+			condition.NewFunctions(func2, func3),
+		), true},
+		{NewStatement("",
+			Allow,
+			NewActionSet(CreateUserAdminAction, DeleteUserAdminAction),
+			nil,
+			condition.NewFunctions(),
+		), false},
+		{Statement{
 			SID:        "",
 			Effect:     Allow,
-			Principal:  NewPrincipal("*"),
 			NotActions: NewActionSet(GetObjectAction),
 			Resources:  NewResourceSet(NewResource("mybucket/myobject*")),
 			Conditions: condition.NewFunctions(),
@@ -310,17 +304,15 @@ func TestBPStatementIsValid(t *testing.T) {
 	}
 }
 
-func TestBPStatementUnmarshalJSONAndValidate(t *testing.T) {
+func TestStatementUnmarshalJSONAndValidate(t *testing.T) {
 	case1Data := []byte(`{
     "Sid": "SomeId1",
     "Effect": "Allow",
-    "Principal": "*",
     "Action": "s3:PutObject",
     "Resource": "arn:aws:s3:::mybucket/myobject*"
 }`)
-	case1Statement := NewBPStatement("",
+	case1Statement := NewStatement("",
 		Allow,
-		NewPrincipal("*"),
 		NewActionSet(PutObjectAction),
 		NewResourceSet(NewResource("mybucket/myobject*")),
 		condition.NewFunctions(),
@@ -329,7 +321,6 @@ func TestBPStatementUnmarshalJSONAndValidate(t *testing.T) {
 
 	case2Data := []byte(`{
     "Effect": "Allow",
-    "Principal": "*",
     "Action": "s3:PutObject",
     "Resource": "arn:aws:s3:::mybucket/myobject*",
     "Condition": {
@@ -345,9 +336,8 @@ func TestBPStatementUnmarshalJSONAndValidate(t *testing.T) {
 	if err != nil {
 		t.Fatalf("unexpected error. %v\n", err)
 	}
-	case2Statement := NewBPStatement("",
+	case2Statement := NewStatement("",
 		Allow,
-		NewPrincipal("*"),
 		NewActionSet(PutObjectAction),
 		NewResourceSet(NewResource("mybucket/myobject*")),
 		condition.NewFunctions(func1),
@@ -355,9 +345,6 @@ func TestBPStatementUnmarshalJSONAndValidate(t *testing.T) {
 
 	case3Data := []byte(`{
     "Effect": "Deny",
-    "Principal": {
-        "AWS": "*"
-    },
     "Action": [
         "s3:PutObject",
         "s3:GetObject"
@@ -376,9 +363,8 @@ func TestBPStatementUnmarshalJSONAndValidate(t *testing.T) {
 	if err != nil {
 		t.Fatalf("unexpected error. %v\n", err)
 	}
-	case3Statement := NewBPStatement("",
+	case3Statement := NewStatement("",
 		Deny,
-		NewPrincipal("*"),
 		NewActionSet(PutObjectAction, GetObjectAction),
 		NewResourceSet(NewResource("mybucket/myobject*")),
 		condition.NewFunctions(func2),
@@ -386,38 +372,27 @@ func TestBPStatementUnmarshalJSONAndValidate(t *testing.T) {
 
 	case4Data := []byte(`{
     "Effect": "Allow",
-    "Principal": "Q3AM3UQ867SPQQA43P2F",
-    "Action": "s3:PutObject",
+    "Action": "s3:PutObjec,
     "Resource": "arn:aws:s3:::mybucket/myobject*"
 }`)
 
 	case5Data := []byte(`{
-    "Principal": "*",
-    "Action": "s3:PutObject",
-    "Resource": "arn:aws:s3:::mybucket/myobject*"
-}`)
-
-	case6Data := []byte(`{
-    "Effect": "Allow",
     "Action": "s3:PutObject",
     "Resource": "arn:aws:s3:::mybucket/myobject*"
 }`)
 
 	case7Data := []byte(`{
     "Effect": "Allow",
-    "Principal": "*",
     "Resource": "arn:aws:s3:::mybucket/myobject*"
 }`)
 
 	case8Data := []byte(`{
     "Effect": "Allow",
-    "Principal": "*",
     "Action": "s3:PutObject"
 }`)
 
 	case9Data := []byte(`{
     "Effect": "Allow",
-    "Principal": "*",
     "Action": "s3:PutObject",
     "Resource": "arn:aws:s3:::mybucket/myobject*",
     "Condition": {
@@ -426,9 +401,6 @@ func TestBPStatementUnmarshalJSONAndValidate(t *testing.T) {
 
 	case10Data := []byte(`{
     "Effect": "Deny",
-    "Principal": {
-        "AWS": "*"
-    },
     "Action": [
         "s3:PutObject",
         "s3:GetObject"
@@ -443,16 +415,14 @@ func TestBPStatementUnmarshalJSONAndValidate(t *testing.T) {
 
 	case11Data := []byte(`{
     "Effect": "Deny",
-    "Principal": "*",
     "NotAction": [
         "s3:PutObject",
         "s3:GetObject"
     ],
     "Resource": "arn:aws:s3:::mybucket/myobject*"
 }`)
-	case11Statement := BPStatement{
+	case11Statement := Statement{
 		Effect:     Deny,
-		Principal:  NewPrincipal("*"),
 		NotActions: NewActionSet(GetObjectAction, PutObjectAction),
 		Resources:  NewResourceSet(NewResource("mybucket/myobject*")),
 		Conditions: condition.NewFunctions(),
@@ -460,42 +430,39 @@ func TestBPStatementUnmarshalJSONAndValidate(t *testing.T) {
 
 	testCases := []struct {
 		data                []byte
-		expectedResult      BPStatement
+		expectedResult      Statement
 		expectUnmarshalErr  bool
-		bucket              string
 		expectValidationErr bool
 	}{
-		{case1Data, case1Statement, false, "mybucket", false},
-		{case2Data, case2Statement, false, "mybucket", false},
-		{case3Data, case3Statement, false, "mybucket", false},
+		{case1Data, case1Statement, false, false},
+		{case2Data, case2Statement, false, false},
+		{case3Data, case3Statement, false, false},
 		// JSON unmarshaling error.
-		{case4Data, BPStatement{}, true, "mybucket", true},
+		{case4Data, Statement{}, true, true},
 		// Invalid effect error.
-		{case5Data, BPStatement{}, false, "mybucket", true},
-		// empty principal error.
-		{case6Data, BPStatement{}, false, "mybucket", true},
+		{case5Data, Statement{}, false, true},
 		// Empty action error.
-		{case7Data, BPStatement{}, false, "mybucket", true},
+		{case7Data, Statement{}, false, true},
 		// Empty resource error.
-		{case8Data, BPStatement{}, false, "mybucket", true},
+		{case8Data, Statement{}, false, true},
 		// Empty condition error.
-		{case9Data, BPStatement{}, true, "mybucket", false},
+		{case9Data, Statement{}, true, false},
 		// Unsupported condition key error.
-		{case10Data, BPStatement{}, false, "mybucket", true},
-		{case11Data, case11Statement, false, "mybucket", false},
+		{case10Data, Statement{}, false, true},
+		{case11Data, case11Statement, false, false},
 	}
 
 	for i, testCase := range testCases {
-		var result BPStatement
+		var result Statement
 		expectErr := (json.Unmarshal(testCase.data, &result) != nil)
 
 		if expectErr != testCase.expectUnmarshalErr {
-			t.Errorf("case %v: error during unmarshal: expected: %v, got: %v", i+1, testCase.expectUnmarshalErr, expectErr)
+			t.Fatalf("case %v: error during unmarshal: expected: %v, got: %v", i+1, testCase.expectUnmarshalErr, expectErr)
 		}
 
-		expectErr = (result.Validate(testCase.bucket) != nil)
+		expectErr = (result.Validate() != nil)
 		if expectErr != testCase.expectValidationErr {
-			t.Errorf("case %v: error during validation: expected: %v, got: %v", i+1, testCase.expectValidationErr, expectErr)
+			t.Fatalf("case %v: error during validation: expected: %v, got: %v", i+1, testCase.expectValidationErr, expectErr)
 		}
 
 		if !testCase.expectUnmarshalErr && !testCase.expectValidationErr {
@@ -506,10 +473,9 @@ func TestBPStatementUnmarshalJSONAndValidate(t *testing.T) {
 	}
 }
 
-func TestBPStatementValidate(t *testing.T) {
-	case1Statement := NewBPStatement("",
+func TestStatementValidate(t *testing.T) {
+	case1Statement := NewStatement("",
 		Allow,
-		NewPrincipal("*"),
 		NewActionSet(PutObjectAction),
 		NewResourceSet(NewResource("mybucket/myobject*")),
 		condition.NewFunctions(),
@@ -529,26 +495,23 @@ func TestBPStatementValidate(t *testing.T) {
 	if err != nil {
 		t.Fatalf("unexpected error. %v\n", err)
 	}
-	case2Statement := NewBPStatement("",
+	case2Statement := NewStatement("",
 		Allow,
-		NewPrincipal("*"),
 		NewActionSet(GetObjectAction, PutObjectAction),
 		NewResourceSet(NewResource("mybucket/myobject*")),
 		condition.NewFunctions(func1, func2),
 	)
 
 	testCases := []struct {
-		statement  BPStatement
-		bucketName string
-		expectErr  bool
+		statement Statement
+		expectErr bool
 	}{
-		{case1Statement, "mybucket", false},
-		{case2Statement, "mybucket", true},
-		{case1Statement, "yourbucket", true},
+		{case1Statement, false},
+		{case2Statement, true},
 	}
 
 	for i, testCase := range testCases {
-		err := testCase.statement.Validate(testCase.bucketName)
+		err := testCase.statement.Validate()
 		expectErr := (err != nil)
 
 		if expectErr != testCase.expectErr {

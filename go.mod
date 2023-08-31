@@ -1,4 +1,4 @@
-module github.com/minio/pkg
+module github.com/minio/pkg/v2
 
 go 1.19
 
