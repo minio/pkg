@@ -247,6 +247,7 @@ var supportedAdminActions = map[AdminAction]struct{}{
 	DeletePolicyAdminAction:          {},
 	GetPolicyAdminAction:             {},
 	AttachPolicyAdminAction:          {},
+	UpdatePolicyAssociationAction:    {},
 	ListUserPoliciesAdminAction:      {},
 	SetBucketQuotaAdminAction:        {},
 	GetBucketQuotaAdminAction:        {},
