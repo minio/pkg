@@ -19,6 +19,7 @@ package net
 
 import (
 	"github.com/montanaflynn/stats"
+	madmin "github.com/trinet2005/oss-admin-go"
 )
 
 // ComputePerfStats takes arrays of Latency & Throughput to compute Statistics
