@@ -17,6 +17,8 @@
 
 package event
 
+import madmin "github.com/trinet2005/oss-admin-go"
+
 // Identity represents access key who caused the event.
 type Identity struct {
 	PrincipalID string `json:"principalId"`

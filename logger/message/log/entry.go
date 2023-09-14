@@ -18,6 +18,7 @@
 package log
 
 import (
+	madmin "github.com/trinet2005/oss-admin-go"
 	"strings"
 	"time"
 )
