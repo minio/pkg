@@ -22,7 +22,7 @@ import (
 	"fmt"
 	"sort"
 
-	"github.com/minio/minio-go/v7/pkg/set"
+	"github.com/trinet2005/oss-go-sdk/pkg/set"
 )
 
 // ActionSet - set of actions.

@@ -29,8 +29,8 @@ import (
 	"sync"
 	"time"
 
-	"github.com/minio/pkg/v2/env"
 	"github.com/rjeczalik/notify"
+	"github.com/trinet2005/oss-pkg/env"
 )
 
 // Manager is a TLS certificate manager that can handle multiple certificates.

@@ -20,7 +20,7 @@ package policy
 import (
 	"strings"
 
-	"github.com/minio/pkg/v2/policy/condition"
+	"github.com/trinet2005/oss-pkg/policy/condition"
 )
 
 // Statement - iam policy statement.

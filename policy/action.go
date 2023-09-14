@@ -18,8 +18,8 @@
 package policy
 
 import (
-	"github.com/minio/pkg/v2/policy/condition"
-	"github.com/minio/pkg/v2/wildcard"
+	"github.com/trinet2005/oss-pkg/policy/condition"
+	"github.com/trinet2005/oss-pkg/wildcard"
 )
 
 // Action - policy action.

@@ -22,7 +22,7 @@ import (
 	"strings"
 
 	"github.com/go-ldap/ldap/v3"
-	"github.com/minio/minio-go/v7/pkg/set"
+	"github.com/trinet2005/oss-go-sdk/pkg/set"
 )
 
 // Result - type for high-level names for the validation status of the config.
