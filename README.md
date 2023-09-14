@@ -1,5 +1,3 @@
-# pkg
-Collection of common packages used in MinIO projects.
+此项目为杭州瑞网广通公司对象存储系统的PKG
 
-# License
-Use of this package `pkg` is governed by the GNU AGPLv3 license that can be found in the [LICENSE](https://github.com/minio/pkg/blob/master/LICENSE) file.
+此项目基于Minio开发，使用请遵守minio相关开源协议
