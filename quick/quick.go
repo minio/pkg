@@ -26,7 +26,7 @@ import (
 	"sync"
 
 	"github.com/fatih/structs"
-	"github.com/minio/pkg/v2/safe"
+	"github.com/trinet2005/oss-pkg/safe"
 	etcd "go.etcd.io/etcd/client/v3"
 )
 

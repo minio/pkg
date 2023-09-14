@@ -25,8 +25,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/minio/minio-go/v7/pkg/set"
-	"github.com/minio/pkg/v2/policy/condition"
+	"github.com/trinet2005/oss-go-sdk/pkg/set"
+	"github.com/trinet2005/oss-pkg/policy/condition"
 )
 
 func TestGetPoliciesFromClaims(t *testing.T) {

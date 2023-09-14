@@ -22,7 +22,7 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/minio/minio-go/v7/pkg/set"
+	"github.com/trinet2005/oss-go-sdk/pkg/set"
 )
 
 func TestStringEqualsFuncEvaluate(t *testing.T) {

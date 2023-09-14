@@ -18,7 +18,6 @@
 package net
 
 import (
-	"github.com/minio/madmin-go/v3"
 	"github.com/montanaflynn/stats"
 )
 
