@@ -21,6 +21,7 @@ import (
 	"fmt"
 	"net"
 	"sort"
+	"strings"
 )
 
 // ipaddrFunc - IP address function. It checks whether value by Key in given
@@ -125,6 +126,12 @@ func valuesToIPNets(n string, values ValueSet) ([]*net.IPNet, error) {
 		s, err := v.GetString()
 		if err != nil {
 			return nil, fmt.Errorf("value %v must be string representation of CIDR for %v condition", v, n)
+		}
+
+		// If you specify an IP address without the associated routing prefix, IAM uses the default prefix value of /32.
+		// https://docs.aws.amazon.com/IAM/latest/UserGuide/reference_policies_elements_condition_operators.html#Conditions_IPAddress
+		if strings.IndexByte(s, '/') == -1 {
+			s += "/32"
 		}
 
 		var IPNet *net.IPNet
