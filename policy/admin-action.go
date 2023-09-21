@@ -290,72 +290,11 @@ func createAdminActionConditionKeyMap() map[Action]condition.KeySet {
 		allSupportedAdminKeys = append(allSupportedAdminKeys, keyName.ToKey())
 	}
 
-	return map[Action]condition.KeySet{
-		AllAdminActions:                  condition.NewKeySet(allSupportedAdminKeys...),
-		HealAdminAction:                  condition.NewKeySet(allSupportedAdminKeys...),
-		StorageInfoAdminAction:           condition.NewKeySet(allSupportedAdminKeys...),
-		ServerInfoAdminAction:            condition.NewKeySet(allSupportedAdminKeys...),
-		DataUsageInfoAdminAction:         condition.NewKeySet(allSupportedAdminKeys...),
-		HealthInfoAdminAction:            condition.NewKeySet(allSupportedAdminKeys...),
-		BandwidthMonitorAction:           condition.NewKeySet(allSupportedAdminKeys...),
-		TopLocksAdminAction:              condition.NewKeySet(allSupportedAdminKeys...),
-		ProfilingAdminAction:             condition.NewKeySet(allSupportedAdminKeys...),
-		TraceAdminAction:                 condition.NewKeySet(allSupportedAdminKeys...),
-		ConsoleLogAdminAction:            condition.NewKeySet(allSupportedAdminKeys...),
-		KMSKeyStatusAdminAction:          condition.NewKeySet(allSupportedAdminKeys...),
-		ServerUpdateAdminAction:          condition.NewKeySet(allSupportedAdminKeys...),
-		ServiceRestartAdminAction:        condition.NewKeySet(allSupportedAdminKeys...),
-		ServiceStopAdminAction:           condition.NewKeySet(allSupportedAdminKeys...),
-		ServiceFreezeAdminAction:         condition.NewKeySet(allSupportedAdminKeys...),
-		ConfigUpdateAdminAction:          condition.NewKeySet(allSupportedAdminKeys...),
-		CreateUserAdminAction:            condition.NewKeySet(allSupportedAdminKeys...),
-		DeleteUserAdminAction:            condition.NewKeySet(allSupportedAdminKeys...),
-		ListUsersAdminAction:             condition.NewKeySet(allSupportedAdminKeys...),
-		EnableUserAdminAction:            condition.NewKeySet(allSupportedAdminKeys...),
-		DisableUserAdminAction:           condition.NewKeySet(allSupportedAdminKeys...),
-		GetUserAdminAction:               condition.NewKeySet(allSupportedAdminKeys...),
-		AddUserToGroupAdminAction:        condition.NewKeySet(allSupportedAdminKeys...),
-		RemoveUserFromGroupAdminAction:   condition.NewKeySet(allSupportedAdminKeys...),
-		ListGroupsAdminAction:            condition.NewKeySet(allSupportedAdminKeys...),
-		EnableGroupAdminAction:           condition.NewKeySet(allSupportedAdminKeys...),
-		DisableGroupAdminAction:          condition.NewKeySet(allSupportedAdminKeys...),
-		CreateServiceAccountAdminAction:  condition.NewKeySet(allSupportedAdminKeys...),
-		UpdateServiceAccountAdminAction:  condition.NewKeySet(allSupportedAdminKeys...),
-		RemoveServiceAccountAdminAction:  condition.NewKeySet(allSupportedAdminKeys...),
-		ListServiceAccountsAdminAction:   condition.NewKeySet(allSupportedAdminKeys...),
-		ListTemporaryAccountsAdminAction: condition.NewKeySet(allSupportedAdminKeys...),
-
-		CreatePolicyAdminAction:        condition.NewKeySet(allSupportedAdminKeys...),
-		DeletePolicyAdminAction:        condition.NewKeySet(allSupportedAdminKeys...),
-		GetPolicyAdminAction:           condition.NewKeySet(allSupportedAdminKeys...),
-		AttachPolicyAdminAction:        condition.NewKeySet(allSupportedAdminKeys...),
-		ListUserPoliciesAdminAction:    condition.NewKeySet(allSupportedAdminKeys...),
-		SetBucketQuotaAdminAction:      condition.NewKeySet(allSupportedAdminKeys...),
-		GetBucketQuotaAdminAction:      condition.NewKeySet(allSupportedAdminKeys...),
-		SetBucketTargetAction:          condition.NewKeySet(allSupportedAdminKeys...),
-		GetBucketTargetAction:          condition.NewKeySet(allSupportedAdminKeys...),
-		ReplicationDiff:                condition.NewKeySet(allSupportedAdminKeys...),
-		SetTierAction:                  condition.NewKeySet(allSupportedAdminKeys...),
-		ListTierAction:                 condition.NewKeySet(allSupportedAdminKeys...),
-		DecommissionAdminAction:        condition.NewKeySet(allSupportedAdminKeys...),
-		RebalanceAdminAction:           condition.NewKeySet(allSupportedAdminKeys...),
-		SiteReplicationAddAction:       condition.NewKeySet(allSupportedAdminKeys...),
-		SiteReplicationDisableAction:   condition.NewKeySet(allSupportedAdminKeys...),
-		SiteReplicationInfoAction:      condition.NewKeySet(allSupportedAdminKeys...),
-		SiteReplicationOperationAction: condition.NewKeySet(allSupportedAdminKeys...),
-		SiteReplicationRemoveAction:    condition.NewKeySet(allSupportedAdminKeys...),
-		SiteReplicationResyncAction:    condition.NewKeySet(allSupportedAdminKeys...),
-
-		ImportBucketMetadataAction: condition.NewKeySet(allSupportedAdminKeys...),
-		ExportBucketMetadataAction: condition.NewKeySet(allSupportedAdminKeys...),
-		ExportIAMAction:            condition.NewKeySet(allSupportedAdminKeys...),
-		ImportIAMAction:            condition.NewKeySet(allSupportedAdminKeys...),
-
-		ListBatchJobsAction:    condition.NewKeySet(allSupportedAdminKeys...),
-		DescribeBatchJobAction: condition.NewKeySet(allSupportedAdminKeys...),
-		StartBatchJobAction:    condition.NewKeySet(allSupportedAdminKeys...),
-		CancelBatchJobAction:   condition.NewKeySet(allSupportedAdminKeys...),
+	adminActionConditionKeyMap := map[Action]condition.KeySet{}
+	for act := range supportedAdminActions {
+		adminActionConditionKeyMap[Action(act)] = condition.NewKeySet(allSupportedAdminKeys...)
 	}
+	return adminActionConditionKeyMap
 }
 
 // adminActionConditionKeyMap - holds mapping of supported condition key for an action.
