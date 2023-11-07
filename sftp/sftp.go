@@ -97,10 +97,6 @@ type Options struct {
 	HandleSFTPSession func(channel ssh.Channel, sconn *ssh.ServerConn)
 }
 
-func defaultBeforeAccept(_ net.Conn, _ error) (accept bool) {
-	return true
-}
-
 // NewServer composes a new Server{} object from the options given.
 //
 // It is recommended to use (2*time.Minute) as the SSHHandshakeDeadline.
