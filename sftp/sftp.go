@@ -18,6 +18,7 @@
 package sftp
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"net"
@@ -74,6 +75,14 @@ type Server struct {
 	beforeHandle         func(conn net.Conn, err error) (acceptConn bool)
 	handleSFTPSession    func(channel ssh.Channel, sconn *ssh.ServerConn)
 	listener             net.Listener
+	ctx                  context.Context
+	cancelFunc           context.CancelFunc
+}
+
+// ShutDown calls the cancel context and shuts
+// down the SFTP server.
+func (s *Server) ShutDown() {
+	s.cancelFunc()
 }
 
 // Options defines required configurations
@@ -83,6 +92,10 @@ type Options struct {
 	PublicIP  string
 	Logger    Logger
 	SSHConfig *ssh.ServerConfig
+	// Context is used to shut down the net.Listener
+	Context context.Context
+	// ConnectionKeepAlive controls how long the connection keep-alive duration is set to.
+	ConnectionKeepAlive time.Duration
 	// SSHHandshakeDeadline controls the time.Duration which ssh session
 	// have to complete their handshake. This option is not a part of the
 	// ssh.ServerConfig so we had to implement it separately.
@@ -114,25 +127,41 @@ func NewServer(options *Options) (sftpServer *Server, err error) {
 	if options.Port < 1 || options.Port > 65535 {
 		return nil, ErrInvalidPort
 	}
+	// It is recommended to use (2*time.Minute) as the SSHHandshakeDeadline.
+	// 2 minutes is the default deadline for OpenSSH servers/clients.
+	if options.SSHHandshakeDeadline == 0 {
+		options.SSHHandshakeDeadline = time.Minute * 2
+	}
 
-	listener, nErr := net.Listen(
+	lc := new(net.ListenConfig)
+	if options.ConnectionKeepAlive != 0 {
+		lc.KeepAlive = options.ConnectionKeepAlive
+	}
+
+	sftpServer = new(Server)
+	if options.Context == nil {
+		sftpServer.ctx, sftpServer.cancelFunc = context.WithCancel(context.Background())
+	} else {
+		sftpServer.ctx, sftpServer.cancelFunc = context.WithCancel(options.Context)
+	}
+
+	sftpServer.listener, err = lc.Listen(
+		sftpServer.ctx,
 		"tcp",
 		net.JoinHostPort(options.PublicIP, strconv.Itoa(options.Port)),
 	)
-	if nErr != nil {
-		return nil, nErr
+	if err != nil {
+		return
 	}
 
-	return &Server{
-		publicIP:             options.PublicIP,
-		port:                 options.Port,
-		sshConfig:            *options.SSHConfig,
-		sshHandshakeDeadline: options.SSHHandshakeDeadline,
-		beforeHandle:         options.BeforeHandle,
-		handleSFTPSession:    options.HandleSFTPSession,
-		logger:               options.Logger,
-		listener:             listener,
-	}, nil
+	sftpServer.publicIP = options.PublicIP
+	sftpServer.port = options.Port
+	sftpServer.sshConfig = *options.SSHConfig
+	sftpServer.sshHandshakeDeadline = options.SSHHandshakeDeadline
+	sftpServer.beforeHandle = options.BeforeHandle
+	sftpServer.handleSFTPSession = options.HandleSFTPSession
+	sftpServer.logger = options.Logger
+	return
 }
 
 // Listen starts the SFTP server
