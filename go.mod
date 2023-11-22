@@ -1,6 +1,6 @@
 module github.com/minio/pkg/v2
 
-go 1.19
+go 1.21.1
 
 require (
 	github.com/cheggaaa/pb v1.0.29
@@ -16,6 +16,7 @@ require (
 	github.com/montanaflynn/stats v0.7.0
 	github.com/rjeczalik/notify v0.9.3
 	go.etcd.io/etcd/client/v3 v3.5.7
+	golang.org/x/crypto v0.9.0
 	golang.org/x/sys v0.8.0
 	gopkg.in/yaml.v2 v2.4.0
 )
@@ -61,7 +62,6 @@ require (
 	go.uber.org/atomic v1.10.0 // indirect
 	go.uber.org/multierr v1.9.0 // indirect
 	go.uber.org/zap v1.24.0 // indirect
-	golang.org/x/crypto v0.9.0 // indirect
 	golang.org/x/net v0.10.0 // indirect
 	golang.org/x/sync v0.1.0 // indirect
 	golang.org/x/text v0.9.0 // indirect
