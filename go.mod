@@ -1,6 +1,6 @@
 module github.com/minio/pkg/v2
 
-go 1.21.1
+go 1.20
 
 require (
 	github.com/cheggaaa/pb v1.0.29
