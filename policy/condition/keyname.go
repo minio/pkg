@@ -143,6 +143,9 @@ const (
 	// S3SignatureVersion - identifies the version of AWS Signature that you want to support for authenticated requests.
 	S3SignatureVersion KeyName = "s3:signatureversion"
 
+	// S3SignatureAge - identifies the maximum age of presgiend URL allowed
+	S3SignatureAge KeyName = "s3:signatureAge"
+
 	// S3AuthType - optionally use this condition key to restrict incoming requests to use a specific authentication method.
 	S3AuthType KeyName = "s3:authType"
 
@@ -229,6 +232,7 @@ var JWTKeys = []KeyName{
 var AllSupportedKeys = append([]KeyName{
 	S3SignatureVersion,
 	S3AuthType,
+	S3SignatureAge,
 	S3XAmzCopySource,
 	S3XAmzServerSideEncryption,
 	S3XAmzServerSideEncryptionCustomerAlgorithm,
@@ -267,6 +271,7 @@ var AllSupportedKeys = append([]KeyName{
 var CommonKeys = append([]KeyName{
 	S3SignatureVersion,
 	S3AuthType,
+	S3SignatureAge,
 	S3XAmzContentSha256,
 	S3LocationConstraint,
 	AWSReferer,
