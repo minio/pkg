@@ -67,6 +67,7 @@ type Logger interface {
 
 // Server implements a composable SFTP Server.
 type Server struct {
+	quit                 chan struct{}
 	port                 int
 	publicIP             string
 	sshConfig            ssh.ServerConfig
@@ -75,14 +76,14 @@ type Server struct {
 	beforeHandle         func(conn net.Conn, err error) (acceptConn bool)
 	handleSFTPSession    func(channel ssh.Channel, sconn *ssh.ServerConn)
 	listener             net.Listener
-	ctx                  context.Context
-	cancelFunc           context.CancelFunc
 }
 
 // ShutDown calls the cancel context and shuts
 // down the SFTP server.
-func (s *Server) ShutDown() {
-	s.cancelFunc()
+func (s *Server) ShutDown() (err error) {
+	close(s.quit)
+	err = s.listener.Close()
+	return
 }
 
 // Options defines required configurations
@@ -92,8 +93,6 @@ type Options struct {
 	PublicIP  string
 	Logger    Logger
 	SSHConfig *ssh.ServerConfig
-	// Context is used to shut down the net.Listener
-	Context context.Context
 	// ConnectionKeepAlive controls how long the connection keep-alive duration is set to.
 	ConnectionKeepAlive time.Duration
 	// SSHHandshakeDeadline controls the time.Duration which ssh session
@@ -139,14 +138,11 @@ func NewServer(options *Options) (sftpServer *Server, err error) {
 	}
 
 	sftpServer = new(Server)
-	if options.Context == nil {
-		sftpServer.ctx, sftpServer.cancelFunc = context.WithCancel(context.Background())
-	} else {
-		sftpServer.ctx, sftpServer.cancelFunc = context.WithCancel(options.Context)
-	}
 
+	// net.Listener does not respect the context cancelFunc.
+	// Hence we just pass it a normal context.Background()
 	sftpServer.listener, err = lc.Listen(
-		sftpServer.ctx,
+		context.Background(),
 		"tcp",
 		net.JoinHostPort(options.PublicIP, strconv.Itoa(options.Port)),
 	)
@@ -161,6 +157,7 @@ func NewServer(options *Options) (sftpServer *Server, err error) {
 	sftpServer.beforeHandle = options.BeforeHandle
 	sftpServer.handleSFTPSession = options.HandleSFTPSession
 	sftpServer.logger = options.Logger
+	sftpServer.quit = make(chan struct{})
 	return
 }
 
@@ -180,6 +177,11 @@ func (s *Server) Listen() (err error) {
 			continue
 		}
 		if err != nil {
+			select {
+			case <-s.quit:
+				return nil
+			default:
+			}
 			// Temporary() is deprecated but since it's been deployed to
 			// current production builds I do not want to simply switch it out.
 			// ISSUE: https://github.com/golang/go/issues/45729
