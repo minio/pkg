@@ -59,6 +59,9 @@ const (
 	// GetObjectAction - GetObject Rest API action.
 	GetObjectAction = "s3:GetObject"
 
+	// GetObjectAttributesAction - GetObjectVersionAttributes Rest API action.
+	GetObjectAttributesAction = "s3:GetObjectAttributes"
+
 	// HeadBucketAction - HeadBucket Rest API action. This action is unused in minio.
 	HeadBucketAction = "s3:HeadBucket"
 
@@ -111,6 +114,9 @@ const (
 
 	// GetObjectVersionAction - GetObjectVersionAction Rest API action.
 	GetObjectVersionAction = "s3:GetObjectVersion"
+
+	// GetObjectVersionAttributesAction - GetObjectVersionAttributes Rest API action.
+	GetObjectVersionAttributesAction = "s3:GetObjectVersionAttributes"
 
 	// GetObjectVersionTaggingAction - GetObjectVersionTagging Rest API action.
 	GetObjectVersionTaggingAction = "s3:GetObjectVersionTagging"
