@@ -237,6 +237,8 @@ var supportedActions = map[Action]struct{}{
 	GetBucketTaggingAction:                 {},
 	PutBucketTaggingAction:                 {},
 	GetObjectVersionAction:                 {},
+	GetObjectAttributesAction:              {},
+	GetObjectVersionAttributesAction:       {},
 	GetObjectVersionTaggingAction:          {},
 	DeleteObjectVersionAction:              {},
 	DeleteObjectVersionTaggingAction:       {},
@@ -372,7 +374,9 @@ func createActionConditionKeyMap() ActionConditionKeyMap {
 				condition.ExistingObjectTag.ToKey(),
 			}, commonKeys...)...),
 
-		HeadBucketAction: condition.NewKeySet(commonKeys...),
+		HeadBucketAction:                 condition.NewKeySet(commonKeys...),
+		GetObjectAttributesAction:        condition.NewKeySet(commonKeys...),
+		GetObjectVersionAttributesAction: condition.NewKeySet(commonKeys...),
 
 		ListAllMyBucketsAction: condition.NewKeySet(commonKeys...),
 
