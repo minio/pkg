@@ -59,6 +59,9 @@ const (
 	// GetObjectAction - GetObject Rest API action.
 	GetObjectAction = "s3:GetObject"
 
+	// GetObjectAttributesAction - GetObjectVersionAttributes Rest API action.
+	GetObjectAttributesAction = "s3:GetObjectAttributes"
+
 	// HeadBucketAction - HeadBucket Rest API action. This action is unused in minio.
 	HeadBucketAction = "s3:HeadBucket"
 
@@ -111,6 +114,9 @@ const (
 
 	// GetObjectVersionAction - GetObjectVersionAction Rest API action.
 	GetObjectVersionAction = "s3:GetObjectVersion"
+
+	// GetObjectVersionAttributesAction - GetObjectVersionAttributes Rest API action.
+	GetObjectVersionAttributesAction = "s3:GetObjectVersionAttributes"
 
 	// GetObjectVersionTaggingAction - GetObjectVersionTagging Rest API action.
 	GetObjectVersionTaggingAction = "s3:GetObjectVersionTagging"
@@ -231,6 +237,8 @@ var supportedActions = map[Action]struct{}{
 	GetBucketTaggingAction:                 {},
 	PutBucketTaggingAction:                 {},
 	GetObjectVersionAction:                 {},
+	GetObjectAttributesAction:              {},
+	GetObjectVersionAttributesAction:       {},
 	GetObjectVersionTaggingAction:          {},
 	DeleteObjectVersionAction:              {},
 	DeleteObjectVersionTaggingAction:       {},
@@ -367,6 +375,17 @@ func createActionConditionKeyMap() ActionConditionKeyMap {
 			}, commonKeys...)...),
 
 		HeadBucketAction: condition.NewKeySet(commonKeys...),
+
+		GetObjectAttributesAction: condition.NewKeySet(
+			append([]condition.Key{
+				condition.ExistingObjectTag.ToKey(),
+			}, commonKeys...)...),
+
+		GetObjectVersionAttributesAction: condition.NewKeySet(
+			append([]condition.Key{
+				condition.S3VersionID.ToKey(),
+				condition.ExistingObjectTag.ToKey(),
+			}, commonKeys...)...),
 
 		ListAllMyBucketsAction: condition.NewKeySet(commonKeys...),
 
