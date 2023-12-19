@@ -374,9 +374,18 @@ func createActionConditionKeyMap() ActionConditionKeyMap {
 				condition.ExistingObjectTag.ToKey(),
 			}, commonKeys...)...),
 
-		HeadBucketAction:                 condition.NewKeySet(commonKeys...),
-		GetObjectAttributesAction:        condition.NewKeySet(commonKeys...),
-		GetObjectVersionAttributesAction: condition.NewKeySet(commonKeys...),
+		HeadBucketAction: condition.NewKeySet(commonKeys...),
+
+		GetObjectAttributesAction: condition.NewKeySet(
+			append([]condition.Key{
+				condition.ExistingObjectTag.ToKey(),
+			}, commonKeys...)...),
+
+		GetObjectVersionAttributesAction: condition.NewKeySet(
+			append([]condition.Key{
+				condition.S3VersionID.ToKey(),
+				condition.ExistingObjectTag.ToKey(),
+			}, commonKeys...)...),
 
 		ListAllMyBucketsAction: condition.NewKeySet(commonKeys...),
 
