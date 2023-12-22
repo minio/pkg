@@ -1,4 +1,4 @@
-// Copyright (c) 2015-2021 MinIO, Inc.
+// Copyright (c) 2015-2023 MinIO, Inc.
 //
 // This file is part of MinIO Object Storage stack
 //
@@ -42,7 +42,7 @@ func (f ipaddrFunc) eval(values map[string][]string) bool {
 	for _, s := range rvalues {
 		IP := net.ParseIP(s)
 		if IP == nil {
-			panic(fmt.Errorf("invalid IP address '%v'", s))
+			return false
 		}
 
 		IPs = append(IPs, IP)
