@@ -53,7 +53,7 @@ func (statement Statement) IsAllowed(args Args) bool {
 		}
 
 		// For admin statements, resource match can be ignored.
-		if !statement.Resources.Match(resource, args.ConditionValues) && !statement.isAdmin() && !statement.isKMS() {
+		if !statement.Resources.Match(resource, args.ConditionValues) && !statement.isAdmin() && !statement.isKMS() && !statement.isSTS() {
 			return false
 		}
 
@@ -66,6 +66,15 @@ func (statement Statement) IsAllowed(args Args) bool {
 func (statement Statement) isAdmin() bool {
 	for action := range statement.Actions {
 		if AdminAction(action).IsValid() {
+			return true
+		}
+	}
+	return false
+}
+
+func (statement Statement) isSTS() bool {
+	for action := range statement.Actions {
+		if STSAction(action).IsValid() {
 			return true
 		}
 	}
@@ -98,6 +107,20 @@ func (statement Statement) isValid() error {
 		for action := range statement.Actions {
 			keys := statement.Conditions.Keys()
 			keyDiff := keys.Difference(adminActionConditionKeyMap[action])
+			if !keyDiff.IsEmpty() {
+				return Errorf("unsupported condition keys '%v' used for action '%v'", keyDiff, action)
+			}
+		}
+		return nil
+	}
+
+	if statement.isSTS() {
+		if err := statement.Actions.ValidateSTS(); err != nil {
+			return err
+		}
+		for action := range statement.Actions {
+			keys := statement.Conditions.Keys()
+			keyDiff := keys.Difference(stsActionConditionKeyMap[action])
 			if !keyDiff.IsEmpty() {
 				return Errorf("unsupported condition keys '%v' used for action '%v'", keyDiff, action)
 			}

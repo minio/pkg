@@ -138,6 +138,16 @@ func (actionSet ActionSet) ToAdminSlice() []AdminAction {
 	return actions
 }
 
+// ToSTSSlice - returns slice of STS actions from the action set.
+func (actionSet ActionSet) ToSTSSlice() []STSAction {
+	actions := []STSAction{}
+	for action := range actionSet {
+		actions = append(actions, STSAction(action))
+	}
+
+	return actions
+}
+
 // ToKMSSlice - returns slice of kms actions from the action set.
 func (actionSet ActionSet) ToKMSSlice() (actions []KMSAction) {
 	for action := range actionSet {
@@ -170,6 +180,16 @@ func (actionSet ActionSet) ValidateAdmin() error {
 	for _, action := range actionSet.ToAdminSlice() {
 		if !action.IsValid() {
 			return Errorf("unsupported admin action '%v'", action)
+		}
+	}
+	return nil
+}
+
+// ValidateSTS checks if all actions are valid STS actions
+func (actionSet ActionSet) ValidateSTS() error {
+	for _, action := range actionSet.ToSTSSlice() {
+		if !action.IsValid() {
+			return Errorf("unsupported STS action '%v'", action)
 		}
 	}
 	return nil
