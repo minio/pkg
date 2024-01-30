@@ -1,4 +1,4 @@
-// Copyright (c) 2015-2023 MinIO, Inc.
+// Copyright (c) 2015-2024 MinIO, Inc.
 //
 // This file is part of MinIO Object Storage stack
 //
@@ -55,8 +55,8 @@ type API struct {
 // Entry - defines fields and values of each log entry.
 type Entry struct {
 	DeploymentID string         `json:"deploymentid,omitempty"`
-	Level        string         `json:"level"`
-	LogKind      madmin.LogKind `json:"errKind"`
+	Level        madmin.LogKind `json:"level"`
+	LogKind      madmin.LogKind `json:"errKind,omitempty"` // Deprecated Jan 2024
 	Time         time.Time      `json:"time"`
 	API          *API           `json:"api,omitempty"`
 	RemoteHost   string         `json:"remotehost,omitempty"`
@@ -77,12 +77,12 @@ type Info struct {
 
 // Mask returns the mask based on the error level.
 func (l Info) Mask() uint64 {
-	return l.LogKind.LogMask().Mask()
+	return l.Level.LogMask().Mask()
 }
 
 // SendLog returns true if log pertains to node specified in args.
 func (l Info) SendLog(node string, logKind madmin.LogMask) bool {
-	if logKind.Contains(l.LogKind.LogMask()) {
+	if logKind.Contains(l.Level.LogMask()) {
 		return node == "" || strings.EqualFold(node, l.NodeName) && !l.Time.IsZero()
 	}
 	return false
