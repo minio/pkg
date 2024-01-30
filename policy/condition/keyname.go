@@ -37,6 +37,8 @@ func (key KeyName) Name() string {
 		return strings.TrimPrefix(name, "jwt:")
 	case strings.HasPrefix(name, "ldap:"):
 		return strings.TrimPrefix(name, "ldap:")
+	case strings.HasPrefix(name, "sts:"):
+		return strings.TrimPrefix(name, "sts:")
 	default:
 		return strings.TrimPrefix(name, "s3:")
 	}
@@ -265,7 +267,7 @@ var AllSupportedKeys = append([]KeyName{
 	ExistingObjectTag,
 	RequestObjectTagKeys,
 	// Add new supported condition keys.
-}, JWTKeys...)
+}, append(JWTKeys, AllSupportedSTSKeys...)...)
 
 // CommonKeys - is list of all common condition keys.
 var CommonKeys = append([]KeyName{
@@ -306,3 +308,14 @@ var AllSupportedAdminKeys = append([]KeyName{
 	LDAPGroups,
 	// Add new supported condition keys.
 }, JWTKeys...)
+
+const (
+	// STSDurationSeconds - A condition for STS policy
+	STSDurationSeconds KeyName = "sts:DurationSeconds"
+)
+
+// AllSupportedSTSKeys is the all supported conditions for STS policies
+var AllSupportedSTSKeys = []KeyName{
+	STSDurationSeconds,
+	// Add new supported condition keys.
+}
