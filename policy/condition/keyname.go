@@ -39,6 +39,8 @@ func (key KeyName) Name() string {
 		return strings.TrimPrefix(name, "ldap:")
 	case strings.HasPrefix(name, "sts:"):
 		return strings.TrimPrefix(name, "sts:")
+	case strings.HasPrefix(name, "svc:"):
+		return strings.TrimPrefix(name, "svc:")
 	default:
 		return strings.TrimPrefix(name, "s3:")
 	}
@@ -203,6 +205,13 @@ const (
 	LDAPGroups KeyName = "ldap:groups"
 )
 
+const (
+	// STSDurationSeconds - Duration seconds condition for STS policy
+	STSDurationSeconds KeyName = "sts:DurationSeconds"
+	// SVCDurationSeconds - Duration seconds condition for Admin policy
+	SVCDurationSeconds KeyName = "svc:DurationSeconds"
+)
+
 // JWTKeys - Supported JWT keys, non-exhaustive list please
 // expand as new claims are standardized.
 var JWTKeys = []KeyName{
@@ -231,7 +240,7 @@ var JWTKeys = []KeyName{
 }
 
 // AllSupportedKeys - is list of all all supported keys.
-var AllSupportedKeys = append([]KeyName{
+var AllSupportedKeys = []KeyName{
 	S3SignatureVersion,
 	S3AuthType,
 	S3SignatureAge,
@@ -266,8 +275,31 @@ var AllSupportedKeys = append([]KeyName{
 	RequestObjectTag,
 	ExistingObjectTag,
 	RequestObjectTagKeys,
-	// Add new supported condition keys.
-}, append(JWTKeys, AllSupportedSTSKeys...)...)
+	JWTSub,
+	JWTIss,
+	JWTAud,
+	JWTJti,
+	JWTName,
+	JWTUpn,
+	JWTGroups,
+	JWTGivenName,
+	JWTFamilyName,
+	JWTMiddleName,
+	JWTNickName,
+	JWTPrefUsername,
+	JWTProfile,
+	JWTPicture,
+	JWTWebsite,
+	JWTEmail,
+	JWTGender,
+	JWTBirthdate,
+	JWTPhoneNumber,
+	JWTAddress,
+	JWTScope,
+	JWTClientID,
+	STSDurationSeconds,
+	SVCDurationSeconds,
+}
 
 // CommonKeys - is list of all common condition keys.
 var CommonKeys = append([]KeyName{
@@ -306,13 +338,9 @@ var AllSupportedAdminKeys = append([]KeyName{
 	LDAPUser,
 	LDAPUsername,
 	LDAPGroups,
+	SVCDurationSeconds,
 	// Add new supported condition keys.
 }, JWTKeys...)
-
-const (
-	// STSDurationSeconds - A condition for STS policy
-	STSDurationSeconds KeyName = "sts:DurationSeconds"
-)
 
 // AllSupportedSTSKeys is the all supported conditions for STS policies
 var AllSupportedSTSKeys = []KeyName{
