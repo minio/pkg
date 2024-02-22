@@ -39,11 +39,8 @@ var (
 )
 
 // GetThemeColor gets a color for a particular tag.
-func GetThemeColor(tag string) (*color.Color, bool) {
-	themeMu.Lock()
-	defer themeMu.Unlock()
-	c, ok := theme[tag]
-	return c, ok
+func GetThemeColor(tag string) *color.Color {
+	return getThemeColor(tag)
 }
 
 func getThemeColor(tag string) *color.Color {
