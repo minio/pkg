@@ -38,6 +38,7 @@ var (
 	themeMu sync.Mutex
 )
 
+// GetThemeColor gets a color for a particular tag.
 func GetThemeColor(tag string) (*color.Color, bool) {
 	themeMu.Lock()
 	defer themeMu.Unlock()
