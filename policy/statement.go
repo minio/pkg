@@ -90,14 +90,18 @@ func (statement Statement) isKMS() bool {
 	return false
 }
 
-// isValid - checks whether statement is valid or not.
-func (statement Statement) isValid() error {
+// Validate - checks whether statement is valid or not.
+func (statement Statement) Validate() error {
 	if !statement.Effect.IsValid() {
 		return Errorf("invalid Effect %v", statement.Effect)
 	}
 
 	if len(statement.Actions) == 0 && len(statement.NotActions) == 0 {
 		return Errorf("Action must not be empty")
+	}
+
+	if len(statement.Actions) > 0 && len(statement.NotActions) > 0 {
+		return Errorf("Only exactly one of Action or NotAction may be provided")
 	}
 
 	if statement.isAdmin() {
@@ -132,6 +136,8 @@ func (statement Statement) isValid() error {
 		return statement.Actions.ValidateKMS()
 	}
 
+	// Handle statement with S3 actions.
+
 	if !statement.SID.IsValid() {
 		return Errorf("invalid SID %v", statement.SID)
 	}
@@ -144,7 +150,7 @@ func (statement Statement) isValid() error {
 		return err
 	}
 
-	if err := statement.Actions.Validate(); err != nil {
+	if err := statement.Actions.ValidateS3(); err != nil {
 		return err
 	}
 
@@ -161,11 +167,6 @@ func (statement Statement) isValid() error {
 	}
 
 	return nil
-}
-
-// Validate - validates Statement is for given bucket or not.
-func (statement Statement) Validate() error {
-	return statement.isValid()
 }
 
 // Equals checks if two statements are equal

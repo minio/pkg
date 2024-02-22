@@ -301,7 +301,7 @@ func TestBPStatementIsValid(t *testing.T) {
 	}
 
 	for i, testCase := range testCases {
-		err := testCase.statement.isValid()
+		err := testCase.statement.validate()
 		expectErr := (err != nil)
 
 		if expectErr != testCase.expectErr {

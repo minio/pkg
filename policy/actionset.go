@@ -128,6 +128,16 @@ func (actionSet ActionSet) ToSlice() []Action {
 	return actions
 }
 
+// ToS3Slice - returns slice of S3 actions from the action set.
+func (actionSet ActionSet) ToS3Slice() []S3Action {
+	actions := []S3Action{}
+	for action := range actionSet {
+		actions = append(actions, S3Action(action))
+	}
+
+	return actions
+}
+
 // ToAdminSlice - returns slice of admin actions from the action set.
 func (actionSet ActionSet) ToAdminSlice() []AdminAction {
 	actions := []AdminAction{}
@@ -172,6 +182,16 @@ func (actionSet *ActionSet) UnmarshalJSON(data []byte) error {
 		actionSet.Add(Action(s))
 	}
 
+	return nil
+}
+
+// ValidateS3 checks if all actions are valid S3 actions.
+func (actionSet ActionSet) ValidateS3() error {
+	for _, action := range actionSet.ToS3Slice() {
+		if !action.IsValid() {
+			return Errorf("unsupported S3 action '%v'", action)
+		}
+	}
 	return nil
 }
 

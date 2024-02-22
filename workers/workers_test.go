@@ -56,7 +56,7 @@ func TestWorkers(t *testing.T) {
 			jobs: 5,
 		},
 	}
-	testFn := func(n, jobs int, mustFail bool) {
+	testFn := func(t *testing.T, n, jobs int, mustFail bool) {
 		var mu sync.Mutex
 		var jobsDone int
 		// Create workers for n concurrent workers
@@ -88,7 +88,7 @@ func TestWorkers(t *testing.T) {
 
 	for i, test := range tests {
 		t.Run(fmt.Sprintf("test-%d", i), func(t *testing.T) {
-			testFn(test.n, test.jobs, test.mustFail)
+			testFn(t, test.n, test.jobs, test.mustFail)
 		})
 	}
 
