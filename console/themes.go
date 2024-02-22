@@ -38,6 +38,13 @@ var (
 	themeMu sync.Mutex
 )
 
+func GetThemeColor(tag string) (*color.Color, bool) {
+	themeMu.Lock()
+	defer themeMu.Unlock()
+	c, ok := theme[tag]
+	return c, ok
+}
+
 func getThemeColor(tag string) *color.Color {
 	themeMu.Lock()
 	defer themeMu.Unlock()
