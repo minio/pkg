@@ -87,7 +87,7 @@ func TestWorkers(t *testing.T) {
 	}
 
 	for i, test := range tests {
-		t.Run(fmt.Sprintf("test-%d", i), func(t *testing.T) {
+		t.Run(fmt.Sprintf("test-%d", i), func(_ *testing.T) {
 			testFn(test.n, test.jobs, test.mustFail)
 		})
 	}
