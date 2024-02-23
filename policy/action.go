@@ -76,6 +76,9 @@ func (action Action) Match(a Action) bool {
 }
 
 // IsValid - checks if action is valid or not.
+//
+// Deprecated: IsValid is deprecated, use Type() and specific action type's
+// IsValid instead.
 func (action Action) IsValid() bool {
 	switch action.Type() {
 	case S3ActionType:
