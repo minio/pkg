@@ -128,7 +128,21 @@ func (actionSet ActionSet) ToSlice() []Action {
 	return actions
 }
 
+// ToS3Slice - returns slice of S3 actions from the action set.
+//
+// Deprecated: This function will be removed in a future release.
+func (actionSet ActionSet) ToS3Slice() []S3Action {
+	actions := []S3Action{}
+	for action := range actionSet {
+		actions = append(actions, S3Action(action))
+	}
+
+	return actions
+}
+
 // ToAdminSlice - returns slice of admin actions from the action set.
+//
+// Deprecated: This function will be removed in a future release.
 func (actionSet ActionSet) ToAdminSlice() []AdminAction {
 	actions := []AdminAction{}
 	for action := range actionSet {
@@ -139,6 +153,8 @@ func (actionSet ActionSet) ToAdminSlice() []AdminAction {
 }
 
 // ToSTSSlice - returns slice of STS actions from the action set.
+//
+// Deprecated: This function will be removed in a future release.
 func (actionSet ActionSet) ToSTSSlice() []STSAction {
 	actions := []STSAction{}
 	for action := range actionSet {
@@ -149,6 +165,8 @@ func (actionSet ActionSet) ToSTSSlice() []STSAction {
 }
 
 // ToKMSSlice - returns slice of kms actions from the action set.
+//
+// Deprecated: This function will be removed in a future release.
 func (actionSet ActionSet) ToKMSSlice() (actions []KMSAction) {
 	for action := range actionSet {
 		actions = append(actions, KMSAction(action))
@@ -175,10 +193,20 @@ func (actionSet *ActionSet) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+// ValidateS3 checks if all actions are valid S3 actions.
+func (actionSet ActionSet) ValidateS3() error {
+	for _, action := range actionSet.ToS3Slice() {
+		if !action.IsValid() {
+			return Errorf("unsupported S3 action '%v'", action)
+		}
+	}
+	return nil
+}
+
 // ValidateAdmin checks if all actions are valid Admin actions
 func (actionSet ActionSet) ValidateAdmin() error {
-	for _, action := range actionSet.ToAdminSlice() {
-		if !action.IsValid() {
+	for action := range actionSet {
+		if !AdminAction(action).IsValid() {
 			return Errorf("unsupported admin action '%v'", action)
 		}
 	}
@@ -187,8 +215,8 @@ func (actionSet ActionSet) ValidateAdmin() error {
 
 // ValidateSTS checks if all actions are valid STS actions
 func (actionSet ActionSet) ValidateSTS() error {
-	for _, action := range actionSet.ToSTSSlice() {
-		if !action.IsValid() {
+	for action := range actionSet {
+		if !STSAction(action).IsValid() {
 			return Errorf("unsupported STS action '%v'", action)
 		}
 	}
@@ -197,19 +225,9 @@ func (actionSet ActionSet) ValidateSTS() error {
 
 // ValidateKMS checks if all actions are valid KMS actions
 func (actionSet ActionSet) ValidateKMS() error {
-	for _, action := range actionSet.ToKMSSlice() {
-		if !action.IsValid() {
+	for action := range actionSet {
+		if !KMSAction(action).IsValid() {
 			return Errorf("unsupported KMS action '%v'", action)
-		}
-	}
-	return nil
-}
-
-// Validate checks if all actions are valid
-func (actionSet ActionSet) Validate() error {
-	for _, action := range actionSet.ToSlice() {
-		if !action.IsValid() {
-			return Errorf("unsupported action '%v'", action)
 		}
 	}
 	return nil

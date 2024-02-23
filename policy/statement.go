@@ -31,6 +31,11 @@ type Statement struct {
 	NotActions ActionSet           `json:"NotAction,omitempty"`
 	Resources  ResourceSet         `json:"Resource,omitempty"`
 	Conditions condition.Functions `json:"Condition,omitempty"`
+
+	// managed values
+
+	// This is set during validation, and used during evaluation of the policy.
+	actionType ActionType
 }
 
 // IsAllowed - checks given policy args is allowed to continue the Rest API.
@@ -52,9 +57,11 @@ func (statement Statement) IsAllowed(args Args) bool {
 			resource += "/"
 		}
 
-		// For admin statements, resource match can be ignored.
-		if !statement.Resources.Match(resource, args.ConditionValues) && !statement.isAdmin() && !statement.isKMS() && !statement.isSTS() {
-			return false
+		// For non S3 statements, resource is ignored.
+		if statement.actionType == S3ActionType {
+			if !statement.Resources.Match(resource, args.ConditionValues) {
+				return false
+			}
 		}
 
 		return statement.Conditions.Evaluate(args.ConditionValues)
@@ -63,35 +70,8 @@ func (statement Statement) IsAllowed(args Args) bool {
 	return statement.Effect.IsAllowed(check())
 }
 
-func (statement Statement) isAdmin() bool {
-	for action := range statement.Actions {
-		if AdminAction(action).IsValid() {
-			return true
-		}
-	}
-	return false
-}
-
-func (statement Statement) isSTS() bool {
-	for action := range statement.Actions {
-		if STSAction(action).IsValid() {
-			return true
-		}
-	}
-	return false
-}
-
-func (statement Statement) isKMS() bool {
-	for action := range statement.Actions {
-		if KMSAction(action).IsValid() {
-			return true
-		}
-	}
-	return false
-}
-
-// isValid - checks whether statement is valid or not.
-func (statement Statement) isValid() error {
+// Validate - checks whether statement is valid or not.
+func (statement Statement) Validate() error {
 	if !statement.Effect.IsValid() {
 		return Errorf("invalid Effect %v", statement.Effect)
 	}
@@ -100,38 +80,83 @@ func (statement Statement) isValid() error {
 		return Errorf("Action must not be empty")
 	}
 
-	if statement.isAdmin() {
-		if err := statement.Actions.ValidateAdmin(); err != nil {
-			return err
-		}
-		for action := range statement.Actions {
-			keys := statement.Conditions.Keys()
-			keyDiff := keys.Difference(adminActionConditionKeyMap[action])
-			if !keyDiff.IsEmpty() {
-				return Errorf("unsupported condition keys '%v' used for action '%v'", keyDiff, action)
+	if len(statement.Actions) > 0 && len(statement.NotActions) > 0 {
+		return Errorf("Action and NotAction are mutually exclusive")
+	}
+
+	// In this implementation, a statement may have actions of a single
+	// ActionType only. For example, a statement with both "s3:GetObject" and
+	// "admin:*" actions is invalid.
+
+	// Check ActionType of all actions in the statement.
+	var firstActionType ActionType
+	for _, actionBlock := range []ActionSet{statement.Actions, statement.NotActions} {
+		for action := range actionBlock {
+			actType := action.Type()
+			if actType == "" {
+				return Errorf("invalid action %v", action)
+			}
+
+			if firstActionType == "" {
+				firstActionType = actType
+			} else if firstActionType != actType {
+				return Errorf("Actions of different types found in the statement")
 			}
 		}
-		return nil
 	}
 
-	if statement.isSTS() {
-		if err := statement.Actions.ValidateSTS(); err != nil {
-			return err
+	// Set the action type for the statement. This will never be empty because
+	// either Action or NotAction has been specified.
+	statement.actionType = firstActionType
+
+	switch statement.actionType {
+	case S3ActionType:
+		return statement.validateS3()
+	case STSActionType:
+		return statement.validateSTS()
+	case KMSActionType:
+		return statement.validateKMS()
+	case AdminActionType:
+		return statement.validateAdmin()
+	default:
+		return Errorf("unsupported action type %v", statement.actionType)
+	}
+}
+
+func (statement Statement) validateAdmin() error {
+	if err := statement.Actions.ValidateAdmin(); err != nil {
+		return err
+	}
+	for action := range statement.Actions {
+		keys := statement.Conditions.Keys()
+		keyDiff := keys.Difference(adminActionConditionKeyMap[action])
+		if !keyDiff.IsEmpty() {
+			return Errorf("unsupported condition keys '%v' used for action '%v'", keyDiff, action)
 		}
-		for action := range statement.Actions {
-			keys := statement.Conditions.Keys()
-			keyDiff := keys.Difference(stsActionConditionKeyMap[action])
-			if !keyDiff.IsEmpty() {
-				return Errorf("unsupported condition keys '%v' used for action '%v'", keyDiff, action)
-			}
+	}
+	return nil
+}
+
+func (statement Statement) validateSTS() error {
+	if err := statement.Actions.ValidateSTS(); err != nil {
+		return err
+	}
+	for action := range statement.Actions {
+		keys := statement.Conditions.Keys()
+		keyDiff := keys.Difference(stsActionConditionKeyMap[action])
+		if !keyDiff.IsEmpty() {
+			return Errorf("unsupported condition keys '%v' used for action '%v'", keyDiff, action)
 		}
-		return nil
 	}
+	return nil
 
-	if statement.isKMS() {
-		return statement.Actions.ValidateKMS()
-	}
+}
 
+func (statement Statement) validateKMS() error {
+	return statement.Actions.ValidateKMS()
+}
+
+func (statement Statement) validateS3() error {
 	if !statement.SID.IsValid() {
 		return Errorf("invalid SID %v", statement.SID)
 	}
@@ -144,7 +169,7 @@ func (statement Statement) isValid() error {
 		return err
 	}
 
-	if err := statement.Actions.Validate(); err != nil {
+	if err := statement.Actions.ValidateS3(); err != nil {
 		return err
 	}
 
@@ -161,11 +186,6 @@ func (statement Statement) isValid() error {
 	}
 
 	return nil
-}
-
-// Validate - validates Statement is for given bucket or not.
-func (statement Statement) Validate() error {
-	return statement.isValid()
 }
 
 // Equals checks if two statements are equal

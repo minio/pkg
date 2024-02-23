@@ -152,7 +152,9 @@ func TestActionSetUnmarshalJSON(t *testing.T) {
 			t.Fatalf("case %v: error during unmarshal: expected: %v, got: %v\n", i+1, testCase.expectUnmarshalErr, expectErr)
 		}
 
-		err = result.Validate()
+		// Action set validation is specific to the type of action. This test
+		// only uses S3 actions.
+		err = result.ValidateS3()
 		expectErr = (err != nil)
 		if expectErr != testCase.expectValidateErr {
 			t.Fatalf("case %v: error during validation: expected: %v, got: %v\n", i+1, testCase.expectValidateErr, expectErr)

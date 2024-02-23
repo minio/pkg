@@ -295,7 +295,7 @@ func TestStatementIsValid(t *testing.T) {
 	}
 
 	for i, testCase := range testCases {
-		err := testCase.statement.isValid()
+		err := testCase.statement.Validate()
 		expectErr := (err != nil)
 
 		if expectErr != testCase.expectErr {
