@@ -20,7 +20,6 @@ package subnet
 import (
 	"bytes"
 	"crypto/tls"
-	"errors"
 	"fmt"
 	"net"
 	"net/http"
@@ -171,15 +170,27 @@ func (lv *LicenseValidator) ValidateLicense() (*licverifier.LicenseInfo, error) 
 	return lv.ParseLicense(string(licData))
 }
 
-// ValidateEnterpriseLicense validates the enterprise license file.
-func (lv *LicenseValidator) ValidateEnterpriseLicense() (*licverifier.LicenseInfo, error) {
+// ValidateEnterpriseLicense validates the ENTERPRISE license file.
+// Since there are multiple variants of ENTERPRISE licenses, ones
+// accepted by the application can be passed as `acceptedPlans`.
+// TRIAL licenses do not get grace period after expiry.
+func (lv *LicenseValidator) ValidateEnterpriseLicense(acceptedPlans []string) (*licverifier.LicenseInfo, error) {
 	li, err := lv.ValidateLicense()
 	if err != nil {
 		return nil, err
 	}
-	if li.Plan == "STANDARD" {
-		return nil, errors.New("this tool/service is available only to ENTERPRISE customers")
+
+	accepted := false
+	for _, plan := range acceptedPlans {
+		if plan == li.Plan {
+			accepted = true
+			break
+		}
 	}
+	if !accepted {
+		return nil, fmt.Errorf("this tool/service is not available to %s customers", li.Plan)
+	}
+
 	if li.ExpiresAt.Before(time.Now()) && li.Plan == "TRIAL" {
 		return nil, fmt.Errorf("trial license has expired on %v", li.ExpiresAt)
 	}
