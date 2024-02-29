@@ -191,7 +191,7 @@ func (lv *LicenseValidator) ValidateEnterpriseLicense(acceptedPlans []string) (*
 		return nil, fmt.Errorf("this tool/service is not available to %s customers", li.Plan)
 	}
 
-	if li.ExpiresAt.Before(time.Now()) && li.Plan == "TRIAL" {
+	if li.ExpiresAt.Before(time.Now()) && li.IsTrial {
 		return nil, fmt.Errorf("trial license has expired on %v", li.ExpiresAt)
 	}
 	return li, nil

@@ -49,6 +49,7 @@ type LicenseInfo struct {
 	IssuedAt        time.Time // Time of license issue
 	ExpiresAt       time.Time // Time of license expiry
 	APIKey          string    // Subnet account API Key
+	IsTrial         bool      // Is this a TRIAL license?
 }
 
 // license key JSON field names
@@ -61,6 +62,7 @@ const (
 	issuedAt     = "iat"
 	plan         = "plan"
 	apiKey       = "apiKey"
+	trial        = "trial"
 )
 
 // parse PEM encoded PKCS1 or PKCS8 public key
@@ -151,6 +153,10 @@ func toLicenseInfo(token jwt.Token) (LicenseInfo, error) {
 	// apiKey is optional as it's not present in older licenses
 	apiKey, _ := claims[apiKey].(string)
 
+	// isTrial is optional as it's not present in older licenses
+	// default value = false
+	isTrial, _ := claims[trial].(bool)
+
 	return LicenseInfo{
 		LicenseID:       licID,
 		Email:           token.Subject(),
@@ -162,6 +168,7 @@ func toLicenseInfo(token jwt.Token) (LicenseInfo, error) {
 		IssuedAt:        iAt,
 		ExpiresAt:       token.Expiration(),
 		APIKey:          apiKey,
+		IsTrial:         isTrial,
 	}, nil
 }
 
