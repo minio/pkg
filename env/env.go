@@ -54,14 +54,16 @@ func SetEnvOn() {
 }
 
 // IsSet returns if the given env key is set.
+// remember ENV must be a non-empty. All empty
+// values are considered unset.
 func IsSet(key string) bool {
 	return Get(key, "") != ""
 }
 
 // Get retrieves the value of the environment variable named
 // by the key. If the variable is present in the environment the
-// value (which may be empty) is returned. Otherwise it returns
-// the specified default value.
+// value (which may be empty) is not returned and this is considered
+// unset. Otherwise it returns the specified default value.
 func Get(key, defaultValue string) string {
 	privateMutex.RLock()
 	ok := envOff

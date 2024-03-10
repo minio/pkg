@@ -166,9 +166,9 @@ func Environ() []string {
 
 // LookupEnv retrieves the value of the environment variable
 // named by the key. If the variable is present in the
-// environment the value (which may be empty) is returned
-// and the boolean is true. Otherwise the returned value
-// will be empty and the boolean will be false.
+// environment the value then that ENV is conisdered unset.
+// and the boolean is false. Otherwise the returned value
+// will be whatever value is set and the boolean will be true.
 //
 // Additionally if the input is env://username:password@remote:port/
 // to fetch ENV values for the env value from a remote server.
