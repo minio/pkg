@@ -173,7 +173,7 @@ func Environ() []string {
 // Additionally if the input is env://username:password@remote:port/
 // to fetch ENV values for the env value from a remote server.
 // In this case, it also returns the credentials username and password
-func LookupEnv(key string) (string, string, string, error) {
+func LookupEnv(key string) (string, bool, string, string, error) {
 	v, ok := os.LookupEnv(key)
 	if ok && strings.HasPrefix(v, webEnvScheme) {
 		// If env value starts with `env*://`
@@ -184,16 +184,16 @@ func LookupEnv(key string) (string, string, string, error) {
 			env, eok := os.LookupEnv("_" + key)
 			if eok {
 				// fallback to cached value if-any.
-				return env, user, pwd, nil
+				return env, eok, user, pwd, nil
 			}
-			return env, user, pwd, err
+			return env, eok, user, pwd, err
 		}
 		// Set the ENV value to _env value,
 		// this value is a fallback in-case of
 		// server restarts when webhook server
 		// is down.
-		os.Setenv("_"+key, v)
-		return v, user, pwd, nil
+		_ = os.Setenv("_"+key, v)
+		return v, ok, user, pwd, nil
 	}
-	return v, "", "", nil
+	return v, ok, "", "", nil
 }

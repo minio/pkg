@@ -55,7 +55,15 @@ func SetEnvOn() {
 
 // IsSet returns if the given env key is set.
 func IsSet(key string) bool {
-	return Get(key, "") != ""
+	privateMutex.RLock()
+	ok := envOff
+	privateMutex.RUnlock()
+	if !ok {
+		_, ok, _, _, _ = LookupEnv(key)
+		return ok
+	}
+	// Env lookup is off
+	return false
 }
 
 // Get retrieves the value of the environment variable named
@@ -67,8 +75,8 @@ func Get(key, defaultValue string) string {
 	ok := envOff
 	privateMutex.RUnlock()
 	if !ok {
-		v, _, _, _ := LookupEnv(key)
-		if v != "" {
+		v, ok, _, _, _ := LookupEnv(key)
+		if ok {
 			return strings.TrimSpace(v)
 		}
 	}
