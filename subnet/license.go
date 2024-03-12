@@ -19,11 +19,13 @@ package subnet
 
 import (
 	"bytes"
+	"context"
 	"crypto/tls"
 	"fmt"
 	"net"
 	"net/http"
 	"os"
+	"strings"
 	"time"
 
 	"github.com/lestrrat-go/jwx/jwt"
@@ -53,6 +55,7 @@ type LicenseValidator struct {
 	LicenseFilePath   string
 	pubKeyURL         string
 	offlinePubKey     []byte
+	licenseFromEnv    string
 	ExpiryGracePeriod time.Duration
 }
 
@@ -83,9 +86,11 @@ func BaseURL(devMode bool) string {
 // running SUBNET instance to download the public key or use the bundled dev key.
 func NewLicenseValidator(params LicenseValidatorParams) (*LicenseValidator, error) {
 	licPath := params.LicenseFilePath
-	if licPath == "" {
-		// if license file path is not provided, expect it
-		// to be present in the current working directory
+	licFromEnv := os.Getenv("MINIO_LICENSE")
+	if licPath == "" && licFromEnv == "" {
+		// if license file path is not provided, and also
+		// not set in env variable, expect it to be present
+		// in the current working directory
 		pwd, err := os.Getwd()
 		if err != nil {
 			return nil, err
@@ -108,6 +113,7 @@ func NewLicenseValidator(params LicenseValidatorParams) (*LicenseValidator, erro
 	lv := LicenseValidator{
 		Client:            client,
 		LicenseFilePath:   licPath,
+		licenseFromEnv:    licFromEnv,
 		ExpiryGracePeriod: params.ExpiryGracePeriod,
 	}
 	lv.Init(params.DevMode)
@@ -163,18 +169,59 @@ func (lv *LicenseValidator) ParseLicense(license string) (*licverifier.LicenseIn
 
 // ValidateLicense validates the license file.
 func (lv *LicenseValidator) ValidateLicense() (*licverifier.LicenseInfo, error) {
-	licData, err := os.ReadFile(lv.LicenseFilePath)
-	if err != nil {
-		return nil, err
+	if lv.licenseFromEnv == "" && lv.LicenseFilePath == "" {
+		return nil, fmt.Errorf("MinIO license not found")
 	}
-	return lv.ParseLicense(string(licData))
+
+	var lic string
+	if lv.licenseFromEnv != "" {
+		lic = lv.licenseFromEnv
+	} else {
+		licData, err := os.ReadFile(lv.LicenseFilePath)
+		if err != nil {
+			return nil, err
+		}
+		lic = string(licData)
+	}
+
+	return lv.ParseLicense(lic)
+}
+
+func getDurationForNextLicenseCheck(li *licverifier.LicenseInfo) time.Duration {
+	if li.ExpiresAt.Before(time.Now()) {
+		// expired, within grace period. schedule daily
+		return time.Hour * 24
+	}
+	// not expired, schedule to check just after expiry
+	return time.Until(li.ExpiresAt.Add(time.Second))
+}
+
+func (lv *LicenseValidator) scheduleNextLicenseCheck(li *licverifier.LicenseInfo, acceptedPlans []string, licExpiredChan chan<- string) {
+	duration := getDurationForNextLicenseCheck(li)
+	timer := time.NewTimer(duration)
+	defer timer.Stop()
+
+	ctxt := context.Background()
+	for {
+		select {
+		case <-timer.C:
+			li, err := lv.ValidateEnterpriseLicense(acceptedPlans, licExpiredChan)
+			if err != nil {
+				licExpiredChan <- err.Error()
+				return
+			}
+			timer.Reset(getDurationForNextLicenseCheck(li))
+		case <-ctxt.Done():
+			return
+		}
+	}
 }
 
 // ValidateEnterpriseLicense validates the ENTERPRISE license file.
 // Since there are multiple variants of ENTERPRISE licenses, ones
 // accepted by the application can be passed as `acceptedPlans`.
 // TRIAL licenses do not get grace period after expiry.
-func (lv *LicenseValidator) ValidateEnterpriseLicense(acceptedPlans []string) (*licverifier.LicenseInfo, error) {
+func (lv *LicenseValidator) ValidateEnterpriseLicense(acceptedPlans []string, licExpiredChan chan<- string) (*licverifier.LicenseInfo, error) {
 	li, err := lv.ValidateLicense()
 	if err != nil {
 		return nil, err
@@ -188,11 +235,20 @@ func (lv *LicenseValidator) ValidateEnterpriseLicense(acceptedPlans []string) (*
 		}
 	}
 	if !accepted {
-		return nil, fmt.Errorf("this tool/service is not available to %s customers", li.Plan)
+		return nil, fmt.Errorf("this software is only available for license plans %v", strings.Join(acceptedPlans, ", "))
 	}
 
-	if li.ExpiresAt.Before(time.Now()) && li.IsTrial {
-		return nil, fmt.Errorf("trial license has expired on %v", li.ExpiresAt)
+	if li.ExpiresAt.Before(time.Now()) {
+		if li.IsTrial || li.Plan == "TRIAL" {
+			// no grace period for trial
+			return nil, fmt.Errorf("trial license has expired on %v", li.ExpiresAt)
+		}
 	}
+
+	// validation successful. start a background routine to validate the license
+	// - daily if already expired (within grace period)
+	// - just after expiry if not expired
+	go lv.scheduleNextLicenseCheck(li, acceptedPlans, licExpiredChan)
+
 	return li, nil
 }
