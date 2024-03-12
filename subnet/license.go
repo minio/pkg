@@ -19,11 +19,13 @@ package subnet
 
 import (
 	"bytes"
+	"context"
 	"crypto/tls"
 	"fmt"
 	"net"
 	"net/http"
 	"os"
+	"strings"
 	"time"
 
 	"github.com/lestrrat-go/jwx/jwt"
@@ -170,6 +172,36 @@ func (lv *LicenseValidator) ValidateLicense() (*licverifier.LicenseInfo, error) 
 	return lv.ParseLicense(string(licData))
 }
 
+func getDurationForNextLicenseCheck(li *licverifier.LicenseInfo) time.Duration {
+	if li.ExpiresAt.Before(time.Now()) {
+		// expired, within grace period. schedule daily
+		return time.Hour * 24
+	}
+	// not expired, schedule to check just after expiry
+	return time.Until(li.ExpiresAt.Add(time.Second))
+}
+
+func (lv *LicenseValidator) scheduleNextLicenseCheck(li *licverifier.LicenseInfo, acceptedPlans []string) error {
+	duration := getDurationForNextLicenseCheck(li)
+	timer := time.NewTimer(duration)
+	defer timer.Stop()
+
+	ctxt := context.Background()
+	for {
+		select {
+		case <-timer.C:
+			li, err := lv.ValidateEnterpriseLicense(acceptedPlans)
+			if err != nil {
+				fmt.Println("license validation failed:", err.Error())
+				os.Exit(1)
+			}
+			timer.Reset(getDurationForNextLicenseCheck(li))
+		case <-ctxt.Done():
+			return nil
+		}
+	}
+}
+
 // ValidateEnterpriseLicense validates the ENTERPRISE license file.
 // Since there are multiple variants of ENTERPRISE licenses, ones
 // accepted by the application can be passed as `acceptedPlans`.
@@ -188,11 +220,22 @@ func (lv *LicenseValidator) ValidateEnterpriseLicense(acceptedPlans []string) (*
 		}
 	}
 	if !accepted {
-		return nil, fmt.Errorf("this tool/service is not available to %s customers", li.Plan)
+		return nil, fmt.Errorf("this software is only available for license plans %v", strings.Join(acceptedPlans, ", "))
 	}
 
-	if li.ExpiresAt.Before(time.Now()) && li.IsTrial {
-		return nil, fmt.Errorf("trial license has expired on %v", li.ExpiresAt)
+	if li.ExpiresAt.Before(time.Now()) {
+		if li.IsTrial || li.Plan == "TRIAL" {
+			// no grace period for trial
+			return nil, fmt.Errorf("trial license has expired on %v", li.ExpiresAt)
+		}
+		// expired, within grace period. print warning.
+		fmt.Printf("license has expired on %v, renew immediately to avoid outage.", li.ExpiresAt)
 	}
+
+	// validation successful. start a background routine to validate the license
+	// - daily if already expired (within grace period)
+	// - just after expiry if not expired
+	go lv.scheduleNextLicenseCheck(li, acceptedPlans)
+
 	return li, nil
 }
