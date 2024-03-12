@@ -196,7 +196,7 @@ func getDurationForNextLicenseCheck(li *licverifier.LicenseInfo) time.Duration {
 	return time.Until(li.ExpiresAt.Add(time.Second))
 }
 
-func (lv *LicenseValidator) scheduleNextLicenseCheck(li *licverifier.LicenseInfo, acceptedPlans []string) error {
+func (lv *LicenseValidator) scheduleNextLicenseCheck(li *licverifier.LicenseInfo, acceptedPlans []string, licExpiredChan chan<- string) {
 	duration := getDurationForNextLicenseCheck(li)
 	timer := time.NewTimer(duration)
 	defer timer.Stop()
@@ -205,14 +205,14 @@ func (lv *LicenseValidator) scheduleNextLicenseCheck(li *licverifier.LicenseInfo
 	for {
 		select {
 		case <-timer.C:
-			li, err := lv.ValidateEnterpriseLicense(acceptedPlans)
+			li, err := lv.ValidateEnterpriseLicense(acceptedPlans, licExpiredChan)
 			if err != nil {
-				fmt.Println("license validation failed:", err.Error())
-				os.Exit(1)
+				licExpiredChan <- err.Error()
+				return
 			}
 			timer.Reset(getDurationForNextLicenseCheck(li))
 		case <-ctxt.Done():
-			return nil
+			return
 		}
 	}
 }
@@ -221,7 +221,7 @@ func (lv *LicenseValidator) scheduleNextLicenseCheck(li *licverifier.LicenseInfo
 // Since there are multiple variants of ENTERPRISE licenses, ones
 // accepted by the application can be passed as `acceptedPlans`.
 // TRIAL licenses do not get grace period after expiry.
-func (lv *LicenseValidator) ValidateEnterpriseLicense(acceptedPlans []string) (*licverifier.LicenseInfo, error) {
+func (lv *LicenseValidator) ValidateEnterpriseLicense(acceptedPlans []string, licExpiredChan chan<- string) (*licverifier.LicenseInfo, error) {
 	li, err := lv.ValidateLicense()
 	if err != nil {
 		return nil, err
@@ -248,7 +248,7 @@ func (lv *LicenseValidator) ValidateEnterpriseLicense(acceptedPlans []string) (*
 	// validation successful. start a background routine to validate the license
 	// - daily if already expired (within grace period)
 	// - just after expiry if not expired
-	go lv.scheduleNextLicenseCheck(li, acceptedPlans)
+	go lv.scheduleNextLicenseCheck(li, acceptedPlans, licExpiredChan)
 
 	return li, nil
 }
