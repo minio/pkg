@@ -80,7 +80,7 @@ func (policy BucketPolicy) isValid() error {
 	}
 
 	for _, statement := range policy.Statements {
-		if err := statement.validate(); err != nil {
+		if err := statement.isValid(); err != nil {
 			return err
 		}
 	}

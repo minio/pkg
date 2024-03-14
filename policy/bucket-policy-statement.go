@@ -65,8 +65,8 @@ func (statement BPStatement) IsAllowed(args BucketPolicyArgs) bool {
 	return statement.Effect.IsAllowed(check())
 }
 
-// validate - checks whether statement is valid or returns an error.
-func (statement BPStatement) validate() error {
+// isValid - checks whether statement is valid or not.
+func (statement BPStatement) isValid() error {
 	if !statement.Effect.IsValid() {
 		return Errorf("invalid Effect %v", statement.Effect)
 	}
@@ -106,7 +106,7 @@ func (statement BPStatement) validate() error {
 
 // Validate - validates Statement is for given bucket or not.
 func (statement BPStatement) Validate(bucketName string) error {
-	if err := statement.validate(); err != nil {
+	if err := statement.isValid(); err != nil {
 		return err
 	}
 

@@ -129,8 +129,7 @@ func (iamp Policy) MatchResource(resource string) bool {
 // IsAllowedActions returns all supported actions for this policy.
 func (iamp Policy) IsAllowedActions(bucketName, objectName string, conditionValues map[string][]string) ActionSet {
 	actionSet := make(ActionSet)
-	for action := range supportedS3Actions {
-		action := Action(action)
+	for action := range supportedActions {
 		if iamp.IsAllowed(Args{
 			BucketName:      bucketName,
 			ObjectName:      objectName,
@@ -211,6 +210,20 @@ func (iamp Policy) IsEmpty() bool {
 	return len(iamp.Statements) == 0
 }
 
+// isValid - checks if Policy is valid or not.
+func (iamp Policy) isValid() error {
+	if iamp.Version != DefaultVersion && iamp.Version != "" {
+		return Errorf("invalid version '%v'", iamp.Version)
+	}
+
+	for _, statement := range iamp.Statements {
+		if err := statement.isValid(); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
 // MergePolicies merges all the given policies into a single policy dropping any
 // duplicate statements.
 func MergePolicies(inputs ...Policy) Policy {
@@ -272,18 +285,9 @@ func (iamp *Policy) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
-// Validate - checks if Policy is valid or not.
+// Validate - validates all statements are for given bucket or not.
 func (iamp Policy) Validate() error {
-	if iamp.Version != DefaultVersion && iamp.Version != "" {
-		return Errorf("invalid version '%v'", iamp.Version)
-	}
-
-	for _, statement := range iamp.Statements {
-		if err := statement.Validate(); err != nil {
-			return err
-		}
-	}
-	return nil
+	return iamp.isValid()
 }
 
 // ParseConfig - parses data in given reader to Iamp.

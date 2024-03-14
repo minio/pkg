@@ -497,7 +497,7 @@ func TestPolicyIsValid(t *testing.T) {
 	}
 
 	for i, testCase := range testCases {
-		err := testCase.policy.Validate()
+		err := testCase.policy.isValid()
 		expectErr := (err != nil)
 
 		if expectErr != testCase.expectErr {
