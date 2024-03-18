@@ -144,7 +144,7 @@ func TestResourceSetMarshalJSON(t *testing.T) {
 			NewResourceSet(NewResource("mybucket/photos/myobject*")),
 			[]byte(`["arn:aws:s3:::mybucket/photos/myobject*"]`), false,
 		},
-		{NewResourceSet(), nil, true},
+		{NewResourceSet(), []byte(`[]`), false}, // Empty resources don't return error, only empty actions do.
 	}
 
 	for i, testCase := range testCases {

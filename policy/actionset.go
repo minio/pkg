@@ -104,7 +104,6 @@ func (actionSet ActionSet) MarshalJSON() ([]byte, error) {
 	if len(actionSet) == 0 {
 		return nil, Errorf("empty actions not allowed")
 	}
-
 	return json.Marshal(actionSet.ToSlice())
 }
 
@@ -163,7 +162,7 @@ func (actionSet *ActionSet) UnmarshalJSON(data []byte) error {
 		return err
 	}
 
-	if len(sset) == 0 {
+	if sset.IsEmpty() {
 		return Errorf("empty actions not allowed")
 	}
 
