@@ -55,7 +55,7 @@ type LicenseValidator struct {
 	LicenseFilePath   string
 	pubKeyURL         string
 	offlinePubKey     []byte
-	licenseFromEnv    string
+	LicenseToken      string
 	ExpiryGracePeriod time.Duration
 }
 
@@ -63,6 +63,7 @@ type LicenseValidator struct {
 type LicenseValidatorParams struct {
 	TLSClientConfig   *tls.Config
 	LicenseFilePath   string
+	LicenseToken      string
 	ExpiryGracePeriod time.Duration
 	DevMode           bool
 }
@@ -86,8 +87,11 @@ func BaseURL(devMode bool) string {
 // running SUBNET instance to download the public key or use the bundled dev key.
 func NewLicenseValidator(params LicenseValidatorParams) (*LicenseValidator, error) {
 	licPath := params.LicenseFilePath
-	licFromEnv := os.Getenv("MINIO_LICENSE")
-	if licPath == "" && licFromEnv == "" {
+	licToken := params.LicenseToken
+	if licToken == "" {
+		licToken = os.Getenv("MINIO_LICENSE")
+	}
+	if licPath == "" && licToken == "" {
 		// if license file path is not provided, and also
 		// not set in env variable, expect it to be present
 		// in the current working directory
@@ -113,7 +117,7 @@ func NewLicenseValidator(params LicenseValidatorParams) (*LicenseValidator, erro
 	lv := LicenseValidator{
 		Client:            client,
 		LicenseFilePath:   licPath,
-		licenseFromEnv:    licFromEnv,
+		LicenseToken:      licToken,
 		ExpiryGracePeriod: params.ExpiryGracePeriod,
 	}
 	lv.Init(params.DevMode)
@@ -169,13 +173,13 @@ func (lv *LicenseValidator) ParseLicense(license string) (*licverifier.LicenseIn
 
 // ValidateLicense validates the license file.
 func (lv *LicenseValidator) ValidateLicense() (*licverifier.LicenseInfo, error) {
-	if lv.licenseFromEnv == "" && lv.LicenseFilePath == "" {
+	if lv.LicenseToken == "" && lv.LicenseFilePath == "" {
 		return nil, fmt.Errorf("MinIO license not found")
 	}
 
 	var lic string
-	if lv.licenseFromEnv != "" {
-		lic = lv.licenseFromEnv
+	if lv.LicenseToken != "" {
+		lic = lv.LicenseToken
 	} else {
 		licData, err := os.ReadFile(lv.LicenseFilePath)
 		if err != nil {
