@@ -87,10 +87,6 @@ func (resourceSet ResourceSet) Intersection(sset ResourceSet) ResourceSet {
 
 // MarshalJSON - encodes ResourceSet to JSON data.
 func (resourceSet ResourceSet) MarshalJSON() ([]byte, error) {
-	if len(resourceSet) == 0 {
-		return nil, Errorf("empty resources not allowed")
-	}
-
 	resources := []Resource{}
 	for resource := range resourceSet {
 		resources = append(resources, resource)
