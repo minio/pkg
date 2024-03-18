@@ -248,7 +248,11 @@ func (lv *LicenseValidator) ValidateEnterpriseLicense(acceptedPlans []string, li
 	// validation successful. start a background routine to validate the license
 	// - daily if already expired (within grace period)
 	// - just after expiry if not expired
-	go lv.scheduleNextLicenseCheck(li, acceptedPlans, licExpiredChan)
+	if licExpiredChan != nil {
+		// if the expiry channel is nil, it means client doesn't want to be notified
+		// when license expires. In that case we don't schedule the background check.
+		go lv.scheduleNextLicenseCheck(li, acceptedPlans, licExpiredChan)
+	}
 
 	return li, nil
 }
