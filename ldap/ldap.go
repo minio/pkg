@@ -68,30 +68,37 @@ func (l *Config) Clone() (cloned Config) {
 	return cloned
 }
 
-func (l *Config) connect(ldapAddr string) (ldapConn *ldap.Conn, err error) {
+func (l *Config) connect(ldapHost, ldapPort string) (ldapConn *ldap.Conn, err error) {
 	tlsConfig := &tls.Config{
+		ServerName:         ldapHost,
 		InsecureSkipVerify: l.TLSSkipVerify,
 		RootCAs:            l.RootCAs,
 	}
 
-	if l.ServerInsecure {
-		ldapConn, err = ldap.Dial("tcp", ldapAddr)
-	} else {
-		if l.ServerStartTLS {
-			ldapConn, err = ldap.Dial("tcp", ldapAddr)
-		} else {
-			ldapConn, err = ldap.DialTLS("tcp", ldapAddr, tlsConfig)
+	scheme := "ldaps"
+	dialOpts := []ldap.DialOpt{ldap.DialWithTLSConfig(tlsConfig)}
+	if l.ServerInsecure || l.ServerStartTLS {
+		scheme = "ldap"
+		dialOpts = nil
+	}
+	ldapURL := fmt.Sprintf("%s://%s:%s", scheme, ldapHost, ldapPort)
+
+	ldapConn, err = ldap.DialURL(ldapURL, dialOpts...)
+	if err != nil {
+		return nil, fmt.Errorf("LDAP connection error: %w", err)
+	}
+
+	if l.ServerStartTLS {
+		err = ldapConn.StartTLS(tlsConfig)
+		if err != nil {
+			ldapConn.Close()
+			return nil, fmt.Errorf("LDAP StartTLS error: %w", err)
 		}
 	}
 
-	if ldapConn != nil {
-		ldapConn.SetTimeout(30 * time.Second) // Change default timeout to 30 seconds.
-		if l.ServerStartTLS {
-			err = ldapConn.StartTLS(tlsConfig)
-		}
-	}
+	ldapConn.SetTimeout(30 * time.Second) // Change default timeout to 30 seconds.
 
-	return ldapConn, err
+	return ldapConn, nil
 }
 
 // Connect connect to ldap server.
@@ -118,17 +125,18 @@ func (l *Config) Connect() (ldapConn *ldap.Conn, err error) {
 		// No SRV Record lookup case.
 		ldapAddr := l.ServerAddr
 
-		_, _, err = net.SplitHostPort(ldapAddr)
+		var ldapHost, ldapPort string
+		ldapHost, ldapPort, err = net.SplitHostPort(ldapAddr)
 		if err != nil {
 			if strings.Contains(err.Error(), "missing port in address") {
 				// Use default LDAP port if none specified "636"
-				ldapAddr = net.JoinHostPort(ldapAddr, "636")
+				ldapHost, ldapPort = ldapAddr, "636"
 			} else {
 				return nil, err
 			}
 		}
 
-		return l.connect(ldapAddr)
+		return l.connect(ldapHost, ldapPort)
 	}
 
 	// SRV Record lookup is enabled.
@@ -141,9 +149,7 @@ func (l *Config) Connect() (ldapConn *ldap.Conn, err error) {
 
 	// Return a connection to the first server to which we could connect.
 	for _, addr := range addrs {
-		ldapAddr := fmt.Sprintf("%s:%d", addr.Target, addr.Port)
-
-		ldapConn, err = l.connect(ldapAddr)
+		ldapConn, err = l.connect(addr.Target, fmt.Sprintf("%d", addr.Port))
 		if err == nil {
 			return ldapConn, nil
 		}
