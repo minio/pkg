@@ -194,7 +194,11 @@ func (l *Config) LookupUserDN(conn *ldap.Conn, username string) (string, error) 
 		}
 
 		for _, entry := range searchResult.Entries {
-			foundDistNames = append(foundDistNames, entry.DN)
+			normDN, err := NormalizeDN(entry.DN)
+			if err != nil {
+				return "", err
+			}
+			foundDistNames = append(foundDistNames, normDN)
 		}
 	}
 	if len(foundDistNames) == 0 {
@@ -250,7 +254,21 @@ func getGroups(conn *ldap.Conn, sreq *ldap.SearchRequest) ([]string, error) {
 	for _, entry := range sres.Entries {
 		// We only queried one attribute,
 		// so we only look up the first one.
-		groups = append(groups, entry.DN)
+		normalizedDN, err := NormalizeDN(entry.DN)
+		if err != nil {
+			return nil, err
+		}
+		groups = append(groups, normalizedDN)
 	}
 	return groups, nil
+}
+
+// NormalizeDN normalizes the DN. The ldap library here mainly lowercases the
+// attribute type names in the DN.
+func NormalizeDN(dn string) (string, error) {
+	parsedDN, err := ldap.ParseDN(dn)
+	if err != nil {
+		return "", fmt.Errorf("DN (%s) parse failure: %w", dn, err)
+	}
+	return parsedDN.String(), nil
 }
