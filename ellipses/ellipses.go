@@ -35,6 +35,8 @@ var (
 	ellipses    = "..."
 )
 
+var errFormat = errors.New("format error")
+
 // Parses an ellipses range pattern of following style
 // `{1...64}`
 // `{33...64}`
@@ -170,17 +172,26 @@ var ErrInvalidEllipsesFormatFn = func(arg string) error {
 
 // FindEllipsesPatterns - finds all ellipses patterns, recursively and parses the ranges numerically.
 func FindEllipsesPatterns(arg string) (ArgPattern, error) {
+	v, err := findPatterns(arg, regexpEllipses, parseEllipsesRange)
+	if err == errFormat {
+		err = ErrInvalidEllipsesFormatFn(arg)
+	}
+	return v, err
+}
+
+// findPatterns - finds all patterns, recursively and parses the ranges numerically.
+func findPatterns(arg string, re *regexp.Regexp, patternParser func(string) ([]string, error)) (ArgPattern, error) {
 	var patterns []Pattern
-	parts := regexpEllipses.FindStringSubmatch(arg)
+	parts := re.FindStringSubmatch(arg)
 	if len(parts) == 0 {
 		// We throw an error if arg doesn't have any recognizable ellipses pattern.
-		return nil, ErrInvalidEllipsesFormatFn(arg)
+		return nil, errFormat
 	}
 
 	parts = parts[1:]
-	patternFound := regexpEllipses.MatchString(parts[0])
+	patternFound := re.MatchString(parts[0])
 	for patternFound {
-		seq, err := parseEllipsesRange(parts[1])
+		seq, err := patternParser(parts[1])
 		if err != nil {
 			return patterns, err
 		}
@@ -189,17 +200,17 @@ func FindEllipsesPatterns(arg string) (ArgPattern, error) {
 			Suffix: parts[2],
 			Seq:    seq,
 		})
-		parts = regexpEllipses.FindStringSubmatch(parts[0])
+		parts = re.FindStringSubmatch(parts[0])
 		if len(parts) > 0 {
 			parts = parts[1:]
-			patternFound = HasEllipses(parts[0])
+			patternFound = re.MatchString(parts[0])
 			continue
 		}
 		break
 	}
 
 	if len(parts) > 0 {
-		seq, err := parseEllipsesRange(parts[1])
+		seq, err := patternParser(parts[1])
 		if err != nil {
 			return patterns, err
 		}

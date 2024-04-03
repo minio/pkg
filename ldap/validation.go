@@ -153,20 +153,19 @@ func (l *Config) Validate() Validation {
 	}
 
 	// Validate User Lookup parameters
-	l.UserDNSearchBaseDistNames = splitAndTrim(l.UserDNSearchBaseDistName, dnDelimiter)
+	userBaseDNList := splitAndTrim(l.UserDNSearchBaseDistName, dnDelimiter)
+	l.UserDNSearchBaseDistNames, err = validateAndParseBaseDNList(conn, userBaseDNList)
+	if err != nil {
+		return Validation{
+			Result:     UserSearchParamsMisconfigured,
+			Detail:     fmt.Sprintf("UserDN search base DN failed to validate/parse: %v", err),
+			Suggestion: "Set the UserDN search base to a valid DN - e.g. as returned by an LDAP search",
+		}
+	}
 	if len(l.UserDNSearchBaseDistNames) == 0 {
 		return Validation{
 			Result:     UserSearchParamsMisconfigured,
 			Detail:     "UserDN search base is empty",
-			Suggestion: "Set the UserDN search base to the DN of the directory subtree where users are present",
-		}
-	}
-
-	// Validate that given DNs parse successfully.
-	if badDN, err := validateDistinguishedNames(l.UserDNSearchBaseDistNames); err != nil {
-		return Validation{
-			Result:     UserSearchParamsMisconfigured,
-			Detail:     fmt.Sprintf("UserDN search base DN %s is not valid: %v", badDN, err),
 			Suggestion: "Set the UserDN search base to the DN of the directory subtree where users are present",
 		}
 	}
@@ -221,22 +220,21 @@ func (l *Config) Validate() Validation {
 	if l.GroupSearchBaseDistName != "" || l.GroupSearchFilter != "" {
 
 		// Validate Group Search parameters.
-		l.GroupSearchBaseDistNames = splitAndTrim(l.GroupSearchBaseDistName, dnDelimiter)
+		groupBaseDNList := splitAndTrim(l.GroupSearchBaseDistName, dnDelimiter)
+		l.GroupSearchBaseDistNames, err = validateAndParseBaseDNList(conn, groupBaseDNList)
+		if err != nil {
+			return Validation{
+				Result:     GroupSearchParamsMisconfigured,
+				Detail:     fmt.Sprintf("Group Search Base DN failed to parse: %v", err),
+				Suggestion: "Set the Group Search Base DN to a valid DN - e.g. as returned by an LDAP search",
+			}
+		}
 		if len(l.GroupSearchBaseDistNames) == 0 {
 			return Validation{
 				Result: GroupSearchParamsMisconfigured,
 				Detail: "Group Search Base DN is required.",
 				Suggestion: `Since you entered a value for the Group Search Filter - enter a value for the Group Search Base DN too:
     Enter this value as the DN of the subtree where groups will be found.`,
-			}
-		}
-
-		// Validate that given DNs parse successfully.
-		if badDN, err := validateDistinguishedNames(l.GroupSearchBaseDistNames); err != nil {
-			return Validation{
-				Result:     GroupSearchParamsMisconfigured,
-				Detail:     fmt.Sprintf("Group Search Base DN %s is not valid: %v", badDN, err),
-				Suggestion: "Set the Group Search Base DN to the DN of the directory subtree where groups are present",
 			}
 		}
 
@@ -362,9 +360,8 @@ func (l *Config) ValidateLookup(testUsername string) (*UserLookupResult, Validat
 
 // Splits on given delimiter, trims leading/trailing whitespace and removes
 // empty values.
-func splitAndTrim(s, sep string) []string {
+func splitAndTrim(s, sep string) (res []string) {
 	parts := strings.Split(s, sep)
-	var res []string
 	for i := range parts {
 		v := strings.TrimSpace(parts[i])
 		if len(v) == 0 {
@@ -372,30 +369,39 @@ func splitAndTrim(s, sep string) []string {
 		}
 		res = append(res, v)
 	}
-	return res
+	return
 }
 
-func validateDistinguishedNames(s []string) (string, error) {
-	for _, dn := range s {
-		if _, err := ldap.ParseDN(dn); err != nil {
-			return dn, err
+// Validates that the given DNs are present in the LDAP server.
+func validateAndParseBaseDNList(conn *ldap.Conn, baseDNList []string) ([]BaseDNInfo, error) {
+	var res []BaseDNInfo
+	for _, dn := range baseDNList {
+		serverDN, err := LookupDN(conn, dn)
+		if err != nil {
+			return nil, fmt.Errorf("Base DN `%s` lookup failed: %w", dn, err)
 		}
+		if serverDN == "" {
+			return nil, fmt.Errorf("Base DN `%s` not found in the LDAP server", dn)
+		}
+		parsed, err := ldap.ParseDN(serverDN)
+		if err != nil {
+			return nil, fmt.Errorf("Unexpectedly failed to parse DN `%s`: %w", serverDN, err)
+		}
+		res = append(res, BaseDNInfo{Original: dn, ServerDN: serverDN, Parsed: parsed})
 	}
-	return "", nil
+	return res, nil
 }
 
 // checks if given DNs overlap - returns the first pair of DNs having an overlap
 // or empty strings.
-func checkForDNOverlaps(s []string) (string, string) {
+func checkForDNOverlaps(s []BaseDNInfo) (string, string) {
 	n := len(s)
 	for i := 0; i < n; i++ {
-		p, _ := ldap.ParseDN(s[i])
 		for j := i + 1; j < n; j++ {
-			c, _ := ldap.ParseDN(s[j])
-			if p.AncestorOf(c) {
-				return s[i], s[j]
-			} else if c.AncestorOf(p) {
-				return s[j], s[i]
+			if s[i].Parsed.AncestorOf(s[j].Parsed) {
+				return s[i].Original, s[j].Original
+			} else if s[j].Parsed.AncestorOf(s[i].Parsed) {
+				return s[j].Original, s[i].Original
 			}
 		}
 	}
