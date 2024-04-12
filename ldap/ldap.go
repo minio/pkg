@@ -91,9 +91,9 @@ func (l *Config) connect(ldapAddr string) (ldapConn *ldap.Conn, err error) {
 		ldapConn, err = ldap.Dial("tcp", ldapAddr)
 	} else {
 		if l.ServerStartTLS {
-			ldapConn, err = ldap.Dial("tcp", ldapAddr)
-		} else {
 			ldapConn, err = ldap.DialTLS("tcp", ldapAddr, tlsConfig)
+		} else {
+			ldapConn, err = ldap.Dial("tcp", ldapAddr)
 		}
 	}
 
