@@ -20,6 +20,7 @@ package console
 
 import (
 	"fmt"
+	"io"
 	"os"
 	"path/filepath"
 	"strings"
@@ -355,6 +356,76 @@ type Table struct {
 // margin width)
 func NewTable(rowColors []*color.Color, alignRight []bool, indentWidth int) *Table {
 	return &Table{rowColors, alignRight, indentWidth, false}
+}
+
+// PopulateTable - writes to the custom output
+func (t *Table) PopulateTable(out io.Writer, rows [][]string) error {
+	numRows := len(rows)
+	numCols := len(rows[0])
+	if numRows != len(t.RowColors) {
+		return fmt.Errorf("row count and row-colors mismatch")
+	}
+
+	// Compute max. column widths
+	maxColWidths := make([]int, numCols)
+	for _, row := range rows {
+		if len(row) != len(t.AlignRight) {
+			return fmt.Errorf("col count and align-right mismatch")
+		}
+		for i, v := range row {
+			if len([]rune(v)) > maxColWidths[i] {
+				maxColWidths[i] = len([]rune(v))
+			}
+		}
+	}
+
+	// Compute per-cell text with padding and alignment applied.
+	paddedText := make([][]string, numRows)
+	for r, row := range rows {
+		paddedText[r] = make([]string, numCols)
+		for c, cell := range row {
+			if t.AlignRight[c] {
+				fmtStr := fmt.Sprintf("%%%ds", maxColWidths[c])
+				paddedText[r][c] = fmt.Sprintf(fmtStr, cell)
+			} else {
+				extraWidth := maxColWidths[c] - len([]rune(cell))
+				fmtStr := fmt.Sprintf("%%s%%%ds", extraWidth)
+				paddedText[r][c] = fmt.Sprintf(fmtStr, cell, "")
+			}
+		}
+	}
+
+	// Draw table top border
+	segments := make([]string, numCols)
+	for i, c := range maxColWidths {
+		segments[i] = strings.Repeat("─", c+2)
+	}
+	indentText := strings.Repeat(" ", t.TableIndentWidth)
+	border := fmt.Sprintf("%s┌%s┐", indentText, strings.Join(segments, "┬"))
+	fmt.Fprintln(out, border)
+
+	// Print the table with colors
+	for r, row := range paddedText {
+		if t.HeaderRowSeparator && r == 1 {
+			// Draw table header-row border
+			border = fmt.Sprintf("%s├%s┤", indentText, strings.Join(segments, "┼"))
+			fmt.Println(border)
+		}
+		fmt.Fprint(out, indentText+"│ ")
+		for c, text := range row {
+			t.RowColors[r].Fprint(out, text)
+			if c != numCols-1 {
+				fmt.Fprint(out, " │ ")
+			}
+		}
+		fmt.Fprintln(out, " │")
+	}
+
+	// Draw table bottom border
+	border = fmt.Sprintf("%s└%s┘", indentText, strings.Join(segments, "┴"))
+	fmt.Fprintln(out, border)
+
+	return nil
 }
 
 // DisplayTable - prints the table
