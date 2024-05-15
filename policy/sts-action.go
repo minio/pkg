@@ -18,7 +18,7 @@
 package policy
 
 import (
-	"github.com/minio/pkg/v2/policy/condition"
+	"github.com/minio/pkg/v3/policy/condition"
 )
 
 // STSAction - STS policy action.
