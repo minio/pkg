@@ -32,7 +32,15 @@ import (
 )
 
 const (
-	dnDelimiter = ";"
+	dnDelimiter   = ";"
+	attrDelimiter = ","
+)
+
+var (
+	// noAttrsSpec should be used in an LDAP search when no attributes are
+	// requested to be fetched. Ref:
+	// https://www.rfc-editor.org/rfc/rfc4511#section-4.5.1.8
+	noAttrsSpec = []string{"1.1"}
 )
 
 // BaseDNInfo contains information about a base DN.
@@ -65,13 +73,18 @@ type Config struct {
 	// User DN search parameters
 	UserDNSearchBaseDistName string
 	// this is a computed value from UserDNSearchBaseDistName
-	UserDNSearchBaseDistNames []BaseDNInfo
+	userDNSearchBaseDistNames []BaseDNInfo
 	UserDNSearchFilter        string
+
+	// Additional attributes to fetch from the user DN search.
+	UserDNAttributes string
+	// this is a computed value from UserDNAttributes
+	userDNAttributesList []string
 
 	// Group search parameters
 	GroupSearchBaseDistName string
 	// this is a computed value from GroupSearchBaseDistName
-	GroupSearchBaseDistNames []BaseDNInfo
+	groupSearchBaseDistNames []BaseDNInfo
 	GroupSearchFilter        string
 }
 
@@ -189,23 +202,52 @@ func (l *Config) LookupBind(conn *ldap.Conn) error {
 	return nil
 }
 
-// LookupUserDN searches for the DN of the user given their username. conn is
-// assumed to be using the lookup bind service account.
+// GetUserDNSearchBaseDistNames returns the user DN search base DN list.
+func (l *Config) GetUserDNSearchBaseDistNames() []BaseDNInfo {
+	return l.userDNSearchBaseDistNames
+}
+
+// GetUserDNAttributesList returns the user attributes list.
+func (l *Config) GetUserDNAttributesList() []string {
+	return l.userDNAttributesList
+}
+
+// GetGroupSearchBaseDistNames returns the group search base DN list.
+func (l *Config) GetGroupSearchBaseDistNames() []BaseDNInfo {
+	return l.groupSearchBaseDistNames
+}
+
+// DNSearchResult contains the result of a DN search. The attibutes map may be
+// empty if no attributes were requested or if no attributes were found.
+type DNSearchResult struct {
+	// Normalized DN of the user.
+	NormDN string
+	// Attributes of the user.
+	Attributes map[string][]string
+}
+
+// LookupUsername searches for the DN of the user given their login username.
+// conn is assumed to be using the lookup bind service account.
 //
-// It is required that the search result in at most one result.
+// It is required that the search return at most one result.
 //
 // If the user does not exist, an error is returned that starts with:
 //
 //	"User DN not found for:"
-func (l *Config) LookupUserDN(conn *ldap.Conn, username string) (string, error) {
+func (l *Config) LookupUsername(conn *ldap.Conn, username string) (*DNSearchResult, error) {
+	attrsToFetch := noAttrsSpec
+	if len(l.userDNAttributesList) > 0 {
+		attrsToFetch = l.userDNAttributesList
+	}
+
 	filter := strings.ReplaceAll(l.UserDNSearchFilter, "%s", ldap.EscapeFilter(username))
-	var foundDistNames []string
-	for _, userSearchBase := range l.UserDNSearchBaseDistNames {
+	var foundDistNames []DNSearchResult
+	for _, userSearchBase := range l.userDNSearchBaseDistNames {
 		searchRequest := ldap.NewSearchRequest(
 			userSearchBase.ServerDN,
 			ldap.ScopeWholeSubtree, ldap.NeverDerefAliases, 0, 0, false,
 			filter,
-			[]string{}, // only need DN, so no pass no attributes here
+			attrsToFetch,
 			nil,
 		)
 
@@ -218,27 +260,34 @@ func (l *Config) LookupUserDN(conn *ldap.Conn, username string) (string, error) 
 			// it's existence is checked during configuration validation but it
 			// is possible that the base DN was deleted after the validation.
 			if ldap.IsErrorWithCode(err, 32) {
-				return "", fmt.Errorf("Base DN (%s) for user DN search does not exist: %w",
+				return nil, fmt.Errorf("Base DN (%s) for user DN search does not exist: %w",
 					searchRequest.BaseDN, err)
 			}
-			return "", err
+			return nil, err
 		}
 
 		for _, entry := range searchResult.Entries {
 			normDN, err := NormalizeDN(entry.DN)
 			if err != nil {
-				return "", err
+				return nil, err
 			}
-			foundDistNames = append(foundDistNames, normDN)
+			attrs := make(map[string][]string, len(entry.Attributes))
+			for _, attr := range entry.Attributes {
+				attrs[attr.Name] = attr.Values
+			}
+			foundDistNames = append(foundDistNames, DNSearchResult{
+				NormDN:     normDN,
+				Attributes: attrs,
+			})
 		}
 	}
 	if len(foundDistNames) == 0 {
-		return "", fmt.Errorf("User DN not found for: %s", username)
+		return nil, fmt.Errorf("User DN not found for: %s", username)
 	}
 	if len(foundDistNames) != 1 {
-		return "", fmt.Errorf("Multiple DNs for %s found - please fix the search filter", username)
+		return nil, fmt.Errorf("Multiple DNs for %s found - please fix the search filter", username)
 	}
-	return foundDistNames[0], nil
+	return &foundDistNames[0], nil
 }
 
 // SearchForUserGroups finds the groups of the user.
@@ -246,14 +295,14 @@ func (l *Config) SearchForUserGroups(conn *ldap.Conn, username, bindDN string) (
 	// User groups lookup.
 	var groups []string
 	if l.GroupSearchFilter != "" {
-		for _, groupSearchBase := range l.GroupSearchBaseDistNames {
+		for _, groupSearchBase := range l.groupSearchBaseDistNames {
 			filter := strings.ReplaceAll(l.GroupSearchFilter, "%s", ldap.EscapeFilter(username))
 			filter = strings.ReplaceAll(filter, "%d", ldap.EscapeFilter(bindDN))
 			searchRequest := ldap.NewSearchRequest(
 				groupSearchBase.ServerDN,
 				ldap.ScopeWholeSubtree, ldap.NeverDerefAliases, 0, 0, false,
 				filter,
-				nil,
+				noAttrsSpec,
 				nil,
 			)
 
@@ -295,16 +344,22 @@ func getGroups(conn *ldap.Conn, sreq *ldap.SearchRequest) ([]string, error) {
 	return groups, nil
 }
 
-// LookupDN looks up the DN and returns the normalized DN. It only performs a
-// base object search to check if the DN exists. If the DN does not exist on the
-// server, it returns an empty string and a nil error.
-func LookupDN(conn *ldap.Conn, dn string) (string, error) {
+// LookupDN looks a given DN and returns its normalized form along with any
+// requested attributes. It only performs a base object search to check if the
+// DN exists. If the DN does not exist on the server, it returns a nil result
+// and a nil error.
+func LookupDN(conn *ldap.Conn, dn string, attrs []string) (*DNSearchResult, error) {
+	attrsToFetch := noAttrsSpec
+	if len(attrs) > 0 {
+		attrsToFetch = attrs
+	}
+
 	// Check if the DN is valid.
 	searchRequest := ldap.NewSearchRequest(
 		dn,
 		ldap.ScopeBaseObject, ldap.NeverDerefAliases, 0, 0, false,
 		"(objectClass=*)",
-		[]string{}, // only need DN, so no pass no attributes here
+		attrsToFetch,
 		nil,
 	)
 
@@ -317,23 +372,30 @@ func LookupDN(conn *ldap.Conn, dn string) (string, error) {
 		//
 		// Return no DN and nil error.
 		if ldap.IsErrorWithCode(err, 32) {
-			return "", nil
+			return nil, nil
 		}
 
-		return "", fmt.Errorf("LDAP client: %w", err)
+		return nil, fmt.Errorf("LDAP client: %w", err)
 	}
 
 	if len(searchResult.Entries) != 1 {
-		return "", fmt.Errorf(
+		return nil, fmt.Errorf(
 			"Multiple DNs found for %s - this should not happen for a base object search",
 			dn)
 	}
 
 	foundDistName, err := NormalizeDN(searchResult.Entries[0].DN)
 	if err != nil {
-		return "", err
+		return nil, err
 	}
-	return foundDistName, nil
+	foundAttrs := make(map[string][]string, len(searchResult.Entries[0].Attributes))
+	for _, attr := range searchResult.Entries[0].Attributes {
+		foundAttrs[attr.Name] = attr.Values
+	}
+	return &DNSearchResult{
+		NormDN:     foundDistName,
+		Attributes: foundAttrs,
+	}, nil
 }
 
 // NormalizeDN normalizes the DN. The ldap library here mainly lowercases the

@@ -1,4 +1,4 @@
-module github.com/minio/pkg/v2
+module github.com/minio/pkg/v3
 
 go 1.21
 

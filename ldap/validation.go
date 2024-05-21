@@ -19,6 +19,7 @@ package ldap
 
 import (
 	"fmt"
+	"regexp"
 	"strings"
 
 	"github.com/go-ldap/ldap/v3"
@@ -85,6 +86,7 @@ func (v Validation) IsOk() bool {
 // memberships.
 type UserLookupResult struct {
 	DN                 string
+	DNAttributes       map[string][]string
 	GroupDNMemberships []string
 }
 
@@ -154,7 +156,7 @@ func (l *Config) Validate() Validation {
 
 	// Validate User Lookup parameters
 	userBaseDNList := splitAndTrim(l.UserDNSearchBaseDistName, dnDelimiter)
-	l.UserDNSearchBaseDistNames, err = validateAndParseBaseDNList(conn, userBaseDNList)
+	l.userDNSearchBaseDistNames, err = validateAndParseBaseDNList(conn, userBaseDNList)
 	if err != nil {
 		return Validation{
 			Result:     UserSearchParamsMisconfigured,
@@ -162,7 +164,7 @@ func (l *Config) Validate() Validation {
 			Suggestion: "Set the UserDN search base to a valid DN - e.g. as returned by an LDAP search",
 		}
 	}
-	if len(l.UserDNSearchBaseDistNames) == 0 {
+	if len(l.userDNSearchBaseDistNames) == 0 {
 		return Validation{
 			Result:     UserSearchParamsMisconfigured,
 			Detail:     "UserDN search base is empty",
@@ -171,13 +173,26 @@ func (l *Config) Validate() Validation {
 	}
 
 	// Validate that BaseDNs represent non-overlapping subtrees.
-	if ancestor, descendant := checkForDNOverlaps(l.UserDNSearchBaseDistNames); ancestor != "" {
+	if ancestor, descendant := checkForDNOverlaps(l.userDNSearchBaseDistNames); ancestor != "" {
 		return Validation{
 			Result:     UserSearchParamsMisconfigured,
 			Detail:     fmt.Sprintf("User Search Base DN `%s` is an ancestor of `%s`", ancestor, descendant),
 			Suggestion: "No two base DNs may overlap - please remove one of them",
 		}
 	}
+
+	userDNAttributes := splitAndTrim(l.UserDNAttributes, attrDelimiter)
+	if len(userDNAttributes) > 0 {
+		// Check that the attributes are valid.
+		if err := validateAttributes(userDNAttributes); err != nil {
+			return Validation{
+				Result:     UserSearchParamsMisconfigured,
+				Detail:     fmt.Sprintf("UserDN attributes `%s` are invalid: %v", l.UserDNAttributes, err),
+				Suggestion: "Ensure that the attribute names are valid LDAP short names of attributes (not OIDs)",
+			}
+		}
+	}
+	l.userDNAttributesList = userDNAttributes
 
 	if l.UserDNSearchFilter == "" {
 		return Validation{
@@ -221,7 +236,7 @@ func (l *Config) Validate() Validation {
 
 		// Validate Group Search parameters.
 		groupBaseDNList := splitAndTrim(l.GroupSearchBaseDistName, dnDelimiter)
-		l.GroupSearchBaseDistNames, err = validateAndParseBaseDNList(conn, groupBaseDNList)
+		l.groupSearchBaseDistNames, err = validateAndParseBaseDNList(conn, groupBaseDNList)
 		if err != nil {
 			return Validation{
 				Result:     GroupSearchParamsMisconfigured,
@@ -229,7 +244,7 @@ func (l *Config) Validate() Validation {
 				Suggestion: "Set the Group Search Base DN to a valid DN - e.g. as returned by an LDAP search",
 			}
 		}
-		if len(l.GroupSearchBaseDistNames) == 0 {
+		if len(l.groupSearchBaseDistNames) == 0 {
 			return Validation{
 				Result: GroupSearchParamsMisconfigured,
 				Detail: "Group Search Base DN is required.",
@@ -239,7 +254,7 @@ func (l *Config) Validate() Validation {
 		}
 
 		// Validate that BaseDNs represent non-overlapping subtrees.
-		if ancestor, descendant := checkForDNOverlaps(l.GroupSearchBaseDistNames); ancestor != "" {
+		if ancestor, descendant := checkForDNOverlaps(l.groupSearchBaseDistNames); ancestor != "" {
 			return Validation{
 				Result:     GroupSearchParamsMisconfigured,
 				Detail:     fmt.Sprintf("Group Search Base DN `%s` is an ancestor of `%s`", ancestor, descendant),
@@ -326,7 +341,7 @@ func (l *Config) ValidateLookup(testUsername string) (*UserLookupResult, Validat
 	}
 
 	// Lookup the given username.
-	dn, err := l.LookupUserDN(conn, testUsername)
+	dnResult, err := l.LookupUsername(conn, testUsername)
 	if err != nil {
 		return nil, Validation{
 			Result:   UserDNLookupError,
@@ -338,11 +353,12 @@ func (l *Config) ValidateLookup(testUsername string) (*UserLookupResult, Validat
 	}
 
 	// Lookup groups.
-	groups, err := l.SearchForUserGroups(conn, testUsername, dn)
+	groups, err := l.SearchForUserGroups(conn, testUsername, dnResult.NormDN)
 	if err != nil {
 		return nil, Validation{
-			Result:   GroupMembershipsLookupError,
-			Detail:   fmt.Sprintf("Got an error when looking up groups for user(=>%s, dn=>%s): %v", testUsername, dn, err),
+			Result: GroupMembershipsLookupError,
+			Detail: fmt.Sprintf("Got an error when looking up groups for user(=>%s, dn=>%s): %v",
+				testUsername, dnResult.NormDN, err),
 			ErrCause: err,
 			Suggestion: `Check if this is a temporary error and try again.
     Perhaps there is an error in the group search filter or group search base DN.`,
@@ -350,7 +366,8 @@ func (l *Config) ValidateLookup(testUsername string) (*UserLookupResult, Validat
 	}
 
 	return &UserLookupResult{
-			DN:                 dn,
+			DN:                 dnResult.NormDN,
+			DNAttributes:       dnResult.Attributes,
 			GroupDNMemberships: groups,
 		}, Validation{
 			Result: ConfigOk,
@@ -376,13 +393,14 @@ func splitAndTrim(s, sep string) (res []string) {
 func validateAndParseBaseDNList(conn *ldap.Conn, baseDNList []string) ([]BaseDNInfo, error) {
 	var res []BaseDNInfo
 	for _, dn := range baseDNList {
-		serverDN, err := LookupDN(conn, dn)
+		lookupResult, err := LookupDN(conn, dn, nil)
 		if err != nil {
 			return nil, fmt.Errorf("Base DN `%s` lookup failed: %w", dn, err)
 		}
-		if serverDN == "" {
+		if lookupResult == nil {
 			return nil, fmt.Errorf("Base DN `%s` not found in the LDAP server", dn)
 		}
+		serverDN := lookupResult.NormDN
 		parsed, err := ldap.ParseDN(serverDN)
 		if err != nil {
 			return nil, fmt.Errorf("Unexpectedly failed to parse DN `%s`: %w", serverDN, err)
@@ -390,6 +408,21 @@ func validateAndParseBaseDNList(conn *ldap.Conn, baseDNList []string) ([]BaseDNI
 		res = append(res, BaseDNInfo{Original: dn, ServerDN: serverDN, Parsed: parsed})
 	}
 	return res, nil
+}
+
+var (
+	validAttributeRegex = regexp.MustCompile(`^[a-zA-Z][a-zA-Z0-9-]*$`)
+)
+
+// Validates that the given attributes are valid LDAP attribute names according
+// to a regular expression.
+func validateAttributes(attrs []string) error {
+	for _, attr := range attrs {
+		if !validAttributeRegex.MatchString(attr) {
+			return fmt.Errorf("Attribute name `%s` is invalid", attr)
+		}
+	}
+	return nil
 }
 
 // checks if given DNs overlap - returns the first pair of DNs having an overlap

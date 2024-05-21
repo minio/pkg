@@ -18,8 +18,8 @@
 package policy
 
 import (
-	"github.com/minio/pkg/v2/policy/condition"
-	"github.com/minio/pkg/v2/wildcard"
+	"github.com/minio/pkg/v3/policy/condition"
+	"github.com/minio/pkg/v3/wildcard"
 )
 
 // Action - policy action.

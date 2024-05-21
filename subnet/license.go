@@ -29,7 +29,7 @@ import (
 	"time"
 
 	"github.com/lestrrat-go/jwx/jwt"
-	"github.com/minio/pkg/v2/licverifier"
+	"github.com/minio/pkg/v3/licverifier"
 )
 
 const (
