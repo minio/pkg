@@ -222,6 +222,9 @@ func (l *Config) GetGroupSearchBaseDistNames() []BaseDNInfo {
 type DNSearchResult struct {
 	// Normalized DN of the user.
 	NormDN string
+	// Actual DN of the user.
+	ActualDN string
+
 	// Attributes of the user.
 	Attributes map[string][]string
 }
@@ -277,6 +280,7 @@ func (l *Config) LookupUsername(conn *ldap.Conn, username string) (*DNSearchResu
 			}
 			foundDistNames = append(foundDistNames, DNSearchResult{
 				NormDN:     normDN,
+				ActualDN:   entry.DN,
 				Attributes: attrs,
 			})
 		}
@@ -394,6 +398,7 @@ func LookupDN(conn *ldap.Conn, dn string, attrs []string) (*DNSearchResult, erro
 	}
 	return &DNSearchResult{
 		NormDN:     foundDistName,
+		ActualDN:   searchResult.Entries[0].DN,
 		Attributes: foundAttrs,
 	}, nil
 }
