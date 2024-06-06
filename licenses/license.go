@@ -167,7 +167,7 @@ func Parse(s string, opts ...jwt.ParseOption) (License, error) {
 
 // Verify checks whether a valid license is provided.
 //
-// Therfore, it first searches for a license in the following order:
+// Therefore, it first searches for a license in the following order:
 //  1. File referenced by MINIO_LICENSE env var, if any.
 //  2. A "./minio.license" file in the current working directory.
 //  3. The $HOME/"." + os.Args[0]/minio.license file if there are os.Args.
