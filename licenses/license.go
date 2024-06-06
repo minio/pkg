@@ -173,7 +173,7 @@ func Parse(s string, opts ...jwt.ParseOption) (License, error) {
 //  3. The $HOME/"." + os.Args[0]/minio.license file if there are os.Args.
 //
 // If no license is present, Verify returns an error.
-// The license must also be issued after time.Now and,
+// The license must also be issued before time.Now and,
 // in case of a trial license, must not be expired.
 // For non-trial licenses, a 30 day grace period is granted.
 func Verify() (License, error) {
