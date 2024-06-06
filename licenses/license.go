@@ -28,10 +28,6 @@
 //		if time.Now().After(l.ExpiresAt) {
 //			fmt.Fprintf(os.Stderr, "Warning: license expired on %v! Renew and restart immediately to avoid outage.\n", l.ExpiresAt)
 //		}
-//		if time.Now().After(l.NotAfter) {
-//			fmt.Fprintln(os.Stderr, "Error: license has expired. Terminating process...")
-//			os.Exit(1)
-//		}
 //		go func() {
 //			<-time.NewTimer(time.Until(l.ExpiresAt)).C
 //			fmt.Fprintf(os.Stderr, "Warning: license expired on %v! Process will be terminated soon. Renew and restart immediately to avoid outage.\n", l.ExpiresAt)
@@ -57,6 +53,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"slices"
 
 	"github.com/lestrrat-go/jwx/jwa"
 	"github.com/lestrrat-go/jwx/jwk"
@@ -79,10 +76,13 @@ const (
 	licenseIssuer = "subnet@min.io"
 )
 
-// license plans
-const (
-	planEnterpriseLite = "ENTERPRISE-LITE"
-	planEnterprisePlus = "ENTERPRISE-PLUS"
+var (
+	// Plans contains a list of valid license plans.
+	Plans = []string{"ENTERPRISE-LITE", "ENTERPRISE-PLUS"}
+
+	// PlansLegacy contains the current valid plans plus
+	// previous plans for backward compatibility.
+	PlansLegacy = []string{"TRIAL", "STANDARD", "ENTERPRISE", "ENTERPRISE-LITE", "ENTERPRISE-PLUS"}
 )
 
 // license token field names
@@ -165,7 +165,9 @@ func Parse(s string, opts ...jwt.ParseOption) (License, error) {
 	}, nil
 }
 
-// Verify checks whether a valid license is provided.
+// Verify checks whether a valid license is provided for
+// the given plans. If no plans are provided only "ENTERPRISE-LITE"
+// and "ENTERPRISE-PLUS" are allowed.
 //
 // Therefore, it first searches for a license in the following order:
 //  1. File referenced by MINIO_LICENSE env var, if any.
@@ -176,9 +178,12 @@ func Parse(s string, opts ...jwt.ParseOption) (License, error) {
 // The license must also be issued before time.Now and,
 // in case of a trial license, must not be expired.
 // For non-trial licenses, a 30 day grace period is granted.
-func Verify() (License, error) {
+func Verify(plans ...string) (License, error) {
 	fail := func(err error) (License, error) { return License{}, err }
 
+	if len(plans) == 0 {
+		plans = Plans
+	}
 	var (
 		license []byte
 		err     error
@@ -213,14 +218,20 @@ func Verify() (License, error) {
 	if l.IssuedAt.After(time.Now()) {
 		return fail(errors.New("license: license is not yet valid"))
 	}
-	if l.Plan != planEnterpriseLite && l.Plan != planEnterprisePlus {
-		return fail(fmt.Errorf("license: either %s or %s plan required", planEnterpriseLite, planEnterprisePlus))
+	if !slices.Contains(plans, l.Plan) {
+		return fail(fmt.Errorf("license: license is not valid for %v", plans))
 	}
-	if l.Trial && time.Now().After(l.ExpiresAt) {
+
+	now := time.Now()
+	if l.Trial && now.After(l.ExpiresAt) {
 		return fail(fmt.Errorf("license: trial license expired on %v", l.ExpiresAt))
 	}
 	if !l.Trial {
 		l.NotAfter = l.NotAfter.Add(licenseSkew)
+	}
+	if now.After(l.NotAfter) {
+		fmt.Fprintln(os.Stderr, "Error: license has expired. Terminating process...")
+		os.Exit(1)
 	}
 	return l, nil
 }
