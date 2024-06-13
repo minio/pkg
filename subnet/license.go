@@ -182,7 +182,7 @@ func (lv *LicenseValidator) ValidateLicense() (*licverifier.LicenseInfo, error) 
 		if err != nil {
 			return nil, err
 		}
-		lv.LicenseToken = string(licData)
+		lv.LicenseToken = strings.TrimSpace(string(licData))
 	}
 
 	return lv.ParseLicense(lv.LicenseToken)
