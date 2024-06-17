@@ -1,4 +1,4 @@
-// Copyright (c) 2015-2021 MinIO, Inc.
+// Copyright (c) 2015-2023 MinIO, Inc.
 //
 // This file is part of MinIO Object Storage stack
 //
@@ -19,9 +19,8 @@ package certs
 
 import (
 	"crypto/x509"
-	"errors"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"os"
 	"path/filepath"
 )
@@ -49,10 +48,7 @@ func GetRootCAs(path string) (*x509.CertPool, error) {
 	// Open the file path and check whether its a regular file
 	// or a directory.
 	f, err := os.Open(path)
-	if errors.Is(err, os.ErrNotExist) {
-		return rootCAs, nil
-	}
-	if errors.Is(err, os.ErrPermission) {
+	if os.IsNotExist(err) || os.IsPermission(err) {
 		return rootCAs, nil
 	}
 	if err != nil {
@@ -67,12 +63,12 @@ func GetRootCAs(path string) (*x509.CertPool, error) {
 
 	// In case of a file add it to the root CAs.
 	if !stat.IsDir() {
-		bytes, err := ioutil.ReadAll(f)
+		bytes, err := io.ReadAll(f)
 		if err != nil {
 			return rootCAs, err
 		}
 		if !rootCAs.AppendCertsFromPEM(bytes) {
-			return rootCAs, fmt.Errorf("cert: %q does not contain a valid X.509 PEM-encoded certificate", path)
+			return rootCAs, fmt.Errorf("cert: %v does not contain a valid X.509 PEM-encoded certificate", path)
 		}
 		return rootCAs, nil
 	}
@@ -84,7 +80,7 @@ func GetRootCAs(path string) (*x509.CertPool, error) {
 		return rootCAs, err
 	}
 	for _, file := range files {
-		bytes, err := ioutil.ReadFile(filepath.Join(path, file))
+		bytes, err := os.ReadFile(filepath.Join(path, file))
 		if err == nil { // ignore files which are not readable.
 			rootCAs.AppendCertsFromPEM(bytes)
 		}

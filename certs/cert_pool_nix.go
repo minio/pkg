@@ -1,7 +1,7 @@
 //go:build !windows
 // +build !windows
 
-// Copyright (c) 2015-2021 MinIO, Inc.
+// Copyright (c) 2015-2023 MinIO, Inc.
 //
 // This file is part of MinIO Object Storage stack
 //
@@ -22,9 +22,7 @@ package certs
 
 import (
 	"crypto/x509"
-	"io/ioutil"
 	"os"
-	"path/filepath"
 	"strings"
 )
 
@@ -35,52 +33,14 @@ var certDirectories = []string{
 	"/var/run/secrets/kubernetes.io/serviceaccount",
 }
 
-// readUniqueDirectoryEntries is like ioutil.ReadDir but omits
-// symlinks that point within the directory.
-func readUniqueDirectoryEntries(dir string) ([]os.FileInfo, error) {
-	fis, err := ioutil.ReadDir(dir)
-	if err != nil {
-		return nil, err
-	}
-	uniq := fis[:0]
-	for _, fi := range fis {
-		if !isSameDirSymlink(fi, dir) {
-			uniq = append(uniq, fi)
-		}
-	}
-	return uniq, nil
-}
-
-// isSameDirSymlink reports whether fi in dir is a symlink with a
-// target not containing a slash.
-func isSameDirSymlink(fi os.FileInfo, dir string) bool {
-	if fi.Mode()&os.ModeSymlink == 0 {
-		return false
-	}
-	target, err := os.Readlink(filepath.Join(dir, fi.Name()))
-	return err == nil && !strings.Contains(target, "/")
-}
-
 func loadSystemRoots() (*x509.CertPool, error) {
+	// Add additional ENV to load k8s CA certs.
+	os.Setenv("SSL_CERT_DIR", strings.Join(certDirectories, ":"))
+	defer os.Unsetenv("SSL_CERT_DIR")
+
 	caPool, err := x509.SystemCertPool()
 	if err != nil {
 		return caPool, err
-	}
-
-	for _, directory := range certDirectories {
-		fis, err := readUniqueDirectoryEntries(directory)
-		if err != nil {
-			if os.IsNotExist(err) || os.IsPermission(err) {
-				return caPool, nil
-			}
-			return caPool, err
-		}
-		for _, fi := range fis {
-			data, err := ioutil.ReadFile(directory + "/" + fi.Name())
-			if err == nil {
-				caPool.AppendCertsFromPEM(data)
-			}
-		}
 	}
 	return caPool, nil
 }
