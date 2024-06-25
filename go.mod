@@ -3,7 +3,6 @@ module github.com/minio/pkg/v3
 go 1.21
 
 require (
-	github.com/cespare/xxhash/v2 v2.2.0
 	github.com/cheggaaa/pb v1.0.29
 	github.com/fatih/color v1.16.0
 	github.com/fatih/structs v1.1.0
@@ -16,7 +15,6 @@ require (
 	github.com/minio/mux v1.8.2
 	github.com/montanaflynn/stats v0.7.1
 	github.com/rjeczalik/notify v0.9.3
-	github.com/secure-io/sio-go v0.3.1
 	github.com/tinylib/msgp v1.2.0
 	go.etcd.io/etcd/client/v3 v3.5.13
 	golang.org/x/crypto v0.24.0
@@ -58,6 +56,7 @@ require (
 	github.com/rivo/uniseg v0.4.7 // indirect
 	github.com/rs/xid v1.5.0 // indirect
 	github.com/safchain/ethtool v0.3.0 // indirect
+	github.com/secure-io/sio-go v0.3.1 // indirect
 	github.com/shirou/gopsutil/v3 v3.24.4 // indirect
 	github.com/shoenig/go-m1cpu v0.1.6 // indirect
 	github.com/tklauser/go-sysconf v0.3.14 // indirect

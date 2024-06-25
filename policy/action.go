@@ -44,6 +44,9 @@ const (
 	// DeleteBucketPolicyAction - DeleteBucketPolicy Rest API action.
 	DeleteBucketPolicyAction = "s3:DeleteBucketPolicy"
 
+	// DeleteBucketCorsAction - DeleteBucketCors Rest API action.
+	DeleteBucketCorsAction = "s3:DeleteBucketCors"
+
 	// DeleteObjectAction - DeleteObject Rest API action.
 	DeleteObjectAction = "s3:DeleteObject"
 
@@ -55,6 +58,9 @@ const (
 
 	// GetBucketPolicyAction - GetBucketPolicy Rest API action.
 	GetBucketPolicyAction = "s3:GetBucketPolicy"
+
+	// GetBucketCorsAction - GetBucketCors Rest API action.
+	GetBucketCorsAction = "s3:GetBucketCors"
 
 	// GetObjectAction - GetObject Rest API action.
 	GetObjectAction = "s3:GetObject"
@@ -102,6 +108,9 @@ const (
 
 	// PutBucketPolicyAction - PutBucketPolicy Rest API action.
 	PutBucketPolicyAction = "s3:PutBucketPolicy"
+
+	// PutBucketCorsAction - PutBucketCors Rest API action.
+	PutBucketCorsAction = "s3:PutBucketCors"
 
 	// PutObjectAction - PutObject Rest API action.
 	PutObjectAction = "s3:PutObject"
