@@ -31,7 +31,7 @@ func TestBPStatementIsAllowed(t *testing.T) {
 		Allow,
 		NewPrincipal("*"),
 		NewActionSet(GetBucketLocationAction, PutObjectAction),
-		NewResourceSet(NewResource("*")),
+		NewResourceSet(NewResourceAWSS3("*")),
 		condition.NewFunctions(),
 	)
 
@@ -39,7 +39,7 @@ func TestBPStatementIsAllowed(t *testing.T) {
 		Allow,
 		NewPrincipal("*"),
 		NewActionSet(GetObjectAction, PutObjectAction),
-		NewResourceSet(NewResource("mybucket/myobject*")),
+		NewResourceSet(NewResourceAWSS3("mybucket/myobject*")),
 		condition.NewFunctions(),
 	)
 
@@ -59,7 +59,7 @@ func TestBPStatementIsAllowed(t *testing.T) {
 		Allow,
 		NewPrincipal("*"),
 		NewActionSet(GetObjectAction, PutObjectAction),
-		NewResourceSet(NewResource("mybucket/myobject*")),
+		NewResourceSet(NewResourceAWSS3("mybucket/myobject*")),
 		condition.NewFunctions(func1),
 	)
 
@@ -67,7 +67,7 @@ func TestBPStatementIsAllowed(t *testing.T) {
 		Deny,
 		NewPrincipal("*"),
 		NewActionSet(GetObjectAction, PutObjectAction),
-		NewResourceSet(NewResource("mybucket/myobject*")),
+		NewResourceSet(NewResourceAWSS3("mybucket/myobject*")),
 		condition.NewFunctions(func1),
 	)
 
@@ -76,7 +76,7 @@ func TestBPStatementIsAllowed(t *testing.T) {
 		Allow,
 		NewPrincipal("*"),
 		NewActionSet(GetObjectAction, CreateBucketAction),
-		NewResourceSet(NewResource("mybucket/myobject*"), NewResource("mybucket")),
+		NewResourceSet(NewResourceAWSS3("mybucket/myobject*"), NewResourceAWSS3("mybucket")),
 		condition.NewFunctions(),
 	)
 
@@ -85,7 +85,7 @@ func TestBPStatementIsAllowed(t *testing.T) {
 		Deny,
 		NewPrincipal("*"),
 		NewActionSet(GetObjectAction),
-		NewResourceSet(NewResource("mybucket/myobject*")),
+		NewResourceSet(NewResourceAWSS3("mybucket/myobject*")),
 		condition.NewFunctions(func1),
 	)
 
@@ -232,7 +232,7 @@ func TestBPStatementIsValid(t *testing.T) {
 			Effect("foo"),
 			NewPrincipal("*"),
 			NewActionSet(GetBucketLocationAction, PutObjectAction),
-			NewResourceSet(NewResource("*")),
+			NewResourceSet(NewResourceAWSS3("*")),
 			condition.NewFunctions(),
 		), true},
 		// Invalid principal error.
@@ -240,7 +240,7 @@ func TestBPStatementIsValid(t *testing.T) {
 			Allow,
 			NewPrincipal(),
 			NewActionSet(GetBucketLocationAction, PutObjectAction),
-			NewResourceSet(NewResource("*")),
+			NewResourceSet(NewResourceAWSS3("*")),
 			condition.NewFunctions(),
 		), true},
 		// Empty actions error.
@@ -248,7 +248,7 @@ func TestBPStatementIsValid(t *testing.T) {
 			Allow,
 			NewPrincipal("*"),
 			NewActionSet(),
-			NewResourceSet(NewResource("*")),
+			NewResourceSet(NewResourceAWSS3("*")),
 			condition.NewFunctions(),
 		), true},
 		// Empty resources error.
@@ -264,7 +264,7 @@ func TestBPStatementIsValid(t *testing.T) {
 			Allow,
 			NewPrincipal("*"),
 			NewActionSet(GetBucketLocationAction, PutObjectAction),
-			NewResourceSet(NewResource("mybucket")),
+			NewResourceSet(NewResourceAWSS3("mybucket")),
 			condition.NewFunctions(),
 		), true},
 		// Unsupported resource found for bucket action.
@@ -272,7 +272,7 @@ func TestBPStatementIsValid(t *testing.T) {
 			Allow,
 			NewPrincipal("*"),
 			NewActionSet(GetBucketLocationAction, PutObjectAction),
-			NewResourceSet(NewResource("mybucket/myobject*")),
+			NewResourceSet(NewResourceAWSS3("mybucket/myobject*")),
 			condition.NewFunctions(),
 		), true},
 		// Unsupported condition key for action.
@@ -280,14 +280,14 @@ func TestBPStatementIsValid(t *testing.T) {
 			Allow,
 			NewPrincipal("*"),
 			NewActionSet(GetObjectAction, PutObjectAction),
-			NewResourceSet(NewResource("mybucket/myobject*")),
+			NewResourceSet(NewResourceAWSS3("mybucket/myobject*")),
 			condition.NewFunctions(func1, func2),
 		), true},
 		{NewBPStatement("",
 			Deny,
 			NewPrincipal("*"),
 			NewActionSet(GetObjectAction, PutObjectAction),
-			NewResourceSet(NewResource("mybucket/myobject*")),
+			NewResourceSet(NewResourceAWSS3("mybucket/myobject*")),
 			condition.NewFunctions(func1),
 		), false},
 		{BPStatement{
@@ -295,7 +295,7 @@ func TestBPStatementIsValid(t *testing.T) {
 			Effect:     Allow,
 			Principal:  NewPrincipal("*"),
 			NotActions: NewActionSet(GetObjectAction),
-			Resources:  NewResourceSet(NewResource("mybucket/myobject*")),
+			Resources:  NewResourceSet(NewResourceAWSS3("mybucket/myobject*")),
 			Conditions: condition.NewFunctions(),
 		}, false},
 	}
@@ -322,7 +322,7 @@ func TestBPStatementUnmarshalJSONAndValidate(t *testing.T) {
 		Allow,
 		NewPrincipal("*"),
 		NewActionSet(PutObjectAction),
-		NewResourceSet(NewResource("mybucket/myobject*")),
+		NewResourceSet(NewResourceAWSS3("mybucket/myobject*")),
 		condition.NewFunctions(),
 	)
 	case1Statement.SID = "SomeId1"
@@ -349,7 +349,7 @@ func TestBPStatementUnmarshalJSONAndValidate(t *testing.T) {
 		Allow,
 		NewPrincipal("*"),
 		NewActionSet(PutObjectAction),
-		NewResourceSet(NewResource("mybucket/myobject*")),
+		NewResourceSet(NewResourceAWSS3("mybucket/myobject*")),
 		condition.NewFunctions(func1),
 	)
 
@@ -380,7 +380,7 @@ func TestBPStatementUnmarshalJSONAndValidate(t *testing.T) {
 		Deny,
 		NewPrincipal("*"),
 		NewActionSet(PutObjectAction, GetObjectAction),
-		NewResourceSet(NewResource("mybucket/myobject*")),
+		NewResourceSet(NewResourceAWSS3("mybucket/myobject*")),
 		condition.NewFunctions(func2),
 	)
 
@@ -454,7 +454,7 @@ func TestBPStatementUnmarshalJSONAndValidate(t *testing.T) {
 		Effect:     Deny,
 		Principal:  NewPrincipal("*"),
 		NotActions: NewActionSet(GetObjectAction, PutObjectAction),
-		Resources:  NewResourceSet(NewResource("mybucket/myobject*")),
+		Resources:  NewResourceSet(NewResourceAWSS3("mybucket/myobject*")),
 		Conditions: condition.NewFunctions(),
 	}
 
@@ -511,7 +511,7 @@ func TestBPStatementValidate(t *testing.T) {
 		Allow,
 		NewPrincipal("*"),
 		NewActionSet(PutObjectAction),
-		NewResourceSet(NewResource("mybucket/myobject*")),
+		NewResourceSet(NewResourceAWSS3("mybucket/myobject*")),
 		condition.NewFunctions(),
 	)
 
@@ -533,7 +533,7 @@ func TestBPStatementValidate(t *testing.T) {
 		Allow,
 		NewPrincipal("*"),
 		NewActionSet(GetObjectAction, PutObjectAction),
-		NewResourceSet(NewResource("mybucket/myobject*")),
+		NewResourceSet(NewResourceAWSS3("mybucket/myobject*")),
 		condition.NewFunctions(func1, func2),
 	)
 

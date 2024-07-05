@@ -150,9 +150,26 @@ func (resourceSet *ResourceSet) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
-// Validate - validates ResourceSet.
-func (resourceSet ResourceSet) Validate() error {
+// ValidateAWSS3 - validates ResourceSet is AWS S3.
+func (resourceSet ResourceSet) ValidateAWSS3() error {
 	for resource := range resourceSet {
+		if !resource.isAWSS3() {
+			return Errorf("type of resource is not AWS S3 '%v'", resource)
+		}
+		if err := resource.Validate(); err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
+// ValidateKMS - validates ResourceSet is KMS.
+func (resourceSet ResourceSet) ValidateKMS() error {
+	for resource := range resourceSet {
+		if !resource.isKMS() {
+			return Errorf("type of resource is not KMS '%v'", resource)
+		}
 		if err := resource.Validate(); err != nil {
 			return err
 		}

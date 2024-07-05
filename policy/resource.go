@@ -26,12 +26,57 @@ import (
 	"github.com/minio/pkg/v3/wildcard"
 )
 
-// ResourceARNPrefix - resource ARN prefix as per AWS S3 specification.
-const ResourceARNPrefix = "arn:aws:s3:::"
+const (
+	// ResourceARNPrefix - resource S3 ARN prefix as per AWS S3 specification.
+	ResourceARNPrefix = "arn:aws:s3:::"
+
+	// ResourceARNKMSPrefix is for KMS key resources. MinIO specific API.
+	ResourceARNKMSPrefix = "arn:minio:kms:::"
+)
+
+// ARNPrefixType - ARN prefix type
+type ARNPrefixType uint8
+
+const (
+	// ARNPrefixTypeAWSS3 is the ARN prefix type for AWS S3 resources.
+	ARNPrefixTypeAWSS3 ARNPrefixType = iota + 1
+
+	// ARNPrefixTypeMinIOKMS is the ARN prefix type for MinIO KMS resources.
+	ARNPrefixTypeMinIOKMS
+)
+
+// ARNTypeToPrefix maps the type to prefix string
+var ARNTypeToPrefix = map[ARNPrefixType]string{
+	ARNPrefixTypeAWSS3:    ResourceARNPrefix,
+	ARNPrefixTypeMinIOKMS: ResourceARNKMSPrefix,
+}
+
+// ARNPrefixToType maps prefix to types.
+var ARNPrefixToType map[string]ARNPrefixType
+
+func init() {
+	ARNPrefixToType = make(map[string]ARNPrefixType)
+	for k, v := range ARNTypeToPrefix {
+		ARNPrefixToType[v] = k
+	}
+}
+
+func (a ARNPrefixType) String() string {
+	return ARNTypeToPrefix[a]
+}
 
 // Resource - resource in policy statement.
 type Resource struct {
 	Pattern string
+	Type    ARNPrefixType
+}
+
+func (r Resource) isKMS() bool {
+	return r.Type == ARNPrefixTypeMinIOKMS
+}
+
+func (r Resource) isAWSS3() bool {
+	return r.Type == ARNPrefixTypeAWSS3
 }
 
 func (r Resource) isBucketPattern() bool {
@@ -44,8 +89,18 @@ func (r Resource) isObjectPattern() bool {
 
 // IsValid - checks whether Resource is valid or not.
 func (r Resource) IsValid() bool {
-	if strings.HasPrefix(r.Pattern, "/") {
-		return false
+	if r.isAWSS3() {
+		if strings.HasPrefix(r.Pattern, "/") {
+			return false
+		}
+	}
+	if r.isKMS() {
+		// TODO: Copied from KES repo, confirm that it is generally applicable.
+		if strings.IndexFunc(r.Pattern, func(c rune) bool {
+			return c == '/' || c == '\\' || c == '.'
+		}) >= 0 {
+			return false
+		}
 	}
 
 	return r.Pattern != ""
@@ -83,7 +138,7 @@ func (r Resource) MarshalJSON() ([]byte, error) {
 }
 
 func (r Resource) String() string {
-	return ResourceARNPrefix + r.Pattern
+	return r.Type.String() + r.Pattern
 }
 
 // UnmarshalJSON - decodes JSON data to Resource.
@@ -136,23 +191,38 @@ func (r Resource) ValidateBucket(bucketName string) error {
 
 // parseResource - parses string to Resource.
 func parseResource(s string) (Resource, error) {
-	if !strings.HasPrefix(s, ResourceARNPrefix) {
+	r := Resource{}
+	switch {
+	case strings.HasPrefix(s, ResourceARNPrefix):
+		r.Pattern = strings.TrimPrefix(s, ResourceARNPrefix)
+		r.Type = ARNPrefixTypeAWSS3
+
+	case strings.HasPrefix(s, ResourceARNKMSPrefix):
+		r.Pattern = strings.TrimPrefix(s, ResourceARNKMSPrefix)
+		r.Type = ARNPrefixTypeMinIOKMS
+	default:
 		return Resource{}, Errorf("invalid resource '%v'", s)
 	}
 
-	pattern := strings.TrimPrefix(s, ResourceARNPrefix)
-	if strings.HasPrefix(pattern, "/") {
+	if strings.HasPrefix(r.Pattern, "/") {
 		return Resource{}, Errorf("invalid resource '%v' - starts with '/' will not match a bucket", s)
 	}
 
-	return Resource{
-		Pattern: pattern,
-	}, nil
+	return r, nil
 }
 
-// NewResource - creates new resource.
-func NewResource(pattern string) Resource {
+// NewResourceAWSS3 - creates new resource with the default ARN type of AWS S3.
+func NewResourceAWSS3(pattern string) Resource {
 	return Resource{
 		Pattern: pattern,
+		Type:    ARNPrefixTypeAWSS3,
+	}
+}
+
+// NewResourceKMS - creates new resource with type KMS
+func NewResourceKMS(pattern string) Resource {
+	return Resource{
+		Pattern: pattern,
+		Type:    ARNPrefixTypeMinIOKMS,
 	}
 }
