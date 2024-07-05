@@ -1,3 +1,20 @@
+// Copyright (c) 2015-2024 MinIO, Inc.
+//
+// This file is part of MinIO Object Storage stack
+//
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU Affero General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU Affero General Public License for more details.
+//
+// You should have received a copy of the GNU Affero General Public License
+// along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
 package cmd
 
 import (
@@ -6,10 +23,10 @@ import (
 	"time"
 )
 
-// ParseTimeDurationSimply parses a time duration string
+// ParseTimeDuration parses a time duration string
 // supports: d, h, m, s, ms, us, ns
 // eg: 7d1h2m3s, -2d1h2m3s
-func ParseTimeDurationSimply(durStr string) (time.Duration, error) {
+func ParseTimeDuration(durStr string) (time.Duration, error) {
 	out := time.Duration(0)
 	num := ""
 	unit := ""
