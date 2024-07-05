@@ -24,16 +24,17 @@ import (
 )
 
 type numericFunc struct {
-	n     name
-	k     Key
-	value int
-	c     condition
+	n        name
+	k        Key
+	value    int
+	c        condition
+	ifExists bool
 }
 
-func (f numericFunc) evaluate(values map[string][]string) bool {
+func (f numericFunc) evaluate(values map[string][]string) (ret bool) {
 	rvalues := getValuesByKey(values, f.k)
 	if len(rvalues) == 0 {
-		return false
+		return f.ifExists
 	}
 
 	rv, err := strconv.Atoi(rvalues[0])
@@ -69,7 +70,7 @@ func (f numericFunc) name() name {
 }
 
 func (f numericFunc) String() string {
-	return fmt.Sprintf("%v:%v:%v", f.n, f.k, f.value)
+	return fmt.Sprintf("%v:%v:%v:%v", f.n, f.ifExists, f.k, f.value)
 }
 
 func (f numericFunc) toMap() map[Key]ValueSet {
@@ -87,10 +88,11 @@ func (f numericFunc) toMap() map[Key]ValueSet {
 
 func (f numericFunc) clone() Function {
 	return &numericFunc{
-		n:     f.n,
-		k:     f.k,
-		value: f.value,
-		c:     f.c,
+		n:        f.n,
+		k:        f.k,
+		value:    f.value,
+		c:        f.c,
+		ifExists: f.ifExists,
 	}
 }
 
@@ -121,23 +123,24 @@ func valueToInt(n string, values ValueSet) (v int, err error) {
 	return v, nil
 }
 
-func newNumericFunc(n string, key Key, values ValueSet, cond condition) (Function, error) {
+func newNumericFunc(n string, ifExists bool, key Key, values ValueSet, cond condition) (Function, error) {
 	v, err := valueToInt(n, values)
 	if err != nil {
 		return nil, err
 	}
 
 	return &numericFunc{
-		n:     name{name: n},
-		k:     key,
-		value: v,
-		c:     cond,
+		n:        name{name: n},
+		k:        key,
+		value:    v,
+		c:        cond,
+		ifExists: ifExists,
 	}, nil
 }
 
 // newNumericEqualsFunc - returns new NumericEquals function.
 func newNumericEqualsFunc(key Key, values ValueSet, _ string) (Function, error) {
-	return newNumericFunc(numericEquals, key, values, equals)
+	return newNumericFunc(numericEquals, false, key, values, equals)
 }
 
 // NewNumericEqualsFunc - returns new NumericEquals function.
@@ -147,7 +150,7 @@ func NewNumericEqualsFunc(key Key, value int) (Function, error) {
 
 // newNumericNotEqualsFunc - returns new NumericNotEquals function.
 func newNumericNotEqualsFunc(key Key, values ValueSet, _ string) (Function, error) {
-	return newNumericFunc(numericNotEquals, key, values, notEquals)
+	return newNumericFunc(numericNotEquals, false, key, values, notEquals)
 }
 
 // NewNumericNotEqualsFunc - returns new NumericNotEquals function.
@@ -157,7 +160,7 @@ func NewNumericNotEqualsFunc(key Key, value int) (Function, error) {
 
 // newNumericGreaterThanFunc - returns new NumericGreaterThan function.
 func newNumericGreaterThanFunc(key Key, values ValueSet, _ string) (Function, error) {
-	return newNumericFunc(numericGreaterThan, key, values, greaterThan)
+	return newNumericFunc(numericGreaterThan, false, key, values, greaterThan)
 }
 
 // NewNumericGreaterThanFunc - returns new NumericGreaterThan function.
@@ -165,9 +168,19 @@ func NewNumericGreaterThanFunc(key Key, value int) (Function, error) {
 	return &numericFunc{n: name{name: numericGreaterThan}, k: key, value: value, c: greaterThan}, nil
 }
 
+// newNumericGreaterThanIfExistsFunc - returns new NumericGreaterThanIfExists function.
+func newNumericGreaterThanIfExistsFunc(key Key, values ValueSet, _ string) (Function, error) {
+	return newNumericFunc(numericGreaterThanIfExists, true, key, values, greaterThan)
+}
+
+// NewNumericGreaterThanIfExistsFunc - returns new NumericGreaterThanIfExists function.
+func NewNumericGreaterThanIfExistsFunc(key Key, value int) (Function, error) {
+	return &numericFunc{n: name{name: numericGreaterThan}, ifExists: true, k: key, value: value, c: greaterThan}, nil
+}
+
 // newNumericGreaterThanEqualsFunc - returns new NumericGreaterThanEquals function.
 func newNumericGreaterThanEqualsFunc(key Key, values ValueSet, _ string) (Function, error) {
-	return newNumericFunc(numericGreaterThanEquals, key, values, greaterThanEquals)
+	return newNumericFunc(numericGreaterThanEquals, false, key, values, greaterThanEquals)
 }
 
 // NewNumericGreaterThanEqualsFunc - returns new NumericGreaterThanEquals function.
@@ -177,7 +190,7 @@ func NewNumericGreaterThanEqualsFunc(key Key, value int) (Function, error) {
 
 // newNumericLessThanFunc - returns new NumericLessThan function.
 func newNumericLessThanFunc(key Key, values ValueSet, _ string) (Function, error) {
-	return newNumericFunc(numericLessThan, key, values, lessThan)
+	return newNumericFunc(numericLessThan, false, key, values, lessThan)
 }
 
 // NewNumericLessThanFunc - returns new NumericLessThan function.
@@ -187,7 +200,7 @@ func NewNumericLessThanFunc(key Key, value int) (Function, error) {
 
 // newNumericLessThanEqualsFunc - returns new NumericLessThanEquals function.
 func newNumericLessThanEqualsFunc(key Key, values ValueSet, _ string) (Function, error) {
-	return newNumericFunc(numericLessThanEquals, key, values, lessThanEquals)
+	return newNumericFunc(numericLessThanEquals, false, key, values, lessThanEquals)
 }
 
 // NewNumericLessThanEqualsFunc - returns new NumericLessThanEquals function.

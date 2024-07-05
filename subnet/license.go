@@ -29,7 +29,7 @@ import (
 	"time"
 
 	"github.com/lestrrat-go/jwx/jwt"
-	"github.com/minio/pkg/v2/licverifier"
+	"github.com/minio/pkg/v3/licverifier"
 )
 
 const (
@@ -177,18 +177,15 @@ func (lv *LicenseValidator) ValidateLicense() (*licverifier.LicenseInfo, error) 
 		return nil, fmt.Errorf("MinIO license not found")
 	}
 
-	var lic string
-	if lv.LicenseToken != "" {
-		lic = lv.LicenseToken
-	} else {
+	if lv.LicenseToken == "" {
 		licData, err := os.ReadFile(lv.LicenseFilePath)
 		if err != nil {
 			return nil, err
 		}
-		lic = string(licData)
+		lv.LicenseToken = strings.TrimSpace(string(licData))
 	}
 
-	return lv.ParseLicense(lic)
+	return lv.ParseLicense(lv.LicenseToken)
 }
 
 func getDurationForNextLicenseCheck(li *licverifier.LicenseInfo) time.Duration {

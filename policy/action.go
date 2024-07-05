@@ -18,8 +18,8 @@
 package policy
 
 import (
-	"github.com/minio/pkg/v2/policy/condition"
-	"github.com/minio/pkg/v2/wildcard"
+	"github.com/minio/pkg/v3/policy/condition"
+	"github.com/minio/pkg/v3/wildcard"
 )
 
 // Action - policy action.
@@ -372,6 +372,7 @@ func createActionConditionKeyMap() ActionConditionKeyMap {
 			append([]condition.Key{
 				condition.S3XAmzServerSideEncryption.ToKey(),
 				condition.S3XAmzServerSideEncryptionCustomerAlgorithm.ToKey(),
+				condition.S3XAmzServerSideEncryptionAwsKmsKeyID.ToKey(),
 				condition.S3VersionID.ToKey(),
 				condition.ExistingObjectTag.ToKey(),
 			}, commonKeys...)...),
@@ -418,6 +419,7 @@ func createActionConditionKeyMap() ActionConditionKeyMap {
 				condition.S3XAmzCopySource.ToKey(),
 				condition.S3XAmzServerSideEncryption.ToKey(),
 				condition.S3XAmzServerSideEncryptionCustomerAlgorithm.ToKey(),
+				condition.S3XAmzServerSideEncryptionAwsKmsKeyID.ToKey(),
 				condition.S3XAmzMetadataDirective.ToKey(),
 				condition.S3XAmzStorageClass.ToKey(),
 				condition.S3VersionID.ToKey(),
@@ -434,6 +436,7 @@ func createActionConditionKeyMap() ActionConditionKeyMap {
 			append([]condition.Key{
 				condition.S3XAmzServerSideEncryption.ToKey(),
 				condition.S3XAmzServerSideEncryptionCustomerAlgorithm.ToKey(),
+				condition.S3XAmzServerSideEncryptionAwsKmsKeyID.ToKey(),
 				condition.S3ObjectLockRemainingRetentionDays.ToKey(),
 				condition.S3ObjectLockRetainUntilDate.ToKey(),
 				condition.S3ObjectLockMode.ToKey(),
@@ -444,6 +447,7 @@ func createActionConditionKeyMap() ActionConditionKeyMap {
 			append([]condition.Key{
 				condition.S3XAmzServerSideEncryption.ToKey(),
 				condition.S3XAmzServerSideEncryptionCustomerAlgorithm.ToKey(),
+				condition.S3XAmzServerSideEncryptionAwsKmsKeyID.ToKey(),
 				condition.S3VersionID.ToKey(),
 			}, commonKeys...)...),
 
@@ -451,6 +455,7 @@ func createActionConditionKeyMap() ActionConditionKeyMap {
 			append([]condition.Key{
 				condition.S3XAmzServerSideEncryption.ToKey(),
 				condition.S3XAmzServerSideEncryptionCustomerAlgorithm.ToKey(),
+				condition.S3XAmzServerSideEncryptionAwsKmsKeyID.ToKey(),
 				condition.S3ObjectLockLegalHold.ToKey(),
 				condition.S3VersionID.ToKey(),
 			}, commonKeys...)...),

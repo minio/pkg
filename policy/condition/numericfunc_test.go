@@ -44,6 +44,9 @@ func testNumericFuncEvaluate(t *testing.T, funcs ...Function) {
 		{funcs[5], map[string][]string{"max-keys": {"16"}}, true},
 		{funcs[5], map[string][]string{"max-keys": {"6"}}, true},
 		{funcs[5], map[string][]string{"max-keys": {"61"}}, false},
+		{funcs[6], map[string][]string{"max-keys": {"16"}}, false},
+		{funcs[6], map[string][]string{"max-keys": {"61"}}, true},
+		{funcs[6], map[string][]string{}, true},
 	}
 
 	for i, testCase := range testCases {
@@ -88,7 +91,12 @@ func TestNumericFuncEvaluate(t *testing.T) {
 		t.Fatalf("unexpected error. %v\n", err)
 	}
 
-	testNumericFuncEvaluate(t, case1Function, case2Function, case3Function, case4Function, case5Function, case6Function)
+	case7Function, err := newNumericGreaterThanIfExistsFunc(S3MaxKeys.ToKey(), valueSet, "")
+	if err != nil {
+		t.Fatalf("unexpected error. %v\n", err)
+	}
+
+	testNumericFuncEvaluate(t, case1Function, case2Function, case3Function, case4Function, case5Function, case6Function, case7Function)
 
 	if _, err := newNumericEqualsFunc(S3MaxKeys.ToKey(), NewValueSet(NewIntValue(16), NewStringValue("16")), ""); err == nil {
 		t.Fatalf("error expected")
@@ -134,7 +142,12 @@ func TestNewNumericFuncEvaluate(t *testing.T) {
 		t.Fatalf("unexpected error. %v\n", err)
 	}
 
-	testNumericFuncEvaluate(t, case1Function, case2Function, case3Function, case4Function, case5Function, case6Function)
+	case7Function, err := NewNumericGreaterThanIfExistsFunc(S3MaxKeys.ToKey(), 16)
+	if err != nil {
+		t.Fatalf("unexpected error. %v\n", err)
+	}
+
+	testNumericFuncEvaluate(t, case1Function, case2Function, case3Function, case4Function, case5Function, case6Function, case7Function)
 }
 
 func TestNumericFuncKey(t *testing.T) {

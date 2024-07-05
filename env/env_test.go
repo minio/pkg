@@ -22,8 +22,8 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"net/url"
-	"os"
 	"testing"
+	"time"
 
 	"github.com/minio/mux"
 )
@@ -89,15 +89,57 @@ func TestWebEnv(t *testing.T) {
 	}
 }
 
-func TestIsSet(t *testing.T) {
-	os.Setenv("_TEST_ENV", "")
-	defer os.Unsetenv("_TEST_ENV")
+func TestIsSetType(t *testing.T) {
+	t.Setenv("_TEST_ENV", "")
 
+	v, err := GetInt("_TEST_ENV", 0)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if v != 0 {
+		t.Fatal("unexpected")
+	}
+
+	t.Setenv("_TEST_ENV", "1")
+
+	v, err = GetInt("_TEST_ENV", 0)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if v != 1 {
+		t.Fatal("unexpected")
+	}
+
+	t.Setenv("_TEST_ENV", "10s")
+
+	d, err := GetDuration("_TEST_ENV", time.Second)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if d != 10*time.Second {
+		t.Fatal("unexpected")
+	}
+
+	t.Setenv("_TEST_ENV", "")
+	d, err = GetDuration("_TEST_ENV", time.Second)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if d != time.Second {
+		t.Fatal("unexpected")
+	}
+}
+
+func TestIsSet(t *testing.T) {
+	t.Setenv("_TEST_ENV", "")
 	if IsSet("_TEST_ENV") {
 		t.Fatal("Expected IsSet(false) but found IsSet(true)")
 	}
 
-	os.Setenv("_TEST_ENV", "v")
+	t.Setenv("_TEST_ENV", "v")
 	if !IsSet("_TEST_ENV") {
 		t.Fatal("Expected IsSet(true) but found IsSet(false)")
 	}
@@ -107,19 +149,18 @@ func TestGetEnv(t *testing.T) {
 	// Set empty env-value, this test covers situation
 	// where env is set but with empty value, choose
 	// to fallback to default value at this point.
-	os.Setenv("_TEST_ENV", "")
+	t.Setenv("_TEST_ENV", "")
 
 	if v := Get("_TEST_ENV", "value"); v != "value" {
 		t.Fatalf("Expected 'value', but got %s", v)
 	}
 
-	os.Unsetenv("_TEST_ENV")
+	t.Setenv("_TEST_ENV", "")
 	if v := Get("_TEST_ENV", "value"); v != "value" {
 		t.Fatalf("Expected 'value', but got %s", v)
 	}
 
-	os.Setenv("_TEST_ENV", "value-new")
-	defer os.Unsetenv("_TEST_ENV")
+	t.Setenv("_TEST_ENV", "value-new")
 	if v := Get("_TEST_ENV", "value"); v != "value-new" {
 		t.Fatalf("Expected 'value-new', but got %s", v)
 	}
