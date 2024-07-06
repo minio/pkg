@@ -20,80 +20,40 @@ package time
 import (
 	"fmt"
 	"strconv"
+	"strings"
 	"time"
 )
 
 // ParseTimeDuration parses a time duration string
 // supports: d, h, m, s, ms, us, ns
 // eg: 7d1h2m3s, -2d1h2m3s
-func ParseTimeDuration(durStr string) (time.Duration, error) {
-	out := time.Duration(0)
-	num := ""
-	unit := ""
-	isNegative := false
-	parsedUint := map[string]bool{}
-	isFirst := true
-	add := func(num, unit string) error {
-		if parsedUint[unit] {
-			return fmt.Errorf("duplicate unit %s", unit)
+func ParseTimeDuration(durStr string) (out time.Duration, err error) {
+	if strings.Contains(durStr, "d") {
+		durStrSlice := strings.Split(durStr, "d")
+		if len(durStrSlice) != 2 {
+			return time.Duration(0), fmt.Errorf("invalid duration string %s", durStr)
 		}
-		parsedUint[unit] = true
-		number, err := strconv.Atoi(num)
+		days, err := strconv.Atoi(durStrSlice[0])
 		if err != nil {
-			return err
+			return time.Duration(0), fmt.Errorf("invalid duration string %s", durStr)
 		}
-		if !isFirst && number < 0 {
-			return fmt.Errorf("negative number %d", number)
-		}
-		if isFirst {
-			if number < 0 {
-				isNegative = true
+		out += time.Duration(days) * 24 * time.Hour
+		if durStrSlice[1] != "" {
+			leftDur, err := time.ParseDuration(durStrSlice[1])
+			if err != nil {
+				return time.Duration(0), fmt.Errorf("invalid duration string %s", durStr)
 			}
-			isFirst = false
-		}
-		if isNegative && number > 0 {
-			number *= -1
-		}
-		switch unit {
-		case "d":
-			out += time.Hour * time.Duration(24*number)
-		case "h":
-			out += time.Hour * time.Duration(number)
-		case "m":
-			out += time.Minute * time.Duration(number)
-		case "s":
-			out += time.Second * time.Duration(number)
-		case "ms":
-			out += time.Millisecond * time.Duration(number)
-		case "us":
-			out += time.Microsecond * time.Duration(number)
-		case "ns":
-			out += time.Nanosecond * time.Duration(number)
-		default:
-			return fmt.Errorf("invalid unit %s", unit)
-		}
-		return nil
-	}
-	for _, c := range durStr {
-		if c >= '0' && c <= '9' || c == '-' {
-			if unit != "" {
-				err := add(num, unit)
-				if err != nil {
-					return 0, err
-				}
-				unit = ""
-				num = ""
+			if leftDur < 0 {
+				return time.Duration(0), fmt.Errorf("invalid duration string %s", durStr)
 			}
-			num += string(c)
-		} else {
-			unit += string(c)
+			if days > 0 {
+				out += leftDur
+			} else {
+				out -= leftDur
+			}
 		}
-	}
-	if num != "" && unit != "" {
-		err := add(num, unit)
-		if err != nil {
-			return 0, err
-		}
+	} else {
+		out, err = time.ParseDuration(durStr)
 	}
 	return out, nil
 }

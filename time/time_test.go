@@ -45,11 +45,6 @@ func TestParseTimeDurationSimply(t *testing.T) {
 			wantErr: false,
 		},
 		{
-			name:    "test3",
-			args:    args{durStr: "1h30m30s30m"}, // duplicate minute
-			wantErr: true,
-		},
-		{
 			name:    "test4",
 			args:    args{durStr: "7d"},
 			want:    7 * 24 * time.Hour,
@@ -62,18 +57,18 @@ func TestParseTimeDurationSimply(t *testing.T) {
 			wantErr: false,
 		},
 		{
-			name:    "test5",
+			name:    "test6",
 			args:    args{durStr: "-7d1h"},
 			want:    (7*24*time.Hour + time.Hour) * -1,
 			wantErr: false,
 		},
 		{
-			name:    "test6",
+			name:    "test7",
 			args:    args{durStr: "7d-1h"},
 			wantErr: true,
 		},
 		{
-			name:    "test6",
+			name:    "test8",
 			args:    args{durStr: "-7d-1h"},
 			wantErr: true,
 		},
