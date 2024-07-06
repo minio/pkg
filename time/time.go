@@ -53,8 +53,6 @@ func ParseTimeDuration(durStr string) (out time.Duration, err error) {
 				out -= leftDur
 			}
 		}
-	} else {
-		out, err = time.ParseDuration(durStr)
 	}
-	return out, nil
+	return time.ParseDuration(durStr)
 }
