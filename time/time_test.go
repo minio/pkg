@@ -72,6 +72,18 @@ func TestParseTimeDurationSimply(t *testing.T) {
 			args:    args{durStr: "-7d-1h"},
 			wantErr: true,
 		},
+		{
+			name:    "test9",
+			args:    args{durStr: "0.1h"},
+			want:    time.Minute * 6,
+			wantErr: false,
+		},
+		{
+			name:    "test10",
+			args:    args{durStr: "1.1d0.1h"},
+			want:    time.Hour*24 + time.Hour*2 + time.Minute*30,
+			wantErr: false,
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {

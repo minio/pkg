@@ -33,11 +33,11 @@ func ParseTimeDuration(durStr string) (out time.Duration, err error) {
 		if len(durStrSlice) != 2 {
 			return time.Duration(0), fmt.Errorf("invalid duration string %s", durStr)
 		}
-		days, err := strconv.Atoi(durStrSlice[0])
+		days, err := strconv.ParseFloat(durStrSlice[0], 10)
 		if err != nil {
 			return time.Duration(0), fmt.Errorf("invalid duration string %s", durStr)
 		}
-		out += time.Duration(days) * 24 * time.Hour
+		out += time.Duration(days * float64(24*time.Hour))
 		if durStrSlice[1] != "" {
 			leftDur, err := time.ParseDuration(durStrSlice[1])
 			if err != nil {
