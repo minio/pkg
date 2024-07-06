@@ -22,7 +22,7 @@ import (
 	"time"
 )
 
-func TestParseTimeDurationSimply(t *testing.T) {
+func TestParseTimeDuration(t *testing.T) {
 	type args struct {
 		durStr string
 	}

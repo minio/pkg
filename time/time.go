@@ -48,11 +48,12 @@ func ParseTimeDuration(durStr string) (out time.Duration, err error) {
 				return time.Duration(0), fmt.Errorf("invalid duration string %s", durStr)
 			}
 			if days > 0 {
-				out += leftDur
+				out = out + leftDur
 			} else {
-				out -= leftDur
+				out = out - leftDur
 			}
 		}
+		return out, nil
 	}
 	return time.ParseDuration(durStr)
 }
