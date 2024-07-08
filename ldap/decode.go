@@ -30,10 +30,10 @@ import (
 	"strings"
 )
 
-// Remove leading and trailing spaces from the attribute type and value
+// DecodeDN - remove leading and trailing spaces from the attribute type and value
 // and unescape any escaped characters in these fields
 //
-// decodeDN is pulled from the go-ldap library
+// pulled from the go-ldap library
 // https://github.com/go-ldap/ldap/blob/dbdc485259442f987d83e604cd4f5859cfc1be58/dn.go
 func DecodeDN(str string) (string, error) {
 	s := []rune(stripLeadingAndTrailingSpaces(str))
