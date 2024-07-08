@@ -28,6 +28,8 @@ import (
 	"errors"
 	"fmt"
 	"strings"
+
+	ldap "github.com/go-ldap/ldap/v3"
 )
 
 // DecodeDN - remove leading and trailing spaces from the attribute type and value
@@ -52,7 +54,7 @@ func DecodeDN(str string) (string, error) {
 		// If the escape character is the last character, it's a corrupted
 		// escaped character
 		if i+1 >= len(s) {
-			return "", fmt.Errorf("got corrupted escaped character: '%s'", string(s))
+			return "", ldap.NewError(34, fmt.Errorf("got corrupted escaped character: '%s'", string(s)))
 		}
 
 		// If the escaped character is a special character, just add it to
@@ -68,7 +70,7 @@ func DecodeDN(str string) (string, error) {
 		// be a hex-encoded character of the form \XX if it's not at least
 		// two characters long, it's a corrupted escaped character
 		if i+2 >= len(s) {
-			return "", errors.New("failed to decode escaped character: encoding/hex: invalid byte: " + string(s[i+1]))
+			return "", ldap.NewError(34, errors.New("unable to decode escaped character: encoding/hex: invalid byte: "+string(s[i+1])))
 		}
 
 		// Get the runes for the two characters after the escape character
@@ -79,15 +81,15 @@ func DecodeDN(str string) (string, error) {
 		// two bytes when converted to a byte slice, it's a corrupted
 		// escaped character
 		if len(xx) != 2 {
-			return "", errors.New("failed to decode escaped character: invalid byte: " + string(xx))
+			return "", ldap.NewError(34, fmt.Errorf("unable to decode escaped character: invalid byte: %s", string(xx)))
 		}
 
 		// Decode the hex-encoded character and add it to the builder
 		dst := []byte{0}
 		if n, err := hex.Decode(dst, xx); err != nil {
-			return "", errors.New("failed to decode escaped character: " + err.Error())
+			return "", ldap.NewError(34, errors.New("unable to decode escaped character: "+err.Error()))
 		} else if n != 1 {
-			return "", fmt.Errorf("failed to decode escaped character: encoding/hex: expected 1 byte when un-escaping, got %d", n)
+			return "", ldap.NewError(34, fmt.Errorf("unable to decode escaped character: encoding/hex: expected 1 byte when un-escaping, got %d", n))
 		}
 
 		builder.WriteByte(dst[0])

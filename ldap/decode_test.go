@@ -1,4 +1,4 @@
-// Copyright (c) 2015-2022 MinIO, Inc.
+// Copyright (c) 2015-2024 MinIO, Inc.
 //
 // This file is part of MinIO Object Storage stack
 //
@@ -34,16 +34,36 @@ func TestDecodeDN(t *testing.T) {
 			expected: "cn=foo,dc=example,dc=com",
 		},
 		{
-			input:    `cn=\d0\98\d0\b2\d0\b0\d0\bd\d0\be\d0\b2 \d0\98\d0\b2\d0\b0\d0\bd,dc=example,dc=com`,
-			expected: "cn=Иванов Иван,dc=example,dc=com",
-		},
-		{
-			input:    `cn=\20foo,dc=example,dc=com`,
-			expected: "cn= foo,dc=example,dc=com",
+			input:    `cn=\d0\bf\d1\80\d0\b5\d1\86\d0\b5\d0\b4\d0\b5\d0\bd\d1\82 \d1\82\d0\b5\d1\81\d1\82,dc=example,dc=com`,
+			expected: "cn=прецедент тест,dc=example,dc=com",
 		},
 		{
 			input:    `cn=pr\c3\bcfen,dc=example,dc=com`,
 			expected: "cn=prüfen,dc=example,dc=com",
+		},
+		{
+			input:    `cn=fo\20o,dc=example,dc=com`,
+			expected: "cn=fo o,dc=example,dc=com",
+		},
+		{
+			input:    `cn=\e6\b5\8b\e8\af\95,dc=example,dc=com`,
+			expected: "cn=测试,dc=example,dc=com",
+		},
+		{
+			input:    `cn=\e6\b8\ac\e8\a9\a6,dc=example,dc=com`,
+			expected: "cn=測試,dc=example,dc=com",
+		},
+		{
+			input:    `cn=svc\ef\b9\92algorithm,dc=example,dc=com`,
+			expected: "cn=svc﹒algorithm,dc=example,dc=com",
+		},
+		{
+			input:    `cn=\e0\a4\9c\e0\a4\be\e0\a4\81\e0\a4\9a,dc=example,dc=com`,
+			expected: "cn=जाँच,dc=example,dc=com",
+		},
+		{
+			input:    `cn=\f0\9f\a7\aa\f0\9f\93\9d,dc=example,dc=com`,
+			expected: "cn=🧪📝,dc=example,dc=com",
 		},
 		{
 			input: `cn=foo,dc=example,dc=com\`,
@@ -51,7 +71,7 @@ func TestDecodeDN(t *testing.T) {
 		},
 		{
 			input: `cn=foo,dc=example,dc=com\a`,
-			err:   fmt.Errorf("ailed to decode escaped character: encoding/hex: invalid byte: %s", "a"),
+			err:   fmt.Errorf("unable to decode escaped character: encoding/hex: invalid byte: %s", "a"),
 		},
 	}
 	for i, testCase := range testCases {
