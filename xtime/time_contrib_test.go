@@ -71,6 +71,8 @@ var parseDurationTests = []struct {
 	{"0.100000000000000000000h", 6 * time.Minute},
 	// This value tests the first overflow check in leadingFraction.
 	{"0.830103483285477580700h", 49*time.Minute + 48*time.Second + 372539827*time.Nanosecond},
+	{"1w1d1h", 1*7*24*time.Hour + 1*24*time.Hour + 1*time.Hour},
+	{"0.1w0.1d0.1h", time.Hour*19 + time.Minute*18},
 }
 
 func TestParseDuration(t *testing.T) {
