@@ -18,7 +18,10 @@
 package xtime
 
 import (
+	"fmt"
 	"time"
+
+	"gopkg.in/yaml.v3"
 )
 
 // Additional durations, a day is considered to be 24 hours
@@ -52,4 +55,34 @@ func ParseDuration(s string) (time.Duration, error) {
 		return dur, nil
 	}
 	return parseDuration(s)
+}
+
+// Duration is a wrapper around time.Duration that supports YAML and JSON
+type Duration time.Duration
+
+// UnmarshalYAML implements yaml.Unmarshaler
+func (d *Duration) UnmarshalYAML(value *yaml.Node) error {
+	if value.Kind == yaml.ScalarNode {
+		dur, err := ParseDuration(value.Value)
+		if err != nil {
+			return err
+		}
+		*d = Duration(dur)
+		return nil
+	}
+	return fmt.Errorf("unable to unmarshal %s", value.Tag)
+
+}
+
+// UnmarshalJSON implements json.Unmarshaler
+func (d *Duration) UnmarshalJSON(bs []byte) error {
+	if len(bs) <= 2 {
+		return nil
+	}
+	dur, err := ParseDuration(string(bs[1 : len(bs)-1]))
+	if err != nil {
+		return err
+	}
+	*d = Duration(dur)
+	return nil
 }
