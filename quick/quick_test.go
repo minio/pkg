@@ -225,9 +225,9 @@ func TestYAMLFormat(t *testing.T) {
 user: guest
 password: nopassword
 directories:
-- Work
-- Documents
-- Music
+    - Work
+    - Documents
+    - Music
 `
 
 	if runtime.GOOS == "windows" {

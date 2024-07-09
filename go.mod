@@ -18,7 +18,7 @@ require (
 	go.etcd.io/etcd/client/v3 v3.5.13
 	golang.org/x/crypto v0.23.0
 	golang.org/x/sys v0.20.0
-	gopkg.in/yaml.v2 v2.4.0
+	gopkg.in/yaml.v3 v3.0.1
 )
 
 require (
