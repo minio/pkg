@@ -91,6 +91,9 @@ func (r Resource) isObjectPattern() bool {
 
 // IsValid - checks whether Resource is valid or not.
 func (r Resource) IsValid() bool {
+	if r.Type == unknownARN {
+		return false
+	}
 	if r.isAWSS3() {
 		if strings.HasPrefix(r.Pattern, "/") {
 			return false
@@ -192,7 +195,7 @@ func (r Resource) ValidateBucket(bucketName string) error {
 
 // parseResource - parses string to Resource.
 func parseResource(s string) (Resource, error) {
-	r := Resource{}
+	r := Resource{Type: unknownARN}
 	switch {
 	case strings.HasPrefix(s, ResourceARNPrefix):
 		r.Pattern = strings.TrimPrefix(s, ResourceARNPrefix)
@@ -202,11 +205,11 @@ func parseResource(s string) (Resource, error) {
 		r.Pattern = strings.TrimPrefix(s, ResourceARNKMSPrefix)
 		r.Type = ResourceARNKMS
 	default:
-		return Resource{}, Errorf("invalid resource '%v'", s)
+		return r, Errorf("invalid resource '%v'", s)
 	}
 
 	if strings.HasPrefix(r.Pattern, "/") {
-		return Resource{}, Errorf("invalid resource '%v' - starts with '/' will not match a bucket", s)
+		return r, Errorf("invalid resource '%v' - starts with '/' will not match a bucket", s)
 	}
 
 	return r, nil
