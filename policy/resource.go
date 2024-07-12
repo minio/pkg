@@ -95,7 +95,6 @@ func (r Resource) IsValid() bool {
 		}
 	}
 	if r.isKMS() {
-		// TODO: Copied from KES repo, confirm that it is generally applicable.
 		if strings.IndexFunc(r.Pattern, func(c rune) bool {
 			return c == '/' || c == '\\' || c == '.'
 		}) >= 0 {
