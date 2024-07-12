@@ -28,14 +28,14 @@ func TestResourceIsBucketPattern(t *testing.T) {
 		resource       Resource
 		expectedResult bool
 	}{
-		{NewResourceAWSS3("*"), true},
-		{NewResourceAWSS3("mybucket"), true},
-		{NewResourceAWSS3("mybucket*"), true},
-		{NewResourceAWSS3("mybucket?0"), true},
-		{NewResourceAWSS3("*/*"), false},
-		{NewResourceAWSS3("mybucket/*"), false},
-		{NewResourceAWSS3("mybucket*/myobject"), false},
-		{NewResourceAWSS3("mybucket?0/2010/photos/*"), false},
+		{NewResourceS3("*"), true},
+		{NewResourceS3("mybucket"), true},
+		{NewResourceS3("mybucket*"), true},
+		{NewResourceS3("mybucket?0"), true},
+		{NewResourceS3("*/*"), false},
+		{NewResourceS3("mybucket/*"), false},
+		{NewResourceS3("mybucket*/myobject"), false},
+		{NewResourceS3("mybucket?0/2010/photos/*"), false},
 
 		{NewResourceKMS("*"), true},
 		{NewResourceKMS("mykey"), true},
@@ -57,14 +57,14 @@ func TestResourceIsObjectPattern(t *testing.T) {
 		resource       Resource
 		expectedResult bool
 	}{
-		{NewResourceAWSS3("*"), true},
-		{NewResourceAWSS3("mybucket*"), true},
-		{NewResourceAWSS3("*/*"), true},
-		{NewResourceAWSS3("mybucket/*"), true},
-		{NewResourceAWSS3("mybucket*/myobject"), true},
-		{NewResourceAWSS3("mybucket?0/2010/photos/*"), true},
-		{NewResourceAWSS3("mybucket"), false},
-		{NewResourceAWSS3("mybucket?0"), false},
+		{NewResourceS3("*"), true},
+		{NewResourceS3("mybucket*"), true},
+		{NewResourceS3("*/*"), true},
+		{NewResourceS3("mybucket/*"), true},
+		{NewResourceS3("mybucket*/myobject"), true},
+		{NewResourceS3("mybucket?0/2010/photos/*"), true},
+		{NewResourceS3("mybucket"), false},
+		{NewResourceS3("mybucket?0"), false},
 	}
 
 	for i, testCase := range testCases {
@@ -81,16 +81,16 @@ func TestResourceIsValid(t *testing.T) {
 		resource       Resource
 		expectedResult bool
 	}{
-		{NewResourceAWSS3("*"), true},
-		{NewResourceAWSS3("mybucket*"), true},
-		{NewResourceAWSS3("*/*"), true},
-		{NewResourceAWSS3("mybucket/*"), true},
-		{NewResourceAWSS3("mybucket*/myobject"), true},
-		{NewResourceAWSS3("mybucket?0/2010/photos/*"), true},
-		{NewResourceAWSS3("mybucket"), true},
-		{NewResourceAWSS3("mybucket?0"), true},
-		{NewResourceAWSS3("/*"), false},
-		{NewResourceAWSS3(""), false},
+		{NewResourceS3("*"), true},
+		{NewResourceS3("mybucket*"), true},
+		{NewResourceS3("*/*"), true},
+		{NewResourceS3("mybucket/*"), true},
+		{NewResourceS3("mybucket*/myobject"), true},
+		{NewResourceS3("mybucket?0/2010/photos/*"), true},
+		{NewResourceS3("mybucket"), true},
+		{NewResourceS3("mybucket?0"), true},
+		{NewResourceS3("/*"), false},
+		{NewResourceS3(""), false},
 
 		{NewResourceKMS("*"), true},
 		{NewResourceKMS("mykey*"), true},
@@ -119,21 +119,21 @@ func TestResourceMatch(t *testing.T) {
 		objectName     string
 		expectedResult bool
 	}{
-		{NewResourceAWSS3("*"), "mybucket", true},
-		{NewResourceAWSS3("*"), "mybucket/myobject", true},
-		{NewResourceAWSS3("mybucket*"), "mybucket", true},
-		{NewResourceAWSS3("mybucket*"), "mybucket/myobject", true},
-		{NewResourceAWSS3("*/*"), "mybucket/myobject", true},
-		{NewResourceAWSS3("mybucket/*"), "mybucket/myobject", true},
-		{NewResourceAWSS3("mybucket*/myobject"), "mybucket/myobject", true},
-		{NewResourceAWSS3("mybucket*/myobject"), "mybucket100/myobject", true},
-		{NewResourceAWSS3("mybucket?0/2010/photos/*"), "mybucket20/2010/photos/1.jpg", true},
-		{NewResourceAWSS3("mybucket"), "mybucket", true},
-		{NewResourceAWSS3("mybucket?0"), "mybucket30", true},
-		{NewResourceAWSS3("*/*"), "mybucket", false},
-		{NewResourceAWSS3("mybucket/*"), "mybucket10/myobject", false},
-		{NewResourceAWSS3("mybucket?0/2010/photos/*"), "mybucket0/2010/photos/1.jpg", false},
-		{NewResourceAWSS3("mybucket"), "mybucket/myobject", false},
+		{NewResourceS3("*"), "mybucket", true},
+		{NewResourceS3("*"), "mybucket/myobject", true},
+		{NewResourceS3("mybucket*"), "mybucket", true},
+		{NewResourceS3("mybucket*"), "mybucket/myobject", true},
+		{NewResourceS3("*/*"), "mybucket/myobject", true},
+		{NewResourceS3("mybucket/*"), "mybucket/myobject", true},
+		{NewResourceS3("mybucket*/myobject"), "mybucket/myobject", true},
+		{NewResourceS3("mybucket*/myobject"), "mybucket100/myobject", true},
+		{NewResourceS3("mybucket?0/2010/photos/*"), "mybucket20/2010/photos/1.jpg", true},
+		{NewResourceS3("mybucket"), "mybucket", true},
+		{NewResourceS3("mybucket?0"), "mybucket30", true},
+		{NewResourceS3("*/*"), "mybucket", false},
+		{NewResourceS3("mybucket/*"), "mybucket10/myobject", false},
+		{NewResourceS3("mybucket?0/2010/photos/*"), "mybucket0/2010/photos/1.jpg", false},
+		{NewResourceS3("mybucket"), "mybucket/myobject", false},
 	}
 
 	for i, testCase := range testCases {
@@ -153,13 +153,13 @@ func TestResourceMarshalJSON(t *testing.T) {
 		expectedResult []byte
 		expectErr      bool
 	}{
-		{NewResourceAWSS3("*"), []byte(`"arn:aws:s3:::*"`), false},
-		{NewResourceAWSS3("mybucket*"), []byte(`"arn:aws:s3:::mybucket*"`), false},
-		{NewResourceAWSS3("mybucket"), []byte(`"arn:aws:s3:::mybucket"`), false},
-		{NewResourceAWSS3("*/*"), []byte(`"arn:aws:s3:::*/*"`), false},
-		{NewResourceAWSS3("mybucket/*"), []byte(`"arn:aws:s3:::mybucket/*"`), false},
-		{NewResourceAWSS3("mybucket*/myobject"), []byte(`"arn:aws:s3:::mybucket*/myobject"`), false},
-		{NewResourceAWSS3("mybucket?0/2010/photos/*"), []byte(`"arn:aws:s3:::mybucket?0/2010/photos/*"`), false},
+		{NewResourceS3("*"), []byte(`"arn:aws:s3:::*"`), false},
+		{NewResourceS3("mybucket*"), []byte(`"arn:aws:s3:::mybucket*"`), false},
+		{NewResourceS3("mybucket"), []byte(`"arn:aws:s3:::mybucket"`), false},
+		{NewResourceS3("*/*"), []byte(`"arn:aws:s3:::*/*"`), false},
+		{NewResourceS3("mybucket/*"), []byte(`"arn:aws:s3:::mybucket/*"`), false},
+		{NewResourceS3("mybucket*/myobject"), []byte(`"arn:aws:s3:::mybucket*/myobject"`), false},
+		{NewResourceS3("mybucket?0/2010/photos/*"), []byte(`"arn:aws:s3:::mybucket?0/2010/photos/*"`), false},
 		{Resource{}, nil, true},
 	}
 
@@ -185,13 +185,13 @@ func TestResourceUnmarshalJSON(t *testing.T) {
 		expectedResult Resource
 		expectErr      bool
 	}{
-		{[]byte(`"arn:aws:s3:::*"`), NewResourceAWSS3("*"), false},
-		{[]byte(`"arn:aws:s3:::mybucket*"`), NewResourceAWSS3("mybucket*"), false},
-		{[]byte(`"arn:aws:s3:::mybucket"`), NewResourceAWSS3("mybucket"), false},
-		{[]byte(`"arn:aws:s3:::*/*"`), NewResourceAWSS3("*/*"), false},
-		{[]byte(`"arn:aws:s3:::mybucket/*"`), NewResourceAWSS3("mybucket/*"), false},
-		{[]byte(`"arn:aws:s3:::mybucket*/myobject"`), NewResourceAWSS3("mybucket*/myobject"), false},
-		{[]byte(`"arn:aws:s3:::mybucket?0/2010/photos/*"`), NewResourceAWSS3("mybucket?0/2010/photos/*"), false},
+		{[]byte(`"arn:aws:s3:::*"`), NewResourceS3("*"), false},
+		{[]byte(`"arn:aws:s3:::mybucket*"`), NewResourceS3("mybucket*"), false},
+		{[]byte(`"arn:aws:s3:::mybucket"`), NewResourceS3("mybucket"), false},
+		{[]byte(`"arn:aws:s3:::*/*"`), NewResourceS3("*/*"), false},
+		{[]byte(`"arn:aws:s3:::mybucket/*"`), NewResourceS3("mybucket/*"), false},
+		{[]byte(`"arn:aws:s3:::mybucket*/myobject"`), NewResourceS3("mybucket*/myobject"), false},
+		{[]byte(`"arn:aws:s3:::mybucket?0/2010/photos/*"`), NewResourceS3("mybucket?0/2010/photos/*"), false},
 		{[]byte(`"mybucket/myobject*"`), Resource{}, true},
 		{[]byte(`"arn:aws:s3:::/*"`), Resource{}, true},
 	}
@@ -218,9 +218,9 @@ func TestResourceValidate(t *testing.T) {
 		resource  Resource
 		expectErr bool
 	}{
-		{NewResourceAWSS3("mybucket/myobject*"), false},
-		{NewResourceAWSS3("/myobject*"), true},
-		{NewResourceAWSS3("/"), true},
+		{NewResourceS3("mybucket/myobject*"), false},
+		{NewResourceS3("/myobject*"), true},
+		{NewResourceS3("/"), true},
 	}
 
 	for i, testCase := range testCases {
@@ -239,15 +239,15 @@ func TestResourceValidateBucket(t *testing.T) {
 		bucketName string
 		expectErr  bool
 	}{
-		{NewResourceAWSS3("mybucket/myobject*"), "mybucket", false},
-		{NewResourceAWSS3("/myobject*"), "yourbucket", true},
-		{NewResourceAWSS3("mybucket/myobject*"), "yourbucket", true},
-		{NewResourceAWSS3("mybucket*a/myobject*"), "mybucket-east-a", false},
+		{NewResourceS3("mybucket/myobject*"), "mybucket", false},
+		{NewResourceS3("/myobject*"), "yourbucket", true},
+		{NewResourceS3("mybucket/myobject*"), "yourbucket", true},
+		{NewResourceS3("mybucket*a/myobject*"), "mybucket-east-a", false},
 
 		// Following test cases **should validate** successfully - they are
 		// corner cases for the given patterns and buckets.
-		{NewResourceAWSS3("mybucket*a/myobject*"), "mybucket", false},
-		{NewResourceAWSS3("mybucket*a/myobject*"), "mybucket22", false},
+		{NewResourceS3("mybucket*a/myobject*"), "mybucket", false},
+		{NewResourceS3("mybucket*a/myobject*"), "mybucket22", false},
 	}
 
 	for i, testCase := range testCases {
