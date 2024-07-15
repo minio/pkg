@@ -27,7 +27,7 @@ import (
 )
 
 const (
-	// ResourceARNPrefix - resource S3 ARN prefix as per AWS S3 specification.
+	// ResourceARNPrefix - resource S3 ARN prefix as per S3 specification.
 	ResourceARNPrefix = "arn:aws:s3:::"
 
 	// ResourceARNKMSPrefix is for KMS key resources. MinIO specific API.
@@ -41,7 +41,7 @@ const (
 	// Zero value for detecting errors
 	unknownARN ResourceARNType = iota
 
-	// ResourceARNS3 is the ARN prefix type for AWS S3 resources.
+	// ResourceARNS3 is the ARN prefix type for S3 resources.
 	ResourceARNS3
 
 	// ResourceARNKMS is the ARN prefix type for MinIO KMS resources.
