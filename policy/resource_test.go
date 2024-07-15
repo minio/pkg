@@ -28,19 +28,19 @@ func TestResourceIsBucketPattern(t *testing.T) {
 		resource       Resource
 		expectedResult bool
 	}{
-		{NewResourceS3("*"), true},
-		{NewResourceS3("mybucket"), true},
-		{NewResourceS3("mybucket*"), true},
-		{NewResourceS3("mybucket?0"), true},
-		{NewResourceS3("*/*"), false},
-		{NewResourceS3("mybucket/*"), false},
-		{NewResourceS3("mybucket*/myobject"), false},
-		{NewResourceS3("mybucket?0/2010/photos/*"), false},
+		{NewResource("*"), true},
+		{NewResource("mybucket"), true},
+		{NewResource("mybucket*"), true},
+		{NewResource("mybucket?0"), true},
+		{NewResource("*/*"), false},
+		{NewResource("mybucket/*"), false},
+		{NewResource("mybucket*/myobject"), false},
+		{NewResource("mybucket?0/2010/photos/*"), false},
 
-		{NewResourceKMS("*"), true},
-		{NewResourceKMS("mykey"), true},
-		{NewResourceKMS("mykey*"), true},
-		{NewResourceKMS("mykey?0"), true},
+		{NewKMSResource("*"), true},
+		{NewKMSResource("mykey"), true},
+		{NewKMSResource("mykey*"), true},
+		{NewKMSResource("mykey?0"), true},
 	}
 
 	for i, testCase := range testCases {
@@ -57,14 +57,14 @@ func TestResourceIsObjectPattern(t *testing.T) {
 		resource       Resource
 		expectedResult bool
 	}{
-		{NewResourceS3("*"), true},
-		{NewResourceS3("mybucket*"), true},
-		{NewResourceS3("*/*"), true},
-		{NewResourceS3("mybucket/*"), true},
-		{NewResourceS3("mybucket*/myobject"), true},
-		{NewResourceS3("mybucket?0/2010/photos/*"), true},
-		{NewResourceS3("mybucket"), false},
-		{NewResourceS3("mybucket?0"), false},
+		{NewResource("*"), true},
+		{NewResource("mybucket*"), true},
+		{NewResource("*/*"), true},
+		{NewResource("mybucket/*"), true},
+		{NewResource("mybucket*/myobject"), true},
+		{NewResource("mybucket?0/2010/photos/*"), true},
+		{NewResource("mybucket"), false},
+		{NewResource("mybucket?0"), false},
 	}
 
 	for i, testCase := range testCases {
@@ -81,25 +81,25 @@ func TestResourceIsValid(t *testing.T) {
 		resource       Resource
 		expectedResult bool
 	}{
-		{NewResourceS3("*"), true},
-		{NewResourceS3("mybucket*"), true},
-		{NewResourceS3("*/*"), true},
-		{NewResourceS3("mybucket/*"), true},
-		{NewResourceS3("mybucket*/myobject"), true},
-		{NewResourceS3("mybucket?0/2010/photos/*"), true},
-		{NewResourceS3("mybucket"), true},
-		{NewResourceS3("mybucket?0"), true},
-		{NewResourceS3("/*"), false},
-		{NewResourceS3(""), false},
+		{NewResource("*"), true},
+		{NewResource("mybucket*"), true},
+		{NewResource("*/*"), true},
+		{NewResource("mybucket/*"), true},
+		{NewResource("mybucket*/myobject"), true},
+		{NewResource("mybucket?0/2010/photos/*"), true},
+		{NewResource("mybucket"), true},
+		{NewResource("mybucket?0"), true},
+		{NewResource("/*"), false},
+		{NewResource(""), false},
 
-		{NewResourceKMS("*"), true},
-		{NewResourceKMS("mykey*"), true},
-		{NewResourceKMS("*/*"), false},
-		{NewResourceKMS("mykey/*"), false},
-		{NewResourceKMS("mykey/"), false},
-		{NewResourceKMS("./mykey"), false},
-		{NewResourceKMS("../../mykey"), false},
-		{NewResourceKMS(""), false},
+		{NewKMSResource("*"), true},
+		{NewKMSResource("mykey*"), true},
+		{NewKMSResource("*/*"), false},
+		{NewKMSResource("mykey/*"), false},
+		{NewKMSResource("mykey/"), false},
+		{NewKMSResource("./mykey"), false},
+		{NewKMSResource("../../mykey"), false},
+		{NewKMSResource(""), false},
 	}
 
 	for i, testCase := range testCases {
@@ -119,21 +119,21 @@ func TestResourceMatch(t *testing.T) {
 		objectName     string
 		expectedResult bool
 	}{
-		{NewResourceS3("*"), "mybucket", true},
-		{NewResourceS3("*"), "mybucket/myobject", true},
-		{NewResourceS3("mybucket*"), "mybucket", true},
-		{NewResourceS3("mybucket*"), "mybucket/myobject", true},
-		{NewResourceS3("*/*"), "mybucket/myobject", true},
-		{NewResourceS3("mybucket/*"), "mybucket/myobject", true},
-		{NewResourceS3("mybucket*/myobject"), "mybucket/myobject", true},
-		{NewResourceS3("mybucket*/myobject"), "mybucket100/myobject", true},
-		{NewResourceS3("mybucket?0/2010/photos/*"), "mybucket20/2010/photos/1.jpg", true},
-		{NewResourceS3("mybucket"), "mybucket", true},
-		{NewResourceS3("mybucket?0"), "mybucket30", true},
-		{NewResourceS3("*/*"), "mybucket", false},
-		{NewResourceS3("mybucket/*"), "mybucket10/myobject", false},
-		{NewResourceS3("mybucket?0/2010/photos/*"), "mybucket0/2010/photos/1.jpg", false},
-		{NewResourceS3("mybucket"), "mybucket/myobject", false},
+		{NewResource("*"), "mybucket", true},
+		{NewResource("*"), "mybucket/myobject", true},
+		{NewResource("mybucket*"), "mybucket", true},
+		{NewResource("mybucket*"), "mybucket/myobject", true},
+		{NewResource("*/*"), "mybucket/myobject", true},
+		{NewResource("mybucket/*"), "mybucket/myobject", true},
+		{NewResource("mybucket*/myobject"), "mybucket/myobject", true},
+		{NewResource("mybucket*/myobject"), "mybucket100/myobject", true},
+		{NewResource("mybucket?0/2010/photos/*"), "mybucket20/2010/photos/1.jpg", true},
+		{NewResource("mybucket"), "mybucket", true},
+		{NewResource("mybucket?0"), "mybucket30", true},
+		{NewResource("*/*"), "mybucket", false},
+		{NewResource("mybucket/*"), "mybucket10/myobject", false},
+		{NewResource("mybucket?0/2010/photos/*"), "mybucket0/2010/photos/1.jpg", false},
+		{NewResource("mybucket"), "mybucket/myobject", false},
 	}
 
 	for i, testCase := range testCases {
@@ -153,13 +153,13 @@ func TestResourceMarshalJSON(t *testing.T) {
 		expectedResult []byte
 		expectErr      bool
 	}{
-		{NewResourceS3("*"), []byte(`"arn:aws:s3:::*"`), false},
-		{NewResourceS3("mybucket*"), []byte(`"arn:aws:s3:::mybucket*"`), false},
-		{NewResourceS3("mybucket"), []byte(`"arn:aws:s3:::mybucket"`), false},
-		{NewResourceS3("*/*"), []byte(`"arn:aws:s3:::*/*"`), false},
-		{NewResourceS3("mybucket/*"), []byte(`"arn:aws:s3:::mybucket/*"`), false},
-		{NewResourceS3("mybucket*/myobject"), []byte(`"arn:aws:s3:::mybucket*/myobject"`), false},
-		{NewResourceS3("mybucket?0/2010/photos/*"), []byte(`"arn:aws:s3:::mybucket?0/2010/photos/*"`), false},
+		{NewResource("*"), []byte(`"arn:aws:s3:::*"`), false},
+		{NewResource("mybucket*"), []byte(`"arn:aws:s3:::mybucket*"`), false},
+		{NewResource("mybucket"), []byte(`"arn:aws:s3:::mybucket"`), false},
+		{NewResource("*/*"), []byte(`"arn:aws:s3:::*/*"`), false},
+		{NewResource("mybucket/*"), []byte(`"arn:aws:s3:::mybucket/*"`), false},
+		{NewResource("mybucket*/myobject"), []byte(`"arn:aws:s3:::mybucket*/myobject"`), false},
+		{NewResource("mybucket?0/2010/photos/*"), []byte(`"arn:aws:s3:::mybucket?0/2010/photos/*"`), false},
 		{Resource{}, nil, true},
 	}
 
@@ -185,13 +185,13 @@ func TestResourceUnmarshalJSON(t *testing.T) {
 		expectedResult Resource
 		expectErr      bool
 	}{
-		{[]byte(`"arn:aws:s3:::*"`), NewResourceS3("*"), false},
-		{[]byte(`"arn:aws:s3:::mybucket*"`), NewResourceS3("mybucket*"), false},
-		{[]byte(`"arn:aws:s3:::mybucket"`), NewResourceS3("mybucket"), false},
-		{[]byte(`"arn:aws:s3:::*/*"`), NewResourceS3("*/*"), false},
-		{[]byte(`"arn:aws:s3:::mybucket/*"`), NewResourceS3("mybucket/*"), false},
-		{[]byte(`"arn:aws:s3:::mybucket*/myobject"`), NewResourceS3("mybucket*/myobject"), false},
-		{[]byte(`"arn:aws:s3:::mybucket?0/2010/photos/*"`), NewResourceS3("mybucket?0/2010/photos/*"), false},
+		{[]byte(`"arn:aws:s3:::*"`), NewResource("*"), false},
+		{[]byte(`"arn:aws:s3:::mybucket*"`), NewResource("mybucket*"), false},
+		{[]byte(`"arn:aws:s3:::mybucket"`), NewResource("mybucket"), false},
+		{[]byte(`"arn:aws:s3:::*/*"`), NewResource("*/*"), false},
+		{[]byte(`"arn:aws:s3:::mybucket/*"`), NewResource("mybucket/*"), false},
+		{[]byte(`"arn:aws:s3:::mybucket*/myobject"`), NewResource("mybucket*/myobject"), false},
+		{[]byte(`"arn:aws:s3:::mybucket?0/2010/photos/*"`), NewResource("mybucket?0/2010/photos/*"), false},
 		{[]byte(`"mybucket/myobject*"`), Resource{}, true},
 		{[]byte(`"arn:aws:s3:::/*"`), Resource{}, true},
 	}
@@ -218,9 +218,9 @@ func TestResourceValidate(t *testing.T) {
 		resource  Resource
 		expectErr bool
 	}{
-		{NewResourceS3("mybucket/myobject*"), false},
-		{NewResourceS3("/myobject*"), true},
-		{NewResourceS3("/"), true},
+		{NewResource("mybucket/myobject*"), false},
+		{NewResource("/myobject*"), true},
+		{NewResource("/"), true},
 	}
 
 	for i, testCase := range testCases {
@@ -239,15 +239,15 @@ func TestResourceValidateBucket(t *testing.T) {
 		bucketName string
 		expectErr  bool
 	}{
-		{NewResourceS3("mybucket/myobject*"), "mybucket", false},
-		{NewResourceS3("/myobject*"), "yourbucket", true},
-		{NewResourceS3("mybucket/myobject*"), "yourbucket", true},
-		{NewResourceS3("mybucket*a/myobject*"), "mybucket-east-a", false},
+		{NewResource("mybucket/myobject*"), "mybucket", false},
+		{NewResource("/myobject*"), "yourbucket", true},
+		{NewResource("mybucket/myobject*"), "yourbucket", true},
+		{NewResource("mybucket*a/myobject*"), "mybucket-east-a", false},
 
 		// Following test cases **should validate** successfully - they are
 		// corner cases for the given patterns and buckets.
-		{NewResourceS3("mybucket*a/myobject*"), "mybucket", false},
-		{NewResourceS3("mybucket*a/myobject*"), "mybucket22", false},
+		{NewResource("mybucket*a/myobject*"), "mybucket", false},
+		{NewResource("mybucket*a/myobject*"), "mybucket22", false},
 	}
 
 	for i, testCase := range testCases {

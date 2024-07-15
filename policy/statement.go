@@ -155,7 +155,7 @@ func (statement Statement) isValid() error {
 		return Errorf("Resource must not be empty")
 	}
 
-	if err := statement.Resources.ValidateAWSS3(); err != nil {
+	if err := statement.Resources.ValidateS3(); err != nil {
 		return err
 	}
 

@@ -150,11 +150,11 @@ func (resourceSet *ResourceSet) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
-// ValidateAWSS3 - validates ResourceSet is AWS S3.
-func (resourceSet ResourceSet) ValidateAWSS3() error {
+// ValidateS3 - validates ResourceSet is S3.
+func (resourceSet ResourceSet) ValidateS3() error {
 	for resource := range resourceSet {
-		if !resource.isAWSS3() {
-			return Errorf("type of resource is not AWS S3 '%v'", resource)
+		if !resource.isS3() {
+			return Errorf("type of resource is not S3 '%v'", resource)
 		}
 		if err := resource.Validate(); err != nil {
 			return err

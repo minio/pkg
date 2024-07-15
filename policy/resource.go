@@ -38,13 +38,14 @@ const (
 type ResourceARNType uint32
 
 const (
+	// Zero value for detecting errors
+	unknownARN ResourceARNType = iota
+
 	// ResourceARNS3 is the ARN prefix type for AWS S3 resources.
-	ResourceARNS3 ResourceARNType = iota + 1
+	ResourceARNS3
 
 	// ResourceARNKMS is the ARN prefix type for MinIO KMS resources.
 	ResourceARNKMS
-
-	unknownARN // for detecting errors
 )
 
 // ARNTypeToPrefix maps the type to prefix string
@@ -77,7 +78,7 @@ func (r Resource) isKMS() bool {
 	return r.Type == ResourceARNKMS
 }
 
-func (r Resource) isAWSS3() bool {
+func (r Resource) isS3() bool {
 	return r.Type == ResourceARNS3
 }
 
@@ -94,7 +95,7 @@ func (r Resource) IsValid() bool {
 	if r.Type == unknownARN {
 		return false
 	}
-	if r.isAWSS3() {
+	if r.isS3() {
 		if strings.HasPrefix(r.Pattern, "/") {
 			return false
 		}
@@ -195,16 +196,15 @@ func (r Resource) ValidateBucket(bucketName string) error {
 
 // parseResource - parses string to Resource.
 func parseResource(s string) (Resource, error) {
-	r := Resource{Type: unknownARN}
-	switch {
-	case strings.HasPrefix(s, ResourceARNPrefix):
-		r.Pattern = strings.TrimPrefix(s, ResourceARNPrefix)
-		r.Type = ResourceARNS3
-
-	case strings.HasPrefix(s, ResourceARNKMSPrefix):
-		r.Pattern = strings.TrimPrefix(s, ResourceARNKMSPrefix)
-		r.Type = ResourceARNKMS
-	default:
+	r := Resource{}
+	for k, v := range ARNPrefixToType {
+		if rem, ok := strings.CutPrefix(s, k); ok {
+			r.Type = v
+			r.Pattern = rem
+			break
+		}
+	}
+	if r.Type == unknownARN {
 		return r, Errorf("invalid resource '%v'", s)
 	}
 
@@ -215,16 +215,16 @@ func parseResource(s string) (Resource, error) {
 	return r, nil
 }
 
-// NewResourceS3 - creates new resource with the default ARN type of AWS S3.
-func NewResourceS3(pattern string) Resource {
+// NewResource - creates new resource with the default ARN type of S3.
+func NewResource(pattern string) Resource {
 	return Resource{
 		Pattern: pattern,
 		Type:    ResourceARNS3,
 	}
 }
 
-// NewResourceKMS - creates new resource with type KMS
-func NewResourceKMS(pattern string) Resource {
+// NewKMSResource - creates new resource with type KMS
+func NewKMSResource(pattern string) Resource {
 	return Resource{
 		Pattern: pattern,
 		Type:    ResourceARNKMS,
