@@ -25,29 +25,30 @@ import (
 
 const (
 	// names
-	stringEquals              = "StringEquals"
-	stringNotEquals           = "StringNotEquals"
-	stringEqualsIgnoreCase    = "StringEqualsIgnoreCase"
-	stringNotEqualsIgnoreCase = "StringNotEqualsIgnoreCase"
-	stringLike                = "StringLike"
-	stringNotLike             = "StringNotLike"
-	binaryEquals              = "BinaryEquals"
-	ipAddress                 = "IpAddress"
-	notIPAddress              = "NotIpAddress"
-	null                      = "Null"
-	boolean                   = "Bool"
-	numericEquals             = "NumericEquals"
-	numericNotEquals          = "NumericNotEquals"
-	numericLessThan           = "NumericLessThan"
-	numericLessThanEquals     = "NumericLessThanEquals"
-	numericGreaterThan        = "NumericGreaterThan"
-	numericGreaterThanEquals  = "NumericGreaterThanEquals"
-	dateEquals                = "DateEquals"
-	dateNotEquals             = "DateNotEquals"
-	dateLessThan              = "DateLessThan"
-	dateLessThanEquals        = "DateLessThanEquals"
-	dateGreaterThan           = "DateGreaterThan"
-	dateGreaterThanEquals     = "DateGreaterThanEquals"
+	stringEquals               = "StringEquals"
+	stringNotEquals            = "StringNotEquals"
+	stringEqualsIgnoreCase     = "StringEqualsIgnoreCase"
+	stringNotEqualsIgnoreCase  = "StringNotEqualsIgnoreCase"
+	stringLike                 = "StringLike"
+	stringNotLike              = "StringNotLike"
+	binaryEquals               = "BinaryEquals"
+	ipAddress                  = "IpAddress"
+	notIPAddress               = "NotIpAddress"
+	null                       = "Null"
+	boolean                    = "Bool"
+	numericEquals              = "NumericEquals"
+	numericNotEquals           = "NumericNotEquals"
+	numericLessThan            = "NumericLessThan"
+	numericLessThanEquals      = "NumericLessThanEquals"
+	numericGreaterThan         = "NumericGreaterThan"
+	numericGreaterThanIfExists = "NumericGreaterThanIfExists"
+	numericGreaterThanEquals   = "NumericGreaterThanEquals"
+	dateEquals                 = "DateEquals"
+	dateNotEquals              = "DateNotEquals"
+	dateLessThan               = "DateLessThan"
+	dateLessThanEquals         = "DateLessThanEquals"
+	dateGreaterThan            = "DateGreaterThan"
+	dateGreaterThanEquals      = "DateGreaterThanEquals"
 
 	// qualifiers
 	// refer https://docs.aws.amazon.com/IAM/latest/UserGuide/reference_policies_multi-value-conditions.html#reference_policies_multi-key-or-value-conditions
@@ -56,29 +57,30 @@ const (
 )
 
 var names = map[string]struct{}{
-	stringEquals:              {},
-	stringNotEquals:           {},
-	stringEqualsIgnoreCase:    {},
-	stringNotEqualsIgnoreCase: {},
-	binaryEquals:              {},
-	stringLike:                {},
-	stringNotLike:             {},
-	ipAddress:                 {},
-	notIPAddress:              {},
-	null:                      {},
-	boolean:                   {},
-	numericEquals:             {},
-	numericNotEquals:          {},
-	numericLessThan:           {},
-	numericLessThanEquals:     {},
-	numericGreaterThan:        {},
-	numericGreaterThanEquals:  {},
-	dateEquals:                {},
-	dateNotEquals:             {},
-	dateLessThan:              {},
-	dateLessThanEquals:        {},
-	dateGreaterThan:           {},
-	dateGreaterThanEquals:     {},
+	stringEquals:               {},
+	stringNotEquals:            {},
+	stringEqualsIgnoreCase:     {},
+	stringNotEqualsIgnoreCase:  {},
+	binaryEquals:               {},
+	stringLike:                 {},
+	stringNotLike:              {},
+	ipAddress:                  {},
+	notIPAddress:               {},
+	null:                       {},
+	boolean:                    {},
+	numericEquals:              {},
+	numericNotEquals:           {},
+	numericLessThan:            {},
+	numericLessThanEquals:      {},
+	numericGreaterThan:         {},
+	numericGreaterThanIfExists: {},
+	numericGreaterThanEquals:   {},
+	dateEquals:                 {},
+	dateNotEquals:              {},
+	dateLessThan:               {},
+	dateLessThanEquals:         {},
+	dateGreaterThan:            {},
+	dateGreaterThanEquals:      {},
 }
 
 var qualifiers = map[string]struct{}{

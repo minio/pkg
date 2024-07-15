@@ -39,6 +39,7 @@ type LicenseVerifier struct {
 
 // LicenseInfo holds customer metadata present in the license key.
 type LicenseInfo struct {
+	LicenseToken    string    // License token
 	LicenseID       string    // Unique id of the license
 	Email           string    // Email of the license key requestor
 	Organization    string    // Subnet organization name
@@ -115,7 +116,7 @@ func NewLicenseVerifier(pemBytes []byte) (*LicenseVerifier, error) {
 
 // toLicenseInfo extracts LicenseInfo from claims. It returns an error if any of
 // the claim values are invalid.
-func toLicenseInfo(token jwt.Token) (LicenseInfo, error) {
+func toLicenseInfo(license string, token jwt.Token) (LicenseInfo, error) {
 	claims, err := token.AsMap(context.Background())
 	if err != nil {
 		return LicenseInfo{}, err
@@ -158,6 +159,7 @@ func toLicenseInfo(token jwt.Token) (LicenseInfo, error) {
 	isTrial, _ := claims[trial].(bool)
 
 	return LicenseInfo{
+		LicenseToken:    license,
 		LicenseID:       licID,
 		Email:           token.Subject(),
 		Organization:    orgName,
@@ -180,5 +182,5 @@ func (lv *LicenseVerifier) Verify(license string, options ...jwt.ParseOption) (L
 		return LicenseInfo{}, fmt.Errorf("failed to verify license: %s", err)
 	}
 
-	return toLicenseInfo(token)
+	return toLicenseInfo(license, token)
 }

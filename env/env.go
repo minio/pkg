@@ -21,6 +21,7 @@ import (
 	"strconv"
 	"strings"
 	"sync"
+	"time"
 )
 
 var (
@@ -85,6 +86,17 @@ func GetInt(key string, defaultValue int) (int, error) {
 		return defaultValue, nil
 	}
 	return strconv.Atoi(v)
+}
+
+// GetDuration returns a parsed time.Duration if found in
+// the environment value, returns the default value duration
+// otherwise.
+func GetDuration(key string, defaultValue time.Duration) (time.Duration, error) {
+	v := Get(key, "")
+	if v == "" {
+		return defaultValue, nil
+	}
+	return time.ParseDuration(v)
 }
 
 // List all envs with a given prefix.

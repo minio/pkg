@@ -80,6 +80,10 @@ const (
 	// only.
 	S3XAmzStorageClass KeyName = "s3:x-amz-storage-class"
 
+	// S3XAmzServerSideEncryptionAwsKmsKeyID - key representing x-amz-server-side-encryption-aws-kms-key-id
+	// HTTP header for S3 API calls
+	S3XAmzServerSideEncryptionAwsKmsKeyID KeyName = "s3:x-amz-server-side-encryption-aws-kms-key-id"
+
 	// S3LocationConstraint - key representing LocationConstraint XML tag of CreateBucket API only.
 	S3LocationConstraint KeyName = "s3:LocationConstraint"
 
@@ -249,6 +253,7 @@ var AllSupportedKeys = []KeyName{
 	S3XAmzServerSideEncryptionCustomerAlgorithm,
 	S3XAmzMetadataDirective,
 	S3XAmzStorageClass,
+	S3XAmzServerSideEncryptionAwsKmsKeyID,
 	S3XAmzContentSha256,
 	S3LocationConstraint,
 	S3Prefix,

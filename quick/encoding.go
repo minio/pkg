@@ -30,7 +30,7 @@ import (
 	"time"
 
 	etcd "go.etcd.io/etcd/client/v3"
-	yaml "gopkg.in/yaml.v2"
+	yaml "gopkg.in/yaml.v3"
 )
 
 // ConfigEncoding is a generic interface which

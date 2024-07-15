@@ -10,12 +10,16 @@ getdeps:
 
 lint: getdeps
 	@echo "Running $@ check"
-	@GO111MODULE=on ${GOPATH}/bin/golangci-lint cache clean
-	@GO111MODULE=on ${GOPATH}/bin/golangci-lint run --build-tags kqueue --timeout=10m --config ./.golangci.yml
+	@${GOPATH}/bin/golangci-lint cache clean
+	@${GOPATH}/bin/golangci-lint run --build-tags kqueue --timeout=10m --config ./.golangci.yml
 
 test: lint
 	@echo "Running unit tests"
-	@GO111MODULE=on go test -race -tags kqueue ./...
+	@go test -race -tags kqueue ./...
+
+test-ldap: lint
+	@echo "Running unit tests for LDAP with LDAP server at '"${LDAP_TEST_SERVER}"'"
+	@go test -v -race ./ldap
 
 clean:
 	@echo "Cleaning up all the generated files"

@@ -32,6 +32,7 @@ const (
 func TestConfigValidator(t *testing.T) {
 	ldapServer := os.Getenv(EnvTestLDAPServer)
 	if ldapServer == "" {
+		t.Logf("Skipping test as %s is not set", EnvTestLDAPServer)
 		t.Skip()
 	}
 	testCases := []struct {

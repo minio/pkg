@@ -2,9 +2,9 @@ name: LDAP Config Validator
 
 on:
   push:
-    branches: [ main ]
+    branches: [main]
   pull_request:
-    branches: [ main ]
+    branches: [main]
 
 # This ensures that previous jobs for the PR are canceled when the PR is
 # updated.
@@ -31,14 +31,14 @@ jobs:
           LDAP_ADMIN_PASSWORD: "admin"
     strategy:
       matrix:
-        go-version: [1.21.x]
+        go-version: [1.22.x]
     steps:
-      - uses: actions/checkout@v2
-      - uses: actions/setup-go@v3
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
         with:
           go-version: ${{ matrix.go-version }}
           check-latest: true
-      - uses: actions/cache@v2
+      - uses: actions/cache@v4
         with:
           path: |
             ~/.cache/go-build
@@ -49,4 +49,4 @@ jobs:
       - name: Test with LDAP server
         env:
           LDAP_TEST_SERVER: "localhost:389"
-        run: make test
+        run: make test-ldap
