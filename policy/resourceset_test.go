@@ -232,17 +232,39 @@ func TestResourceSetUnmarshalJSON(t *testing.T) {
 	}
 }
 
-func TestResourceSetValidate(t *testing.T) {
+func TestResourceSetS3Validate(t *testing.T) {
 	testCases := []struct {
 		resourceSet ResourceSet
 		expectErr   bool
 	}{
 		{NewResourceSet(NewResource("mybucket/myobject*")), false},
 		{NewResourceSet(NewResource("/")), true},
+		{NewResourceSet(NewResource("mybucket"), NewKMSResource("mykey")), true}, // mismatching types
 	}
 
 	for i, testCase := range testCases {
-		err := testCase.resourceSet.Validate()
+		err := testCase.resourceSet.ValidateS3()
+		expectErr := (err != nil)
+
+		if expectErr != testCase.expectErr {
+			t.Fatalf("case %v: error: expected: %v, got: %v", i+1, testCase.expectErr, expectErr)
+		}
+	}
+}
+
+func TestResourceSetKMSValidate(t *testing.T) {
+	testCases := []struct {
+		resourceSet ResourceSet
+		expectErr   bool
+	}{
+		{NewResourceSet(NewKMSResource("mykey/invalid")), true},
+		{NewResourceSet(NewKMSResource("/")), true},
+		{NewResourceSet(NewKMSResource("mykey")), false},
+		{NewResourceSet(NewKMSResource("mykey"), NewResource("mybucket")), true}, // mismatching types
+	}
+
+	for i, testCase := range testCases {
+		err := testCase.resourceSet.ValidateKMS()
 		expectErr := (err != nil)
 
 		if expectErr != testCase.expectErr {

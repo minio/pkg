@@ -52,8 +52,20 @@ func (statement Statement) IsAllowed(args Args) bool {
 			resource += "/"
 		}
 
-		// For admin statements, resource match can be ignored.
-		if !statement.Resources.Match(resource, args.ConditionValues) && !statement.isAdmin() && !statement.isKMS() && !statement.isSTS() {
+		if statement.isKMS() {
+			if resource == "/" || len(statement.Resources) == 0 {
+				// In previous MinIO versions, KMS statements ignored Resources, so if len(statement.Resources) == 0,
+				// allow backward compatibility by not trying to Match.
+
+				// When resource is "/", this allows evaluating KMS statements while explicitly excluding Resource,
+				// by passing Args with empty BucketName and ObjectName. This is useful when doing a
+				// two-phase authorization of a request.
+				return statement.Conditions.Evaluate(args.ConditionValues)
+			}
+		}
+
+		// For some admin statements, resource match can be ignored.
+		if !statement.Resources.Match(resource, args.ConditionValues) && !statement.isAdmin() && !statement.isSTS() {
 			return false
 		}
 
@@ -129,7 +141,10 @@ func (statement Statement) isValid() error {
 	}
 
 	if statement.isKMS() {
-		return statement.Actions.ValidateKMS()
+		if err := statement.Actions.ValidateKMS(); err != nil {
+			return err
+		}
+		return statement.Resources.ValidateKMS()
 	}
 
 	if !statement.SID.IsValid() {
@@ -140,7 +155,7 @@ func (statement Statement) isValid() error {
 		return Errorf("Resource must not be empty")
 	}
 
-	if err := statement.Resources.Validate(); err != nil {
+	if err := statement.Resources.ValidateS3(); err != nil {
 		return err
 	}
 

@@ -26,12 +26,60 @@ import (
 	"github.com/minio/pkg/v3/wildcard"
 )
 
-// ResourceARNPrefix - resource ARN prefix as per AWS S3 specification.
-const ResourceARNPrefix = "arn:aws:s3:::"
+const (
+	// ResourceARNPrefix - resource S3 ARN prefix as per S3 specification.
+	ResourceARNPrefix = "arn:aws:s3:::"
+
+	// ResourceARNKMSPrefix is for KMS key resources. MinIO specific API.
+	ResourceARNKMSPrefix = "arn:minio:kms:::"
+)
+
+// ResourceARNType - ARN prefix type
+type ResourceARNType uint32
+
+const (
+	// Zero value for detecting errors
+	unknownARN ResourceARNType = iota
+
+	// ResourceARNS3 is the ARN prefix type for S3 resources.
+	ResourceARNS3
+
+	// ResourceARNKMS is the ARN prefix type for MinIO KMS resources.
+	ResourceARNKMS
+)
+
+// ARNTypeToPrefix maps the type to prefix string
+var ARNTypeToPrefix = map[ResourceARNType]string{
+	ResourceARNS3:  ResourceARNPrefix,
+	ResourceARNKMS: ResourceARNKMSPrefix,
+}
+
+// ARNPrefixToType maps prefix to types.
+var ARNPrefixToType map[string]ResourceARNType
+
+func init() {
+	ARNPrefixToType = make(map[string]ResourceARNType)
+	for k, v := range ARNTypeToPrefix {
+		ARNPrefixToType[v] = k
+	}
+}
+
+func (a ResourceARNType) String() string {
+	return ARNTypeToPrefix[a]
+}
 
 // Resource - resource in policy statement.
 type Resource struct {
 	Pattern string
+	Type    ResourceARNType
+}
+
+func (r Resource) isKMS() bool {
+	return r.Type == ResourceARNKMS
+}
+
+func (r Resource) isS3() bool {
+	return r.Type == ResourceARNS3
 }
 
 func (r Resource) isBucketPattern() bool {
@@ -44,8 +92,20 @@ func (r Resource) isObjectPattern() bool {
 
 // IsValid - checks whether Resource is valid or not.
 func (r Resource) IsValid() bool {
-	if strings.HasPrefix(r.Pattern, "/") {
+	if r.Type == unknownARN {
 		return false
+	}
+	if r.isS3() {
+		if strings.HasPrefix(r.Pattern, "/") {
+			return false
+		}
+	}
+	if r.isKMS() {
+		if strings.IndexFunc(r.Pattern, func(c rune) bool {
+			return c == '/' || c == '\\' || c == '.'
+		}) >= 0 {
+			return false
+		}
 	}
 
 	return r.Pattern != ""
@@ -83,7 +143,7 @@ func (r Resource) MarshalJSON() ([]byte, error) {
 }
 
 func (r Resource) String() string {
-	return ResourceARNPrefix + r.Pattern
+	return r.Type.String() + r.Pattern
 }
 
 // UnmarshalJSON - decodes JSON data to Resource.
@@ -136,23 +196,37 @@ func (r Resource) ValidateBucket(bucketName string) error {
 
 // parseResource - parses string to Resource.
 func parseResource(s string) (Resource, error) {
-	if !strings.HasPrefix(s, ResourceARNPrefix) {
-		return Resource{}, Errorf("invalid resource '%v'", s)
+	r := Resource{}
+	for k, v := range ARNPrefixToType {
+		if rem, ok := strings.CutPrefix(s, k); ok {
+			r.Type = v
+			r.Pattern = rem
+			break
+		}
+	}
+	if r.Type == unknownARN {
+		return r, Errorf("invalid resource '%v'", s)
 	}
 
-	pattern := strings.TrimPrefix(s, ResourceARNPrefix)
-	if strings.HasPrefix(pattern, "/") {
-		return Resource{}, Errorf("invalid resource '%v' - starts with '/' will not match a bucket", s)
+	if strings.HasPrefix(r.Pattern, "/") {
+		return r, Errorf("invalid resource '%v' - starts with '/' will not match a bucket", s)
 	}
 
-	return Resource{
-		Pattern: pattern,
-	}, nil
+	return r, nil
 }
 
-// NewResource - creates new resource.
+// NewResource - creates new resource with the default ARN type of S3.
 func NewResource(pattern string) Resource {
 	return Resource{
 		Pattern: pattern,
+		Type:    ResourceARNS3,
+	}
+}
+
+// NewKMSResource - creates new resource with type KMS
+func NewKMSResource(pattern string) Resource {
+	return Resource{
+		Pattern: pattern,
+		Type:    ResourceARNKMS,
 	}
 }

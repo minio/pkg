@@ -36,6 +36,11 @@ func TestResourceIsBucketPattern(t *testing.T) {
 		{NewResource("mybucket/*"), false},
 		{NewResource("mybucket*/myobject"), false},
 		{NewResource("mybucket?0/2010/photos/*"), false},
+
+		{NewKMSResource("*"), true},
+		{NewKMSResource("mykey"), true},
+		{NewKMSResource("mykey*"), true},
+		{NewKMSResource("mykey?0"), true},
 	}
 
 	for i, testCase := range testCases {
@@ -86,6 +91,15 @@ func TestResourceIsValid(t *testing.T) {
 		{NewResource("mybucket?0"), true},
 		{NewResource("/*"), false},
 		{NewResource(""), false},
+
+		{NewKMSResource("*"), true},
+		{NewKMSResource("mykey*"), true},
+		{NewKMSResource("*/*"), false},
+		{NewKMSResource("mykey/*"), false},
+		{NewKMSResource("mykey/"), false},
+		{NewKMSResource("./mykey"), false},
+		{NewKMSResource("../../mykey"), false},
+		{NewKMSResource(""), false},
 	}
 
 	for i, testCase := range testCases {
