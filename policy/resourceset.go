@@ -154,7 +154,7 @@ func (resourceSet *ResourceSet) UnmarshalJSON(data []byte) error {
 func (resourceSet ResourceSet) ValidateS3() error {
 	for resource := range resourceSet {
 		if !resource.isS3() {
-			return Errorf("type of resource is not S3 '%v'", resource)
+			return Errorf("resource '%v' type is not S3", resource)
 		}
 		if err := resource.Validate(); err != nil {
 			return err
@@ -168,7 +168,7 @@ func (resourceSet ResourceSet) ValidateS3() error {
 func (resourceSet ResourceSet) ValidateKMS() error {
 	for resource := range resourceSet {
 		if !resource.isKMS() {
-			return Errorf("type of resource is not KMS '%v'", resource)
+			return Errorf("resource '%v' type is not KMS", resource)
 		}
 		if err := resource.Validate(); err != nil {
 			return err
