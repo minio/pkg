@@ -18,9 +18,12 @@
 package xtime
 
 import (
+	"bytes"
 	"encoding/json"
 	"testing"
+	"time"
 
+	"github.com/tinylib/msgp/msgp"
 	"gopkg.in/yaml.v3"
 )
 
@@ -55,4 +58,57 @@ dur: 1w1s`)
 		t.Fatal(err)
 	}
 
+}
+
+func TestMarshalUnmarshalDuration(t *testing.T) {
+	v := Duration(time.Hour)
+	var vn Duration
+	bts, err := v.MarshalMsg(nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	left, err := vn.UnmarshalMsg(bts)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(left) > 0 {
+		t.Errorf("%d bytes left over after UnmarshalMsg(): %q", len(left), left)
+	}
+	if vn != v {
+		t.Errorf("v=%#v; want=%#v", vn, v)
+	}
+
+	left, err = msgp.Skip(bts)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(left) > 0 {
+		t.Errorf("%d bytes left over after Skip(): %q", len(left), left)
+	}
+}
+
+func TestEncodeDecodeDuration(t *testing.T) {
+	v := Duration(time.Hour)
+	var buf bytes.Buffer
+	msgp.Encode(&buf, &v)
+
+	m := v.Msgsize()
+	if buf.Len() > m {
+		t.Log("WARNING: TestEncodeDecodeDuration Msgsize() is inaccurate")
+	}
+
+	var vn Duration
+	err := msgp.Decode(&buf, &vn)
+	if err != nil {
+		t.Error(err)
+	}
+	if vn != v {
+		t.Errorf("v=%#v; want=%#v", vn, v)
+	}
+	buf.Reset()
+	msgp.Encode(&buf, &v)
+	err = msgp.NewReader(&buf).Skip()
+	if err != nil {
+		t.Error(err)
+	}
 }
