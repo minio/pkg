@@ -61,6 +61,11 @@ func ParseDuration(s string) (time.Duration, error) {
 // Duration is a wrapper around time.Duration that supports YAML and JSON
 type Duration time.Duration
 
+// D will return as a time.Duration.
+func (d Duration) D() time.Duration {
+	return time.Duration(d)
+}
+
 // UnmarshalYAML implements yaml.Unmarshaler
 func (d *Duration) UnmarshalYAML(value *yaml.Node) error {
 	if value.Kind == yaml.ScalarNode {
