@@ -391,15 +391,7 @@ func (m *Manager) GetClientCertificate(reqInfo *tls.CertificateRequestInfo) (*tl
 			return certificate, nil
 		}
 	}
-
-	// Check if there is a default defaultCert
-	defaultCert := m.certificates[m.defaultCert]
-	if defaultCert == nil {
-		return nil, errors.New("certs: no client certificate is supported by peer")
-	}
-
-	// Return the default certificate
-	return defaultCert, nil
+	return nil, errors.New("certs: no client certificate is supported by peer")
 }
 
 // isSymlink returns true if the given file
