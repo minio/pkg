@@ -349,7 +349,15 @@ func (m *Manager) GetCertificate(hello *tls.ClientHelloInfo) (*tls.Certificate, 
 			return certificate, nil
 		}
 	}
-	return nil, errors.New("certs: no server certificate is supported by peer")
+
+	// Check if there is a default certificate
+	certificate := m.certificates[m.defaultCert]
+	if certificate == nil {
+		return nil, errors.New("certs: no server certificate is supported by peer")
+	}
+
+	// Return the default certificate
+	return certificate, nil
 }
 
 // GetClientCertificate returns a TLS certificate for mTLS based on the
@@ -383,7 +391,15 @@ func (m *Manager) GetClientCertificate(reqInfo *tls.CertificateRequestInfo) (*tl
 			return certificate, nil
 		}
 	}
-	return nil, errors.New("certs: no client certificate is supported by peer")
+
+	// Check if there is a default defaultCert
+	defaultCert := m.certificates[m.defaultCert]
+	if defaultCert == nil {
+		return nil, errors.New("certs: no client certificate is supported by peer")
+	}
+
+	// Return the default certificate
+	return defaultCert, nil
 }
 
 // isSymlink returns true if the given file
