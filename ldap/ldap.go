@@ -21,7 +21,6 @@ package ldap
 
 import (
 	"crypto/tls"
-	"crypto/x509"
 	"errors"
 	"fmt"
 	"net"
@@ -36,12 +35,10 @@ const (
 	attrDelimiter = ","
 )
 
-var (
-	// noAttrsSpec should be used in an LDAP search when no attributes are
-	// requested to be fetched. Ref:
-	// https://www.rfc-editor.org/rfc/rfc4511#section-4.5.1.8
-	noAttrsSpec = []string{"1.1"}
-)
+// noAttrsSpec should be used in an LDAP search when no attributes are
+// requested to be fetched. Ref:
+// https://www.rfc-editor.org/rfc/rfc4511#section-4.5.1.8
+var noAttrsSpec = []string{"1.1"}
 
 // BaseDNInfo contains information about a base DN.
 type BaseDNInfo struct {
@@ -61,10 +58,9 @@ type Config struct {
 	// E.g. "ldap.minio.io:636"
 	ServerAddr     string
 	SRVRecordName  string
-	TLSSkipVerify  bool // allows skipping TLS verification
-	ServerInsecure bool // allows plain text connection to LDAP server
-	ServerStartTLS bool // allows using StartTLS connection to LDAP server
-	RootCAs        *x509.CertPool
+	ServerInsecure bool        // allows plain text connection to LDAP server
+	ServerStartTLS bool        // allows using StartTLS connection to LDAP server
+	TLS            *tls.Config // TLS client config
 
 	// Lookup bind LDAP service account
 	LookupBindDN       string
@@ -95,25 +91,20 @@ func (l *Config) Clone() (cloned Config) {
 }
 
 func (l *Config) connect(ldapAddr string) (ldapConn *ldap.Conn, err error) {
-	tlsConfig := &tls.Config{
-		InsecureSkipVerify: l.TLSSkipVerify,
-		RootCAs:            l.RootCAs,
-	}
-
 	if l.ServerInsecure {
 		ldapConn, err = ldap.Dial("tcp", ldapAddr)
 	} else {
 		if l.ServerStartTLS {
 			ldapConn, err = ldap.Dial("tcp", ldapAddr)
 		} else {
-			ldapConn, err = ldap.DialTLS("tcp", ldapAddr, tlsConfig)
+			ldapConn, err = ldap.DialTLS("tcp", ldapAddr, l.TLS)
 		}
 	}
 
 	if ldapConn != nil {
 		ldapConn.SetTimeout(30 * time.Second) // Change default timeout to 30 seconds.
 		if l.ServerStartTLS {
-			err = ldapConn.StartTLS(tlsConfig)
+			err = ldapConn.StartTLS(l.TLS)
 		}
 	}
 
