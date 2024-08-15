@@ -29,7 +29,7 @@ func MatchSimple(pattern, name string) bool {
 		return true
 	}
 	// Do an extended wildcard '*' and '?' match.
-	return deepMatchRune([]rune(name), []rune(pattern), true)
+	return deepMatchRune(name, pattern, true)
 }
 
 // Match -  finds whether the text matches/satisfies the pattern string.
@@ -44,10 +44,10 @@ func Match(pattern, name string) (matched bool) {
 		return true
 	}
 	// Do an extended wildcard '*' and '?' match.
-	return deepMatchRune([]rune(name), []rune(pattern), false)
+	return deepMatchRune(name, pattern, false)
 }
 
-func deepMatchRune(str, pattern []rune, simple bool) bool {
+func deepMatchRune(str, pattern string, simple bool) bool {
 	for len(pattern) > 0 {
 		switch pattern[0] {
 		default:
@@ -59,8 +59,9 @@ func deepMatchRune(str, pattern []rune, simple bool) bool {
 				return simple
 			}
 		case '*':
-			return deepMatchRune(str, pattern[1:], simple) ||
-				(len(str) > 0 && deepMatchRune(str[1:], pattern, simple))
+			return len(pattern) == 1 || // Pattern ends with this star
+				deepMatchRune(str, pattern[1:], simple) || // Matches next part of pattern
+				(len(str) > 0 && deepMatchRune(str[1:], pattern, simple)) // Continue searching forward
 		}
 		str = str[1:]
 		pattern = pattern[1:]
@@ -83,10 +84,6 @@ func deepMatchRune(str, pattern []rune, simple bool) bool {
 //
 // This function is only useful in some special situations.
 func MatchAsPatternPrefix(pattern, text string) bool {
-	return matchAsPatternPrefix([]rune(pattern), []rune(text))
-}
-
-func matchAsPatternPrefix(pattern, text []rune) bool {
 	for i := 0; i < len(text) && i < len(pattern); i++ {
 		if pattern[i] == '*' {
 			return true
