@@ -18,6 +18,8 @@
 package wildcard
 
 import (
+	"fmt"
+	"strings"
 	"testing"
 )
 
@@ -549,6 +551,187 @@ func TestMatchSimple(t *testing.T) {
 		if testCase.matched != actualResult {
 			t.Errorf("Test %d: Expected the result to be `%v`, but instead found it to be `%v`", i+1, testCase.matched, actualResult)
 		}
+	}
+}
+
+// BenchmarkMatchSimple - Tests validate the logic of wild card matching.
+// `MatchSimple` supports matching for only '*' in the pattern string.
+func BenchmarkMatchSimple(b *testing.B) {
+	testCases := []struct {
+		pattern string
+		text    string
+		matched bool
+	}{
+		// Test case - 0.
+		{
+			pattern: "a*",
+			text:    "aListMultipartUploadPartsListMultipartUploadPartsListMultipartUploadPartsListMultipartUploadPartsListMultipartUploadPartsListMultipartUploadPartsListMultipartUploadPartsListMultipartUploadPartsListMultipartUploadPartsListMultipartUploadPartsListMultipartUploadPartsListMultipartUploadPartsListMultipartUploadPartsListMultipartUploadPartsListMultipartUploadPartsListMultipartUploadPartsListMultipartUploadPartsListMultipartUploadPartsListMultipartUploadPartsListMultipartUploadPartsListMultipartUploadPartsListMultipartUploadPartsListMultipartUploadParts",
+			matched: true,
+		},
+		// Test case - 1.
+		// Test case with pattern "*". Expected to match any text.
+		{
+			pattern: "*",
+			text:    "s3:GetObject",
+			matched: true,
+		},
+		// Test case - 2.
+		// Test case with empty pattern. This only matches empty string.
+		{
+			pattern: "",
+			text:    "s3:GetObject",
+			matched: false,
+		},
+		// Test case - 3.
+		// Test case with empty pattern. This only matches empty string.
+		{
+			pattern: "",
+			text:    "",
+			matched: true,
+		},
+		// Test case - 4.
+		// Test case with single "*" at the end.
+		{
+			pattern: "s3:*",
+			text:    "s3:ListMultipartUploadParts",
+			matched: true,
+		},
+		// Test case - 5.
+		// Test case with a no "*". In this case the pattern and text should be the same.
+		{
+			pattern: "s3:ListBucketMultipartUploads",
+			text:    "s3:ListBucket",
+			matched: false,
+		},
+		// Test case - 6.
+		// Test case with a no "*". In this case the pattern and text should be the same.
+		{
+			pattern: "s3:ListBucket",
+			text:    "s3:ListBucket",
+			matched: true,
+		},
+		// Test case - 7.
+		// Test case with a no "*". In this case the pattern and text should be the same.
+		{
+			pattern: "s3:ListBucketMultipartUploads",
+			text:    "s3:ListBucketMultipartUploads",
+			matched: true,
+		},
+		// Test case - 8.
+		// Test case with pattern containing key name with a prefix. Should accept the same text without a "*".
+		{
+			pattern: "my-bucket/oo*",
+			text:    "my-bucket/oo",
+			matched: true,
+		},
+		// Test case - 9.
+		// Test case with "*" at the end of the pattern.
+		{
+			pattern: "my-bucket/In*",
+			text:    "my-bucket/India/Karnataka/",
+			matched: true,
+		},
+		// Test case - 10.
+		// Test case with prefixes shuffled.
+		// This should fail.
+		{
+			pattern: "my-bucket/In*",
+			text:    "my-bucket/Karnataka/India/",
+			matched: false,
+		},
+		// Test case - 11.
+		// Test case with text expanded to the wildcards in the pattern.
+		{
+			pattern: "my-bucket/In*/Ka*/Ban",
+			text:    "my-bucket/India/Karnataka/Ban",
+			matched: true,
+		},
+		// Test case - 12.
+		// Test case with the  keyname part is repeated as prefix several times.
+		// This is valid.
+		{
+			pattern: "my-bucket/In*/Ka*/Ban",
+			text:    "my-bucket/India/Karnataka/Ban/Ban/Ban/Ban/Ban",
+			matched: true,
+		},
+		// Test case - 13.
+		// Test case to validate that `*` can be expanded into multiple prefixes.
+		{
+			pattern: "my-bucket/In*/Ka*/Ban",
+			text:    "my-bucket/India/Karnataka/Area1/Area2/Area3/Ban",
+			matched: true,
+		},
+		// Test case - 14.
+		// Test case to validate that `*` can be expanded into multiple prefixes.
+		{
+			pattern: "my-bucket/In*/Ka*/Ban",
+			text:    "my-bucket/India/State1/State2/Karnataka/Area1/Area2/Area3/Ban",
+			matched: true,
+		},
+		// Test case - 15.
+		// Test case where the keyname part of the pattern is expanded in the text.
+		{
+			pattern: "my-bucket/In*/Ka*/Ban",
+			text:    "my-bucket/India/Karnataka/Bangalore",
+			matched: false,
+		},
+		// Test case - 16.
+		// Test case with prefixes and wildcard expanded for all "*".
+		{
+			pattern: "my-bucket/In*/Ka*/Ban*",
+			text:    "my-bucket/India/Karnataka/Bangalore",
+			matched: true,
+		},
+		// Test case - 17.
+		// Test case with keyname part being a wildcard in the pattern.
+		{
+			pattern: "my-bucket/*",
+			text:    "my-bucket/India",
+			matched: true,
+		},
+		// Test case - 18.
+		{
+			pattern: "my-bucket/oo*",
+			text:    "my-bucket/odo",
+			matched: false,
+		},
+		// Test case - 19.
+		{
+			pattern: "my-bucket/oo?*",
+			text:    "my-bucket/oo???",
+			matched: true,
+		},
+		// Test case - 20:
+		{
+			pattern: "my-bucket/oo??*",
+			text:    "my-bucket/odo",
+			matched: false,
+		},
+		// Test case - 21:
+		{
+			pattern: "?h?*",
+			text:    "?h?hello",
+			matched: true,
+		},
+		// Test case - 22:
+		{
+			pattern: "a?",
+			text:    "a",
+			matched: true,
+		},
+	}
+	// Iterating over the test cases, call the function under test and assert the output.
+	b.Run("0-prefix-reference", func(b *testing.B) {
+		for i := 0; i < b.N; i++ {
+			_ = strings.HasPrefix(testCases[0].text, "a")
+		}
+	})
+	for i, testCase := range testCases {
+		b.Run(fmt.Sprintf("bench-%d", i), func(b *testing.B) {
+			for i := 0; i < b.N; i++ {
+				_ = MatchSimple(testCase.pattern, testCase.text)
+			}
+		})
 	}
 }
 

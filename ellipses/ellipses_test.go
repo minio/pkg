@@ -238,7 +238,7 @@ func TestFindEllipsesPatterns(t *testing.T) {
 					return s
 				}
 				if !reflect.DeepEqual(got, testCase.want) {
-					t.Errorf(fmt.Sprintf("want %s,", repl(testCase.want)))
+					t.Errorf("want %s,", repl(testCase.want))
 					t.Errorf("got %s,", repl(got))
 				}
 			}
