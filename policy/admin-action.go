@@ -59,6 +59,8 @@ const (
 	ServerInfoAdminAction = "admin:ServerInfo"
 	// HealthInfoAdminAction - allow obtaining cluster health information
 	HealthInfoAdminAction = "admin:OBDInfo"
+	// LicenseInfoAdminAction - allow obtaining license information
+	LicenseInfoAdminAction = "admin:LicenseInfo"
 	// BandwidthMonitorAction - allow monitoring bandwidth usage
 	BandwidthMonitorAction = "admin:BandwidthMonitor"
 	// InspectDataAction - allows downloading raw files from backend
