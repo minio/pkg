@@ -101,8 +101,8 @@ github.com/mattn/go-runewidth v0.0.16 h1:E5ScNMtiwvlvB5paMFdw9p4kSQzbXFikJ5SQO6T
 github.com/mattn/go-runewidth v0.0.16/go.mod h1:Jdepj2loyihRzMpdS35Xk/zdY8IAYHsh153qUoGf23w=
 github.com/matttproud/golang_protobuf_extensions v1.0.4 h1:mmDVorXM7PCGKw94cs5zkfA9PSy5pEvNWRP0ET0TIVo=
 github.com/matttproud/golang_protobuf_extensions v1.0.4/go.mod h1:BSXmuO+STAnVfrANrmjBb36TMTDstsz7MSK+HVaYKv4=
-github.com/minio/madmin-go/v3 v3.0.66 h1:O4w7L3vTxhORqTeyegFdbuO4kKVbAUarJfcmsDXQMTs=
-github.com/minio/madmin-go/v3 v3.0.66/go.mod h1:IFAwr0XMrdsLovxAdCcuq/eoL4nRuMVQQv0iubJANQw=
+github.com/minio/madmin-go/v3 v3.0.68 h1:YiWSboJiFylXkRIwQTCSYbPMI2iiZ1GpWzw/E6T91GA=
+github.com/minio/madmin-go/v3 v3.0.68/go.mod h1:TOTc96ZkMknNhl+ReO/V68bQfgRGfH+8iy7YaDzHdXA=
 github.com/minio/md5-simd v1.1.2 h1:Gdi1DZK69+ZVMoNHRXJyNcxrMA4dSxoYHZSQbirFg34=
 github.com/minio/md5-simd v1.1.2/go.mod h1:MzdKDxYpY2BT9XQFocsiZf/NKVtR7nkE4RoEpN+20RM=
 github.com/minio/minio-go/v7 v7.0.76 h1:9nxHH2XDai61cT/EFhyIw/wW4vJfpPNvl7lSFpRt+Ng=

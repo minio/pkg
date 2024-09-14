@@ -10,7 +10,7 @@ require (
 	github.com/lestrrat-go/jwx v1.2.30
 	github.com/mattn/go-colorable v0.1.13
 	github.com/mattn/go-isatty v0.0.20
-	github.com/minio/madmin-go/v3 v3.0.66
+	github.com/minio/madmin-go/v3 v3.0.68
 	github.com/minio/minio-go/v7 v7.0.76
 	github.com/minio/mux v1.8.2
 	github.com/montanaflynn/stats v0.7.1
