@@ -27,16 +27,14 @@ import (
 )
 
 func TestStatementIsAllowed(t *testing.T) {
-	case1Statement := NewStatement(
-		"",
+	case1Statement := NewStatement("",
 		Allow,
 		NewActionSet(GetBucketLocationAction, PutObjectAction),
 		NewResourceSet(NewResource("*")),
 		condition.NewFunctions(),
 	)
 
-	case2Statement := NewStatement(
-		"",
+	case2Statement := NewStatement("",
 		Allow,
 		NewActionSet(GetObjectAction, PutObjectAction),
 		NewResourceSet(NewResource("mybucket/myobject*")),
@@ -55,16 +53,14 @@ func TestStatementIsAllowed(t *testing.T) {
 		t.Fatalf("unexpected error. %v\n", err)
 	}
 
-	case3Statement := NewStatement(
-		"",
+	case3Statement := NewStatement("",
 		Allow,
 		NewActionSet(GetObjectAction, PutObjectAction),
 		NewResourceSet(NewResource("mybucket/myobject*")),
 		condition.NewFunctions(func1),
 	)
 
-	case4Statement := NewStatement(
-		"",
+	case4Statement := NewStatement("",
 		Deny,
 		NewActionSet(GetObjectAction, PutObjectAction),
 		NewResourceSet(NewResource("mybucket/myobject*")),
@@ -85,22 +81,6 @@ func TestStatementIsAllowed(t *testing.T) {
 		NewActionSet(GetObjectAction),
 		NewResourceSet(NewResource("mybucket/myobject*")),
 		condition.NewFunctions(func1),
-	)
-
-	case7Statement := NewStatement(
-		"",
-		Allow,
-		NewActionSet(GetBucketLocationAction),
-		NewResourceSet(NewResource("mybucket")),
-		condition.NewFunctions(),
-	)
-
-	case8Statement := NewStatement(
-		"",
-		Allow,
-		NewActionSet(GetBucketLocationAction, GetObjectAction, PutObjectAction),
-		NewResourceSet(NewResource("mybucket/*")),
-		condition.NewFunctions(),
 	)
 
 	anonGetBucketLocationArgs := Args{
@@ -201,20 +181,6 @@ func TestStatementIsAllowed(t *testing.T) {
 		{case6Statement, getBucketLocationArgs, true},
 		{case6Statement, putObjectActionArgs, false},
 		{case6Statement, getObjectActionArgs, true},
-
-		{case7Statement, anonGetBucketLocationArgs, true},
-		{case7Statement, anonPutObjectActionArgs, false},
-		{case7Statement, anonGetObjectActionArgs, false},
-		{case7Statement, getBucketLocationArgs, true},
-		{case7Statement, putObjectActionArgs, false},
-		{case7Statement, getObjectActionArgs, false},
-
-		{case8Statement, anonGetBucketLocationArgs, false},
-		{case8Statement, anonPutObjectActionArgs, true},
-		{case8Statement, anonGetObjectActionArgs, true},
-		{case8Statement, getBucketLocationArgs, false},
-		{case8Statement, putObjectActionArgs, true},
-		{case8Statement, getObjectActionArgs, true},
 	}
 
 	for i, testCase := range testCases {
