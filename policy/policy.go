@@ -33,6 +33,7 @@ type Args struct {
 	AccountName     string                 `json:"account"`
 	Groups          []string               `json:"groups"`
 	Action          Action                 `json:"action"`
+	OriginalAction  Action                 `json:"originalAction"`
 	BucketName      string                 `json:"bucket"`
 	ConditionValues map[string][]string    `json:"conditions"`
 	IsOwner         bool                   `json:"owner"`
