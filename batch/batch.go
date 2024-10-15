@@ -94,7 +94,6 @@ type BatchJobReplicateCredentials struct {
 	SessionToken string `xml:"SessionToken" json:"sessionToken,omitempty" yaml:"sessionToken"`
 }
 
-
 type BatchJobReplicateSource struct {
 	Type     BatchJobReplicateResourceType `yaml:"type" json:"type"`
 	Bucket   string                        `yaml:"bucket" json:"bucket"`
@@ -130,7 +129,6 @@ type BatchJobKeyRotateFlags struct {
 	Notify BatchJobNotification `yaml:"notify" json:"notify"`
 	Retry  BatchJobRetry        `yaml:"retry" json:"retry"`
 }
-
 
 type BatchKeyRotateFilter struct {
 	NewerThan     time.Duration `yaml:"newerThan,omitempty" json:"newerThan"`
