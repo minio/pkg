@@ -25,6 +25,7 @@ import (
 	"github.com/minio/pkg/v3/xtime"
 )
 
+// BatchJobRequest to start batch job
 type BatchJobRequest struct {
 	ID        string               `yaml:"-" json:"name"`
 	User      string               `yaml:"-" json:"user"`
@@ -35,6 +36,7 @@ type BatchJobRequest struct {
 	ctx       context.Context      `msg:"-"`
 }
 
+// BatchJobReplicateV1 v1 of batch job replication
 type BatchJobReplicateV1 struct {
 	APIVersion string                  `yaml:"apiVersion" json:"apiVersion"`
 	Flags      BatchJobReplicateFlags  `yaml:"flags" json:"flags"`
@@ -44,12 +46,14 @@ type BatchJobReplicateV1 struct {
 	clnt *miniogo.Core `msg:"-"`
 }
 
+// BatchJobReplicateFlags various configurations for replication job definition currently includes
 type BatchJobReplicateFlags struct {
 	Filter BatchReplicateFilter `yaml:"filter" json:"filter"`
 	Notify BatchJobNotification `yaml:"notify" json:"notify"`
 	Retry  BatchJobRetry        `yaml:"retry" json:"retry"`
 }
 
+// BatchReplicateFilter holds all the filters currently supported for batch replication
 type BatchReplicateFilter struct {
 	NewerThan     xtime.Duration `yaml:"newerThan,omitempty" json:"newerThan"`
 	OlderThan     xtime.Duration `yaml:"olderThan,omitempty" json:"olderThan"`
@@ -59,24 +63,30 @@ type BatchReplicateFilter struct {
 	Metadata      []BatchJobKV   `yaml:"metadata,omitempty" json:"metadata"`
 }
 
+// BatchJobKV is a key-value data type which supports wildcard matching
 type BatchJobKV struct {
 	line, col int
 	Key       string `yaml:"key" json:"key"`
 	Value     string `yaml:"value" json:"value"`
 }
 
+// BatchJobNotification stores notification endpoint and token information.
+// Used by batch jobs to notify of their status.
 type BatchJobNotification struct {
 	line, col int
 	Endpoint  string `yaml:"endpoint" json:"endpoint"`
 	Token     string `yaml:"token" json:"token"`
 }
 
+// BatchJobRetry stores retry configuration used in the event of failures.
 type BatchJobRetry struct {
 	line, col int
 	Attempts  int           `yaml:"attempts" json:"attempts"` // number of retry attempts
 	Delay     time.Duration `yaml:"delay" json:"delay"`       // delay between each retries
 }
 
+// BatchJobReplicateTarget describes target element of the replication job that receives
+// the filtered data from source
 type BatchJobReplicateTarget struct {
 	Type     BatchJobReplicateResourceType `yaml:"type" json:"type"`
 	Bucket   string                        `yaml:"bucket" json:"bucket"`
@@ -86,14 +96,19 @@ type BatchJobReplicateTarget struct {
 	Creds    BatchJobReplicateCredentials  `yaml:"credentials" json:"credentials"`
 }
 
+// BatchJobReplicateResourceType defines the type of batch jobs
 type BatchJobReplicateResourceType string
 
+// BatchJobReplicateCredentials access credentials for batch replication it may
+// be either for target or source.
 type BatchJobReplicateCredentials struct {
 	AccessKey    string `xml:"AccessKeyId" json:"accessKey,omitempty" yaml:"accessKey"`
 	SecretKey    string `xml:"SecretAccessKey" json:"secretKey,omitempty" yaml:"secretKey"`
 	SessionToken string `xml:"SessionToken" json:"sessionToken,omitempty" yaml:"sessionToken"`
 }
 
+// BatchJobReplicateSource describes source element of the replication job that is
+// the source of the data for the target
 type BatchJobReplicateSource struct {
 	Type     BatchJobReplicateResourceType `yaml:"type" json:"type"`
 	Bucket   string                        `yaml:"bucket" json:"bucket"`
@@ -104,8 +119,10 @@ type BatchJobReplicateSource struct {
 	Snowball BatchJobSnowball              `yaml:"snowball" json:"snowball"`
 }
 
+// BatchJobPrefix - to support prefix field yaml unmarshalling with string or slice of strings
 type BatchJobPrefix []string
 
+// BatchJobSnowball describes the snowball feature when replicating objects from a local source to a remote target
 type BatchJobSnowball struct {
 	line, col   int
 	Disable     *bool   `yaml:"disable" json:"disable"`
@@ -116,6 +133,7 @@ type BatchJobSnowball struct {
 	SkipErrs    *bool   `yaml:"skipErrs" json:"skipErrs"`
 }
 
+// BatchJobKeyRotateV1 v1 of batch key rotation job
 type BatchJobKeyRotateV1 struct {
 	APIVersion string                      `yaml:"apiVersion" json:"apiVersion"`
 	Flags      BatchJobKeyRotateFlags      `yaml:"flags" json:"flags"`
@@ -124,12 +142,14 @@ type BatchJobKeyRotateV1 struct {
 	Encryption BatchJobKeyRotateEncryption `yaml:"encryption" json:"encryption"`
 }
 
+// BatchJobKeyRotateFlags various configurations for replication job definition currently includes
 type BatchJobKeyRotateFlags struct {
 	Filter BatchKeyRotateFilter `yaml:"filter" json:"filter"`
 	Notify BatchJobNotification `yaml:"notify" json:"notify"`
 	Retry  BatchJobRetry        `yaml:"retry" json:"retry"`
 }
 
+// BatchKeyRotateFilter holds all the filters currently supported for batch replication
 type BatchKeyRotateFilter struct {
 	NewerThan     time.Duration `yaml:"newerThan,omitempty" json:"newerThan"`
 	OlderThan     time.Duration `yaml:"olderThan,omitempty" json:"olderThan"`
@@ -140,6 +160,7 @@ type BatchKeyRotateFilter struct {
 	KMSKeyID      string        `yaml:"kmskeyid" json:"kmskey"`
 }
 
+// BatchJobKeyRotateEncryption defines key rotation encryption options passed
 type BatchJobKeyRotateEncryption struct {
 	Type       BatchKeyRotationType `yaml:"type" json:"type"`
 	Key        string               `yaml:"key" json:"key"`
@@ -147,8 +168,11 @@ type BatchJobKeyRotateEncryption struct {
 	kmsContext map[string]string    `msg:"-"`
 }
 
+// BatchKeyRotationType defines key rotation type
 type BatchKeyRotationType string
 
+// BatchJobExpire represents configuration parameters for a batch expiration
+// job typically supplied in yaml form
 type BatchJobExpire struct {
 	line, col       int
 	APIVersion      string                 `yaml:"apiVersion" json:"apiVersion"`
@@ -159,6 +183,7 @@ type BatchJobExpire struct {
 	Rules           []BatchJobExpireFilter `yaml:"rules" json:"rules"`
 }
 
+// BatchJobExpireFilter holds all the filters currently supported for batch replication
 type BatchJobExpireFilter struct {
 	line, col     int
 	OlderThan     xtime.Duration      `yaml:"olderThan,omitempty" json:"olderThan"`
@@ -171,15 +196,18 @@ type BatchJobExpireFilter struct {
 	Purge         BatchJobExpirePurge `yaml:"purge" json:"purge"`
 }
 
+// BatchJobSizeFilter supports size based filters - LesserThan and GreaterThan
 type BatchJobSizeFilter struct {
 	line, col  int
 	UpperBound BatchJobSize `yaml:"lessThan" json:"lessThan"`
 	LowerBound BatchJobSize `yaml:"greaterThan" json:"greaterThan"`
 }
 
+// BatchJobExpirePurge type accepts non-negative versions to be retained
 type BatchJobExpirePurge struct {
 	line, col      int
 	RetainVersions int `yaml:"retainVersions" json:"retainVersions"`
 }
 
+// BatchJobSize supports humanized byte values in yaml files type BatchJobSize uint64
 type BatchJobSize int64
