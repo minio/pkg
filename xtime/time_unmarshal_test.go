@@ -57,7 +57,6 @@ dur: 1w1s`)
 	if err := json.Unmarshal(jsonData, &jsonTest); err != nil {
 		t.Fatal(err)
 	}
-
 }
 
 func TestMarshalUnmarshalDuration(t *testing.T) {

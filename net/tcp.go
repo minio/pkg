@@ -25,6 +25,10 @@ import (
 // A TCPConfig structure is used to configure
 // a TCP client or server connections.
 type TCPConfig struct {
+	// IdleTimeout is the maximum time duration for idle connections
+	// before they are forcibly closed.
+	IdleTimeout time.Duration
+
 	// UserTimeout is the maximum amount of time that transmitted
 	// data may remain unacknowledged before forcefully closing the
 	// connection.
@@ -72,6 +76,7 @@ func (c *TCPConfig) Clone() *TCPConfig {
 		return nil
 	}
 	return &TCPConfig{
+		IdleTimeout: c.IdleTimeout,
 		UserTimeout: c.UserTimeout,
 		SendBufSize: c.SendBufSize,
 		RecvBufSize: c.RecvBufSize,

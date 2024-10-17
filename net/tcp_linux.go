@@ -70,7 +70,16 @@ func (c *TCPConfig) control(_, address string, rc syscall.RawConn) error {
 
 			// The time (in seconds) the connection needs to remain idle before
 			// TCP starts sending keepalive probes
-			_ = syscall.SetsockoptInt(fd, syscall.IPPROTO_TCP, syscall.TCP_KEEPIDLE, 15)
+			idleTimeout := 15
+			if c != nil && c.IdleTimeout > 0 {
+				idleTimeout = int(c.IdleTimeout.Seconds())
+			}
+
+			if idleTimeout < 1 {
+				idleTimeout = 15
+			}
+
+			_ = syscall.SetsockoptInt(fd, syscall.IPPROTO_TCP, syscall.TCP_KEEPIDLE, idleTimeout)
 
 			// Number of probes.
 			// ~ cat /proc/sys/net/ipv4/tcp_keepalive_probes (defaults to 9, we reduce it to 5)

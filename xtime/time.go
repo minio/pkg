@@ -77,7 +77,6 @@ func (d *Duration) UnmarshalYAML(value *yaml.Node) error {
 		return nil
 	}
 	return fmt.Errorf("unable to unmarshal %s", value.Tag)
-
 }
 
 // UnmarshalJSON implements json.Unmarshaler

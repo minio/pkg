@@ -410,9 +410,7 @@ func validateAndParseBaseDNList(conn *ldap.Conn, baseDNList []string) ([]BaseDNI
 	return res, nil
 }
 
-var (
-	validAttributeRegex = regexp.MustCompile(`^[a-zA-Z][a-zA-Z0-9-]*$`)
-)
+var validAttributeRegex = regexp.MustCompile(`^[a-zA-Z][a-zA-Z0-9-]*$`)
 
 // Validates that the given attributes are valid LDAP attribute names according
 // to a regular expression.
