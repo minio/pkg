@@ -57,7 +57,6 @@ dur: 1w1s`)
 	if err := json.Unmarshal(jsonData, &jsonTest); err != nil {
 		t.Fatal(err)
 	}
-
 }
 
 func TestMarshalUnmarshalDuration(t *testing.T) {
@@ -113,31 +112,27 @@ func TestEncodeDecodeDuration(t *testing.T) {
 	}
 }
 
-
 func TestDuration_Marshal(t *testing.T) {
 	type testDuration struct {
-		A              Duration `json:"a" yaml:"a"`
-		Dur            Duration `json:"dur" yaml:"dur"`
+		A               Duration  `json:"a" yaml:"a"`
+		Dur             Duration  `json:"dur" yaml:"dur"`
 		DurationPointer *Duration `json:"durationPointer,omitempty" yaml:"durationPointer,omitempty"`
 	}
 
-
 	d1 := Duration(time.Second)
-	d2 := Duration(0) 
-	d3 := Duration(time.Hour*24*7 + time.Second) 
+	d2 := Duration(0)
+	d3 := Duration(time.Hour*24*7 + time.Second)
 
 	testData := testDuration{
-		A: d1,
-		Dur: d2,
+		A:               d1,
+		Dur:             d2,
 		DurationPointer: &d3,
 	}
-
 
 	yamlData, err := yaml.Marshal(&testData)
 	if err != nil {
 		t.Fatalf("Failed to marshal YAML: %v", err)
 	}
-
 
 	expected := `a: 1s
 dur: 0s

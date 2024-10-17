@@ -77,7 +77,6 @@ func (d *Duration) UnmarshalYAML(value *yaml.Node) error {
 		return nil
 	}
 	return fmt.Errorf("unable to unmarshal %s", value.Tag)
-
 }
 
 // UnmarshalJSON implements json.Unmarshaler
@@ -125,7 +124,6 @@ func (d Duration) Msgsize() int {
 }
 
 // Implements yaml.Marshaler - Converts duration to human-readable format (e.g., "2h", "30m")
- func (d Duration) MarshalYAML() (interface{}, error) {
-    return time.Duration(d).String(), nil 
+func (d Duration) MarshalYAML() (interface{}, error) {
+	return time.Duration(d).String(), nil
 }
-
