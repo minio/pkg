@@ -111,3 +111,34 @@ func TestEncodeDecodeDuration(t *testing.T) {
 		t.Error(err)
 	}
 }
+
+func TestDuration_Marshal(t *testing.T) {
+	type testDuration struct {
+		A               Duration  `json:"a" yaml:"a"`
+		Dur             Duration  `json:"dur" yaml:"dur"`
+		DurationPointer *Duration `json:"durationPointer,omitempty" yaml:"durationPointer,omitempty"`
+	}
+
+	d1 := Duration(time.Second)
+	d2 := Duration(0)
+	d3 := Duration(time.Hour*24*7 + time.Second)
+
+	testData := testDuration{
+		A:               d1,
+		Dur:             d2,
+		DurationPointer: &d3,
+	}
+
+	yamlData, err := yaml.Marshal(&testData)
+	if err != nil {
+		t.Fatalf("Failed to marshal YAML: %v", err)
+	}
+
+	expected := `a: 1s
+dur: 0s
+durationPointer: 168h0m1s
+`
+	if string(yamlData) != expected {
+		t.Errorf("Expected:\n%s\nGot:\n%s", expected, string(yamlData))
+	}
+}
