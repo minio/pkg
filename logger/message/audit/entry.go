@@ -43,6 +43,7 @@ type Entry struct {
 		Bucket              string          `json:"bucket,omitempty"`
 		Object              string          `json:"object,omitempty"`
 		Objects             []ObjectVersion `json:"objects,omitempty"`
+		Policy              string          `json:"policy,omitempty"`
 		Status              string          `json:"status,omitempty"`
 		StatusCode          int             `json:"statusCode,omitempty"`
 		InputBytes          int64           `json:"rx"`
