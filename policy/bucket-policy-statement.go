@@ -25,13 +25,14 @@ import (
 
 // BPStatement - policy statement.
 type BPStatement struct {
-	SID        ID                  `json:"Sid,omitempty"`
-	Effect     Effect              `json:"Effect"`
-	Principal  Principal           `json:"Principal"`
-	Actions    ActionSet           `json:"Action"`
-	NotActions ActionSet           `json:"NotAction,omitempty"`
-	Resources  ResourceSet         `json:"Resource"`
-	Conditions condition.Functions `json:"Condition,omitempty"`
+	SID          ID                  `json:"Sid,omitempty"`
+	Effect       Effect              `json:"Effect"`
+	Principal    Principal           `json:"Principal"`
+	Actions      ActionSet           `json:"Action"`
+	NotActions   ActionSet           `json:"NotAction,omitempty"`
+	Resources    ResourceSet         `json:"Resource"`
+	NotResources ResourceSet         `json:"NotResource,omitempty"`
+	Conditions   condition.Functions `json:"Condition,omitempty"`
 }
 
 // IsAllowed - checks given policy args is allowed to continue the Rest API.
@@ -59,6 +60,10 @@ func (statement BPStatement) IsAllowed(args BucketPolicyArgs) bool {
 			return false
 		}
 
+		if statement.NotResources.Match(resource, args.ConditionValues) {
+			return false
+		}
+
 		return statement.Conditions.Evaluate(args.ConditionValues)
 	}
 
@@ -79,7 +84,7 @@ func (statement BPStatement) isValid() error {
 		return Errorf("Action must not be empty")
 	}
 
-	if len(statement.Resources) == 0 {
+	if len(statement.Resources) == 0 && len(statement.NotResources) == 0 {
 		return Errorf("Resource must not be empty")
 	}
 
@@ -88,9 +93,15 @@ func (statement BPStatement) isValid() error {
 			if !statement.Resources.ObjectResourceExists() {
 				return Errorf("unsupported Resource found %v for action %v", statement.Resources, action)
 			}
+			if !statement.NotResources.ObjectResourceExists() {
+				return Errorf("unsupported NotResource found %v for action %v", statement.NotResources, action)
+			}
 		} else {
 			if !statement.Resources.BucketResourceExists() {
 				return Errorf("unsupported Resource found %v for action %v", statement.Resources, action)
+			}
+			if !statement.NotResources.BucketResourceExists() {
+				return Errorf("unsupported NotResource found %v for action %v", statement.NotResources, action)
 			}
 		}
 
@@ -106,11 +117,20 @@ func (statement BPStatement) isValid() error {
 
 // Validate - validates Statement is for given bucket or not.
 func (statement BPStatement) Validate(bucketName string) error {
-	if err := statement.isValid(); err != nil {
+	var err error
+	if err = statement.isValid(); err != nil {
 		return err
 	}
 
-	return statement.Resources.ValidateBucket(bucketName)
+	if err = statement.NotResources.ValidateBucket(bucketName); err == nil {
+		return nil
+	}
+
+	if err = statement.Resources.ValidateBucket(bucketName); err == nil {
+		return nil
+	}
+
+	return err
 }
 
 // Equals checks if two statements are equal
@@ -130,6 +150,9 @@ func (statement BPStatement) Equals(st BPStatement) bool {
 	if !statement.Resources.Equals(st.Resources) {
 		return false
 	}
+	if !statement.NotResources.Equals(st.NotResources) {
+		return false
+	}
 	if !statement.Conditions.Equals(st.Conditions) {
 		return false
 	}
@@ -139,13 +162,14 @@ func (statement BPStatement) Equals(st BPStatement) bool {
 // Clone clones Statement structure
 func (statement BPStatement) Clone() BPStatement {
 	return BPStatement{
-		SID:        statement.SID,
-		Effect:     statement.Effect,
-		Principal:  statement.Principal.Clone(),
-		Actions:    statement.Actions.Clone(),
-		NotActions: statement.NotActions.Clone(),
-		Resources:  statement.Resources.Clone(),
-		Conditions: statement.Conditions.Clone(),
+		SID:          statement.SID,
+		Effect:       statement.Effect,
+		Principal:    statement.Principal.Clone(),
+		Actions:      statement.Actions.Clone(),
+		NotActions:   statement.NotActions.Clone(),
+		Resources:    statement.Resources.Clone(),
+		NotResources: statement.NotResources.Clone(),
+		Conditions:   statement.Conditions.Clone(),
 	}
 }
 
@@ -170,5 +194,17 @@ func NewBPStatementWithNotAction(sid ID, effect Effect, principal Principal, not
 		NotActions: notActions,
 		Resources:  resources,
 		Conditions: conditions,
+	}
+}
+
+// NewBPStatementWithNotResource - creates new statement with NotResource.
+func NewBPStatementWithNotResource(sid ID, effect Effect, principal Principal, actions ActionSet, notResources ResourceSet, conditions condition.Functions) BPStatement {
+	return BPStatement{
+		SID:          sid,
+		Effect:       effect,
+		Principal:    principal,
+		Actions:      actions,
+		NotResources: notResources,
+		Conditions:   conditions,
 	}
 }
