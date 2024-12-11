@@ -90,18 +90,12 @@ func (statement BPStatement) isValid() error {
 
 	for action := range statement.Actions {
 		if action.IsObjectAction() {
-			if !statement.Resources.ObjectResourceExists() {
+			if !statement.Resources.ObjectResourceExists() && !statement.NotResources.ObjectResourceExists() {
 				return Errorf("unsupported Resource found %v for action %v", statement.Resources, action)
-			}
-			if !statement.NotResources.ObjectResourceExists() {
-				return Errorf("unsupported NotResource found %v for action %v", statement.NotResources, action)
 			}
 		} else {
-			if !statement.Resources.BucketResourceExists() {
+			if !statement.Resources.BucketResourceExists() && !statement.NotResources.BucketResourceExists() {
 				return Errorf("unsupported Resource found %v for action %v", statement.Resources, action)
-			}
-			if !statement.NotResources.BucketResourceExists() {
-				return Errorf("unsupported NotResource found %v for action %v", statement.NotResources, action)
 			}
 		}
 
@@ -117,20 +111,23 @@ func (statement BPStatement) isValid() error {
 
 // Validate - validates Statement is for given bucket or not.
 func (statement BPStatement) Validate(bucketName string) error {
-	var err error
-	if err = statement.isValid(); err != nil {
+	if err := statement.isValid(); err != nil {
 		return err
 	}
 
-	if err = statement.NotResources.ValidateBucket(bucketName); err == nil {
-		return nil
+	if len(statement.Resources) > 0 {
+		if err := statement.Resources.ValidateBucket(bucketName); err != nil {
+			return err
+		}
 	}
 
-	if err = statement.Resources.ValidateBucket(bucketName); err == nil {
-		return nil
+	if len(statement.NotResources) > 0 {
+		if err := statement.NotResources.ValidateBucket(bucketName); err != nil {
+			return err
+		}
 	}
 
-	return err
+	return nil
 }
 
 // Equals checks if two statements are equal
