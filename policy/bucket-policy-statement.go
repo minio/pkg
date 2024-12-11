@@ -90,12 +90,18 @@ func (statement BPStatement) isValid() error {
 
 	for action := range statement.Actions {
 		if action.IsObjectAction() {
-			if !statement.Resources.ObjectResourceExists() && !statement.NotResources.ObjectResourceExists() {
+			if len(statement.Resources) > 0 && !statement.Resources.ObjectResourceExists() {
 				return Errorf("unsupported Resource found %v for action %v", statement.Resources, action)
 			}
+			if len(statement.NotResources) > 0 && !statement.NotResources.ObjectResourceExists() {
+				return Errorf("unsupported Resource found %v for action %v", statement.NotResources, action)
+			}
 		} else {
-			if !statement.Resources.BucketResourceExists() && !statement.NotResources.BucketResourceExists() {
+			if len(statement.Resources) > 0 && !statement.Resources.BucketResourceExists() {
 				return Errorf("unsupported Resource found %v for action %v", statement.Resources, action)
+			}
+			if len(statement.NotResources) > 0 && !statement.NotResources.BucketResourceExists() {
+				return Errorf("unsupported Resource found %v for action %v", statement.NotResources, action)
 			}
 		}
 
