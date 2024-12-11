@@ -18,7 +18,6 @@
 package subnet
 
 import (
-	"bytes"
 	"context"
 	"crypto/tls"
 	"fmt"
@@ -133,36 +132,11 @@ func (lv *LicenseValidator) Init(devMode bool) {
 	}
 }
 
-// downloadSubnetPublicKey will download the current subnet public key.
-func (lv *LicenseValidator) downloadSubnetPublicKey() ([]byte, error) {
-	resp, err := lv.Client.Get(lv.pubKeyURL)
-	if err != nil {
-		return nil, err
-	}
-	if resp.StatusCode != http.StatusOK {
-		return nil, fmt.Errorf("failed to download public key from %s. response [%d:%s]", lv.pubKeyURL, resp.StatusCode, resp.Status)
-	}
-	defer resp.Body.Close()
-	buf := new(bytes.Buffer)
-	_, err = buf.ReadFrom(resp.Body)
-	if err != nil {
-		return nil, err
-	}
-	return buf.Bytes(), nil
-}
-
 // ParseLicense parses the license with the public key and return it's information.
 // Public key is downloaded from subnet. If there is an error downloading the public key
 // it will use the bundled public key instead.
 func (lv *LicenseValidator) ParseLicense(license string) (*licverifier.LicenseInfo, error) {
-	publicKey, e := lv.downloadSubnetPublicKey()
-	if e != nil {
-		// there was an issue getting the subnet public key
-		// use hardcoded public keys instead
-		publicKey = lv.offlinePubKey
-	}
-
-	lvr, e := licverifier.NewLicenseVerifier(publicKey)
+	lvr, e := licverifier.NewLicenseVerifier(lv.offlinePubKey)
 	if e != nil {
 		return nil, e
 	}

@@ -25,6 +25,10 @@ import (
 // A TCPConfig structure is used to configure
 // a TCP client or server connections.
 type TCPConfig struct {
+	// IdleTimeout is the maximum time duration for idle connections
+	// before they are forcibly closed.
+	IdleTimeout time.Duration
+
 	// UserTimeout is the maximum amount of time that transmitted
 	// data may remain unacknowledged before forcefully closing the
 	// connection.
@@ -63,6 +67,9 @@ type TCPConfig struct {
 // necessarily the ones passed to Dial. For example, passing "tcp" to Dial
 // will cause the Control function to be called with "tcp4" or "tcp6".
 func (c *TCPConfig) Control(network, address string, rc syscall.RawConn) error {
+	if c == nil {
+		return nil
+	}
 	return c.control(network, address, rc)
 }
 
@@ -72,6 +79,7 @@ func (c *TCPConfig) Clone() *TCPConfig {
 		return nil
 	}
 	return &TCPConfig{
+		IdleTimeout: c.IdleTimeout,
 		UserTimeout: c.UserTimeout,
 		SendBufSize: c.SendBufSize,
 		RecvBufSize: c.RecvBufSize,

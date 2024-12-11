@@ -267,6 +267,7 @@ func TestConfigValidator(t *testing.T) {
 	expectedGroups := set.CreateStringSet(
 		"cn=projecta,ou=groups,ou=swengg,dc=min,dc=io",
 		"cn=projectb,ou=groups,ou=swengg,dc=min,dc=io",
+		"cn=project/d,ou=groups,ou=swengg,dc=min,dc=io",
 	)
 
 	for i, test := range testCases {

@@ -37,15 +37,15 @@ func (c *TCPConfig) control(_, address string, rc syscall.RawConn) error {
 		_ = unix.SetsockoptInt(fd, unix.SOL_SOCKET, unix.SO_REUSEPORT, 1)
 
 		// Enable custom socket send/recv buffers.
-		if c.SendBufSize > 0 {
+		if c != nil && c.SendBufSize > 0 {
 			_ = unix.SetsockoptInt(fd, unix.SOL_SOCKET, unix.SO_SNDBUF, c.SendBufSize)
 		}
 
-		if c.RecvBufSize > 0 {
+		if c != nil && c.RecvBufSize > 0 {
 			_ = unix.SetsockoptInt(fd, unix.SOL_SOCKET, unix.SO_RCVBUF, c.RecvBufSize)
 		}
 
-		if c.NoDelay {
+		if c != nil && c.NoDelay {
 			_ = syscall.SetsockoptInt(fd, syscall.IPPROTO_TCP, unix.TCP_NODELAY, 1)
 			_ = syscall.SetsockoptInt(fd, syscall.SOL_TCP, unix.TCP_CORK, 0)
 		}
@@ -70,7 +70,16 @@ func (c *TCPConfig) control(_, address string, rc syscall.RawConn) error {
 
 			// The time (in seconds) the connection needs to remain idle before
 			// TCP starts sending keepalive probes
-			_ = syscall.SetsockoptInt(fd, syscall.IPPROTO_TCP, syscall.TCP_KEEPIDLE, 15)
+			idleTimeout := 15
+			if c != nil && c.IdleTimeout > 0 {
+				idleTimeout = int(c.IdleTimeout.Seconds())
+			}
+
+			if idleTimeout < 1 {
+				idleTimeout = 15
+			}
+
+			_ = syscall.SetsockoptInt(fd, syscall.IPPROTO_TCP, syscall.TCP_KEEPIDLE, idleTimeout)
 
 			// Number of probes.
 			// ~ cat /proc/sys/net/ipv4/tcp_keepalive_probes (defaults to 9, we reduce it to 5)
@@ -86,11 +95,11 @@ func (c *TCPConfig) control(_, address string, rc syscall.RawConn) error {
 		//    https://blog.cloudflare.com/when-tcp-sockets-refuse-to-die/
 		// This is a sensitive configuration, it is better to set it to high values, > 60 secs since it can
 		// affect clients reading data with a very slow pace  (disappropriate with socket buffer sizes)
-		if c.UserTimeout > 0 {
+		if c != nil && c.UserTimeout > 0 {
 			_ = syscall.SetsockoptInt(fd, syscall.IPPROTO_TCP, unix.TCP_USER_TIMEOUT, int(c.UserTimeout.Milliseconds()))
 		}
 
-		if c.Interface != "" {
+		if c != nil && c.Interface != "" {
 			if h, _, err := net.SplitHostPort(address); err == nil {
 				address = h
 			}
