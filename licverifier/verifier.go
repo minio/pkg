@@ -27,9 +27,10 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/lestrrat-go/jwx/jwa"
-	"github.com/lestrrat-go/jwx/jwk"
-	"github.com/lestrrat-go/jwx/jwt"
+	"github.com/lestrrat-go/jwx/v2/jwa"
+	"github.com/lestrrat-go/jwx/v2/jwk"
+	"github.com/lestrrat-go/jwx/v2/jws"
+	"github.com/lestrrat-go/jwx/v2/jwt"
 )
 
 // LicenseVerifier needs an ECDSA public key in PEM format for initialization.
@@ -102,13 +103,13 @@ func NewLicenseVerifier(pemBytes []byte) (*LicenseVerifier, error) {
 	if err != nil {
 		return nil, fmt.Errorf("Failed to parse public key: %s", err)
 	}
-	key, err := jwk.New(pbKey)
+	key, err := jwk.FromRaw(pbKey)
 	if err != nil {
 		return nil, err
 	}
 	key.Set(jwk.AlgorithmKey, jwa.ES384)
 	keyset := jwk.NewSet()
-	keyset.Add(key)
+	keyset.AddKey(key)
 	return &LicenseVerifier{
 		keySet: keyset,
 	}, nil
@@ -176,7 +177,7 @@ func toLicenseInfo(license string, token jwt.Token) (LicenseInfo, error) {
 
 // Verify verifies the license key and validates the claims present in it.
 func (lv *LicenseVerifier) Verify(license string, options ...jwt.ParseOption) (LicenseInfo, error) {
-	options = append(options, jwt.WithKeySet(lv.keySet), jwt.UseDefaultKey(true), jwt.WithValidate(true))
+	options = append(options, jwt.WithKeySet(lv.keySet, jws.WithUseDefault(true)), jwt.WithValidate(true))
 	token, err := jwt.ParseString(license, options...)
 	if err != nil {
 		return LicenseInfo{}, fmt.Errorf("failed to verify license: %s", err)

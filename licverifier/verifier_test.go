@@ -22,7 +22,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/lestrrat-go/jwx/jwt"
+	"github.com/lestrrat-go/jwx/v2/jwt"
 )
 
 func areEqLicenseInfo(a, b LicenseInfo) bool {
