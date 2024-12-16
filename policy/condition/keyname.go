@@ -27,23 +27,23 @@ import (
 // for more information about available condition keys.
 type KeyName string
 
+// Prefixes to trim from key names.
+var toTrim = map[string]bool{
+	"aws":  true,
+	"jwt":  true,
+	"ldap": true,
+	"sts":  true,
+	"svc":  true,
+	"s3":   true,
+}
+
 // Name - returns key name which is stripped value of prefixes "aws:", "s3:", "jwt:" and "ldap:"
 func (key KeyName) Name() string {
-	name := string(key)
-	switch {
-	case strings.HasPrefix(name, "aws:"):
-		return strings.TrimPrefix(name, "aws:")
-	case strings.HasPrefix(name, "jwt:"):
-		return strings.TrimPrefix(name, "jwt:")
-	case strings.HasPrefix(name, "ldap:"):
-		return strings.TrimPrefix(name, "ldap:")
-	case strings.HasPrefix(name, "sts:"):
-		return strings.TrimPrefix(name, "sts:")
-	case strings.HasPrefix(name, "svc:"):
-		return strings.TrimPrefix(name, "svc:")
-	default:
-		return strings.TrimPrefix(name, "s3:")
+	idx := strings.IndexByte(string(key), ':')
+	if idx == -1 || !toTrim[string(key[:idx])] {
+		return string(key)
 	}
+	return string(key[idx+1:])
 }
 
 // VarName - returns variable key name, such as "${aws:username}"
@@ -327,6 +327,16 @@ var CommonKeys = append([]KeyName{
 	LDAPUsername,
 	LDAPGroups,
 }, JWTKeys...)
+
+// CommonKeysMap is a lookup of CommonKeys.
+var CommonKeysMap map[KeyName]bool
+
+func init() {
+	CommonKeysMap = make(map[KeyName]bool, len(CommonKeys))
+	for _, key := range CommonKeys {
+		CommonKeysMap[key] = true
+	}
+}
 
 // AllSupportedAdminKeys - is list of all admin supported keys.
 var AllSupportedAdminKeys = append([]KeyName{

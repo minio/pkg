@@ -115,7 +115,7 @@ func TestActionSetToSlice(t *testing.T) {
 		expectedResult []Action
 	}{
 		{NewActionSet(PutObjectAction), []Action{PutObjectAction}},
-		{NewActionSet(), []Action{}},
+		{NewActionSet(), nil},
 	}
 
 	for i, testCase := range testCases {

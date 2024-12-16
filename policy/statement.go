@@ -18,7 +18,9 @@
 package policy
 
 import (
+	"bytes"
 	"strings"
+	"sync"
 
 	"github.com/minio/pkg/v3/policy/condition"
 )
@@ -33,6 +35,11 @@ type Statement struct {
 	Conditions condition.Functions `json:"Condition,omitempty"`
 }
 
+// smallBufPool should always return a non-nil *bytes.Buffer
+var smallBufPool = sync.Pool{
+	New: func() interface{} { return &bytes.Buffer{} },
+}
+
 // IsAllowed - checks given policy args is allowed to continue the Rest API.
 func (statement Statement) IsAllowed(args Args) bool {
 	check := func() bool {
@@ -40,20 +47,23 @@ func (statement Statement) IsAllowed(args Args) bool {
 			statement.NotActions.Match(args.Action) {
 			return false
 		}
+		resource := smallBufPool.Get().(*bytes.Buffer)
+		defer smallBufPool.Put(resource)
+		resource.Reset()
 
-		resource := args.BucketName
+		resource.WriteString(args.BucketName)
 		if args.ObjectName != "" {
 			if !strings.HasPrefix(args.ObjectName, "/") {
-				resource += "/"
+				resource.WriteByte('/')
 			}
 
-			resource += args.ObjectName
+			resource.WriteString(args.ObjectName)
 		} else {
-			resource += "/"
+			resource.WriteByte('/')
 		}
 
 		if statement.isKMS() {
-			if resource == "/" || len(statement.Resources) == 0 {
+			if resource.Len() == 1 && resource.String() == "/" || len(statement.Resources) == 0 {
 				// In previous MinIO versions, KMS statements ignored Resources, so if len(statement.Resources) == 0,
 				// allow backward compatibility by not trying to Match.
 
@@ -65,7 +75,7 @@ func (statement Statement) IsAllowed(args Args) bool {
 		}
 
 		// For some admin statements, resource match can be ignored.
-		if !statement.Resources.Match(resource, args.ConditionValues) && !statement.isAdmin() && !statement.isSTS() {
+		if !statement.Resources.Match(resource.String(), args.ConditionValues) && !statement.isAdmin() && !statement.isSTS() {
 			return false
 		}
 

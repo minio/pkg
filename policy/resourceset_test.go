@@ -20,6 +20,7 @@ package policy
 import (
 	"encoding/json"
 	"reflect"
+	"strconv"
 	"testing"
 )
 
@@ -164,36 +165,68 @@ func TestResourceSetMarshalJSON(t *testing.T) {
 }
 
 func TestResourceSetMatch(t *testing.T) {
+	mybucketCond := map[string][]string{"username": {"mybucket"}, "groups": {"myobject"}}
+	mybucketCondWrong := map[string][]string{"username": {"notmybucket"}, "groups": {"myobject"}}
 	testCases := []struct {
 		resourceSet    ResourceSet
 		resource       string
 		expectedResult bool
+		cond           map[string][]string
 	}{
-		{NewResourceSet(NewResource("*")), "mybucket", true},
-		{NewResourceSet(NewResource("*")), "mybucket/myobject", true},
-		{NewResourceSet(NewResource("mybucket*")), "mybucket", true},
-		{NewResourceSet(NewResource("mybucket*")), "mybucket/myobject", true},
-		{NewResourceSet(NewResource("*/*")), "mybucket/myobject", true},
-		{NewResourceSet(NewResource("mybucket/*")), "mybucket/myobject", true},
-		{NewResourceSet(NewResource("mybucket*/myobject")), "mybucket/myobject", true},
-		{NewResourceSet(NewResource("mybucket*/myobject")), "mybucket100/myobject", true},
-		{NewResourceSet(NewResource("mybucket?0/2010/photos/*")), "mybucket20/2010/photos/1.jpg", true},
-		{NewResourceSet(NewResource("mybucket")), "mybucket", true},
-		{NewResourceSet(NewResource("mybucket?0")), "mybucket30", true},
-		{NewResourceSet(NewResource("mybucket?0/2010/photos/*"),
-			NewResource("mybucket/2010/photos/*")), "mybucket/2010/photos/1.jpg", true},
-		{NewResourceSet(NewResource("*/*")), "mybucket", false},
-		{NewResourceSet(NewResource("mybucket/*")), "mybucket10/myobject", false},
-		{NewResourceSet(NewResource("mybucket")), "mybucket/myobject", false},
-		{NewResourceSet(), "mybucket/myobject", false},
+		{resourceSet: NewResourceSet(NewResource("*")), resource: "mybucket", expectedResult: true},
+		{resourceSet: NewResourceSet(NewResource("*")), resource: "mybucket/myobject", expectedResult: true},
+		{resourceSet: NewResourceSet(NewResource("mybucket*")), resource: "mybucket", expectedResult: true},
+		{resourceSet: NewResourceSet(NewResource("mybucket*")), resource: "mybucket/myobject", expectedResult: true},
+		{resourceSet: NewResourceSet(NewResource("*/*")), resource: "mybucket/myobject", expectedResult: true},
+		{resourceSet: NewResourceSet(NewResource("mybucket/*")), resource: "mybucket/myobject", expectedResult: true},
+		{resourceSet: NewResourceSet(NewResource("mybucket*/myobject")), resource: "mybucket/myobject", expectedResult: true},
+		{resourceSet: NewResourceSet(NewResource("mybucket*/myobject")), resource: "mybucket100/myobject", expectedResult: true},
+		{resourceSet: NewResourceSet(NewResource("mybucket?0/2010/photos/*")), resource: "mybucket20/2010/photos/1.jpg", expectedResult: true},
+		{resourceSet: NewResourceSet(NewResource("mybucket")), resource: "mybucket", expectedResult: true},
+		{resourceSet: NewResourceSet(NewResource("mybucket?0")), resource: "mybucket30", expectedResult: true},
+		{resourceSet: NewResourceSet(NewResource("mybucket?0/2010/photos/*"),
+			NewResource("mybucket/2010/photos/*")), resource: "mybucket/2010/photos/1.jpg", expectedResult: true},
+		{resourceSet: NewResourceSet(NewResource("*/*")), resource: "mybucket", expectedResult: false},
+		{resourceSet: NewResourceSet(NewResource("mybucket/*")), resource: "mybucket10/myobject", expectedResult: false},
+		{resourceSet: NewResourceSet(NewResource("mybucket")), resource: "mybucket/myobject", expectedResult: false},
+		{resourceSet: NewResourceSet(), resource: "mybucket/myobject", expectedResult: false},
+
+		{resourceSet: NewResourceSet(NewResource("${aws:username}*")), resource: "mybucket", expectedResult: true, cond: mybucketCond},
+		{resourceSet: NewResourceSet(NewResource("${aws:username}*")), resource: "mybucket/myobject", expectedResult: true, cond: mybucketCond},
+		{resourceSet: NewResourceSet(NewResource("*/*")), resource: "mybucket/myobject", expectedResult: true, cond: mybucketCond},
+		{resourceSet: NewResourceSet(NewResource("${aws:username}/*")), resource: "mybucket/myobject", expectedResult: true, cond: mybucketCond},
+		{resourceSet: NewResourceSet(NewResource("${aws:username}*/${aws:groups}")), resource: "mybucket/myobject", expectedResult: true, cond: mybucketCond},
+		{resourceSet: NewResourceSet(NewResource("${aws:username}*/${aws:groups}")), resource: "mybucket100/myobject", expectedResult: true, cond: mybucketCond},
+		{resourceSet: NewResourceSet(NewResource("${aws:username}?0/2010/photos/*")), resource: "mybucket20/2010/photos/1.jpg", expectedResult: true, cond: mybucketCond},
+		{resourceSet: NewResourceSet(NewResource("${aws:username}")), resource: "mybucket", expectedResult: true, cond: mybucketCond},
+		{resourceSet: NewResourceSet(NewResource("${aws:username}?0")), resource: "mybucket30", expectedResult: true, cond: mybucketCond},
+		{resourceSet: NewResourceSet(NewResource("${aws:username}?0/2010/photos/*"),
+			NewResource("${aws:username}/2010/photos/*")), resource: "mybucket/2010/photos/1.jpg", expectedResult: true, cond: mybucketCond},
+
+		{resourceSet: NewResourceSet(NewResource("${aws:username}*")), resource: "mybucket", expectedResult: false, cond: mybucketCondWrong},
+		{resourceSet: NewResourceSet(NewResource("${aws:username}*")), resource: "mybucket/myobject", expectedResult: false, cond: mybucketCondWrong},
+		{resourceSet: NewResourceSet(NewResource("*/*")), resource: "mybucket/myobject", expectedResult: true, cond: mybucketCond},
+		{resourceSet: NewResourceSet(NewResource("${aws:username}/*")), resource: "mybucket/myobject", expectedResult: false, cond: mybucketCondWrong},
+		{resourceSet: NewResourceSet(NewResource("${aws:username}*/${aws:groups}")), resource: "mybucket/myobject", expectedResult: false, cond: mybucketCondWrong},
+		{resourceSet: NewResourceSet(NewResource("${aws:username}*/${aws:groups}")), resource: "mybucket100/myobject", expectedResult: false, cond: mybucketCondWrong},
+		{resourceSet: NewResourceSet(NewResource("${aws:username}?0/2010/photos/*")), resource: "mybucket20/2010/photos/1.jpg", expectedResult: false, cond: mybucketCondWrong},
+		{resourceSet: NewResourceSet(NewResource("${aws:username}")), resource: "mybucket", expectedResult: false, cond: mybucketCondWrong},
+		{resourceSet: NewResourceSet(NewResource("${aws:username}?0")), resource: "mybucket30", expectedResult: false, cond: mybucketCondWrong},
+		{resourceSet: NewResourceSet(NewResource("${aws:username}?0/2010/photos/*"),
+			NewResource("${aws:username}/2010/photos/*")), resource: "mybucket/2010/photos/1.jpg", expectedResult: false, cond: mybucketCondWrong},
 	}
 
 	for i, testCase := range testCases {
-		result := testCase.resourceSet.Match(testCase.resource, nil)
+		t.Run(strconv.Itoa(i), func(t *testing.T) {
+			result := testCase.resourceSet.Match(testCase.resource, testCase.cond)
 
-		if result != testCase.expectedResult {
-			t.Fatalf("case %v: expected: %v, got: %v", i+1, testCase.expectedResult, result)
-		}
+			if result != testCase.expectedResult {
+				t.Fatalf("case %v: expected: %v, got: %v", i+1, testCase.expectedResult, result)
+			}
+			t.Logf("allocs: %.1f per run", testing.AllocsPerRun(100, func() {
+				result = testCase.resourceSet.Match(testCase.resource, testCase.cond)
+			}))
+		})
 	}
 }
 

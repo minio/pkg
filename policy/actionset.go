@@ -119,7 +119,10 @@ func (actionSet ActionSet) String() string {
 
 // ToSlice - returns slice of actions from the action set.
 func (actionSet ActionSet) ToSlice() []Action {
-	actions := []Action{}
+	if len(actionSet) == 0 {
+		return nil
+	}
+	actions := make([]Action, 0, len(actionSet))
 	for action := range actionSet {
 		actions = append(actions, action)
 	}
@@ -129,7 +132,10 @@ func (actionSet ActionSet) ToSlice() []Action {
 
 // ToAdminSlice - returns slice of admin actions from the action set.
 func (actionSet ActionSet) ToAdminSlice() []AdminAction {
-	actions := []AdminAction{}
+	if len(actionSet) == 0 {
+		return nil
+	}
+	actions := make([]AdminAction, 0, len(actionSet))
 	for action := range actionSet {
 		actions = append(actions, AdminAction(action))
 	}
@@ -216,7 +222,7 @@ func (actionSet ActionSet) Validate() error {
 
 // NewActionSet - creates new action set.
 func NewActionSet(actions ...Action) ActionSet {
-	actionSet := make(ActionSet)
+	actionSet := make(ActionSet, len(actions))
 	for _, action := range actions {
 		actionSet.Add(action)
 	}
