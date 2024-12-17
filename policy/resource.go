@@ -18,6 +18,7 @@
 package policy
 
 import (
+	"bytes"
 	"encoding/json"
 	"path"
 	"strings"
@@ -118,15 +119,53 @@ func (r Resource) MatchResource(resource string) bool {
 
 // Match - matches object name with resource pattern, including specific conditionals.
 func (r Resource) Match(resource string, conditionValues map[string][]string) bool {
-	pattern := r.Pattern
-	if len(conditionValues) != 0 {
-		for _, key := range condition.CommonKeys {
-			// Empty values are not supported for policy variables.
-			if rvalues, ok := conditionValues[key.Name()]; ok && rvalues[0] != "" {
-				pattern = strings.Replace(pattern, key.VarName(), rvalues[0], -1)
-			}
+	// Happy path, with no replacements
+	idx := strings.IndexByte(r.Pattern, '$')
+	if idx < 0 {
+		if cp := path.Clean(resource); cp != "." && cp == r.Pattern {
+			return true
 		}
+		return wildcard.Match(r.Pattern, resource)
 	}
+
+	// Use a small buffer
+	pat := smallBufPool.Get().(*bytes.Buffer)
+	defer smallBufPool.Put(pat)
+	pat.Reset()
+
+	// Do replacement of known keys.
+	pat.WriteString(r.Pattern[:idx])
+	remain := r.Pattern[idx:]
+	for len(remain) > 0 {
+		val := remain[0]
+		if val != '$' || len(remain) < 3 {
+			pat.WriteByte(val)
+			remain = remain[1:]
+			continue
+		}
+		keyEnds := strings.IndexByte(remain, '}')
+
+		// If no curly brackets, emit as-is.
+		if remain[1] != '{' || keyEnds < 0 {
+			pat.WriteByte('$')
+			remain = remain[1:]
+			continue
+		}
+
+		ckey := condition.KeyName(remain[2:keyEnds])
+
+		// Only replace keys we know
+		if rvalues, ok := conditionValues[ckey.Name()]; condition.CommonKeysMap[ckey] && ok && rvalues[0] != "" {
+			pat.WriteString(rvalues[0])
+		} else {
+			// Write without replacing...
+			pat.WriteString("${")
+			pat.WriteString(string(ckey))
+			pat.WriteString("}")
+		}
+		remain = remain[keyEnds+1:]
+	}
+	pattern := pat.String()
 	if cp := path.Clean(resource); cp != "." && cp == pattern {
 		return true
 	}
