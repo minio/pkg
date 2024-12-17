@@ -67,6 +67,9 @@ type TCPConfig struct {
 // necessarily the ones passed to Dial. For example, passing "tcp" to Dial
 // will cause the Control function to be called with "tcp4" or "tcp6".
 func (c *TCPConfig) Control(network, address string, rc syscall.RawConn) error {
+	if c == nil {
+		return nil
+	}
 	return c.control(network, address, rc)
 }
 

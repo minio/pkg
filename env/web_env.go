@@ -32,9 +32,9 @@ import (
 	"strings"
 	"time"
 
-	"github.com/lestrrat-go/jwx/jwa"
-	"github.com/lestrrat-go/jwx/jwk"
-	"github.com/lestrrat-go/jwx/jwt"
+	"github.com/lestrrat-go/jwx/v2/jwa"
+	"github.com/lestrrat-go/jwx/v2/jwk"
+	"github.com/lestrrat-go/jwx/v2/jwt"
 )
 
 const (
@@ -100,7 +100,7 @@ func getEnvValueFromHTTP(urlStr, envKey string) (string, string, string, error) 
 		return "", "", "", err
 	}
 
-	skey, err := jwk.New([]byte(password))
+	skey, err := jwk.FromRaw([]byte(password))
 	if err != nil {
 		return "", "", "", err
 	}
@@ -119,7 +119,7 @@ func getEnvValueFromHTTP(urlStr, envKey string) (string, string, string, error) 
 		return "", "", "", err
 	}
 
-	signed, err := jwt.Sign(token, jwa.HS512, skey)
+	signed, err := jwt.Sign(token, jwt.WithKey(jwa.HS512, skey))
 	if err != nil {
 		return "", "", "", err
 	}
