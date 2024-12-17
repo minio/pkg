@@ -18,9 +18,11 @@
 package policy
 
 import (
+	"encoding/binary"
 	"strings"
 
 	"github.com/minio/pkg/v3/policy/condition"
+	"github.com/zeebo/xxh3"
 )
 
 // Statement - iam policy statement.
@@ -201,6 +203,44 @@ func (statement Statement) Equals(st Statement) bool {
 		return false
 	}
 	return true
+}
+
+// Equals checks if two statements are equal
+func (statement Statement) hash(seed uint64) [16]byte {
+	// Order independent xor.
+	xorTo := func(dst *xxh3.Uint128, v xxh3.Uint128) {
+		dst.Lo ^= v.Lo
+		dst.Hi ^= v.Hi
+	}
+	// Add value with seed.
+	xorInt := func(dst *xxh3.Uint128, n int, seed uint64) {
+		var tmp [8]byte
+		binary.LittleEndian.PutUint64(tmp[:], uint64(n))
+		xorTo(dst, xxh3.Hash128Seed(tmp[:], seed))
+	}
+
+	h := xxh3.HashString128Seed(string(statement.Effect), seed)
+
+	xorInt(&h, len(statement.Actions), seed+1)
+	for action := range statement.Actions {
+		xorTo(&h, xxh3.HashString128Seed(string(action), seed+2))
+	}
+
+	xorInt(&h, len(statement.NotActions), seed+3)
+	for action := range statement.NotActions {
+		xorTo(&h, xxh3.HashString128Seed(string(action), seed+4))
+	}
+
+	xorInt(&h, len(statement.Resources), seed+5)
+	for res := range statement.Resources {
+		xorTo(&h, xxh3.HashString128Seed(res.Pattern+res.Type.String(), seed+6))
+	}
+
+	xorInt(&h, len(statement.Conditions), seed+7)
+	for _, cond := range statement.Conditions {
+		xorTo(&h, xxh3.HashString128Seed(cond.String(), seed+8))
+	}
+	return h.Bytes()
 }
 
 // Clone clones Statement structure

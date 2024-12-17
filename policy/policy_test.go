@@ -21,6 +21,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"net"
+	"strconv"
 	"strings"
 	"testing"
 	"time"
@@ -1543,11 +1544,155 @@ func TestMergePolicies(t *testing.T) {
 				},
 			},
 		},
+		{
+			inputs: []Policy{p1, p2, p3, p1, p2, p3, p1, p2, p3, p1, p2, p3, p1, p2, p3, p1, p2, p3, p1, p2, p3, p1, p2, p3, p1, p2, p3, p1, p2, p3, p1, p2, p3, p1, p2, p3, p1, p2, p3, p1, p2, p3, p1, p2, p3, p1, p2, p3, p1, p2, p3, p1, p2, p3, p1, p2, p3, p1, p2, p3, p1, p2, p3, p1, p2, p3},
+			expected: Policy{
+				Version: DefaultVersion,
+				Statements: []Statement{
+					NewStatement(
+						"",
+						Deny,
+						NewActionSet(AllAdminActions),
+						ResourceSet{},
+						condition.NewFunctions(),
+					),
+					NewStatement(
+						"",
+						Allow,
+						NewActionSet(AllActions),
+						NewResourceSet(NewResource("*")),
+						condition.NewFunctions(),
+					),
+					NewStatement(
+						"",
+						Allow,
+						NewActionSet(GetBucketLocationAction),
+						NewResourceSet(NewResource("mybucket")),
+						condition.NewFunctions(),
+					),
+				},
+			},
+		},
 	}
 	for i, testCase := range testCases {
-		got := MergePolicies(testCase.inputs...)
-		if !got.Equals(testCase.expected) {
-			t.Errorf("Case %d: expected: %v, got %v", i+1, got, testCase.expected)
-		}
+		t.Run(strconv.Itoa(i), func(t *testing.T) {
+			got := MergePolicies(testCase.inputs...)
+			if !got.Equals(testCase.expected) {
+				t.Errorf("Case %d: expected: %v, got %v", i, testCase.expected, got)
+			}
+		})
+	}
+}
+
+func BenchmarkDedupe(b *testing.B) {
+	var allActions []Action
+	var allAdminActions []Action
+	for action := range supportedActions {
+		allActions = append(allActions, action)
+	}
+	for action := range supportedAdminActions {
+		allAdminActions = append(allAdminActions, Action(action))
+	}
+
+	p1 := Policy{
+		Version: DefaultVersion,
+		Statements: []Statement{
+			NewStatement(
+				"",
+				Deny,
+				NewActionSet(allAdminActions...),
+				NewResourceSet(NewResource("bucket0"), NewResource("bucket1"), NewResource("bucket2"), NewResource("bucket3"), NewResource("bucket4"), NewResource("bucket5")),
+				condition.NewFunctions(),
+			),
+			NewStatement(
+				"",
+				Allow,
+				NewActionSet(allActions...),
+				NewResourceSet(NewResource("bucket0"), NewResource("bucket1"), NewResource("bucket2"), NewResource("bucket3"), NewResource("bucket4"), NewResource("bucket5")),
+				condition.NewFunctions(),
+			),
+		},
+	}
+
+	// p2 is a subset of p1
+	p2 := Policy{
+		Version: DefaultVersion,
+		Statements: []Statement{
+			NewStatement(
+				"",
+				Deny,
+				NewActionSet(allAdminActions...),
+				NewResourceSet(NewResource("bucket0"), NewResource("bucket1"), NewResource("bucket2"), NewResource("bucket3"), NewResource("bucket4"), NewResource("bucket5")),
+				condition.NewFunctions(),
+			),
+		},
+	}
+
+	p3 := Policy{
+		ID:      "MyPolicyForMyBucket1",
+		Version: DefaultVersion,
+		Statements: []Statement{
+			NewStatement(
+				"",
+				Allow,
+				NewActionSet(allActions...),
+				NewResourceSet(NewResource("mybucketA"), NewResource("mybucketB"), NewResource("mybucketC"), NewResource("mybucketD"), NewResource("mybucketE"), NewResource("mybucketF"), NewResource("mybucketG"), NewResource("mybucketH"), NewResource("mybucketI"), NewResource("mybucketJ"), NewResource("mybucketK"), NewResource("mybucketL"), NewResource("mybucketM"), NewResource("mybucketN"), NewResource("mybucketO"), NewResource("mybucketP"), NewResource("mybucketQ"), NewResource("mybucketR"), NewResource("mybucketS"), NewResource("mybucketS"), NewResource("mybucketU"), NewResource("mybucketV"), NewResource("mybucketX")),
+				condition.NewFunctions(),
+			),
+		},
+	}
+
+	testCases := []struct {
+		inputs   []Policy
+		expected Policy
+	}{
+		{
+			inputs: []Policy{p1, p2, p3, p1, p2, p3, p1, p2, p3, p1, p2, p3, p1, p2, p3, p1, p2, p3, p1, p2, p3, p1, p2, p3, p1, p2, p3, p1, p2, p3, p1, p2, p3, p1, p2, p3, p1, p2, p3, p1, p2, p3, p1, p2, p3, p1, p2, p3, p1, p2, p3, p1, p2, p3, p1, p2, p3, p1, p2, p3, p1, p2, p3, p1, p2, p3},
+			expected: Policy{
+				Version: DefaultVersion,
+				Statements: []Statement{
+					NewStatement(
+						"",
+						Deny,
+						NewActionSet(allAdminActions...),
+						NewResourceSet(NewResource("bucket0"), NewResource("bucket1"), NewResource("bucket2"), NewResource("bucket3"), NewResource("bucket4"), NewResource("bucket5")),
+						condition.NewFunctions(),
+					),
+					NewStatement(
+						"",
+						Allow,
+						NewActionSet(allActions...),
+						NewResourceSet(NewResource("bucket0"), NewResource("bucket1"), NewResource("bucket2"), NewResource("bucket3"), NewResource("bucket4"), NewResource("bucket5")),
+						condition.NewFunctions(),
+					),
+					NewStatement(
+						"",
+						Allow,
+						NewActionSet(allActions...),
+						NewResourceSet(NewResource("mybucketA"), NewResource("mybucketB"), NewResource("mybucketC"), NewResource("mybucketD"), NewResource("mybucketE"), NewResource("mybucketF"), NewResource("mybucketG"), NewResource("mybucketH"), NewResource("mybucketI"), NewResource("mybucketJ"), NewResource("mybucketK"), NewResource("mybucketL"), NewResource("mybucketM"), NewResource("mybucketN"), NewResource("mybucketO"), NewResource("mybucketP"), NewResource("mybucketQ"), NewResource("mybucketR"), NewResource("mybucketS"), NewResource("mybucketS"), NewResource("mybucketU"), NewResource("mybucketV"), NewResource("mybucketX")),
+						condition.NewFunctions(),
+					),
+				},
+			},
+		},
+	}
+	for i, testCase := range testCases {
+		b.Run(strconv.Itoa(i), func(b *testing.B) {
+			var merged Policy
+			for _, p := range testCase.inputs {
+				if merged.Version == "" {
+					merged.Version = p.Version
+				}
+				for _, st := range p.Statements {
+					merged.Statements = append(merged.Statements, st.Clone())
+				}
+			}
+			b.ResetTimer()
+			b.ReportAllocs()
+			for i := 0; i < b.N; i++ {
+				shallow := merged
+				shallow.dropDuplicateStatements()
+			}
+		})
 	}
 }

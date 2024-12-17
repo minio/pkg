@@ -18,6 +18,8 @@
 package policy
 
 import (
+	"crypto/rand"
+	"encoding/binary"
 	"encoding/json"
 	"io"
 	"strings"
@@ -242,6 +244,11 @@ func MergePolicies(inputs ...Policy) Policy {
 }
 
 func (iamp *Policy) dropDuplicateStatements() {
+	// Select an O(N) version instead of O(N!) for more statements.
+	if len(iamp.Statements) > 10 {
+		iamp.dropDuplicateStatementsMany()
+		return
+	}
 	dups := make(map[int]struct{})
 	for i := range iamp.Statements {
 		if _, ok := dups[i]; ok {
@@ -269,6 +276,30 @@ func (iamp *Policy) dropDuplicateStatements() {
 		c++
 	}
 	iamp.Statements = iamp.Statements[:c]
+}
+
+func (iamp *Policy) dropDuplicateStatementsMany() {
+	// Calculate a hash for each.
+	// Drop statements with duplicate hashes.
+	found := make(map[[16]byte]struct{}, len(iamp.Statements))
+
+	// Apply a base seed
+	var baseSeed [8]byte
+	rand.Read(baseSeed[:])
+	var seed uint64
+	binary.LittleEndian.PutUint64(baseSeed[:], seed)
+	writeAt := 0
+	for _, s := range iamp.Statements {
+		h := s.hash(seed)
+		if _, ok := found[h]; ok {
+			// duplicate, do not write.
+			continue
+		}
+		found[h] = struct{}{}
+		iamp.Statements[writeAt] = s
+		writeAt++
+	}
+	iamp.Statements = iamp.Statements[:writeAt]
 }
 
 // UnmarshalJSON - decodes JSON data to Iamp.
