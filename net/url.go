@@ -239,29 +239,15 @@ func IsNetworkOrHostDown(err error, expectTimeouts bool) bool {
 	}
 
 	// Fallback to other mechanisms.
-	switch {
-	case strings.Contains(err.Error(), "Connection closed by foreign host"):
-		return true
-	case strings.Contains(err.Error(), "TLS handshake timeout"):
-		// If error is - tlsHandshakeTimeoutError.
-		return true
-	case strings.Contains(err.Error(), "i/o timeout"):
-		// If error is - tcp timeoutError.
-		return true
-	case strings.Contains(err.Error(), "connection timed out"):
-		// If err is a net.Dial timeout.
-		return true
-	case strings.Contains(err.Error(), "connection reset by peer"):
-		// IF err is a peer reset on a socket.
-		return true
-	case strings.Contains(err.Error(), "broken pipe"):
-		// IF err is a broken pipe on a socket.
-		return true
-	case strings.Contains(strings.ToLower(err.Error()), "503 service unavailable"):
-		// Denial errors
-		return true
-	}
-	return false
+	return strings.Contains(err.Error(), "Connection closed by foreign host") ||
+		strings.Contains(err.Error(), "TLS handshake timeout") ||
+		strings.Contains(err.Error(), "i/o timeout") ||
+		strings.Contains(err.Error(), "connection timed out") ||
+		strings.Contains(err.Error(), "connection reset by peer") ||
+		strings.Contains(err.Error(), "broken pipe") ||
+		strings.Contains(strings.ToLower(err.Error()), "503 service unavailable") ||
+		strings.Contains(err.Error(), "use of closed network connection") ||
+		strings.Contains(err.Error(), "An existing connection was forcibly closed by the remote host")
 }
 
 // IsConnResetErr - Checks for "connection reset" errors.
