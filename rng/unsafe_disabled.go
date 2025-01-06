@@ -1,4 +1,4 @@
-// Copyright (c) 2015-2021 MinIO, Inc.
+// Copyright (c) 2015-2025 MinIO, Inc.
 //
 // This file is part of MinIO Object Storage stack
 //
@@ -15,30 +15,20 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-package randreader
+//go:build !(amd64 || arm64 || ppc64le || riscv64) || nounsafe || purego || appengine
+
+package rng
 
 import (
-	"io"
-	"math/rand"
-	"time"
-
-	"github.com/minio/pkg/v3/rng"
+	"encoding/binary"
 )
 
-// New returns an infinite reader that will return pseudo-random data.
-// Data should not be used for cryptographic functions.
-// A random time based seed is used.
-func New() io.Reader {
-	return NewSource(rand.NewSource(time.Now().UnixNano()))
+const unsafeEnabled = false
+
+func load64(b []byte, i int) uint64 {
+	return binary.LittleEndian.Uint64(b[i:])
 }
 
-// NewSource returns an infinite reader that will return pseudo-random data.
-// Data should not be used for cryptographic functions.
-// The data is seeded from the provided source.
-func NewSource(src rand.Source) io.Reader {
-	r, err := rng.NewReader(rng.WithRNG(rand.New(src)))
-	if err != nil {
-		panic(err)
-	}
-	return r
+func store64(b []byte, i int, v uint64) {
+	binary.LittleEndian.PutUint64(b[i:], v)
 }

@@ -15,48 +15,9 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-package randreader
+//go:build !noasm && !appengine && !gccgo
 
-import (
-	"io"
-	"math/rand"
-	"testing"
-)
+package rng
 
-func BenchmarkReader(b *testing.B) {
-	const size = 100000
-
-	buf := make([]byte, size)
-	src := New()
-	b.SetBytes(size)
-	b.ReportAllocs()
-	b.ResetTimer()
-	for i := 0; i < b.N; i++ {
-		n, err := io.ReadFull(src, buf)
-		if err != nil {
-			b.Fatal(err)
-		}
-		if n != size {
-			b.Fatalf("want read size %d, got %d", size, n)
-		}
-	}
-}
-
-func BenchmarkMathRand(b *testing.B) {
-	const size = 100000
-
-	buf := make([]byte, size)
-	src := rand.New(rand.NewSource(0))
-	b.SetBytes(size)
-	b.ReportAllocs()
-	b.ResetTimer()
-	for i := 0; i < b.N; i++ {
-		n, err := io.ReadFull(src, buf)
-		if err != nil {
-			b.Fatal(err)
-		}
-		if n != size {
-			b.Fatalf("want read size %d, got %d", size, n)
-		}
-	}
-}
+//go:noescape
+func xorSlice(in, out []byte, v *[4]uint64)

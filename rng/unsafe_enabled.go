@@ -1,7 +1,4 @@
-//go:build !amd64 || noasm || appengine || gccgo
-// +build !amd64 noasm appengine gccgo
-
-// Copyright (c) 2015-2021 MinIO, Inc.
+// Copyright (c) 2015-2025 MinIO, Inc.
 //
 // This file is part of MinIO Object Storage stack
 //
@@ -18,23 +15,25 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-package randreader
+// We enable 64 bit LE platforms:
 
-import "encoding/binary"
+//go:build (amd64 || arm64 || ppc64le || riscv64) && !nounsafe && !purego && !appengine
 
-func xorSlice(rand, out []byte) {
-	var a0, a1 uint64
-	a0 = binary.LittleEndian.Uint64(rand)
-	a1 = binary.LittleEndian.Uint64(rand[8:])
-	for len(out) >= 32 {
-		v0 := binary.LittleEndian.Uint64(out[:]) ^ a0
-		v1 := binary.LittleEndian.Uint64(out[8:]) ^ a1
-		v2 := binary.LittleEndian.Uint64(out[16:]) ^ a0
-		v3 := binary.LittleEndian.Uint64(out[24:]) ^ a1
-		binary.LittleEndian.PutUint64(out[:], v0)
-		binary.LittleEndian.PutUint64(out[8:], v1)
-		binary.LittleEndian.PutUint64(out[16:], v2)
-		binary.LittleEndian.PutUint64(out[24:], v3)
-		out = out[32:]
-	}
+package rng
+
+import (
+	"unsafe"
+)
+
+const unsafeEnabled = true
+
+func load64(b []byte, i int) uint64 {
+	//return binary.LittleEndian.Uint64(b[i:])
+	//return *(*uint64)(unsafe.Pointer(&b[i]))
+	return *(*uint64)(unsafe.Pointer(uintptr(unsafe.Pointer(&b[0])) + uintptr(i)*unsafe.Sizeof(b[0])))
+}
+
+func store64(b []byte, i int, v uint64) {
+	//binary.LittleEndian.PutUint64(b, v)
+	*(*uint64)(unsafe.Pointer(uintptr(unsafe.Pointer(&b[0])) + uintptr(i)*unsafe.Sizeof(b[0]))) = v
 }
