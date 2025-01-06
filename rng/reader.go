@@ -227,6 +227,13 @@ func (r *Reader) Reset() error {
 	return r.init()
 }
 
+// ResetSize will reset the stream and scramble the seed,
+// as well as setting a new size.
+func (r *Reader) ResetSize(size int64) error {
+	r.o.size = size
+	return r.init()
+}
+
 // WithRNG allows to seed the reader with a specific seed.
 // Otherwise a random seed based on current time will be added.
 func WithRNG(rng io.Reader) ReaderOption {
