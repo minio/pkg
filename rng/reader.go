@@ -36,16 +36,18 @@ const (
 // pseudo-random data.
 // The Reader supports seeking and arbitrary async reads from io.ReadAt.
 type Reader struct {
-	buf    [bufferSize]byte
-	tmp    [32]byte
-	subxor [4]uint64
-	o      *readerOptions
-	offset int64
+	buf          [bufferSize]byte
+	tmp          [32]byte
+	subxor       [4]uint64
+	o            *readerOptions
+	offset       int64
+	bufferSeeded bool
 }
 
 type readerOptions struct {
-	rng  io.Reader
-	size int64
+	rng       io.Reader
+	size      int64
+	fullReset bool
 }
 
 // ReaderOption provides an option to NewReader.
@@ -69,12 +71,16 @@ func NewReader(opts ...ReaderOption) (*Reader, error) {
 }
 
 func (r *Reader) init() error {
-	_, err := io.ReadFull(r.o.rng, r.buf[:])
-	if err != nil {
-		return err
+	if !r.bufferSeeded {
+		_, err := io.ReadFull(r.o.rng, r.buf[:])
+		if err != nil {
+			return err
+		}
+		r.bufferSeeded = !r.o.fullReset
 	}
+	// Always reset subkeys.
 	var tmp [32]byte
-	_, err = io.ReadFull(r.o.rng, r.tmp[:])
+	_, err := io.ReadFull(r.o.rng, r.tmp[:])
 	if err != nil {
 		return err
 	}
@@ -234,8 +240,8 @@ func (r *Reader) ResetSize(size int64) error {
 	return r.init()
 }
 
-// WithRNG allows to seed the reader with a specific seed.
-// Otherwise a random seed based on current time will be added.
+// WithRNG allows to use a specific reader for entropy.
+// Otherwise a math/rand prng with a seed based on current time will be added.
 func WithRNG(rng io.Reader) ReaderOption {
 	return func(o *readerOptions) error {
 		o.rng = rng
@@ -247,6 +253,17 @@ func WithRNG(rng io.Reader) ReaderOption {
 func WithSize(size int64) ReaderOption {
 	return func(o *readerOptions) error {
 		o.size = size
+		return nil
+	}
+}
+
+// WithFullReset will fully re-seed the reader on Reset.
+// If set the entire stream will be randomized.
+// If not set, it would be possible to derive a 32 byte xor value
+// that makes it possible to predict a stream from the previous output.
+func WithFullReset(b bool) ReaderOption {
+	return func(o *readerOptions) error {
+		o.fullReset = b
 		return nil
 	}
 }
