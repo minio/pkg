@@ -46,6 +46,28 @@ func BenchmarkReader(b *testing.B) {
 	}
 }
 
+func BenchmarkReaderReset(b *testing.B) {
+	for _, size := range []int{1000, 1024, 16384, 1 << 20} {
+		r, err := NewReader()
+		if err != nil {
+			b.Fatal(err)
+		}
+		b.Run(strconv.Itoa(size), func(b *testing.B) {
+			buf := make([]byte, size)
+			b.ReportAllocs()
+			b.SetBytes(int64(len(buf)))
+			b.ResetTimer()
+			for n := 0; n < b.N; n++ {
+				r.Reset()
+				_, err := io.ReadFull(r, buf)
+				if err != nil {
+					b.Fatal(err)
+				}
+			}
+		})
+	}
+}
+
 func BenchmarkReaderReadAt(b *testing.B) {
 	for _, size := range []int{1000, 1024, 16384, 1 << 20} {
 		r, err := NewReader()
