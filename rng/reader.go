@@ -45,8 +45,9 @@ type Reader struct {
 }
 
 type readerOptions struct {
-	rng  io.Reader
-	size int64
+	rng       io.Reader
+	size      int64
+	fullReset bool
 }
 
 // ReaderOption provides an option to NewReader.
@@ -75,7 +76,7 @@ func (r *Reader) init() error {
 		if err != nil {
 			return err
 		}
-		r.bufferSeeded = true
+		r.bufferSeeded = !r.o.fullReset
 	}
 	// Always reset subkeys.
 	var tmp [32]byte
@@ -252,6 +253,17 @@ func WithRNG(rng io.Reader) ReaderOption {
 func WithSize(size int64) ReaderOption {
 	return func(o *readerOptions) error {
 		o.size = size
+		return nil
+	}
+}
+
+// WithFullReset will fully re-seed the reader on Reset.
+// If set the entire stream will be randomized.
+// If not set, it would be possible to derive a 32 byte xor value
+// that makes it possible to predict a stream from the previous output.
+func WithFullReset(b bool) ReaderOption {
+	return func(o *readerOptions) error {
+		o.fullReset = b
 		return nil
 	}
 }
