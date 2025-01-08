@@ -403,3 +403,24 @@ func isSymlink(file string) (bool, error) {
 	}
 	return st.Mode()&os.ModeSymlink == os.ModeSymlink, nil
 }
+
+// GetAllCertificates returns all the certificates loaded
+func (m *Manager) GetAllCertificates() []*x509.Certificate {
+	m.lock.RLock()
+	defer m.lock.RUnlock()
+
+	certs := []*x509.Certificate{}
+	for _, c := range m.certificates {
+		if c.Leaf != nil {
+			// marshal and parse to create a deep copy
+			cBytes := c.Leaf.Raw
+			copyCert, err := x509.ParseCertificate(cBytes)
+			if err != nil {
+				continue
+			}
+			certs = append(certs, copyCert)
+		}
+	}
+
+	return certs
+}
