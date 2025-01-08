@@ -83,6 +83,38 @@ func TestStatementIsAllowed(t *testing.T) {
 		condition.NewFunctions(func1),
 	)
 
+	case7Statement := NewStatementWithNotResource(
+		"",
+		Deny,
+		NewActionSet(GetObjectAction, PutObjectAction),
+		NewResourceSet(NewResource("mybucket/myobject*")),
+		condition.NewFunctions(),
+	)
+
+	case8Statement := NewStatementWithNotResource(
+		"",
+		Allow,
+		NewActionSet(GetObjectAction, PutObjectAction),
+		NewResourceSet(NewResource("mybucket/myobject*")),
+		condition.NewFunctions(),
+	)
+
+	case9Statement := NewStatementWithNotResource(
+		"",
+		Allow,
+		NewActionSet(GetObjectAction, PutObjectAction),
+		NewResourceSet(NewResource("mybucket/notmyobject*")),
+		condition.NewFunctions(),
+	)
+
+	case10Statement := NewStatementWithNotResource(
+		"",
+		Deny,
+		NewActionSet(GetObjectAction, PutObjectAction),
+		NewResourceSet(NewResource("mybucket/notmyobject*")),
+		condition.NewFunctions(),
+	)
+
 	anonGetBucketLocationArgs := Args{
 		AccountName:     "Q3AM3UQ867SPQQA43P2F",
 		Action:          GetBucketLocationAction,
@@ -181,6 +213,34 @@ func TestStatementIsAllowed(t *testing.T) {
 		{case6Statement, getBucketLocationArgs, true},
 		{case6Statement, putObjectActionArgs, false},
 		{case6Statement, getObjectActionArgs, true},
+
+		{case7Statement, anonGetBucketLocationArgs, true},
+		{case7Statement, anonPutObjectActionArgs, true},
+		{case7Statement, anonGetObjectActionArgs, true},
+		{case7Statement, getBucketLocationArgs, true},
+		{case7Statement, putObjectActionArgs, true},
+		{case7Statement, getObjectActionArgs, true},
+
+		{case8Statement, anonGetBucketLocationArgs, false},
+		{case8Statement, anonPutObjectActionArgs, false},
+		{case8Statement, anonGetObjectActionArgs, false},
+		{case8Statement, getBucketLocationArgs, false},
+		{case8Statement, putObjectActionArgs, false},
+		{case8Statement, getObjectActionArgs, false},
+
+		{case9Statement, anonGetBucketLocationArgs, false},
+		{case9Statement, anonPutObjectActionArgs, true},
+		{case9Statement, anonGetObjectActionArgs, true},
+		{case9Statement, getBucketLocationArgs, false},
+		{case9Statement, putObjectActionArgs, true},
+		{case9Statement, getObjectActionArgs, true},
+
+		{case10Statement, anonGetBucketLocationArgs, true},
+		{case10Statement, anonPutObjectActionArgs, false},
+		{case10Statement, anonGetObjectActionArgs, false},
+		{case10Statement, getBucketLocationArgs, true},
+		{case10Statement, putObjectActionArgs, false},
+		{case10Statement, getObjectActionArgs, false},
 	}
 
 	for i, testCase := range testCases {
@@ -285,13 +345,18 @@ func TestStatementIsValid(t *testing.T) {
 			nil,
 			condition.NewFunctions(),
 		), false},
-		{Statement{
-			SID:        "",
-			Effect:     Allow,
-			NotActions: NewActionSet(GetObjectAction),
-			Resources:  NewResourceSet(NewResource("mybucket/myobject*")),
-			Conditions: condition.NewFunctions(),
-		}, false},
+		{NewStatementWithNotAction("",
+			Allow,
+			NewActionSet(GetObjectAction),
+			NewResourceSet(NewResource("mybucket/myobject*")),
+			condition.NewFunctions(),
+		), false},
+		{NewStatementWithNotResource("",
+			Allow,
+			NewActionSet(GetObjectAction, PutObjectAction),
+			NewResourceSet(NewResource("mybucket/myobject*")),
+			condition.NewFunctions(),
+		), false},
 	}
 
 	for i, testCase := range testCases {
@@ -421,12 +486,24 @@ func TestStatementUnmarshalJSONAndValidate(t *testing.T) {
     ],
     "Resource": "arn:aws:s3:::mybucket/myobject*"
 }`)
-	case11Statement := Statement{
-		Effect:     Deny,
-		NotActions: NewActionSet(GetObjectAction, PutObjectAction),
-		Resources:  NewResourceSet(NewResource("mybucket/myobject*")),
-		Conditions: condition.NewFunctions(),
-	}
+	case11Statement := NewStatementWithNotAction("",
+		Deny,
+		NewActionSet(GetObjectAction, PutObjectAction),
+		NewResourceSet(NewResource("mybucket/myobject*")),
+		condition.NewFunctions(),
+	)
+
+	case12Data := []byte(`{
+		"Effect": "Allow",
+		"Action": "s3:GetObject",
+		"NotResource": "arn:aws:s3:::mybucket/myobject*"
+	}`)
+	case12Statement := NewStatementWithNotResource("",
+		Allow,
+		NewActionSet(GetObjectAction),
+		NewResourceSet(NewResource("mybucket/myobject*")),
+		condition.NewFunctions(),
+	)
 
 	testCases := []struct {
 		data                []byte
@@ -450,6 +527,7 @@ func TestStatementUnmarshalJSONAndValidate(t *testing.T) {
 		// Unsupported condition key error.
 		{case10Data, Statement{}, false, true},
 		{case11Data, case11Statement, false, false},
+		{case12Data, case12Statement, false, false},
 	}
 
 	for i, testCase := range testCases {
