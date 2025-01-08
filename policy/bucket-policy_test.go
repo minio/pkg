@@ -91,6 +91,26 @@ func TestBucketPolicyIsAllowed(t *testing.T) {
 		},
 	}
 
+	case5Policy := BucketPolicy{
+		Version: DefaultVersion,
+		Statements: []BPStatement{
+			NewBPStatement("",
+				Allow,
+				NewPrincipal("*"),
+				NewActionSet(GetObjectAction, PutObjectAction),
+				NewResourceSet(NewResource("mybucket/*")),
+				condition.NewFunctions(),
+			),
+			NewBPStatementWithNotResource("",
+				Deny,
+				NewPrincipal("*"),
+				NewActionSet(PutObjectAction),
+				NewResourceSet(NewResource("mybucket/notmyobject*")),
+				condition.NewFunctions(),
+			),
+		},
+	}
+
 	anonGetBucketLocationArgs := BucketPolicyArgs{
 		AccountName:     "Q3AM3UQ867SPQQA43P2F",
 		Action:          GetBucketLocationAction,
@@ -178,6 +198,13 @@ func TestBucketPolicyIsAllowed(t *testing.T) {
 		{case4Policy, getBucketLocationArgs, true},
 		{case4Policy, putObjectActionArgs, false},
 		{case4Policy, getObjectActionArgs, true},
+
+		{case5Policy, anonGetBucketLocationArgs, false},
+		{case5Policy, anonPutObjectActionArgs, false},
+		{case5Policy, anonGetObjectActionArgs, true},
+		{case5Policy, getBucketLocationArgs, true},
+		{case5Policy, putObjectActionArgs, false},
+		{case5Policy, getObjectActionArgs, true},
 	}
 
 	for i, testCase := range testCases {

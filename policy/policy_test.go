@@ -188,6 +188,26 @@ func TestPolicyIsAllowed(t *testing.T) {
 		},
 	}
 
+	case5Policy := Policy{
+		Version: DefaultVersion,
+		Statements: []Statement{
+			NewStatement(
+				"",
+				Allow,
+				NewActionSet(GetObjectAction, PutObjectAction),
+				NewResourceSet(NewResource("mybucket/*")),
+				condition.NewFunctions(),
+			),
+			NewStatementWithNotResource(
+				"",
+				Deny,
+				NewActionSet(PutObjectAction),
+				NewResourceSet(NewResource("mybucket/notmyobject*")),
+				condition.NewFunctions(),
+			),
+		},
+	}
+
 	anonGetBucketLocationArgs := Args{
 		AccountName:     "Q3AM3UQ867SPQQA43P2F",
 		Action:          GetBucketLocationAction,
@@ -272,6 +292,13 @@ func TestPolicyIsAllowed(t *testing.T) {
 		{case4Policy, getBucketLocationArgs, false},
 		{case4Policy, putObjectActionArgs, false},
 		{case4Policy, getObjectActionArgs, false},
+
+		{case5Policy, anonGetBucketLocationArgs, false},
+		{case5Policy, anonPutObjectActionArgs, false},
+		{case5Policy, anonGetObjectActionArgs, true},
+		{case5Policy, getBucketLocationArgs, false},
+		{case5Policy, putObjectActionArgs, false},
+		{case5Policy, getObjectActionArgs, true},
 	}
 
 	for i, testCase := range testCases {

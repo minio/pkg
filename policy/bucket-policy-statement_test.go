@@ -107,6 +107,24 @@ func TestBPStatementIsAllowed(t *testing.T) {
 		condition.NewFunctions(),
 	)
 
+	case9Statement := NewBPStatementWithNotResource(
+		"",
+		Allow,
+		NewPrincipal("*"),
+		NewActionSet(GetObjectAction, PutObjectAction),
+		NewResourceSet(NewResource("mybucket/notmyobject*")),
+		condition.NewFunctions(),
+	)
+
+	case10Statement := NewBPStatementWithNotResource(
+		"",
+		Deny,
+		NewPrincipal("*"),
+		NewActionSet(GetObjectAction, PutObjectAction),
+		NewResourceSet(NewResource("mybucket/notmyobject*")),
+		condition.NewFunctions(),
+	)
+
 	anonGetBucketLocationArgs := BucketPolicyArgs{
 		AccountName:     "Q3AM3UQ867SPQQA43P2F",
 		Action:          GetBucketLocationAction,
@@ -222,6 +240,20 @@ func TestBPStatementIsAllowed(t *testing.T) {
 		{case8Statement, getBucketLocationArgs, false},
 		{case8Statement, putObjectActionArgs, false},
 		{case8Statement, getObjectActionArgs, false},
+
+		{case9Statement, anonGetBucketLocationArgs, false},
+		{case9Statement, anonPutObjectActionArgs, true},
+		{case9Statement, anonGetObjectActionArgs, true},
+		{case9Statement, getBucketLocationArgs, false},
+		{case9Statement, putObjectActionArgs, true},
+		{case9Statement, getObjectActionArgs, true},
+
+		{case10Statement, anonGetBucketLocationArgs, true},
+		{case10Statement, anonPutObjectActionArgs, false},
+		{case10Statement, anonGetObjectActionArgs, false},
+		{case10Statement, getBucketLocationArgs, true},
+		{case10Statement, putObjectActionArgs, false},
+		{case10Statement, getObjectActionArgs, false},
 	}
 
 	for i, testCase := range testCases {
