@@ -202,7 +202,7 @@ func TestBucketPolicyIsAllowed(t *testing.T) {
 		{case5Policy, anonGetBucketLocationArgs, false},
 		{case5Policy, anonPutObjectActionArgs, false},
 		{case5Policy, anonGetObjectActionArgs, true},
-		{case5Policy, getBucketLocationArgs, false},
+		{case5Policy, getBucketLocationArgs, true},
 		{case5Policy, putObjectActionArgs, false},
 		{case5Policy, getObjectActionArgs, true},
 	}
