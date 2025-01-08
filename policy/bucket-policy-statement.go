@@ -56,11 +56,11 @@ func (statement BPStatement) IsAllowed(args BucketPolicyArgs) bool {
 			resource += args.ObjectName
 		}
 
-		if !statement.Resources.Match(resource, args.ConditionValues) {
+		if len(statement.Resources) > 0 && !statement.Resources.Match(resource, args.ConditionValues) {
 			return false
 		}
 
-		if statement.NotResources.Match(resource, args.ConditionValues) {
+		if len(statement.NotResources) > 0 && statement.NotResources.Match(resource, args.ConditionValues) {
 			return false
 		}
 
@@ -84,8 +84,16 @@ func (statement BPStatement) isValid() error {
 		return Errorf("Action must not be empty")
 	}
 
+	if len(statement.Actions) > 0 && len(statement.NotActions) > 0 {
+		return Errorf("Action and NotAction cannot be specified in the same statement")
+	}
+
 	if len(statement.Resources) == 0 && len(statement.NotResources) == 0 {
 		return Errorf("Resource must not be empty")
+	}
+
+	if len(statement.Resources) > 0 && len(statement.NotResources) > 0 {
+		return Errorf("Resource and NotResource cannot be specified in the same statement")
 	}
 
 	for action := range statement.Actions {

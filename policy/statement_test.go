@@ -67,48 +67,42 @@ func TestStatementIsAllowed(t *testing.T) {
 		condition.NewFunctions(func1),
 	)
 
-	case5Statement := NewStatementWithNotAction(
-		"",
+	case5Statement := NewStatementWithNotAction("",
 		Allow,
 		NewActionSet(GetObjectAction, CreateBucketAction),
 		NewResourceSet(NewResource("mybucket/myobject*"), NewResource("mybucket")),
 		condition.NewFunctions(),
 	)
 
-	case6Statement := NewStatementWithNotAction(
-		"",
+	case6Statement := NewStatementWithNotAction("",
 		Deny,
 		NewActionSet(GetObjectAction),
 		NewResourceSet(NewResource("mybucket/myobject*")),
 		condition.NewFunctions(func1),
 	)
 
-	case7Statement := NewStatementWithNotResource(
-		"",
+	case7Statement := NewStatementWithNotResource("",
 		Deny,
 		NewActionSet(GetObjectAction, PutObjectAction),
 		NewResourceSet(NewResource("mybucket/myobject*")),
 		condition.NewFunctions(),
 	)
 
-	case8Statement := NewStatementWithNotResource(
-		"",
+	case8Statement := NewStatementWithNotResource("",
 		Allow,
 		NewActionSet(GetObjectAction, PutObjectAction),
 		NewResourceSet(NewResource("mybucket/myobject*")),
 		condition.NewFunctions(),
 	)
 
-	case9Statement := NewStatementWithNotResource(
-		"",
+	case9Statement := NewStatementWithNotResource("",
 		Allow,
 		NewActionSet(GetObjectAction, PutObjectAction),
 		NewResourceSet(NewResource("mybucket/notmyobject*")),
 		condition.NewFunctions(),
 	)
 
-	case10Statement := NewStatementWithNotResource(
-		"",
+	case10Statement := NewStatementWithNotResource("",
 		Deny,
 		NewActionSet(GetObjectAction, PutObjectAction),
 		NewResourceSet(NewResource("mybucket/notmyobject*")),
