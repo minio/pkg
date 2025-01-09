@@ -67,6 +67,23 @@ func TestNewManager(t *testing.T) {
 	if err == nil {
 		t.Fatal("Expected to fail but got success")
 	}
+
+	allCerts := c.GetAllCertificates()
+	var found bool
+	for _, cert := range allCerts {
+		if cert.Issuer.String() != "CN=minio.io,OU=Engineering,O=Minio,L=Redwood City,ST=CA,C=US" {
+			t.Error("Unexpected cert issuer found")
+		}
+		found = true
+	}
+	if !found {
+		t.Error("atleast one public cert is expected")
+	}
+
+	var nilMgr *certs.Manager
+	if len(nilMgr.GetAllCertificates()) != 0 {
+		t.Error("no public cert is expected")
+	}
 }
 
 func TestValidPairAfterWrite(t *testing.T) {

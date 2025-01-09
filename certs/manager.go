@@ -96,6 +96,10 @@ func NewManager(ctx context.Context, certFile, keyFile string, loadX509KeyPair L
 
 // UpdateReloadDuration set custom symlink reload duration
 func (m *Manager) UpdateReloadDuration(t time.Duration) {
+	if m == nil {
+		return
+	}
+
 	m.lock.Lock()
 	m.duration = t
 	m.lock.Unlock()
@@ -107,6 +111,10 @@ func (m *Manager) UpdateReloadDuration(t time.Duration) {
 // If there is already a certificate with the same base name it will be
 // replaced by the newly added one.
 func (m *Manager) AddCertificate(certFile, keyFile string) (err error) {
+	if m == nil {
+		return nil
+	}
+
 	certFile, err = filepath.Abs(certFile)
 	if err != nil {
 		return err
@@ -194,6 +202,10 @@ func (m *Manager) reloader() <-chan struct{} {
 // ReloadOnSignal specifies one or more signals that will trigger certificates reloading.
 // If called multiple times with the same signal certificates
 func (m *Manager) ReloadOnSignal(sig ...os.Signal) {
+	if m == nil {
+		return
+	}
+
 	if len(sig) == 0 {
 		return
 	}
@@ -214,6 +226,10 @@ func (m *Manager) ReloadOnSignal(sig ...os.Signal) {
 
 // ReloadCerts will forcefully reload all certs.
 func (m *Manager) ReloadCerts() {
+	if m == nil {
+		return
+	}
+
 	m.lock.RLock()
 	defer m.lock.RUnlock()
 	for _, ch := range m.reloadCerts {
@@ -228,6 +244,10 @@ func (m *Manager) ReloadCerts() {
 // watchSymlinks starts an endless loop reloading the
 // certFile and keyFile periodically.
 func (m *Manager) watchSymlinks(watch pair, reload <-chan struct{}) {
+	if m == nil {
+		return
+	}
+
 	t := time.NewTimer(m.duration)
 	defer t.Stop()
 
@@ -263,6 +283,10 @@ func (m *Manager) watchSymlinks(watch pair, reload <-chan struct{}) {
 // Once an event occurs it reloads the private key and certificate that
 // has changed, if any.
 func (m *Manager) watchFileEvents(watch pair, events chan notify.EventInfo, reload <-chan struct{}) {
+	if m == nil {
+		return
+	}
+
 	for {
 		select {
 		case <-m.done:
@@ -301,6 +325,10 @@ func (m *Manager) watchFileEvents(watch pair, events chan notify.EventInfo, relo
 // found GetCertificate returns the certificate loaded from the
 // Public file.
 func (m *Manager) GetCertificate(hello *tls.ClientHelloInfo) (*tls.Certificate, error) {
+	if m == nil {
+		return nil, errors.New("certs: no server certificate is supported by peer")
+	}
+
 	m.lock.RLock()
 	defer m.lock.RUnlock()
 
@@ -368,6 +396,10 @@ func (m *Manager) GetCertificate(hello *tls.ClientHelloInfo) (*tls.Certificate, 
 // found GetClientCertificate returns the certificate loaded from the
 // Public file.
 func (m *Manager) GetClientCertificate(reqInfo *tls.CertificateRequestInfo) (*tls.Certificate, error) {
+	if m == nil {
+		return nil, errors.New("certs: no client certificate is supported by peer")
+	}
+
 	m.lock.RLock()
 	defer m.lock.RUnlock()
 
@@ -406,6 +438,10 @@ func isSymlink(file string) (bool, error) {
 
 // GetAllCertificates returns all the certificates loaded
 func (m *Manager) GetAllCertificates() []*x509.Certificate {
+	if m == nil {
+		return nil
+	}
+
 	m.lock.RLock()
 	defer m.lock.RUnlock()
 
