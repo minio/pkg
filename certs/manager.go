@@ -447,7 +447,7 @@ func (m *Manager) GetAllCertificates() []*x509.Certificate {
 
 	certs := []*x509.Certificate{}
 	for _, c := range m.certificates {
-		if c.Leaf != nil {
+		if c != nil && c.Leaf != nil {
 			// marshal and parse to create a deep copy
 			cBytes := c.Leaf.Raw
 			copyCert, err := x509.ParseCertificate(cBytes)
