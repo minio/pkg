@@ -21,13 +21,13 @@
 
 // func xorSlice(in, out []byte, v *[4]uint64)
 TEXT ·xorSlice(SB), 7, $0
-	MOVQ  v+48(FP), AX     // AX: v
-	MOVQ  in+0(FP), SI     // SI: &in
-	MOVQ  out+24(FP), DX   // DX: &out
-	MOVQ  out+32(FP), R9   // R9: len(out)
-	MOVOU (AX), X0         // v[x]
-	MOVOU 16(AX), X1       // v[x+2]
-	SHRQ  $5, R9           // len(in) / 32
+	MOVQ  v+48(FP), AX         // AX: v
+	MOVQ  in+0(FP), SI         // SI: &in
+	MOVQ  out+24(FP), DX       // DX: &out
+	MOVQ  out_len+32(FP), R9   // R9: len(out)
+	MOVOU (AX), X0             // v[x]
+	MOVOU 16(AX), X1           // v[x+2]
+	SHRQ  $5, R9               // len(in) / 32
 	JZ    done_xor_sse2_32
 
 loopback_xor_sse2_32:
