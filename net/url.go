@@ -211,6 +211,10 @@ func IsNetworkOrHostDown(err error, expectTimeouts bool) bool {
 		return false
 	}
 
+	if expectTimeouts && errors.Is(err, os.ErrDeadlineExceeded) {
+		return false
+	}
+
 	// We need to figure if the error either a timeout
 	// or a non-temporary error.
 	urlErr := &url.Error{}
