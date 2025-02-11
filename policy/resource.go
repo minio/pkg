@@ -47,12 +47,16 @@ const (
 
 	// ResourceARNKMS is the ARN prefix type for MinIO KMS resources.
 	ResourceARNKMS
+
+	// ResourceARNAll is the ARN '*'
+	ResourceARNAll
 )
 
 // ARNTypeToPrefix maps the type to prefix string
 var ARNTypeToPrefix = map[ResourceARNType]string{
 	ResourceARNS3:  ResourceARNPrefix,
 	ResourceARNKMS: ResourceARNKMSPrefix,
+	ResourceARNAll: "*",
 }
 
 // ARNPrefixToType maps prefix to types.
@@ -76,11 +80,11 @@ type Resource struct {
 }
 
 func (r Resource) isKMS() bool {
-	return r.Type == ResourceARNKMS
+	return r.Type == ResourceARNKMS || r.Type == ResourceARNAll
 }
 
 func (r Resource) isS3() bool {
-	return r.Type == ResourceARNS3
+	return r.Type == ResourceARNS3 || r.Type == ResourceARNAll
 }
 
 func (r Resource) isBucketPattern() bool {
@@ -237,6 +241,12 @@ func (r Resource) ValidateBucket(bucketName string) error {
 func parseResource(s string) (Resource, error) {
 	r := Resource{}
 	for k, v := range ARNPrefixToType {
+		if s == k {
+			// all pattern
+			r.Type = ResourceARNAll
+			r.Pattern = k
+			continue
+		}
 		if rem, ok := strings.CutPrefix(s, k); ok {
 			r.Type = v
 			r.Pattern = rem

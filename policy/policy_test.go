@@ -73,6 +73,43 @@ func TestGetPoliciesFromClaims(t *testing.T) {
 	}
 }
 
+func TestAdminPolicyResource(t *testing.T) {
+	test := `{
+ "Version": "2012-10-17",
+ "Statement": [
+  {
+   "Effect": "Allow",
+   "Action": [
+    "s3:*"
+   ],
+   "Resource": [
+    "*"
+   ]
+  },
+  {
+   "Effect": "Allow",
+   "Action": [
+    "admin:ListServiceAccounts",
+    "admin:GetBucketQuota"
+   ]
+  }
+ ]
+}`
+	p, err := ParseConfig(strings.NewReader(test))
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	allowedActions := p.IsAllowedActions("", "", map[string][]string{})
+	if !allowedActions.Match(ListServiceAccountsAdminAction) {
+		t.Fatal("expected success for ListServiceAccounts, but failed to match")
+	}
+
+	if !allowedActions.Match(GetBucketQuotaAdminAction) {
+		t.Fatal("expected success for GetBucketQuota, but failed to match")
+	}
+}
+
 func TestPolicyIsAllowedActions(t *testing.T) {
 	policy1 := `{
    "Version":"2012-10-17",
