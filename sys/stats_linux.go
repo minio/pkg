@@ -24,7 +24,7 @@ import (
 	"os"
 	"syscall"
 
-	"github.com/minio/madmin-go/v3/cgroup"
+	"github.com/minio/pkg/v3/sys/cgroup"
 )
 
 // Get the final system memory limit chosen by the user.
