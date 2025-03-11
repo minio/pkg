@@ -209,20 +209,20 @@ const (
 
 	// All new v4 APIs
 
-	// ClusterInfo - allow cluster summary
-	ClusterInfo = "admin:ClusterInfo"
+	// ClusterInfoAction - allow cluster summary
+	ClusterInfoAction = "admin:ClusterInfo"
 
-	// PoolList - allow list how many pools and summary per pool
-	PoolList = "admin:PoolList"
+	// PoolListAction - allow list how many pools and summary per pool
+	PoolListAction = "admin:PoolList"
 
-	// PoolInfo - allow pool specific summary and detail information
-	PoolInfo = "admin:PoolInfo"
+	// PoolInfoAction - allow pool specific summary and detail information
+	PoolInfoAction = "admin:PoolInfo"
 
-	// SetInfo - allow set specific summary and detail
-	SetInfo = "admin:SetInfo"
+	// SetInfoAction - allow set specific summary and detail
+	SetInfoAction = "admin:SetInfo"
 
-	// DriveInfo - allow drive specific summary and detail
-	DriveInfo = "admin:DriveInfo"
+	// DriveInfoAction - allow drive specific summary and detail
+	DriveInfoAction = "admin:DriveInfo"
 
 	// AllAdminActions - provides all admin permissions
 	AllAdminActions = "admin:*"
