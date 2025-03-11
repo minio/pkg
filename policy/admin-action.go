@@ -207,6 +207,23 @@ const (
 	// GenerateBatchJobAction allow requesting batch job templates
 	GenerateBatchJobAction = "admin:GenerateBatchJob"
 
+	// All new v4 APIs
+
+	// ClusterInfo - allow cluster summary
+	ClusterInfo = "admin:ClusterInfo"
+
+	// PoolList - allow list how many pools and summary per pool
+	PoolList = "admin:PoolList"
+
+	// PoolInfo - allow pool specific summary and detail information
+	PoolInfo = "admin:PoolInfo"
+
+	// SetInfo - allow set specific summary and detail
+	SetInfo = "admin:SetInfo"
+
+	// DriveInfo - allow drive specific summary and detail
+	DriveInfo = "admin:DriveInfo"
+
 	// AllAdminActions - provides all admin permissions
 	AllAdminActions = "admin:*"
 )
