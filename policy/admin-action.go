@@ -204,6 +204,9 @@ const (
 	// CancelBatchJobAction allow canceling a batch job
 	CancelBatchJobAction = "admin:CancelBatchJob"
 
+	// GenerateBatchJobAction allow requesting batch job templates
+	GenerateBatchJobAction = "admin:GenerateBatchJob"
+
 	// AllAdminActions - provides all admin permissions
 	AllAdminActions = "admin:*"
 )
