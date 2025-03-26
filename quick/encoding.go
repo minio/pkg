@@ -22,7 +22,6 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
 	"os"
 	"path/filepath"
 	"runtime"
@@ -117,7 +116,7 @@ func saveFileConfig(filename string, v interface{}) error {
 		return err
 	}
 	if runtime.GOOS == "windows" {
-		dataBytes = []byte(strings.Replace(string(dataBytes), "\n", "\r\n", -1))
+		dataBytes = []byte(strings.ReplaceAll(string(dataBytes), "\n", "\r\n"))
 	}
 	// Save data.
 	return writeFile(filename, dataBytes)
@@ -132,7 +131,7 @@ func saveFileConfigEtcd(filename string, clnt *etcd.Client, v interface{}) error
 		return err
 	}
 	if runtime.GOOS == "windows" {
-		dataBytes = []byte(strings.Replace(string(dataBytes), "\n", "\r\n", -1))
+		dataBytes = []byte(strings.ReplaceAll(string(dataBytes), "\n", "\r\n"))
 	}
 
 	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
@@ -164,7 +163,7 @@ func loadFileConfigEtcd(filename string, clnt *etcd.Client, v interface{}) error
 		if string(ev.Key) == filename {
 			fileData := ev.Value
 			if runtime.GOOS == "windows" {
-				fileData = bytes.Replace(fileData, []byte("\r\n"), []byte("\n"), -1)
+				fileData = bytes.ReplaceAll(fileData, []byte("\r\n"), []byte("\n"))
 			}
 			// Unmarshal file's content
 			return toUnmarshaller(filepath.Ext(filename))(fileData, v)
@@ -177,12 +176,12 @@ func loadFileConfigEtcd(filename string, clnt *etcd.Client, v interface{}) error
 // decoder format according to the filename extension. If no
 // extension is provided, json will be selected by default.
 func loadFileConfig(filename string, v interface{}) error {
-	fileData, err := ioutil.ReadFile(filename)
+	fileData, err := os.ReadFile(filename)
 	if err != nil {
 		return err
 	}
 	if runtime.GOOS == "windows" {
-		fileData = []byte(strings.Replace(string(fileData), "\r\n", "\n", -1))
+		fileData = []byte(strings.ReplaceAll(string(fileData), "\r\n", "\n"))
 	}
 
 	// Unmarshal file's content

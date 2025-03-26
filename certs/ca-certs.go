@@ -21,7 +21,7 @@ import (
 	"crypto/x509"
 	"errors"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"os"
 	"path/filepath"
 )
@@ -67,7 +67,7 @@ func GetRootCAs(path string) (*x509.CertPool, error) {
 
 	// In case of a file add it to the root CAs.
 	if !stat.IsDir() {
-		bytes, err := ioutil.ReadAll(f)
+		bytes, err := io.ReadAll(f)
 		if err != nil {
 			return rootCAs, err
 		}
@@ -84,7 +84,7 @@ func GetRootCAs(path string) (*x509.CertPool, error) {
 		return rootCAs, err
 	}
 	for _, file := range files {
-		bytes, err := ioutil.ReadFile(filepath.Join(path, file))
+		bytes, err := os.ReadFile(filepath.Join(path, file))
 		if err == nil { // ignore files which are not readable.
 			rootCAs.AppendCertsFromPEM(bytes)
 		}

@@ -48,9 +48,10 @@ func GetFreePort() (Port, error) {
 
 // ParsePort - parses string into Port
 func ParsePort(s string) (p Port, err error) {
-	if s == "https" {
+	switch s {
+	case "https":
 		return Port(443), nil
-	} else if s == "http" {
+	case "http":
 		return Port(80), nil
 	}
 

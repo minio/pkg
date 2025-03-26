@@ -1,30 +1,40 @@
-linters-settings:
-  golint:
-    min-confidence: 0
-
-  misspell:
-    locale: US
-
+version: "2"
 linters:
-  disable-all: true
+  default: none
   enable:
-    - typecheck
-    - goimports
-    - misspell
-    - govet
-    - revive
-    - ineffassign
-    - gosimple
     - gomodguard
-    - gofmt
-    - unused
+    - govet
+    - ineffassign
+    - misspell
+    - revive
+    - staticcheck
     - unconvert
-
-issues:
-  exclude-use-default: false
-  exclude:
-      - should have a package comment
-      - error strings should not be capitalized or end with punctuation or a newline
-
-service:
-  golangci-lint-version: 1.20.0 # use the fixed version to not introduce new linters unexpectedly
+    - unused
+  settings:
+    misspell:
+      locale: US
+  exclusions:
+    generated: lax
+    rules:
+      - path: (.+)\.go$
+        text: "should have a package comment"
+      - path: (.+)\.go$
+        text: "ST1005"
+      - path: ldap/ldap.go$
+        text: "SA1019: ldap.Dial(TLS)?"
+      - path: sftp/sftp.go$
+        text: "SA1019: ne.Temporary"
+    paths:
+      - third_party$
+      - builtin$
+      - examples$
+formatters:
+  enable:
+    - gofmt
+    - goimports
+  exclusions:
+    generated: lax
+    paths:
+      - third_party$
+      - builtin$
+      - examples$

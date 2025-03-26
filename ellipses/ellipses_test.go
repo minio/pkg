@@ -234,7 +234,7 @@ func TestFindEllipsesPatterns(t *testing.T) {
 				repl := func(v interface{}) string {
 					s := fmt.Sprintf("%#v", v)
 					// Clean up unneeded declarations
-					s = strings.Replace(s, `[]string{"`, `{"`, -1)
+					s = strings.ReplaceAll(s, `[]string{"`, `{"`)
 					return s
 				}
 				if !reflect.DeepEqual(got, testCase.want) {
