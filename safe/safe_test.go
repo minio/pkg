@@ -18,7 +18,6 @@
 package safe
 
 import (
-	"io/ioutil"
 	"os"
 	"path"
 	"testing"
@@ -29,7 +28,7 @@ type MySuite struct {
 }
 
 func (s *MySuite) SetUpSuite(t *testing.T) {
-	root, err := ioutil.TempDir(os.TempDir(), "safe_test.go.")
+	root, err := os.MkdirTemp(os.TempDir(), "safe_test.go.")
 	if err != nil {
 		t.Fatal(err)
 	}

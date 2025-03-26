@@ -33,7 +33,7 @@ func substitute(values map[string][]string) func(string) string {
 		for _, key := range CommonKeys {
 			// Empty values are not supported for policy variables.
 			if rvalues, ok := values[key.Name()]; ok && rvalues[0] != "" {
-				v = strings.Replace(v, key.VarName(), rvalues[0], -1)
+				v = strings.ReplaceAll(v, key.VarName(), rvalues[0])
 			}
 		}
 		return v

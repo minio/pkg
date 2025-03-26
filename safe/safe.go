@@ -19,7 +19,6 @@ package safe
 
 import (
 	"errors"
-	"io/ioutil"
 	"os"
 	"path/filepath"
 )
@@ -117,7 +116,7 @@ func CreateFile(name string) (*File, error) {
 	}
 
 	fname := filepath.Base(name)
-	tmpfile, err := ioutil.TempFile(dname, "$tmpfile."+fname+".")
+	tmpfile, err := os.CreateTemp(dname, "$tmpfile."+fname+".")
 	if err != nil {
 		return nil, err
 	}
