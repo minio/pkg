@@ -46,8 +46,8 @@ func GetFreePort() (Port, error) {
 	return Port(l.Addr().(*net.TCPAddr).Port), nil
 }
 
-// GetNextPort returns the immediate next port if it's available.
-func GetNextPort(port string) (Port, error) {
+// GetNextFreePort returns the immediate next port if it's available.
+func GetNextFreePort(port string) (Port, error) {
 	if port == "" || port == "0" {
 		return 0, errors.New("invalid starting port")
 	}
