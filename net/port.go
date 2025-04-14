@@ -46,14 +46,15 @@ func GetFreePort() (Port, error) {
 	return Port(l.Addr().(*net.TCPAddr).Port), nil
 }
 
-// GetNextFreePort returns the immediate next port if it's available.
+// GetNextPort returns the immediate next port if it's available.
+// The maximum allowed input is 65534, since we increment the value by 1.
 func GetNextFreePort(port string) (Port, error) {
 	if port == "" || port == "0" {
 		return 0, errors.New("invalid starting port")
 	}
 	p, err := strconv.Atoi(port)
-	if err != nil || p <= 0 {
-		return 0, errors.New("invalid port number")
+	if err != nil || p <= 0 || p >= 65535 {
+		return 0, errors.New("invalid port number (must be between 1 and 65534)")
 	}
 	nextPort := p + 1
 	addr := &net.TCPAddr{IP: net.ParseIP("127.0.0.1"), Port: nextPort}
