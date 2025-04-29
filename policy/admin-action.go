@@ -243,6 +243,7 @@ var supportedAdminActions = map[AdminAction]struct{}{
 	ServerInfoAdminAction:            {},
 	HealthInfoAdminAction:            {},
 	BandwidthMonitorAction:           {},
+	InspectDataAction:                {},
 	ServerUpdateAdminAction:          {},
 	ServiceRestartAdminAction:        {},
 	ServiceStopAdminAction:           {},
