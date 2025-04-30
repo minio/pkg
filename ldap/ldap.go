@@ -92,7 +92,7 @@ func (l *Config) Clone() (cloned Config) {
 
 func (l *Config) connect(ldapAddr string) (ldapConn *ldap.Conn, err error) {
 	tls := l.TLS
-	if tls.ServerName == "" {
+	if tls != nil && tls.ServerName == "" {
 		// Set the server name to the LDAP server address.
 		colonPos := strings.LastIndex(ldapAddr, ":")
 		if colonPos == -1 {
