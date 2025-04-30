@@ -91,20 +91,32 @@ func (l *Config) Clone() (cloned Config) {
 }
 
 func (l *Config) connect(ldapAddr string) (ldapConn *ldap.Conn, err error) {
+	tls := l.TLS
+	if tls.ServerName == "" {
+		// Set the server name to the LDAP server address.
+		colonPos := strings.LastIndex(ldapAddr, ":")
+		if colonPos == -1 {
+			colonPos = len(ldapAddr)
+		}
+		host := ldapAddr[:colonPos]
+		tls = l.TLS.Clone()
+		tls.ServerName = host
+	}
+
 	if l.ServerInsecure {
 		ldapConn, err = ldap.Dial("tcp", ldapAddr)
 	} else {
 		if l.ServerStartTLS {
 			ldapConn, err = ldap.Dial("tcp", ldapAddr)
 		} else {
-			ldapConn, err = ldap.DialTLS("tcp", ldapAddr, l.TLS)
+			ldapConn, err = ldap.DialTLS("tcp", ldapAddr, tls)
 		}
 	}
 
 	if ldapConn != nil {
 		ldapConn.SetTimeout(30 * time.Second) // Change default timeout to 30 seconds.
 		if l.ServerStartTLS {
-			err = ldapConn.StartTLS(l.TLS)
+			err = ldapConn.StartTLS(tls)
 		}
 	}
 
