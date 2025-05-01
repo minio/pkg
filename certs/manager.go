@@ -43,10 +43,11 @@ import (
 //
 // Manager will automatically reload certificates if the corresponding file changes.
 type Manager struct {
-	lock         sync.RWMutex
-	certificates map[pair]*tls.Certificate // Mapping: certificate file name => TLS certificates
-	defaultCert  pair
-	duration     time.Duration
+	lock              sync.RWMutex
+	certificates      map[pair]*tls.Certificate // Mapping: certificate file name => TLS certificates
+	defaultCert       pair
+	duration          time.Duration
+	disableAutoReload bool
 
 	loadX509KeyPair LoadX509KeyPairFunc
 	done            <-chan struct{}
@@ -68,7 +69,7 @@ type pair struct {
 // The certificate loaded from certFile is considered the default certificate.
 // If a client does not send the TLS SNI extension then Manager will return
 // this certificate.
-func NewManager(ctx context.Context, certFile, keyFile string, loadX509KeyPair LoadX509KeyPairFunc) (manager *Manager, err error) {
+func NewManager(ctx context.Context, certFile, keyFile string, loadX509KeyPair LoadX509KeyPairFunc, opts ...func(*Manager)) (manager *Manager, err error) {
 	certFile, err = filepath.Abs(certFile)
 	if err != nil {
 		return nil, err
@@ -88,10 +89,25 @@ func NewManager(ctx context.Context, certFile, keyFile string, loadX509KeyPair L
 		done:            ctx.Done(),
 		duration:        1 * time.Minute,
 	}
+	for _, opt := range opts {
+		opt(manager)
+	}
 	if err := manager.AddCertificate(certFile, keyFile); err != nil {
 		return nil, err
 	}
 	return manager, nil
+}
+
+// WithDisableAutoReload disables automatic reloading
+func WithDisableAutoReload() func(*Manager) {
+	return func(m *Manager) {
+		m.disableAutoReload = true
+	}
+}
+
+// DisableAutoReload returns if automatic reloading is disabled
+func (m *Manager) DisableAutoReload() bool {
+	return m.disableAutoReload
 }
 
 // UpdateReloadDuration set custom symlink reload duration
@@ -171,22 +187,24 @@ func (m *Manager) AddCertificate(certFile, keyFile string) (err error) {
 	}
 	m.certificates[p] = &certificate
 
-	if certFileIsLink && keyFileIsLink || isk8s {
-		go m.watchSymlinks(p, m.reloader())
-	} else {
-		// Windows doesn't allow for watching file changes but instead allows
-		// for directory changes only, while we can still watch for changes
-		// on files on other platforms. Watch parent directory on all platforms
-		// for simplicity.
-		events := make(chan notify.EventInfo, 1)
+	if !m.DisableAutoReload() {
+		if certFileIsLink && keyFileIsLink || isk8s {
+			go m.watchSymlinks(p, m.reloader())
+		} else {
+			// Windows doesn't allow for watching file changes but instead allows
+			// for directory changes only, while we can still watch for changes
+			// on files on other platforms. Watch parent directory on all platforms
+			// for simplicity.
+			events := make(chan notify.EventInfo, 1)
 
-		if err = notify.Watch(filepath.Dir(certFile), events, eventWrite...); err != nil {
-			return err
+			if err = notify.Watch(filepath.Dir(certFile), events, eventWrite...); err != nil {
+				return err
+			}
+			if err = notify.Watch(filepath.Dir(keyFile), events, eventWrite...); err != nil {
+				return err
+			}
+			go m.watchFileEvents(p, events, m.reloader())
 		}
-		if err = notify.Watch(filepath.Dir(keyFile), events, eventWrite...); err != nil {
-			return err
-		}
-		go m.watchFileEvents(p, events, m.reloader())
 	}
 	return nil
 }
@@ -202,7 +220,7 @@ func (m *Manager) reloader() <-chan struct{} {
 // ReloadOnSignal specifies one or more signals that will trigger certificates reloading.
 // If called multiple times with the same signal certificates
 func (m *Manager) ReloadOnSignal(sig ...os.Signal) {
-	if m == nil {
+	if m == nil || m.DisableAutoReload() {
 		return
 	}
 
