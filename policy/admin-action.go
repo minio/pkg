@@ -227,6 +227,9 @@ const (
 	// SetInfoAction - allow set specific summary and detail
 	SetInfoAction = "admin:SetInfo"
 
+	// DriveListAction - allow listing of drives
+	DriveListAction = "admin:DriveList"
+
 	// DriveInfoAction - allow drive specific summary and detail
 	DriveInfoAction = "admin:DriveInfo"
 
