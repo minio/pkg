@@ -218,8 +218,17 @@ const (
 	// PoolInfoAction - allow pool specific summary and detail information
 	PoolInfoAction = "admin:PoolInfo"
 
+	// NodeListAction - allow listing of nodes
+	NodeListAction = "admin:NodeList"
+
+	// NodeInfoAction - allow node specific summary and detailed information
+	NodeInfoAction = "admin:NodeInfo"
+
 	// SetInfoAction - allow set specific summary and detail
 	SetInfoAction = "admin:SetInfo"
+
+	// DriveListAction - allow listing of drives
+	DriveListAction = "admin:DriveList"
 
 	// DriveInfoAction - allow drive specific summary and detail
 	DriveInfoAction = "admin:DriveInfo"
@@ -297,6 +306,15 @@ var supportedAdminActions = map[AdminAction]struct{}{
 	DescribeBatchJobAction: {},
 	StartBatchJobAction:    {},
 	CancelBatchJobAction:   {},
+
+	ClusterInfoAction: {},
+	PoolListAction:    {},
+	PoolInfoAction:    {},
+	NodeListAction:    {},
+	NodeInfoAction:    {},
+	SetInfoAction:     {},
+	DriveListAction:   {},
+	DriveInfoAction:   {},
 
 	AllAdminActions: {},
 }
