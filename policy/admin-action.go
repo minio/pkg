@@ -307,6 +307,15 @@ var supportedAdminActions = map[AdminAction]struct{}{
 	StartBatchJobAction:    {},
 	CancelBatchJobAction:   {},
 
+	ClusterInfoAction: {},
+	PoolListAction:    {},
+	PoolInfoAction:    {},
+	NodeListAction:    {},
+	NodeInfoAction:    {},
+	SetInfoAction:     {},
+	DriveListAction:   {},
+	DriveInfoAction:   {},
+
 	AllAdminActions: {},
 }
 
