@@ -251,6 +251,7 @@ var supportedAdminActions = map[AdminAction]struct{}{
 	KMSKeyStatusAdminAction:          {},
 	ServerInfoAdminAction:            {},
 	HealthInfoAdminAction:            {},
+	LicenseInfoAdminAction:           {},
 	BandwidthMonitorAction:           {},
 	InspectDataAction:                {},
 	ServerUpdateAdminAction:          {},
