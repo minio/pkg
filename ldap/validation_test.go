@@ -295,3 +295,206 @@ func TestConfigValidator(t *testing.T) {
 		}
 	}
 }
+
+func TestOfflineValidator(t *testing.T) {
+	fakeLDAPServer := "offlinehost:389"
+	testCases := []struct {
+		cfg            Config
+		expectedResult Result
+	}{
+		{ // Case 4
+			cfg: func() Config {
+				v := Config{Enabled: true}
+				v.ServerAddr = fakeLDAPServer
+				v.ServerInsecure = true
+				v.LookupBindDN = "cn=admin,dc=min,dc=io"
+				v.LookupBindPassword = "admin"
+				return v
+			}(),
+			expectedResult: UserSearchParamsMisconfigured,
+		},
+		{
+			cfg: func() Config {
+				v := Config{Enabled: true}
+				v.ServerAddr = fakeLDAPServer
+				v.ServerInsecure = true
+				v.LookupBindDN = "cn=admin,dc=min,dc=io"
+				v.LookupBindPassword = "admin"
+				v.UserDNSearchFilter = "(uid=x)"
+				v.UserDNSearchBaseDistName = "dc=min,dc=io"
+				return v
+			}(),
+			expectedResult: UserSearchParamsMisconfigured,
+		},
+		{
+			cfg: func() Config {
+				v := Config{Enabled: true}
+				v.ServerAddr = fakeLDAPServer
+				v.ServerInsecure = true
+				v.LookupBindDN = "cn=admin,dc=min,dc=io"
+				v.LookupBindPassword = "admin"
+				v.UserDNSearchFilter = "(uid=%s)"
+				v.UserDNSearchBaseDistName = "dc=min,dc=io"
+				return v
+			}(),
+			expectedResult: ConfigOk,
+		},
+		{ // Case 7
+			cfg: func() Config {
+				v := Config{Enabled: true}
+				v.ServerAddr = fakeLDAPServer
+				v.ServerInsecure = true
+				v.LookupBindDN = "cn=admin,dc=min,dc=io"
+				v.LookupBindPassword = "admin"
+				v.UserDNSearchFilter = "(uid=%s)"
+				v.UserDNSearchBaseDistName = "dc=min,dc=io"
+				v.GroupSearchBaseDistName = "ou=swengg,dc=min,dc=io"
+				v.GroupSearchFilter = "(&(objectclass=groupofnames)(member=x))"
+				return v
+			}(),
+			expectedResult: GroupSearchParamsMisconfigured,
+		},
+		{
+			cfg: func() Config {
+				v := Config{Enabled: true}
+				v.ServerAddr = fakeLDAPServer
+				v.ServerInsecure = true
+				v.LookupBindDN = "cn=admin,dc=min,dc=io"
+				v.LookupBindPassword = "admin"
+				v.UserDNSearchFilter = "(uid=%s)"
+				v.UserDNSearchBaseDistName = "dc=min,dc=io"
+				v.GroupSearchFilter = "(&(objectclass=groupofnames)(member=x))"
+				return v
+			}(),
+			expectedResult: GroupSearchParamsMisconfigured,
+		},
+		{ // Case 9
+			cfg: func() Config {
+				v := Config{Enabled: true}
+				v.ServerAddr = fakeLDAPServer
+				v.ServerInsecure = true
+				v.LookupBindDN = "cn=admin,dc=min,dc=io"
+				v.LookupBindPassword = "admin"
+				v.UserDNSearchFilter = "(uid=%s)"
+				v.UserDNSearchBaseDistName = "dc=min,dc=io"
+				v.GroupSearchBaseDistName = "ou=swengg,dc=min,dc=io"
+				v.GroupSearchFilter = "(&(objectclass=groupofnames)(member=%d))"
+				return v
+			}(),
+			expectedResult: ConfigOk,
+		},
+		{
+			cfg: func() Config {
+				v := Config{Enabled: true}
+				v.ServerAddr = fakeLDAPServer
+				v.ServerInsecure = true
+				v.LookupBindDN = "cn=admin,dc=min,dc=io"
+				v.LookupBindPassword = "admin"
+				v.UserDNSearchFilter = "(uid=%s)"
+				v.UserDNSearchBaseDistName = "min,dc=io" // not a valid DN
+				v.GroupSearchBaseDistName = "ou=swengg,dc=min,dc=io"
+				v.GroupSearchFilter = "(&(objectclass=groupofnames)(member=%d))"
+				return v
+			}(),
+			expectedResult: UserSearchParamsMisconfigured,
+		},
+		{
+			cfg: func() Config {
+				v := Config{Enabled: true}
+				v.ServerAddr = fakeLDAPServer
+				v.ServerInsecure = true
+				v.LookupBindDN = "cn=admin,dc=min,dc=io"
+				v.LookupBindPassword = "admin"
+				v.UserDNSearchFilter = "uid=%s" // not a valid filter
+				v.UserDNSearchBaseDistName = "dc=min,dc=io"
+				v.GroupSearchBaseDistName = "ou=swengg,dc=min,dc=io"
+				v.GroupSearchFilter = "(&(objectclass=groupofnames)(member=%d))"
+				return v
+			}(),
+			expectedResult: UserSearchParamsMisconfigured,
+		},
+		{ // Case 12
+			cfg: func() Config {
+				v := Config{Enabled: true}
+				v.ServerAddr = fakeLDAPServer
+				v.ServerInsecure = true
+				v.LookupBindDN = "cn=admin,dc=min,dc=io"
+				v.LookupBindPassword = "admin"
+				v.UserDNSearchFilter = "(uid=%s)"
+				v.UserDNSearchBaseDistName = "dc=min,dc=io"
+				v.GroupSearchBaseDistName = "a" // Not a valid DN
+				v.GroupSearchFilter = "(&(objectclass=groupofnames)(member=%d))"
+				return v
+			}(),
+			expectedResult: GroupSearchParamsMisconfigured,
+		},
+		{
+			cfg: func() Config {
+				v := Config{Enabled: true}
+				v.ServerAddr = fakeLDAPServer
+				v.ServerInsecure = true
+				v.LookupBindDN = "cn=admin,dc=min,dc=io"
+				v.LookupBindPassword = "admin"
+				v.UserDNSearchFilter = "(uid=%s)"
+				v.UserDNSearchBaseDistName = "dc=min,dc=io"
+				v.GroupSearchBaseDistName = "ou=swengg,dc=min,dc=io"
+				v.GroupSearchFilter = "member=%d" // Invalid search filter
+				return v
+			}(),
+			expectedResult: GroupSearchParamsMisconfigured,
+		},
+		{
+			cfg: func() Config {
+				v := Config{Enabled: true}
+				v.ServerAddr = fakeLDAPServer
+				v.ServerInsecure = true
+				v.LookupBindDN = "cn=admin,dc=min,dc=io"
+				v.LookupBindPassword = "admin"
+				v.UserDNSearchFilter = "(uid=%s)"
+				v.UserDNSearchBaseDistName = "dc=min,dc=io;adcio" // Invalid DN (multiple)
+				v.GroupSearchBaseDistName = "ou=swengg,dc=min,dc=io"
+				v.GroupSearchFilter = "(&(objectclass=groupofnames)(member=%d))"
+				return v
+			}(),
+			expectedResult: UserSearchParamsMisconfigured,
+		},
+		{ // Case 15
+			cfg: func() Config {
+				v := Config{Enabled: true}
+				v.ServerAddr = fakeLDAPServer
+				v.ServerInsecure = true
+				v.LookupBindDN = "cn=admin,dc=min,dc=io"
+				v.LookupBindPassword = "admin"
+				v.UserDNSearchFilter = "(uid=%s)"
+				v.UserDNSearchBaseDistName = "dc=min,dc=io;dc=io" // Overlapping subtrees
+				v.GroupSearchBaseDistName = "ou=swengg,dc=min,dc=io"
+				v.GroupSearchFilter = "(&(objectclass=groupofnames)(member=%d))"
+				return v
+			}(),
+			expectedResult: UserSearchParamsMisconfigured,
+		},
+		{
+			cfg: func() Config {
+				v := Config{Enabled: true}
+				v.ServerAddr = fakeLDAPServer
+				v.SRVRecordName = "thingy" // Bad SRV record name.
+				v.ServerInsecure = true
+				v.LookupBindDN = "cn=admin,dc=min,dc=io"
+				v.LookupBindPassword = "admin"
+				v.UserDNSearchFilter = "(uid=%s)"
+				v.UserDNSearchBaseDistName = "dc=min,dc=io"
+				v.GroupSearchBaseDistName = "ou=swengg,dc=min,dc=io"
+				v.GroupSearchFilter = "(&(objectclass=groupofnames)(member=%d))"
+				return v
+			}(),
+			expectedResult: ConnectionParamMisconfigured,
+		},
+	}
+
+	for i, test := range testCases {
+		result := test.cfg.ValidateOffline()
+		if result.Result != test.expectedResult {
+			t.Fatalf("Case %d: Got `%s` expected `%s`", i, result.Result, string(test.expectedResult))
+		}
+	}
+}
