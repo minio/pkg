@@ -101,6 +101,17 @@ var validSRVRecordNames = set.CreateStringSet("ldap", "ldaps", "on")
 // operation. This is done to support configuration validation in Console/mc and
 // for tests.
 func (l *Config) Validate() Validation {
+	return l.validate(false)
+}
+
+// ValidateOffline validates the LDAP configuration without connecting to the
+// LDAP server. It is used to validate the configuration when the server is not
+// reachable
+func (l *Config) ValidateOffline() Validation {
+	return l.validate(true)
+}
+
+func (l *Config) validate(offline bool) Validation {
 	if !l.Enabled {
 		return Validation{Result: ConfigOk, Detail: "Config is not enabled"}
 	}
@@ -122,21 +133,27 @@ func (l *Config) Validate() Validation {
 		}
 	}
 
-	conn, err := l.Connect()
-	if err != nil {
-		return Validation{
-			Result:   ConnectivityError,
-			Detail:   fmt.Sprintf("Could not connect to LDAP server: %v", err),
-			ErrCause: err,
-			Suggestion: `Check:
+	var (
+		conn *ldap.Conn
+		err  error
+	)
+	if !offline {
+		conn, err = l.Connect()
+		if err != nil {
+			return Validation{
+				Result:   ConnectivityError,
+				Detail:   fmt.Sprintf("Could not connect to LDAP server: %v", err),
+				ErrCause: err,
+				Suggestion: `Check:
     (1) server address
     (2) TLS parameters,
     (3) LDAP server's TLS certificate is trusted by MinIO (when using TLS - highly recommended)
     (4) SRV Record lookup if given, and
     (5) LDAP service is up and reachable`,
+			}
 		}
+		defer conn.Close()
 	}
-	defer conn.Close()
 
 	if l.LookupBindDN == "" {
 		return Validation{
@@ -145,18 +162,24 @@ func (l *Config) Validate() Validation {
 			Suggestion: "Specify LDAP service account credentials for performing lookups.",
 		}
 	}
-	if err := l.LookupBind(conn); err != nil {
-		return Validation{
-			Result:     LookupBindError,
-			ErrCause:   err,
-			Detail:     fmt.Sprintf("Error connecting as LDAP Lookup Bind user: %v", err),
-			Suggestion: "Check LDAP Lookup Bind user credentials and if user is allowed to login",
+	if !offline {
+		if err := l.LookupBind(conn); err != nil {
+			return Validation{
+				Result:     LookupBindError,
+				ErrCause:   err,
+				Detail:     fmt.Sprintf("Error connecting as LDAP Lookup Bind user: %v", err),
+				Suggestion: "Check LDAP Lookup Bind user credentials and if user is allowed to login",
+			}
 		}
 	}
 
 	// Validate User Lookup parameters
 	userBaseDNList := splitAndTrim(l.UserDNSearchBaseDistName, dnDelimiter)
-	l.userDNSearchBaseDistNames, err = validateAndParseBaseDNList(conn, userBaseDNList)
+	if offline {
+		l.userDNSearchBaseDistNames, err = parseBaseDNListOffline(userBaseDNList)
+	} else {
+		l.userDNSearchBaseDistNames, err = validateAndParseBaseDNList(conn, userBaseDNList)
+	}
 	if err != nil {
 		return Validation{
 			Result:     UserSearchParamsMisconfigured,
@@ -236,7 +259,11 @@ func (l *Config) Validate() Validation {
 
 		// Validate Group Search parameters.
 		groupBaseDNList := splitAndTrim(l.GroupSearchBaseDistName, dnDelimiter)
-		l.groupSearchBaseDistNames, err = validateAndParseBaseDNList(conn, groupBaseDNList)
+		if offline {
+			l.groupSearchBaseDistNames, err = parseBaseDNListOffline(groupBaseDNList)
+		} else {
+			l.groupSearchBaseDistNames, err = validateAndParseBaseDNList(conn, groupBaseDNList)
+		}
 		if err != nil {
 			return Validation{
 				Result:     GroupSearchParamsMisconfigured,
@@ -406,6 +433,18 @@ func validateAndParseBaseDNList(conn *ldap.Conn, baseDNList []string) ([]BaseDNI
 			return nil, fmt.Errorf("Unexpectedly failed to parse DN `%s`: %w", serverDN, err)
 		}
 		res = append(res, BaseDNInfo{Original: dn, ServerDN: serverDN, Parsed: parsed})
+	}
+	return res, nil
+}
+
+func parseBaseDNListOffline(baseDNList []string) ([]BaseDNInfo, error) {
+	var res []BaseDNInfo
+	for _, dn := range baseDNList {
+		parsed, err := ldap.ParseDN(dn)
+		if err != nil {
+			return nil, fmt.Errorf("Unexpectedly failed to parse DN `%s`: %w", dn, err)
+		}
+		res = append(res, BaseDNInfo{Original: dn, Parsed: parsed})
 	}
 	return res, nil
 }
