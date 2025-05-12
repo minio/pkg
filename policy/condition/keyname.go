@@ -157,6 +157,9 @@ const (
 	// S3AuthType - optionally use this condition key to restrict incoming requests to use a specific authentication method.
 	S3AuthType KeyName = "s3:authType"
 
+	// S3ExpressSessionMode - optionally use this condition key to control who can create a ReadWrite or ReadOnly session.
+	S3ExpressSessionMode = "s3express:SessionMode"
+
 	// Refer https://docs.aws.amazon.com/AmazonS3/latest/userguide/tagging-and-policies.html
 	ExistingObjectTag    KeyName = "s3:ExistingObjectTag"
 	RequestObjectTagKeys KeyName = "s3:RequestObjectTagKeys"
@@ -313,6 +316,7 @@ var CommonKeys = append([]KeyName{
 	S3SignatureAge,
 	S3XAmzContentSha256,
 	S3LocationConstraint,
+	S3ExpressSessionMode,
 	AWSReferer,
 	AWSSourceIP,
 	AWSUserAgent,

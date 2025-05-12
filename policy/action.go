@@ -206,6 +206,9 @@ const (
 	// PutObjectFanOutAction - PutObject like API action but allows PostUpload() fan-out.
 	PutObjectFanOutAction = "s3:PutObjectFanOut"
 
+	// S3Express CreateSession action
+	CreateSessionAction = "s3express:CreateSession"
+
 	// AllActions - all API actions
 	AllActions = "s3:*"
 )
@@ -271,6 +274,7 @@ var supportedActions = map[Action]struct{}{
 	RestoreObjectAction:                    {},
 	ResetBucketReplicationStateAction:      {},
 	PutObjectFanOutAction:                  {},
+	CreateSessionAction:                    {},
 	AllActions:                             {},
 }
 
