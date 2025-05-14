@@ -395,11 +395,12 @@ func LookupDN(conn *ldap.Conn, dn string, attrs []string) (*DNSearchResult, erro
 }
 
 // NormalizeDN normalizes the DN. The ldap library here mainly lowercases the
-// attribute type names in the DN.
+// attribute type names in the DN. However, since MinIO is going to be
+// case-insenstive, we lowercase the whole string.
 func NormalizeDN(dn string) (string, error) {
 	parsedDN, err := ldap.ParseDN(dn)
 	if err != nil {
 		return "", fmt.Errorf("DN (%s) parse failure: %w", dn, err)
 	}
-	return parsedDN.String(), nil
+	return strings.ToLower(parsedDN.String()), nil
 }
