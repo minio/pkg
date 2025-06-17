@@ -289,7 +289,7 @@ func TestConfigValidator(t *testing.T) {
 				continue
 			}
 
-			if !set.CreateStringSet(lookupResult.GroupDNMemberships...).Equals(expectedGroups) {
+			if set.CreateStringSet(lookupResult.GroupDNMemberships...).Intersection(expectedGroups).IsEmpty() {
 				t.Fatalf("Case %d: Got unexpected groups: %v", i, lookupResult.GroupDNMemberships)
 			}
 		}

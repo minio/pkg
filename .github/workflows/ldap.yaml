@@ -31,7 +31,7 @@ jobs:
           LDAP_ADMIN_PASSWORD: "admin"
     strategy:
       matrix:
-        go-version: [1.23.x]
+        go-version: [1.24.x]
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-go@v5

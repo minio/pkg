@@ -206,7 +206,7 @@ const (
 	// PutObjectFanOutAction - PutObject like API action but allows PostUpload() fan-out.
 	PutObjectFanOutAction = "s3:PutObjectFanOut"
 
-	// S3Express CreateSession action
+	// CreateSessionAction - S3 express action
 	CreateSessionAction = "s3express:CreateSession"
 
 	// AllActions - all API actions
