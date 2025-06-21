@@ -149,6 +149,7 @@ func getEnvValueFromHTTP(urlStr, envKey string) (string, string, string, error) 
 	if err != nil {
 		return "", "", "", err
 	}
+	defer resp.Body.Close()
 
 	envValueBytes, err := io.ReadAll(resp.Body)
 	if err != nil {
@@ -164,15 +165,16 @@ func Environ() []string {
 	return os.Environ()
 }
 
-// LookupEnv retrieves the value of the environment variable
-// named by the key. If the variable is present in the
-// environment the value then that ENV is conisdered unset.
-// and the boolean is false. Otherwise the returned value
-// will be whatever value is set and the boolean will be true.
+// LookupEnv retrieves the value of the environment variable named by `key`.
 //
-// Additionally if the input is env://username:password@remote:port/
-// to fetch ENV values for the env value from a remote server.
-// In this case, it also returns the credentials username and password
+// If the value of the variable starts with "env://" or "env+tls://" it is
+// fetched from the referenced remote server. The fetched value is cached in a
+// separate environment variable prefixed with an underscore for subsequent
+// lookups should the remote server be unreachable. When fetching from a remote
+// server the username and password used are also returned.
+//
+// For regular environment variables the value is returned as-is with empty
+// credentials.
 func LookupEnv(key string) (string, string, string, error) {
 	v, ok := os.LookupEnv(key)
 	if ok && strings.HasPrefix(v, webEnvScheme) {
