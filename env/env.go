@@ -61,10 +61,9 @@ func IsSet(key string) bool {
 	return Get(key, "") != ""
 }
 
-// Get retrieves the value of the environment variable named
-// by the key. If the variable is present in the environment the
-// value (which may be empty) is not returned and this is considered
-// unset. Otherwise it returns the specified default value.
+// Get returns the value of the environment variable named by key.
+// If the variable is unset or set to an empty string, defaultValue is
+// returned.
 func Get(key, defaultValue string) string {
 	privateMutex.RLock()
 	ok := envOff
