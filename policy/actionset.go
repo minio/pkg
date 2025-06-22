@@ -229,3 +229,13 @@ func NewActionSet(actions ...Action) ActionSet {
 
 	return actionSet
 }
+
+// NewActionStrings - creates new action set from strings.
+func NewActionStrings(actions ...string) ActionSet {
+	actionSet := make(ActionSet, len(actions))
+	for _, action := range actions {
+		actionSet.Add(Action(action))
+	}
+
+	return actionSet
+}

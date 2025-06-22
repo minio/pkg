@@ -21,6 +21,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"net"
+	"reflect"
 	"strings"
 	"testing"
 	"time"
@@ -1613,5 +1614,77 @@ func TestMergePolicies(t *testing.T) {
 		if !got.Equals(testCase.expected) {
 			t.Errorf("Case %d: expected: %v, got %v", i+1, got, testCase.expected)
 		}
+	}
+}
+
+func TestDropDuplicateStatements(t *testing.T) {
+	tests := []struct {
+		name     string
+		input    []Statement
+		expected []Statement
+	}{
+		{
+			name: "NoDuplicates",
+			input: []Statement{
+				setupStatement([]string{"s3:GetObject"}, []string{"arn:aws:s3:::bucket1/*"}, "Allow", nil),
+				setupStatement([]string{"s3:PutObject"}, []string{"arn:aws:s3:::bucket2/*"}, "Deny", nil),
+			},
+			expected: []Statement{
+				setupStatement([]string{"s3:GetObject"}, []string{"arn:aws:s3:::bucket1/*"}, "Allow", nil),
+				setupStatement([]string{"s3:PutObject"}, []string{"arn:aws:s3:::bucket2/*"}, "Deny", nil),
+			},
+		},
+		{
+			name: "AllDuplicates",
+			input: []Statement{
+				setupStatement([]string{"s3:GetObject"}, []string{"arn:aws:s3:::bucket1/*"}, "Allow", nil),
+				setupStatement([]string{"s3:GetObject"}, []string{"arn:aws:s3:::bucket1/*"}, "Allow", nil),
+				setupStatement([]string{"s3:GetObject"}, []string{"arn:aws:s3:::bucket1/*"}, "Allow", nil),
+			},
+			expected: []Statement{
+				setupStatement([]string{"s3:GetObject"}, []string{"arn:aws:s3:::bucket1/*"}, "Allow", nil),
+			},
+		},
+		{
+			name: "MixedDuplicates",
+			input: []Statement{
+				setupStatement([]string{"s3:GetObject"}, []string{"arn:aws:s3:::bucket1/*"}, "Allow", nil),
+				setupStatement([]string{"s3:GetObject"}, []string{"arn:aws:s3:::bucket1/*"}, "Allow", nil),
+				setupStatement([]string{"s3:PutObject"}, []string{"arn:aws:s3:::bucket2/*"}, "Deny", nil),
+				setupStatement([]string{"s3:GetObject"}, []string{"arn:aws:s3:::bucket3/*"}, "Allow", nil),
+			},
+			expected: []Statement{
+				setupStatement([]string{"s3:GetObject"}, []string{"arn:aws:s3:::bucket1/*"}, "Allow", nil),
+				setupStatement([]string{"s3:PutObject"}, []string{"arn:aws:s3:::bucket2/*"}, "Deny", nil),
+				setupStatement([]string{"s3:GetObject"}, []string{"arn:aws:s3:::bucket3/*"}, "Allow", nil),
+			},
+		},
+		{
+			name:     "EmptySlice",
+			input:    []Statement{},
+			expected: []Statement{},
+		},
+		{
+			name: "SingleStatement",
+			input: []Statement{
+				setupStatement([]string{"s3:GetObject"}, []string{"arn:aws:s3:::bucket1/*"}, "Allow", nil),
+			},
+			expected: []Statement{
+				setupStatement([]string{"s3:GetObject"}, []string{"arn:aws:s3:::bucket1/*"}, "Allow", nil),
+			},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			policy := &Policy{
+				Version:    "2012-10-17",
+				Statements: tt.input,
+			}
+			policy.dropDuplicateStatements()
+			if !reflect.DeepEqual(policy.Statements, tt.expected) {
+				t.Errorf("got %v, want %v", policy.Statements, tt.expected)
+			}
+		})
 	}
 }

@@ -213,3 +213,13 @@ func NewResourceSet(resources ...Resource) ResourceSet {
 
 	return resourceSet
 }
+
+// NewResourceStrings - creates new resource set from strings
+func NewResourceStrings(resources ...string) ResourceSet {
+	resourceSet := make(ResourceSet)
+	for _, resource := range resources {
+		resourceSet.Add(NewResource(resource))
+	}
+
+	return resourceSet
+}
