@@ -17,6 +17,11 @@
 
 package wildcard
 
+import (
+	"cmp"
+	"strings"
+)
+
 // MatchSimple - finds whether the text matches/satisfies the pattern string.
 // supports '*' wildcard in the pattern and ? for single characters.
 // Only difference to Match is that `?` at the end is optional,
@@ -45,6 +50,11 @@ func Match(pattern, name string) (matched bool) {
 	}
 	// Do an extended wildcard '*' and '?' match.
 	return deepMatchRune(name, pattern, false)
+}
+
+// Has returns true if the input pattern has a wildcard (pattern).
+func Has(pattern string) bool {
+	return cmp.Or(strings.Contains(pattern, "*"), strings.Contains(pattern, "?"))
 }
 
 func deepMatchRune(str, pattern string, simple bool) bool {

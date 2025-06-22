@@ -23,6 +23,7 @@ import (
 	"strings"
 
 	"github.com/minio/minio-go/v7/pkg/set"
+	"github.com/minio/pkg/v3/wildcard"
 )
 
 // DefaultVersion - default policy version as per AWS S3 specification.
@@ -112,9 +113,10 @@ func (a Args) GetRoleArn() string {
 
 // Policy - iam bucket iamp.
 type Policy struct {
-	ID         ID `json:"ID,omitempty"`
-	Version    string
-	Statements []Statement `json:"Statement"`
+	ID                   ID `json:"ID,omitempty"`
+	Version              string
+	Statements           []Statement `json:"Statement"`
+	actionStatementIndex map[Action][]int
 }
 
 // MatchResource matches resource with match resource patterns
@@ -195,6 +197,18 @@ func (iamp Policy) IsAllowed(args Args) bool {
 	}
 
 	// Check all allow statements. If any one statement allows, return true.
+	if indexes, ok := iamp.actionStatementIndex[args.Action]; ok {
+		for _, index := range indexes {
+			statement := iamp.Statements[index]
+			if statement.Effect == Allow {
+				if statement.IsAllowed(args) {
+					return true
+				}
+			}
+		}
+		return false
+	}
+
 	for _, statement := range iamp.Statements {
 		if statement.Effect == Allow {
 			if statement.IsAllowed(args) {
@@ -241,25 +255,25 @@ func MergePolicies(inputs ...Policy) Policy {
 	return merged
 }
 
+// dropDuplicateStatementsOriginal is the original quadratic implementation.
 func (iamp *Policy) dropDuplicateStatements() {
+	if len(iamp.Statements) <= 1 {
+		return
+	}
+
 	dups := make(map[int]struct{})
 	for i := range iamp.Statements {
 		if _, ok := dups[i]; ok {
-			// i is already a duplicate of some statement, so we do not need to
-			// compare with it.
 			continue
 		}
 		for j := i + 1; j < len(iamp.Statements); j++ {
 			if !iamp.Statements[i].Equals(iamp.Statements[j]) {
 				continue
 			}
-
-			// save duplicate statement index for removal.
 			dups[j] = struct{}{}
 		}
 	}
 
-	// remove duplicate items from the slice.
 	var c int
 	for i := range iamp.Statements {
 		if _, ok := dups[i]; ok {
@@ -291,6 +305,24 @@ func (iamp Policy) Validate() error {
 	return iamp.isValid()
 }
 
+// updateActionIndex with latest statements()
+// maintains a reverse map of Action -> []Statements
+// for faster lookup and short-circuit.
+func (iamp *Policy) updateActionIndex() {
+	iamp.actionStatementIndex = make(map[Action][]int, len(iamp.Statements))
+	for i := range iamp.Statements {
+		stmt := &iamp.Statements[i]
+		for action := range stmt.Actions {
+			if wildcard.Has(string(action)) {
+				// Do not store any 'wildcard' actions
+				// as we cannot optimize such actions.
+				continue
+			}
+			iamp.actionStatementIndex[action] = append(iamp.actionStatementIndex[action], i)
+		}
+	}
+}
+
 // ParseConfig - parses data in given reader to Iamp.
 func ParseConfig(reader io.Reader) (*Policy, error) {
 	var iamp Policy
@@ -301,6 +333,7 @@ func ParseConfig(reader io.Reader) (*Policy, error) {
 		return nil, Errorf("%w", err)
 	}
 
+	iamp.updateActionIndex()
 	return &iamp, iamp.Validate()
 }
 

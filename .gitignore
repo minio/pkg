@@ -21,3 +21,5 @@ prime/
 stage/
 .sia_temp/
 config.json
+*.prof
+*.pprof
