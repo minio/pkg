@@ -314,6 +314,9 @@ func (iamp *Policy) updateActionIndex() {
 	iamp.actionStatementIndex = make(map[Action][]int, len(iamp.Statements))
 	for i := range iamp.Statements {
 		stmt := &iamp.Statements[i]
+		if stmt.Effect == Deny {
+			continue
+		}
 		for action := range stmt.Actions {
 			if wildcard.Has(string(action)) {
 				// Do not store any 'wildcard' actions
