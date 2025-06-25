@@ -252,6 +252,7 @@ func MergePolicies(inputs ...Policy) Policy {
 		}
 	}
 	merged.dropDuplicateStatements()
+	merged.updateActionIndex()
 	return merged
 }
 
@@ -296,6 +297,7 @@ func (iamp *Policy) UnmarshalJSON(data []byte) error {
 
 	p := Policy(sp)
 	p.dropDuplicateStatements()
+	p.updateActionIndex()
 	*iamp = p
 	return nil
 }
@@ -333,7 +335,6 @@ func ParseConfig(reader io.Reader) (*Policy, error) {
 		return nil, Errorf("%w", err)
 	}
 
-	iamp.updateActionIndex()
 	return &iamp, iamp.Validate()
 }
 
