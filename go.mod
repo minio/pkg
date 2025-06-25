@@ -16,6 +16,7 @@ require (
 	github.com/minio/mux v1.8.2
 	github.com/rjeczalik/notify v0.9.3
 	github.com/tinylib/msgp v1.3.0
+	github.com/zeebo/xxh3 v1.0.2
 	go.etcd.io/etcd/client/v3 v3.6.1
 	golang.org/x/crypto v0.39.0
 	golang.org/x/sys v0.33.0
@@ -34,6 +35,7 @@ require (
 	github.com/golang/protobuf v1.5.4 // indirect
 	github.com/google/uuid v1.6.0 // indirect
 	github.com/grpc-ecosystem/grpc-gateway/v2 v2.27.1 // indirect
+	github.com/klauspost/cpuid/v2 v2.2.10 // indirect
 	github.com/lestrrat-go/blackmagic v1.0.4 // indirect
 	github.com/lestrrat-go/httpcc v1.0.1 // indirect
 	github.com/lestrrat-go/httprc v1.0.6 // indirect

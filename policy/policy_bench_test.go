@@ -19,6 +19,7 @@ package policy
 
 import (
 	"fmt"
+	"strconv"
 	"testing"
 
 	"github.com/minio/pkg/v3/policy/condition"
@@ -186,7 +187,136 @@ func BenchmarkDropDuplicateStatements(b *testing.B) {
 				p := *policy
 				p.Statements = make([]Statement, len(policy.Statements))
 				copy(p.Statements, policy.Statements)
+				p.dropDuplicateStatementsOriginal()
+			}
+		})
+	}
+
+	for _, scenario := range scenarios {
+		b.Run(scenario.name+"_Optimized", func(b *testing.B) {
+			statements := setupStatements(scenario.count, scenario.dupRatio)
+			policy := &Policy{Version: "2012-10-17", Statements: statements}
+
+			b.ResetTimer()
+			b.ReportAllocs()
+			for i := 0; i < b.N; i++ {
+				p := *policy
+				p.Statements = make([]Statement, len(policy.Statements))
+				copy(p.Statements, policy.Statements)
 				p.dropDuplicateStatements()
+			}
+		})
+	}
+}
+
+func BenchmarkDedupe(b *testing.B) {
+	var allActions []Action
+	var allAdminActions []Action
+	for action := range supportedActions {
+		allActions = append(allActions, action)
+	}
+	for action := range supportedAdminActions {
+		allAdminActions = append(allAdminActions, Action(action))
+	}
+
+	p1 := Policy{
+		Version: DefaultVersion,
+		Statements: []Statement{
+			NewStatement(
+				"",
+				Deny,
+				NewActionSet(allAdminActions...),
+				NewResourceSet(NewResource("bucket0"), NewResource("bucket1"), NewResource("bucket2"), NewResource("bucket3"), NewResource("bucket4"), NewResource("bucket5")),
+				condition.NewFunctions(),
+			),
+			NewStatement(
+				"",
+				Allow,
+				NewActionSet(allActions...),
+				NewResourceSet(NewResource("bucket0"), NewResource("bucket1"), NewResource("bucket2"), NewResource("bucket3"), NewResource("bucket4"), NewResource("bucket5")),
+				condition.NewFunctions(),
+			),
+		},
+	}
+
+	// p2 is a subset of p1
+	p2 := Policy{
+		Version: DefaultVersion,
+		Statements: []Statement{
+			NewStatement(
+				"",
+				Deny,
+				NewActionSet(allAdminActions...),
+				NewResourceSet(NewResource("bucket0"), NewResource("bucket1"), NewResource("bucket2"), NewResource("bucket3"), NewResource("bucket4"), NewResource("bucket5")),
+				condition.NewFunctions(),
+			),
+		},
+	}
+
+	p3 := Policy{
+		ID:      "MyPolicyForMyBucket1",
+		Version: DefaultVersion,
+		Statements: []Statement{
+			NewStatement(
+				"",
+				Allow,
+				NewActionSet(allActions...),
+				NewResourceSet(NewResource("mybucketA"), NewResource("mybucketB"), NewResource("mybucketC"), NewResource("mybucketD"), NewResource("mybucketE"), NewResource("mybucketF"), NewResource("mybucketG"), NewResource("mybucketH"), NewResource("mybucketI"), NewResource("mybucketJ"), NewResource("mybucketK"), NewResource("mybucketL"), NewResource("mybucketM"), NewResource("mybucketN"), NewResource("mybucketO"), NewResource("mybucketP"), NewResource("mybucketQ"), NewResource("mybucketR"), NewResource("mybucketS"), NewResource("mybucketS"), NewResource("mybucketU"), NewResource("mybucketV"), NewResource("mybucketX")),
+				condition.NewFunctions(),
+			),
+		},
+	}
+
+	testCases := []struct {
+		inputs   []Policy
+		expected Policy
+	}{
+		{
+			inputs: []Policy{p1, p2, p3, p1, p2, p3, p1, p2, p3, p1, p2, p3, p1, p2, p3, p1, p2, p3, p1, p2, p3, p1, p2, p3, p1, p2, p3, p1, p2, p3, p1, p2, p3, p1, p2, p3, p1, p2, p3, p1, p2, p3, p1, p2, p3, p1, p2, p3, p1, p2, p3, p1, p2, p3, p1, p2, p3, p1, p2, p3, p1, p2, p3, p1, p2, p3},
+			expected: Policy{
+				Version: DefaultVersion,
+				Statements: []Statement{
+					NewStatement(
+						"",
+						Deny,
+						NewActionSet(allAdminActions...),
+						NewResourceSet(NewResource("bucket0"), NewResource("bucket1"), NewResource("bucket2"), NewResource("bucket3"), NewResource("bucket4"), NewResource("bucket5")),
+						condition.NewFunctions(),
+					),
+					NewStatement(
+						"",
+						Allow,
+						NewActionSet(allActions...),
+						NewResourceSet(NewResource("bucket0"), NewResource("bucket1"), NewResource("bucket2"), NewResource("bucket3"), NewResource("bucket4"), NewResource("bucket5")),
+						condition.NewFunctions(),
+					),
+					NewStatement(
+						"",
+						Allow,
+						NewActionSet(allActions...),
+						NewResourceSet(NewResource("mybucketA"), NewResource("mybucketB"), NewResource("mybucketC"), NewResource("mybucketD"), NewResource("mybucketE"), NewResource("mybucketF"), NewResource("mybucketG"), NewResource("mybucketH"), NewResource("mybucketI"), NewResource("mybucketJ"), NewResource("mybucketK"), NewResource("mybucketL"), NewResource("mybucketM"), NewResource("mybucketN"), NewResource("mybucketO"), NewResource("mybucketP"), NewResource("mybucketQ"), NewResource("mybucketR"), NewResource("mybucketS"), NewResource("mybucketS"), NewResource("mybucketU"), NewResource("mybucketV"), NewResource("mybucketX")),
+						condition.NewFunctions(),
+					),
+				},
+			},
+		},
+	}
+	for i, testCase := range testCases {
+		b.Run(strconv.Itoa(i), func(b *testing.B) {
+			var merged Policy
+			for _, p := range testCase.inputs {
+				if merged.Version == "" {
+					merged.Version = p.Version
+				}
+				for _, st := range p.Statements {
+					merged.Statements = append(merged.Statements, st.Clone())
+				}
+			}
+			b.ResetTimer()
+			b.ReportAllocs()
+			for i := 0; i < b.N; i++ {
+				shallow := merged
+				shallow.dropDuplicateStatements()
 			}
 		})
 	}
