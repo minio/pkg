@@ -22,6 +22,7 @@ import (
 	"encoding/json"
 	"net"
 	"reflect"
+	"strconv"
 	"strings"
 	"testing"
 	"time"
@@ -1608,12 +1609,43 @@ func TestMergePolicies(t *testing.T) {
 				},
 			},
 		},
+		{
+			inputs: []Policy{p1, p2, p3, p1, p2, p3, p1, p2, p3, p1, p2, p3, p1, p2, p3, p1, p2, p3, p1, p2, p3, p1, p2, p3, p1, p2, p3, p1, p2, p3, p1, p2, p3, p1, p2, p3, p1, p2, p3, p1, p2, p3, p1, p2, p3, p1, p2, p3, p1, p2, p3, p1, p2, p3, p1, p2, p3, p1, p2, p3, p1, p2, p3, p1, p2, p3},
+			expected: Policy{
+				Version: DefaultVersion,
+				Statements: []Statement{
+					NewStatement(
+						"",
+						Deny,
+						NewActionSet(AllAdminActions),
+						ResourceSet{},
+						condition.NewFunctions(),
+					),
+					NewStatement(
+						"",
+						Allow,
+						NewActionSet(AllActions),
+						NewResourceSet(NewResource("*")),
+						condition.NewFunctions(),
+					),
+					NewStatement(
+						"",
+						Allow,
+						NewActionSet(GetBucketLocationAction),
+						NewResourceSet(NewResource("mybucket")),
+						condition.NewFunctions(),
+					),
+				},
+			},
+		},
 	}
 	for i, testCase := range testCases {
-		got := MergePolicies(testCase.inputs...)
-		if !got.Equals(testCase.expected) {
-			t.Errorf("Case %d: expected: %v, got %v", i+1, got, testCase.expected)
-		}
+		t.Run(strconv.Itoa(i), func(t *testing.T) {
+			got := MergePolicies(testCase.inputs...)
+			if !got.Equals(testCase.expected) {
+				t.Errorf("Case %d: expected: %v, got %v", i, testCase.expected, got)
+			}
+		})
 	}
 }
 
