@@ -162,6 +162,57 @@ func setupStatements(count int, dupRatio float64) []Statement {
 	return statements
 }
 
+func BenchmarkMergePolicies(b *testing.B) {
+	scenarios := []struct {
+		name     string
+		count    int
+		dupRatio float64
+	}{
+		{name: "10Policies_1Stmt_NoDups", count: 10, dupRatio: 0.0},
+		{name: "10Policies_1Stmt_HalfDups", count: 10, dupRatio: 0.5},
+		{name: "100Policies_1Stmt_NoDups", count: 100, dupRatio: 0.0},
+		{name: "100Policies_1Stmt_HalfDups", count: 100, dupRatio: 0.5},
+		{name: "1000Policies_1Stmt_NoDups", count: 1000, dupRatio: 0.0},
+		{name: "1000Policies_1Stmt_HalfDups", count: 1000, dupRatio: 0.5},
+	}
+
+	for _, scenario := range scenarios {
+		b.Run(scenario.name, func(b *testing.B) {
+			// Prepare input policies
+			policies := make([]Policy, scenario.count)
+			uniqueCount := int(float64(scenario.count) * (1 - scenario.dupRatio))
+			for i := 0; i < uniqueCount; i++ {
+				policies[i] = setupPolicy([]Statement{
+					setupStatement(
+						[]string{fmt.Sprintf("s3:Action%d", i)},
+						[]string{fmt.Sprintf("arn:aws:s3:::bucket%d/*", i)},
+						"Allow",
+						nil,
+					),
+				})
+				policies[i].Version = "2012-10-17"
+			}
+			for i := uniqueCount; i < scenario.count; i++ {
+				policies[i] = setupPolicy([]Statement{
+					setupStatement(
+						[]string{"s3:Action0"},
+						[]string{"arn:aws:s3:::bucket0/*"},
+						"Allow",
+						nil,
+					),
+				})
+				policies[i].Version = "2012-10-17"
+			}
+
+			b.ResetTimer()
+			b.ReportAllocs()
+			for i := 0; i < b.N; i++ {
+				_ = MergePolicies(policies...)
+			}
+		})
+	}
+}
+
 func BenchmarkDropDuplicateStatements(b *testing.B) {
 	scenarios := []struct {
 		name     string
