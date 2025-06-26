@@ -177,10 +177,8 @@ func (iamp Policy) IsAllowedActions(bucketName, objectName string, conditionValu
 func (iamp Policy) IsAllowed(args Args) bool {
 	// Check all deny statements. If any one statement denies, return false.
 	for _, statement := range iamp.Statements {
-		if statement.Effect == Deny {
-			if !statement.IsAllowed(args) {
-				return false
-			}
+		if statement.Effect == Deny && !statement.IsAllowed(args) {
+			return false
 		}
 	}
 
@@ -199,11 +197,11 @@ func (iamp Policy) IsAllowed(args Args) bool {
 	}
 
 	// Check all allow statements. If any one statement allows, return true.
-	if indexes, ok := iamp.actionStatementIndex[args.Action]; ok {
-		for _, index := range indexes {
-			statement := iamp.Statements[index]
-			if statement.Effect == Allow {
-				if statement.IsAllowed(args) {
+	if len(iamp.actionStatementIndex) > 0 {
+		if indexes, ok := iamp.actionStatementIndex[args.Action]; ok {
+			for _, index := range indexes {
+				statement := iamp.Statements[index]
+				if statement.Effect == Allow && statement.IsAllowed(args) {
 					return true
 				}
 			}
@@ -211,10 +209,8 @@ func (iamp Policy) IsAllowed(args Args) bool {
 	}
 
 	for _, statement := range iamp.Statements {
-		if statement.Effect == Allow {
-			if statement.IsAllowed(args) {
-				return true
-			}
+		if statement.Effect == Allow && statement.IsAllowed(args) {
+			return true
 		}
 	}
 
@@ -242,17 +238,42 @@ func (iamp Policy) isValid() error {
 
 // MergePolicies merges all the given policies into a single policy dropping any
 // duplicate statements.
-func MergePolicies(inputs ...Policy) Policy {
-	var merged Policy
+func MergePolicies(inputs ...Policy) (merged Policy) {
+	if len(inputs) == 0 {
+		return
+	}
+
+	if len(inputs) == 1 {
+		return inputs[0]
+	}
+
+	totalStmts := 0
 	for _, p := range inputs {
 		if merged.Version == "" {
 			merged.Version = p.Version
 		}
+		totalStmts += len(p.Statements)
+	}
+	merged.Statements = make([]Statement, 0, totalStmts)
+	found := make(map[[16]byte]struct{}, totalStmts)
+
+	// Apply a base seed
+	var baseSeed [8]byte
+	rand.Read(baseSeed[:])
+	var seed uint64
+	binary.LittleEndian.PutUint64(baseSeed[:], seed)
+
+	for _, p := range inputs {
 		for _, st := range p.Statements {
-			merged.Statements = append(merged.Statements, st.Clone())
+			h := st.hash(seed)
+			if _, ok := found[h]; ok {
+				continue
+			}
+			found[h] = struct{}{}
+			merged.Statements = append(merged.Statements, st)
 		}
 	}
-	merged.dropDuplicateStatements()
+
 	merged.updateActionIndex()
 	return merged
 }
@@ -342,7 +363,6 @@ func (iamp Policy) Validate() error {
 // maintains a reverse map of Action -> []Statements
 // for faster lookup and short-circuit.
 func (iamp *Policy) updateActionIndex() {
-	iamp.actionStatementIndex = make(map[Action][]int, len(iamp.Statements))
 	for i := range iamp.Statements {
 		stmt := &iamp.Statements[i]
 		if stmt.Effect == Deny {
@@ -353,6 +373,12 @@ func (iamp *Policy) updateActionIndex() {
 				// Do not store any 'wildcard' actions
 				// as we cannot optimize such actions.
 				continue
+			}
+			if iamp.actionStatementIndex == nil {
+				// do not create action statement index
+				// if we do not have any statement or actions
+				// to save them for, simply avoids allocations
+				iamp.actionStatementIndex = make(map[Action][]int, len(iamp.Statements))
 			}
 			iamp.actionStatementIndex[action] = append(iamp.actionStatementIndex[action], i)
 		}
