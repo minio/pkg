@@ -162,6 +162,54 @@ func TestPolicyIsAllowedActions(t *testing.T) {
 	}
 }
 
+func TestPolicyIsAllowedCornerCase1(t *testing.T) {
+	policy1Str := `{
+   "Version":"2012-10-17",
+   "Statement":[
+       {
+           "Sid":"1",
+           "Effect":"Allow",
+           "Action": "s3:PutObject",
+           "Resource": "arn:aws:s3:::mybucket2/*"
+       },
+       {
+           "Sid":"2",
+           "Effect":"Allow",
+           "Action": "s3:*",
+           "Resource": "arn:aws:s3:::mybucket1/*"
+       }
+    ]
+}`
+	policy1, err := ParseConfig(strings.NewReader(policy1Str))
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	args1 := Args{
+		AccountName:     "Q3AM3UQ867SPQQA43P2F",
+		Action:          PutObjectAction,
+		BucketName:      "mybucket1",
+		ConditionValues: nil,
+		ObjectName:      "myobject",
+	}
+
+	testCases := []struct {
+		policy         *Policy
+		args           Args
+		expectedResult bool
+	}{
+		{policy1, args1, true},
+	}
+
+	for i, testCase := range testCases {
+		result := testCase.policy.IsAllowed(testCase.args)
+
+		if result != testCase.expectedResult {
+			t.Errorf("case %v: expected: %v, got: %v\n", i+1, testCase.expectedResult, result)
+		}
+	}
+}
+
 func TestPolicyIsAllowed(t *testing.T) {
 	case1Policy := Policy{
 		Version: DefaultVersion,

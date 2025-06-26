@@ -33,16 +33,16 @@ const DefaultVersion = "2012-10-17"
 
 // Args - arguments to policy to check whether it is allowed
 type Args struct {
-	AccountName     string                 `json:"account"`
-	Groups          []string               `json:"groups"`
-	Action          Action                 `json:"action"`
-	OriginalAction  Action                 `json:"originalAction"`
-	BucketName      string                 `json:"bucket"`
-	ConditionValues map[string][]string    `json:"conditions"`
-	IsOwner         bool                   `json:"owner"`
-	ObjectName      string                 `json:"object"`
-	Claims          map[string]interface{} `json:"claims"`
-	DenyOnly        bool                   `json:"denyOnly"` // only applies deny
+	AccountName     string              `json:"account"`
+	Groups          []string            `json:"groups"`
+	Action          Action              `json:"action"`
+	OriginalAction  Action              `json:"originalAction"`
+	BucketName      string              `json:"bucket"`
+	ConditionValues map[string][]string `json:"conditions"`
+	IsOwner         bool                `json:"owner"`
+	ObjectName      string              `json:"object"`
+	Claims          map[string]any      `json:"claims"`
+	DenyOnly        bool                `json:"denyOnly"` // only applies deny
 }
 
 // GetValuesFromClaims returns the list of values for the input claimName.
@@ -50,13 +50,13 @@ type Args struct {
 // - string
 // - comma separated values
 // - string array
-func GetValuesFromClaims(claims map[string]interface{}, claimName string) (set.StringSet, bool) {
+func GetValuesFromClaims(claims map[string]any, claimName string) (set.StringSet, bool) {
 	s := set.NewStringSet()
 	pname, ok := claims[claimName]
 	if !ok {
 		return s, false
 	}
-	pnames, ok := pname.([]interface{})
+	pnames, ok := pname.([]any)
 	if !ok {
 		pnameStr, ok := pname.(string)
 		if ok {
@@ -92,7 +92,7 @@ func GetValuesFromClaims(claims map[string]interface{}, claimName string) (set.S
 
 // GetPoliciesFromClaims returns the list of policies to be applied for this
 // incoming request, extracting the information from input JWT claims.
-func GetPoliciesFromClaims(claims map[string]interface{}, policyClaimName string) (set.StringSet, bool) {
+func GetPoliciesFromClaims(claims map[string]any, policyClaimName string) (set.StringSet, bool) {
 	return GetValuesFromClaims(claims, policyClaimName)
 }
 
@@ -208,7 +208,6 @@ func (iamp Policy) IsAllowed(args Args) bool {
 				}
 			}
 		}
-		return false
 	}
 
 	for _, statement := range iamp.Statements {
