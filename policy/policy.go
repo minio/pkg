@@ -1,4 +1,4 @@
-// Copyright (c) 2015-2021 MinIO, Inc.
+// Copyright (c) 2015-2025 MinIO, Inc.
 //
 // This file is part of MinIO Object Storage stack
 //
@@ -18,11 +18,14 @@
 package policy
 
 import (
+	"context"
 	"crypto/rand"
 	"encoding/binary"
 	"encoding/json"
 	"io"
+	"runtime"
 	"strings"
+	"sync"
 
 	"github.com/minio/minio-go/v7/pkg/set"
 	"github.com/minio/pkg/v3/wildcard"
@@ -173,12 +176,124 @@ func (iamp Policy) IsAllowedActions(bucketName, objectName string, conditionValu
 	return actionSet
 }
 
-// IsAllowed - checks given policy args is allowed to continue the Rest API.
-func (iamp Policy) IsAllowed(args Args) bool {
+// IsAllowedSerial - checks if the given Args is allowed by any one of the given
+// policies in serial.
+//
+// This is currently the fastest implementation for our basic benchmark.
+func IsAllowedSerial(policies []Policy, args Args) bool {
+	gotAllow := false
+	for _, policy := range policies {
+		res := policy.Decide(&args)
+		if res == DenyDecision {
+			return false
+		}
+		if res == AllowDecision {
+			gotAllow = true
+		}
+	}
+	return gotAllow
+}
+
+// IsAllowedPar - checks if the given Args is allowed by any one of the given
+// policies in parallel (when len(policies) > 100).
+func IsAllowedPar(policies []Policy, args Args) bool {
+	if len(policies) == 0 {
+		return false
+	}
+
+	// If there is only one policy, use it directly.
+	if len(policies) == 1 {
+		return policies[0].IsAllowed(args)
+	}
+
+	if len(policies) <= 100 {
+		gotAllow := false
+		// If there are less than 100 policies, we can use a simple loop.
+		for _, policy := range policies {
+			res := policy.Decide(&args)
+			if res == DenyDecision {
+				return false
+			}
+			if res == AllowDecision {
+				gotAllow = true
+			}
+		}
+		return gotAllow
+	}
+
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+
+	// get number of workers.
+	numWorkers := min(runtime.GOMAXPROCS(0), len(policies))
+
+	jobs := make(chan int, len(policies))
+	for i := range policies {
+		jobs <- i
+	}
+	close(jobs)
+
+	resultCh := make(chan Decision, len(policies))
+
+	var wg sync.WaitGroup
+	wg.Add(numWorkers)
+	for range numWorkers {
+		go func() {
+			defer wg.Done()
+			for i := range jobs {
+				select {
+				case <-ctx.Done():
+					return
+				default:
+				}
+
+				res := policies[i].Decide(&args)
+
+				select {
+				case resultCh <- res:
+				case <-ctx.Done():
+					return
+				}
+			}
+		}()
+	}
+
+	gotAllow := false
+	for range len(policies) {
+		res := <-resultCh
+		if res == DenyDecision {
+			cancel()
+			wg.Wait()
+			return false
+		}
+		if res == AllowDecision {
+			gotAllow = true
+		}
+	}
+
+	wg.Wait()
+	return gotAllow
+}
+
+// Decision is an enum type representing the decision made by the policy
+// for the given arguments.
+type Decision uint8
+
+// Possible decisions made by the policy.
+const (
+	NoDecision Decision = iota
+	AllowDecision
+	DenyDecision
+)
+
+// Decide - decides whether the given args is allowed or not. If no policy
+// statement explicitly allows or denies the operation in the Args, it returns
+// `noDecision`. It is upto the caller to handle such cases.
+func (iamp *Policy) Decide(args *Args) Decision {
 	// Check all deny statements. If any one statement denies, return false.
 	for _, statement := range iamp.Statements {
-		if statement.Effect == Deny && !statement.IsAllowed(args) {
-			return false
+		if statement.Effect == Deny && !statement.IsAllowedPtr(args) {
+			return DenyDecision
 		}
 	}
 
@@ -188,12 +303,12 @@ func (iamp Policy) IsAllowed(args Args) bool {
 	// specific scenarios where we only want to validate
 	// 'Deny' only policies.
 	if args.DenyOnly {
-		return true
+		return AllowDecision
 	}
 
 	// For owner, its allowed by default.
 	if args.IsOwner {
-		return true
+		return AllowDecision
 	}
 
 	// Check all allow statements. If any one statement allows, return true.
@@ -201,20 +316,31 @@ func (iamp Policy) IsAllowed(args Args) bool {
 		if indexes, ok := iamp.actionStatementIndex[args.Action]; ok {
 			for _, index := range indexes {
 				statement := iamp.Statements[index]
-				if statement.Effect == Allow && statement.IsAllowed(args) {
-					return true
+				if statement.Effect == Allow && statement.IsAllowedPtr(args) {
+					return AllowDecision
 				}
 			}
 		}
 	}
 
 	for _, statement := range iamp.Statements {
-		if statement.Effect == Allow && statement.IsAllowed(args) {
-			return true
+		if statement.Effect == Allow && statement.IsAllowedPtr(args) {
+			return AllowDecision
 		}
 	}
 
-	return false
+	return NoDecision
+}
+
+// IsAllowed - checks given policy args is allowed to continue the Rest API.
+func (iamp Policy) IsAllowed(args Args) bool {
+	decision := iamp.Decide(&args)
+	if decision == NoDecision {
+		// No decision made, return false.
+		return false
+	}
+
+	return decision == AllowDecision
 }
 
 // IsEmpty - returns whether policy is empty or not.

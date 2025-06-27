@@ -45,6 +45,11 @@ var smallBufPool = sync.Pool{
 
 // IsAllowed - checks given policy args is allowed to continue the Rest API.
 func (statement Statement) IsAllowed(args Args) bool {
+	return statement.IsAllowedPtr(&args)
+}
+
+// IsAllowedPtr - checks given policy args is allowed to continue the Rest API.
+func (statement Statement) IsAllowedPtr(args *Args) bool {
 	check := func() bool {
 		if (!statement.Actions.Match(args.Action) && !statement.Actions.IsEmpty()) ||
 			statement.NotActions.Match(args.Action) {
