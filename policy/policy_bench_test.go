@@ -372,3 +372,164 @@ func BenchmarkDedupe(b *testing.B) {
 		})
 	}
 }
+
+func BenchmarkMergeEvalVsParEval(b *testing.B) {
+	getReadPolicyBucket := func(b string) Policy {
+		return Policy{
+			Version: DefaultVersion,
+			Statements: []Statement{
+				NewStatement(
+					"AllowBucketListing",
+					Allow,
+					NewActionSet(ListBucketAction),
+					NewResourceSet(NewResource(b)),
+					condition.NewFunctions(),
+				),
+				NewStatement(
+					"AllowObjectRead",
+					Allow,
+					NewActionSet(GetObjectAction),
+					NewResourceSet(NewResource(b+"/*")),
+					condition.NewFunctions(),
+				),
+			},
+		}
+	}
+	getReadWritePolicyBucket := func(b string) Policy {
+		return Policy{
+			Version: DefaultVersion,
+			Statements: []Statement{
+				NewStatement(
+					"AllowBucketListing",
+					Allow,
+					NewActionSet(ListBucketAction),
+					NewResourceSet(NewResource(b)),
+					condition.NewFunctions(),
+				),
+				NewStatement(
+					"AllowFullObjectAccess",
+					Allow,
+					NewActionSet(GetObjectAction, PutObjectAction, DeleteObjectAction),
+					NewResourceSet(NewResource(b+"/*")),
+					condition.NewFunctions(),
+				),
+			},
+		}
+	}
+	getBucketPolicies := func(n int) []Policy {
+		policies := make([]Policy, n)
+		for i := range n {
+			if i%2 == 0 {
+				policies[i] = getReadPolicyBucket(fmt.Sprintf("mybucket%d", i))
+			} else {
+				policies[i] = getReadWritePolicyBucket(fmt.Sprintf("mybucket%d", i))
+			}
+		}
+		return policies
+	}
+	getRequestArgs := func(numArgs, numBuckets int) ([]Args, []bool) {
+		args := make([]Args, numArgs)
+		isAllowed := make([]bool, numArgs)
+		for i := range numArgs {
+			bucketIndex := i % numBuckets
+			bucketName := fmt.Sprintf("mybucket%d", bucketIndex)
+			args[i] = Args{
+				Action:     PutObjectAction,
+				BucketName: bucketName,
+				ObjectName: fmt.Sprintf("object%d.txt", i),
+			}
+			// Even buckets get only read permission. Others get read-write.
+			isAllowed[i] = bucketIndex%2 == 1
+		}
+		return args, isAllowed
+	}
+	type tcase struct {
+		policies []Policy
+		args     []Args
+		expected []bool
+	}
+	genTestCases := func(numPolicies, numArgs int) tcase {
+		// numPolicies == numBuckets in these test cases.
+		policies := getBucketPolicies(numPolicies)
+		args, isAlloweds := getRequestArgs(numArgs, numPolicies)
+		// fmt.Printf("isAlloweds: %v\n", isAlloweds)
+		return tcase{
+			policies: policies,
+			args:     args,
+			expected: isAlloweds,
+		}
+	}
+	testCaseGeneratorCases := []struct {
+		numPolicies int
+		numArgs     int
+	}{
+		{numPolicies: 1, numArgs: 10},
+		{numPolicies: 2, numArgs: 10},
+		{numPolicies: 4, numArgs: 10},
+		{numPolicies: 8, numArgs: 10},
+		{numPolicies: 64, numArgs: 10},
+		{numPolicies: 128, numArgs: 10},
+		{numPolicies: 512, numArgs: 10},
+		{numPolicies: 1024, numArgs: 10},
+		{numPolicies: 4096, numArgs: 10},
+		{numPolicies: 16384, numArgs: 10},
+	}
+	testCases := make([]tcase, 0, len(testCaseGeneratorCases))
+	for _, tc := range testCaseGeneratorCases {
+		testCases = append(testCases, genTestCases(tc.numPolicies, tc.numArgs))
+	}
+
+	mergeAndEval := func(policies []Policy, args []Args, expected []bool) {
+		for i, args := range args {
+			// We merge policies for each case, to simulate real-world usage.
+			policy := MergePolicies(policies...)
+			if policy.IsAllowed(args) != expected[i] {
+				b.Errorf("Expected %v for args %v, got %v", expected[i], args, !expected[i])
+			}
+		}
+	}
+
+	parallelEval := func(policies []Policy, args []Args, expected []bool) {
+		for i, args := range args {
+			if IsAllowedPar(policies, args) != expected[i] {
+				b.Errorf("Expected %v for args %v, got %v", expected[i], args, !expected[i])
+			}
+		}
+	}
+
+	serialEval := func(policies []Policy, args []Args, expected []bool) {
+		for i, args := range args {
+			if IsAllowedSerial(policies, args) != expected[i] {
+				b.Errorf("Expected %v for args %v, got %v", expected[i], args, !expected[i])
+			}
+		}
+	}
+
+	for i, testCase := range testCases {
+		b.Run(fmt.Sprintf("TestCase_%d_%dp_%da", i, len(testCase.policies), len(testCase.args)), func(b *testing.B) {
+			b.Run("MergeAndEval", func(b *testing.B) {
+				b.ResetTimer()
+				b.ReportAllocs()
+				for j := 0; j < b.N; j++ {
+					mergeAndEval(testCase.policies, testCase.args, testCase.expected)
+				}
+			})
+
+			b.Run("ParallelEval", func(b *testing.B) {
+				b.ResetTimer()
+				b.ReportAllocs()
+				for j := 0; j < b.N; j++ {
+					parallelEval(testCase.policies, testCase.args, testCase.expected)
+				}
+			})
+
+			b.Run("SerialEval", func(b *testing.B) {
+				b.ResetTimer()
+				b.ReportAllocs()
+				for j := 0; j < b.N; j++ {
+					serialEval(testCase.policies, testCase.args, testCase.expected)
+				}
+			})
+		})
+	}
+}
