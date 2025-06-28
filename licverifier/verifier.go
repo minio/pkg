@@ -101,7 +101,7 @@ func parseECPublicKeyFromPEM(key []byte) (*ecdsa.PublicKey, error) {
 func NewLicenseVerifier(pemBytes []byte) (*LicenseVerifier, error) {
 	pbKey, err := parseECPublicKeyFromPEM(pemBytes)
 	if err != nil {
-		return nil, fmt.Errorf("Failed to parse public key: %s", err)
+		return nil, fmt.Errorf("failed to parse public key: %w", err)
 	}
 	key, err := jwk.FromRaw(pbKey)
 	if err != nil {
@@ -124,7 +124,7 @@ func toLicenseInfo(license string, token jwt.Token) (LicenseInfo, error) {
 	}
 	accID, ok := claims[accountID].(float64)
 	if !ok || ok && accID < 0 {
-		return LicenseInfo{}, errors.New("Invalid accountId in claims")
+		return LicenseInfo{}, errors.New("invalid accountId in claims")
 	}
 
 	// deployment id may not be present in older licenses.
@@ -137,19 +137,19 @@ func toLicenseInfo(license string, token jwt.Token) (LicenseInfo, error) {
 
 	orgName, ok := claims[organization].(string)
 	if !ok {
-		return LicenseInfo{}, errors.New("Invalid organization in claims")
+		return LicenseInfo{}, errors.New("invalid organization in claims")
 	}
 	storageCap, ok := claims[capacity].(float64)
 	if !ok {
-		return LicenseInfo{}, errors.New("Invalid storage capacity in claims")
+		return LicenseInfo{}, errors.New("invalid storage capacity in claims")
 	}
 	plan, ok := claims[plan].(string)
 	if !ok {
-		return LicenseInfo{}, errors.New("Invalid plan in claims")
+		return LicenseInfo{}, errors.New("invalid plan in claims")
 	}
 	iAt, ok := claims[issuedAt].(time.Time)
 	if !ok {
-		return LicenseInfo{}, errors.New("Invalid issuedAt in claims")
+		return LicenseInfo{}, errors.New("invalid issuedAt in claims")
 	}
 
 	// apiKey is optional as it's not present in older licenses

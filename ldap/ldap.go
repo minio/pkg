@@ -92,12 +92,12 @@ func (l *Config) Clone() (cloned Config) {
 
 func (l *Config) connect(ldapAddr string) (ldapConn *ldap.Conn, err error) {
 	if l.ServerInsecure {
-		ldapConn, err = ldap.Dial("tcp", ldapAddr)
+		ldapConn, err = ldap.DialURL("ldap://" + ldapAddr)
 	} else {
 		if l.ServerStartTLS {
-			ldapConn, err = ldap.Dial("tcp", ldapAddr)
+			ldapConn, err = ldap.DialURL("ldap://" + ldapAddr)
 		} else {
-			ldapConn, err = ldap.DialTLS("tcp", ldapAddr, l.TLS)
+			ldapConn, err = ldap.DialURL("ldaps://" + ldapAddr)
 		}
 	}
 
@@ -114,7 +114,7 @@ func (l *Config) connect(ldapAddr string) (ldapConn *ldap.Conn, err error) {
 // Connect connect to ldap server.
 func (l *Config) Connect() (ldapConn *ldap.Conn, err error) {
 	if l == nil || !l.Enabled {
-		return nil, errors.New("LDAP is not configured")
+		return nil, errors.New("ldap is not configured")
 	}
 
 	var srvService, srvProto, srvName string
@@ -127,7 +127,7 @@ func (l *Config) Connect() (ldapConn *ldap.Conn, err error) {
 		srvName = l.ServerAddr
 	case "":
 	default:
-		return nil, errors.New("Invalid SRV Record Name parameter")
+		return nil, errors.New("invalid SRV Record Name parameter")
 
 	}
 
@@ -172,7 +172,7 @@ func (l *Config) Connect() (ldapConn *ldap.Conn, err error) {
 	for i, e := range errs {
 		errMsgs = append(errMsgs, fmt.Sprintf("Connect err to %s:%d - %v", addrs[i].Target, addrs[i].Port, e))
 	}
-	err = fmt.Errorf("Could not connect to any LDAP server: %s", strings.Join(errMsgs, "; "))
+	err = fmt.Errorf("could not connect to any LDAP server: %s", strings.Join(errMsgs, "; "))
 	return nil, err
 }
 
@@ -186,9 +186,9 @@ func (l *Config) LookupBind(conn *ldap.Conn) error {
 	}
 	if err != nil {
 		if ldap.IsErrorWithCode(err, 49) {
-			return fmt.Errorf("LDAP Lookup Bind user invalid credentials error: %w", err)
+			return fmt.Errorf("ldap lookup bind user invalid credentials error: %w", err)
 		}
-		return fmt.Errorf("LDAP client: %w", err)
+		return fmt.Errorf("ldap client: %w", err)
 	}
 	return nil
 }
@@ -254,7 +254,7 @@ func (l *Config) LookupUsername(conn *ldap.Conn, username string) (*DNSearchResu
 			// it's existence is checked during configuration validation but it
 			// is possible that the base DN was deleted after the validation.
 			if ldap.IsErrorWithCode(err, 32) {
-				return nil, fmt.Errorf("Base DN (%s) for user DN search does not exist: %w",
+				return nil, fmt.Errorf("base DN (%s) for user DN search does not exist: %w",
 					searchRequest.BaseDN, err)
 			}
 			return nil, err
@@ -277,10 +277,10 @@ func (l *Config) LookupUsername(conn *ldap.Conn, username string) (*DNSearchResu
 		}
 	}
 	if len(foundDistNames) == 0 {
-		return nil, fmt.Errorf("User DN not found for: %s", username)
+		return nil, fmt.Errorf("user DN not found for: %s", username)
 	}
 	if len(foundDistNames) != 1 {
-		return nil, fmt.Errorf("Multiple DNs for %s found - please fix the search filter", username)
+		return nil, fmt.Errorf("multiple DNs for %s found - please fix the search filter", username)
 	}
 	return &foundDistNames[0], nil
 }
@@ -304,7 +304,7 @@ func (l *Config) SearchForUserGroups(conn *ldap.Conn, username, bindDN string) (
 			var newGroups []string
 			newGroups, err := getGroups(conn, searchRequest)
 			if err != nil {
-				errRet := fmt.Errorf("Error finding groups of %s: %w", bindDN, err)
+				errRet := fmt.Errorf("error finding groups of %s: %w", bindDN, err)
 				return nil, errRet
 			}
 
@@ -322,10 +322,10 @@ func getGroups(conn *ldap.Conn, sreq *ldap.SearchRequest) ([]string, error) {
 		// For a search, if the base DN does not exist, we get a 32 error code.
 		// Ref: https://ldap.com/ldap-result-code-reference/
 		if ldap.IsErrorWithCode(err, 32) {
-			return nil, fmt.Errorf("Base DN (%s) for group search does not exist: %w",
+			return nil, fmt.Errorf("base DN (%s) for group search does not exist: %w",
 				sreq.BaseDN, err)
 		}
-		return nil, fmt.Errorf("LDAP client: %w", err)
+		return nil, fmt.Errorf("ldap client: %w", err)
 	}
 	for _, entry := range sres.Entries {
 		// We only queried one attribute,
@@ -370,12 +370,12 @@ func LookupDN(conn *ldap.Conn, dn string, attrs []string) (*DNSearchResult, erro
 			return nil, nil
 		}
 
-		return nil, fmt.Errorf("LDAP client: %w", err)
+		return nil, fmt.Errorf("ldap client: %w", err)
 	}
 
 	if len(searchResult.Entries) != 1 {
 		return nil, fmt.Errorf(
-			"Multiple DNs found for %s - this should not happen for a base object search",
+			"multiple DNs found for %s - this should not happen for a base object search",
 			dn)
 	}
 

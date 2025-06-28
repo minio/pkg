@@ -46,7 +46,7 @@ func HasList(args ...string) bool {
 
 // ErrInvalidListFormatFn error returned when invalid list format is detected.
 var ErrInvalidListFormatFn = func(arg string) error {
-	return fmt.Errorf("Invalid list format in (%s)", arg)
+	return fmt.Errorf("invalid list format in (%s)", arg)
 }
 
 // FindListPatterns - finds all list patterns, recursively and parses the ranges numerically.

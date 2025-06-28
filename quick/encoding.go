@@ -59,10 +59,10 @@ func (j jsonEncoding) Unmarshal(b []byte, v interface{}) error {
 		// Try to return a sophisticated json error message if possible
 		switch jerr := err.(type) {
 		case *json.SyntaxError:
-			return fmt.Errorf("Unable to parse JSON schema due to a syntax error at '%s'",
+			return fmt.Errorf("unable to parse JSON schema due to a syntax error at '%s'",
 				FormatJSONSyntaxError(bytes.NewReader(b), jerr.Offset))
 		case *json.UnmarshalTypeError:
-			return fmt.Errorf("Unable to parse JSON, type '%v' cannot be converted into the Go '%v' type",
+			return fmt.Errorf("unable to parse JSON, type '%v' cannot be converted into the Go '%v' type",
 				jerr.Value, jerr.Type)
 		}
 		return err

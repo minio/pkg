@@ -190,7 +190,7 @@ func (s *Server) Listen() (err error) {
 			// it is alright to keep it implemented for consistency.
 			// UPDATE: https://go-review.googlesource.com/c/go/+/340261
 			ne, ok := err.(net.Error)
-			if ok && (ne.Timeout() || ne.Temporary()) {
+			if ok && ne.Timeout() {
 				s.logger.Error(
 					AcceptNetworkError,
 					fmt.Errorf("error accepting connections: %w", err),
