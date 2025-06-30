@@ -422,15 +422,15 @@ func validateAndParseBaseDNList(conn *ldap.Conn, baseDNList []string) ([]BaseDNI
 	for _, dn := range baseDNList {
 		lookupResult, err := LookupDN(conn, dn, nil)
 		if err != nil {
-			return nil, fmt.Errorf("Base DN `%s` lookup failed: %w", dn, err)
+			return nil, fmt.Errorf("base DN `%s` lookup failed: %w", dn, err)
 		}
 		if lookupResult == nil {
-			return nil, fmt.Errorf("Base DN `%s` not found in the LDAP server", dn)
+			return nil, fmt.Errorf("base DN `%s` not found in the LDAP server", dn)
 		}
 		serverDN := lookupResult.NormDN
 		parsed, err := ldap.ParseDN(serverDN)
 		if err != nil {
-			return nil, fmt.Errorf("Unexpectedly failed to parse DN `%s`: %w", serverDN, err)
+			return nil, fmt.Errorf("unexpectedly failed to parse DN `%s`: %w", serverDN, err)
 		}
 		res = append(res, BaseDNInfo{Original: dn, ServerDN: serverDN, Parsed: parsed})
 	}
@@ -442,7 +442,7 @@ func parseBaseDNListOffline(baseDNList []string) ([]BaseDNInfo, error) {
 	for _, dn := range baseDNList {
 		parsed, err := ldap.ParseDN(dn)
 		if err != nil {
-			return nil, fmt.Errorf("Unexpectedly failed to parse DN `%s`: %w", dn, err)
+			return nil, fmt.Errorf("unexpectedly failed to parse DN `%s`: %w", dn, err)
 		}
 		res = append(res, BaseDNInfo{Original: dn, Parsed: parsed})
 	}
@@ -456,7 +456,7 @@ var validAttributeRegex = regexp.MustCompile(`^[a-zA-Z][a-zA-Z0-9-]*$`)
 func validateAttributes(attrs []string) error {
 	for _, attr := range attrs {
 		if !validAttributeRegex.MatchString(attr) {
-			return fmt.Errorf("Attribute name `%s` is invalid", attr)
+			return fmt.Errorf("attribute name `%s` is invalid", attr)
 		}
 	}
 	return nil

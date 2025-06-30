@@ -42,10 +42,10 @@ var errFormat = errors.New("format error")
 // `{33...64}`
 func parseEllipsesRange(pattern string) (seq []string, err error) {
 	if !strings.Contains(pattern, openBraces) {
-		return nil, errors.New("Invalid argument")
+		return nil, errors.New("invalid argument")
 	}
 	if !strings.Contains(pattern, closeBraces) {
-		return nil, errors.New("Invalid argument")
+		return nil, errors.New("invalid argument")
 	}
 
 	pattern = strings.TrimPrefix(pattern, openBraces)
@@ -53,7 +53,7 @@ func parseEllipsesRange(pattern string) (seq []string, err error) {
 
 	ellipsesRange := strings.Split(pattern, ellipses)
 	if len(ellipsesRange) != 2 {
-		return nil, errors.New("Invalid argument")
+		return nil, errors.New("invalid argument")
 	}
 
 	var hexadecimal bool
@@ -77,7 +77,7 @@ func parseEllipsesRange(pattern string) (seq []string, err error) {
 	}
 
 	if start > end {
-		return nil, fmt.Errorf("Incorrect range start %d cannot be bigger than end %d", start, end)
+		return nil, fmt.Errorf("incorrect range start %d cannot be bigger than end %d", start, end)
 	}
 
 	for i := start; i <= end; i++ {
@@ -167,7 +167,7 @@ func HasEllipses(args ...string) bool {
 
 // ErrInvalidEllipsesFormatFn error returned when invalid ellipses format is detected.
 var ErrInvalidEllipsesFormatFn = func(arg string) error {
-	return fmt.Errorf("Invalid ellipsis format in (%s), Ellipsis range must be provided in format {N...M} where N and M are positive integers, M must be greater than N,  with an allowed minimum range of 4", arg)
+	return fmt.Errorf("invalid ellipsis format in (%s), ellipsis range must be provided in format {N...M} where N and M are positive integers, M must be greater than N,  with an allowed minimum range of 4", arg)
 }
 
 // FindEllipsesPatterns - finds all ellipses patterns, recursively and parses the ranges numerically.
