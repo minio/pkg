@@ -25,17 +25,37 @@ import (
 type STSAction string
 
 const (
-	// AssumeRoleWithWebIdentityAction - STS action for AssumeRoleWithWebIdentity call
+	// AssumeRoleAction - use to deny or allow sts:AssumeRole action under specific conditions.
+	AssumeRoleAction = "sts:AssumeRole"
+
+	// AssumeRoleLDAPIdentityAction - use to deny or allow sts:AssumeRoleLDAPIdentity action under specific conditions.
+	AssumeRoleLDAPIdentityAction = "sts:AssumeRoleLDAPIdentity"
+
+	// AssumeRoleWithCustomTokenAction - use to deny or allow sts:AssumeRoleWithCustomToken action under specific conditions.
+	AssumeRoleWithCustomTokenAction = "sts:AssumeRoleWithCustomToken"
+
+	// AssumeRoleWithWebIdentityAction - use to deny or allow sts:AssumeRoleWithWebIdentity action under specific conditions.
 	AssumeRoleWithWebIdentityAction = "sts:AssumeRoleWithWebIdentity"
+
+	// AssumeRoleWithClientGrantsAction - use to deny or allow sts:AssumeRoleWithClientGrants action under specific conditions.
+	AssumeRoleWithClientGrantsAction = "sts:AssumeRoleWithClientGrants"
+
+	// AssumeRoleWithClientCertificateAction - use to deny or allow sts:AssumeRoleWithClientCertificate action under specific conditions.
+	AssumeRoleWithClientCertificateAction = "sts:AssumeRoleWithClientCertificate"
+
 	// AllSTSActions - select all STS actions
-	AllSTSActions = "*"
+	AllSTSActions = "sts:*"
 )
 
 // List of all supported sts actions.
 var supportedSTSActions = map[STSAction]struct{}{
-	AssumeRoleWithWebIdentityAction: {},
-
-	AllSTSActions: {},
+	AllSTSActions:                         {},
+	AssumeRoleAction:                      {},
+	AssumeRoleLDAPIdentityAction:          {},
+	AssumeRoleWithWebIdentityAction:       {},
+	AssumeRoleWithCustomTokenAction:       {},
+	AssumeRoleWithClientGrantsAction:      {},
+	AssumeRoleWithClientCertificateAction: {},
 }
 
 // IsValid - checks if action is valid or not.
@@ -51,8 +71,13 @@ func createSTSActionConditionKeyMap() map[Action]condition.KeySet {
 	}
 
 	return ActionConditionKeyMap{
-		AllSTSActions:                   condition.NewKeySet(allSupportedSTSKeys...),
-		AssumeRoleWithWebIdentityAction: condition.NewKeySet([]condition.Key{condition.STSDurationSeconds.ToKey()}...),
+		AllSTSActions:                         condition.NewKeySet(allSupportedSTSKeys...),
+		AssumeRoleAction:                      condition.NewKeySet(allSupportedSTSKeys...),
+		AssumeRoleLDAPIdentityAction:          condition.NewKeySet(allSupportedSTSKeys...),
+		AssumeRoleWithWebIdentityAction:       condition.NewKeySet(allSupportedSTSKeys...),
+		AssumeRoleWithCustomTokenAction:       condition.NewKeySet(allSupportedSTSKeys...),
+		AssumeRoleWithClientGrantsAction:      condition.NewKeySet(allSupportedSTSKeys...),
+		AssumeRoleWithClientCertificateAction: condition.NewKeySet(allSupportedSTSKeys...),
 	}
 }
 
