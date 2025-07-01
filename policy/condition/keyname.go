@@ -215,6 +215,7 @@ const (
 const (
 	// STSDurationSeconds - Duration seconds condition for STS policy
 	STSDurationSeconds KeyName = "sts:DurationSeconds"
+
 	// SVCDurationSeconds - Duration seconds condition for Admin policy
 	SVCDurationSeconds KeyName = "svc:DurationSeconds"
 )
@@ -363,6 +364,14 @@ var AllSupportedAdminKeys = append([]KeyName{
 
 // AllSupportedSTSKeys is the all supported conditions for STS policies
 var AllSupportedSTSKeys = []KeyName{
+	AWSPrincipalType,
+	AWSSecureTransport,
 	STSDurationSeconds,
+	LDAPUser,
+	AWSUserID,
+	AWSGroups,
+	LDAPGroups,
+	LDAPUsername,
+	AWSUsername,
 	// Add new supported condition keys.
 }
