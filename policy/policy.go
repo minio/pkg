@@ -206,30 +206,22 @@ func IsAllowedPar(policies []Policy, args Args) bool {
 		return policies[0].IsAllowed(args)
 	}
 
-	if len(policies) <= 100 {
-		gotAllow := false
-		// If there are less than 100 policies, we can use a simple loop.
-		for _, policy := range policies {
-			res := policy.Decide(&args)
-			if res == DenyDecision {
-				return false
-			}
-			if res == AllowDecision {
-				gotAllow = true
-			}
-		}
-		return gotAllow
-	}
-
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
-	// get number of workers.
-	numWorkers := min(runtime.GOMAXPROCS(0), len(policies))
+	// This must be at least 1.
+	const numPoliciesPerWorker = 25
 
-	jobs := make(chan int, len(policies))
-	for i := range policies {
-		jobs <- i
+	// Here numJobs = ceil(len(policies) / numPoliciesPerWorker) - computed
+	// using integer arithmetic
+	numJobs := (len(policies) + numPoliciesPerWorker - 1) / numPoliciesPerWorker
+
+	// get number of workers.
+	numWorkers := min(runtime.GOMAXPROCS(0), numJobs)
+
+	jobs := make(chan int, numJobs)
+	for i := range numJobs {
+		jobs <- i * numPoliciesPerWorker
 	}
 	close(jobs)
 
@@ -247,7 +239,17 @@ func IsAllowedPar(policies []Policy, args Args) bool {
 				default:
 				}
 
-				res := policies[i].Decide(&args)
+				maxJ := min(i+numPoliciesPerWorker, len(policies))
+				res := NoDecision
+				for j := i; j < maxJ; j++ {
+					decision := policies[j].Decide(&args)
+					if decision == DenyDecision {
+						res = DenyDecision
+						break
+					} else if decision == AllowDecision {
+						res = AllowDecision
+					}
+				}
 
 				select {
 				case resultCh <- res:
@@ -259,7 +261,7 @@ func IsAllowedPar(policies []Policy, args Args) bool {
 	}
 
 	gotAllow := false
-	for range len(policies) {
+	for range numJobs {
 		res := <-resultCh
 		if res == DenyDecision {
 			cancel()

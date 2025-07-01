@@ -373,7 +373,7 @@ func BenchmarkDedupe(b *testing.B) {
 	}
 }
 
-func BenchmarkMergeEvalVsParEval(b *testing.B) {
+func BenchmarkSerialEvalVsParEval(b *testing.B) {
 	getReadPolicyBucket := func(b string) Policy {
 		return Policy{
 			Version: DefaultVersion,
@@ -479,20 +479,10 @@ func BenchmarkMergeEvalVsParEval(b *testing.B) {
 		testCases = append(testCases, genTestCases(tc.numPolicies, tc.numArgs))
 	}
 
-	mergeAndEval := func(policies []Policy, args []Args, expected []bool) {
-		for i, args := range args {
-			// We merge policies for each case, to simulate real-world usage.
-			policy := MergePolicies(policies...)
-			if policy.IsAllowed(args) != expected[i] {
-				b.Errorf("Expected %v for args %v, got %v", expected[i], args, !expected[i])
-			}
-		}
-	}
-
 	parallelEval := func(policies []Policy, args []Args, expected []bool) {
 		for i, args := range args {
 			if IsAllowedPar(policies, args) != expected[i] {
-				b.Errorf("Expected %v for args %v, got %v", expected[i], args, !expected[i])
+				b.Fatalf("Expected %v for args %v, got %v", expected[i], args, !expected[i])
 			}
 		}
 	}
@@ -507,14 +497,6 @@ func BenchmarkMergeEvalVsParEval(b *testing.B) {
 
 	for i, testCase := range testCases {
 		b.Run(fmt.Sprintf("TestCase_%d_%dp_%da", i, len(testCase.policies), len(testCase.args)), func(b *testing.B) {
-			b.Run("MergeAndEval", func(b *testing.B) {
-				b.ResetTimer()
-				b.ReportAllocs()
-				for j := 0; j < b.N; j++ {
-					mergeAndEval(testCase.policies, testCase.args, testCase.expected)
-				}
-			})
-
 			b.Run("ParallelEval", func(b *testing.B) {
 				b.ResetTimer()
 				b.ReportAllocs()
