@@ -60,6 +60,12 @@ var DefaultPolicies = []struct {
 					Actions:   NewActionSet(GetBucketLocationAction, GetObjectAction),
 					Resources: NewResourceSet(NewResource("*")),
 				},
+				{
+					SID:       ID(""),
+					Effect:    Deny,
+					Actions:   NewActionSet(CreateUserAdminAction),
+					Resources: NewResourceSet(NewResource("*")),
+				},
 			},
 		},
 	},
