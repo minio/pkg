@@ -122,6 +122,12 @@ type Policy struct {
 	Version              string
 	Statements           []Statement `json:"Statement"`
 	actionStatementIndex map[Action][]int
+	hasDeny              bool
+}
+
+// HasDenyStatement returns if the policy has a deny statement.
+func (iamp *Policy) HasDenyStatement() bool {
+	return iamp.hasDeny
 }
 
 // MatchResource matches resource with match resource patterns
@@ -494,6 +500,7 @@ func (iamp *Policy) updateActionIndex() {
 	for i := range iamp.Statements {
 		stmt := &iamp.Statements[i]
 		if stmt.Effect == Deny {
+			iamp.hasDeny = true
 			continue
 		}
 		for action := range stmt.Actions {
