@@ -1,14 +1,32 @@
+// Copyright (c) 2015-2025 MinIO, Inc.
+//
+// # This file is part of MinIO Object Storage stack
+//
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU Affero General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU Affero General Public License for more details.
+//
+// You should have received a copy of the GNU Affero General Public License
+// along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
 package oidc
 
 import (
 	"context"
 	"fmt"
+	"io"
 	"net/http"
 	"net/url"
 	"strings"
 	"time"
 
-	"github.com/coreos/go-oidc"
+	"github.com/coreos/go-oidc/v3/oidc"
 	"golang.org/x/oauth2"
 )
 
@@ -19,12 +37,19 @@ import (
 type OpenIDClientAppParams struct {
 	ClientID, ClientSecret, ProviderURL, RedirectURL string
 	Transport                                        http.RoundTripper
+	Debug                                            bool
 }
 
 // MockOpenIDTestUserInteraction - tries to login to dex using provided credentials.
 // It performs the user's browser interaction to login and retrieves the auth
 // code from dex and exchanges it for a JWT.
 func MockOpenIDTestUserInteraction(ctx context.Context, pro OpenIDClientAppParams, username, password string) (string, string, string, error) {
+	var debug bool
+
+	debug = false
+	if pro.Debug {
+		debug = true
+	}
 	ctx, cancel := context.WithTimeout(ctx, 10*time.Second)
 	defer cancel()
 
@@ -52,15 +77,9 @@ func MockOpenIDTestUserInteraction(ctx context.Context, pro OpenIDClientAppParam
 
 	state := fmt.Sprintf("x%dx", time.Now().Unix())
 	authCodeURL := oauth2Config.AuthCodeURL(state)
-	// fmt.Printf("authcodeurl: %s\n", authCodeURL)
 
 	var lastReq *http.Request
-	checkRedirect := func(req *http.Request, via []*http.Request) error {
-		// fmt.Printf("CheckRedirect:\n")
-		// fmt.Printf("Upcoming: %s %s\n", req.Method, req.URL.String())
-		// for i, c := range via {
-		// 	fmt.Printf("Sofar %d: %s %s\n", i, c.Method, c.URL.String())
-		// }
+	checkRedirect := func(req *http.Request, _ []*http.Request) error {
 		// Save the last request in a redirect chain.
 		lastReq = req
 		// We do not follow redirect back to client application.
@@ -87,7 +106,7 @@ func MockOpenIDTestUserInteraction(ctx context.Context, pro OpenIDClientAppParam
 		return "", "", "", fmt.Errorf("new request err: %v", err)
 	}
 	resp, err := dexClient.Do(req)
-	// fmt.Printf("Do: %#v %#v\n", resp, err)
+
 	if err != nil {
 		return "", "", "", fmt.Errorf("auth url request err: %v", err)
 	}
@@ -97,7 +116,6 @@ func MockOpenIDTestUserInteraction(ctx context.Context, pro OpenIDClientAppParam
 
 	// Modify u to choose the ldap option
 	u.Path += "/ldap"
-	// fmt.Println(u)
 
 	// Pick the LDAP login option. This would return a form page after
 	// following some redirects. `lastReq` would be the URL of the form
@@ -107,23 +125,14 @@ func MockOpenIDTestUserInteraction(ctx context.Context, pro OpenIDClientAppParam
 		return "", "", "", fmt.Errorf("new request err (/ldap): %v", err)
 	}
 	resp, err = dexClient.Do(req)
-	// fmt.Printf("Fetch LDAP login page: %#v %#v\n", resp, err)
 	if err != nil {
 		return "", "", "", fmt.Errorf("request err: %v", err)
 	}
 	if resp.StatusCode != http.StatusOK {
 		return "", "", "", fmt.Errorf("ew request (/ldap) returned HTTP status: %d", resp.StatusCode)
 	}
-	// {
-	// 	bodyBuf, err := io.ReadAll(resp.Body)
-	// 	if err != nil {
-	// 		return "", "", "", fmt.Errorf("Error reading body: %v", err)
-	// 	}
-	// 	fmt.Printf("bodyBuf (for LDAP login page): %s\n", string(bodyBuf))
-	// }
 
 	// Fill the login form with our test creds:
-	// fmt.Printf("login form url: %s\n", lastReq.URL.String())
 	formData := url.Values{}
 	formData.Set("login", username)
 	formData.Set("password", password)
@@ -136,18 +145,20 @@ func MockOpenIDTestUserInteraction(ctx context.Context, pro OpenIDClientAppParam
 	if err != nil {
 		return "", "", "", fmt.Errorf("post form err: %v", err)
 	}
-	// fmt.Printf("resp: %#v %#v\n", resp.StatusCode, resp.Header)
-	// bodyBuf, err := io.ReadAll(resp.Body)
-	// if err != nil {
-	// 	return "", "", "", fmt.Errorf("Error reading body: %v", err)
-	// }
-	// fmt.Printf("resp body: %s\n", string(bodyBuf))
-	// fmt.Printf("lastReq: %#v\n", lastReq.URL.String())
+
+	if debug {
+		fmt.Printf("resp: %#v %#v\n", resp.StatusCode, resp.Header)
+		bodyBuf, err := io.ReadAll(resp.Body)
+		if err != nil {
+			return "", "", "", fmt.Errorf("Error reading body: %v", err)
+		}
+		fmt.Printf("resp body: %s\n", string(bodyBuf))
+		fmt.Printf("lastReq: %#v\n", lastReq.URL.String())
+	}
 
 	// On form submission, the last redirect response contains the auth
 	// code, which we now have in `lastReq`. Exchange it for a JWT id_token.
 	q := lastReq.URL.Query()
-	// fmt.Printf("lastReq.URL: %#v q: %#v\n", lastReq.URL, q)
 	code := q.Get("code")
 	oauth2Token, err := oauth2Config.Exchange(ctx, code)
 	if err != nil {
@@ -156,19 +167,18 @@ func MockOpenIDTestUserInteraction(ctx context.Context, pro OpenIDClientAppParam
 
 	rawIDToken, ok := oauth2Token.Extra("id_token").(string)
 	if !ok {
-		return "", "", "", fmt.Errorf("id_token not found!")
+		return "", "", "", fmt.Errorf("id_token not found")
 	}
 
 	accessIDToken, ok := oauth2Token.Extra("access_token").(string)
 	if !ok {
-		return "", "", "", fmt.Errorf("access_token not found!")
+		return "", "", "", fmt.Errorf("access_token not found")
 	}
 
 	refreshToken, ok := oauth2Token.Extra("refresh_token").(string)
 	if !ok {
-		return "", "", "", fmt.Errorf("refresh_token not found!")
+		return "", "", "", fmt.Errorf("refresh_token not found")
 	}
 
-	// fmt.Printf("TOKEN: %s\n", rawIDToken)
 	return rawIDToken, accessIDToken, refreshToken, nil
 }
