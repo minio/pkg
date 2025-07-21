@@ -210,7 +210,7 @@ const (
 	CreateSessionAction = "s3express:CreateSession"
 
 	// CreateWarehouseAction - CreateWarehouse REST API action
-	CreateWarehouseAction = "s3:CreateWarehouse"
+	CreateWarehouseAction = "s3tables:CreateTableBucket"
 
 	// AllActions - all API actions
 	AllActions = "s3:*"
