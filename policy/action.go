@@ -206,6 +206,13 @@ const (
 	// PutObjectFanOutAction - PutObject like API action but allows PostUpload() fan-out.
 	PutObjectFanOutAction = "s3:PutObjectFanOut"
 
+	// Inventory configuration actions
+
+	// PutInventoryConfigurationAction - Bucket inventory write operations actions
+	PutInventoryConfigurationAction = "s3:PutInventoryConfiguration"
+	// GetInventoryConfigurationAction - Bucket inventory read operations actions
+	GetInventoryConfigurationAction = "s3:GetInventoryConfiguration"
+
 	// CreateSessionAction - S3Express REST API action
 	CreateSessionAction = "s3express:CreateSession"
 
