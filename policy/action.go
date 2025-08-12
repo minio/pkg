@@ -112,6 +112,12 @@ const (
 	// PutBucketCorsAction - PutBucketCors Rest API action.
 	PutBucketCorsAction = "s3:PutBucketCors"
 
+	//  PutBucketQOSAction - allow set QOS configuration
+	PutBucketQOSAction = "s3:PutBucketQOS"
+
+	//  GetBucketQOSAction - allow get QOS configuration
+	GetBucketQOSAction = "s3:GetBucketQOS"
+
 	// PutObjectAction - PutObject Rest API action.
 	PutObjectAction = "s3:PutObject"
 
@@ -248,6 +254,8 @@ var supportedActions = map[Action]struct{}{
 	PutBucketNotificationAction:            {},
 	PutBucketPolicyAction:                  {},
 	PutBucketCorsAction:                    {},
+	PutBucketQOSAction:                     {},
+	GetBucketQOSAction:                     {},
 	PutObjectAction:                        {},
 	BypassGovernanceRetentionAction:        {},
 	PutObjectRetentionAction:               {},
