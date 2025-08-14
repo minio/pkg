@@ -444,6 +444,7 @@ func createActionConditionKeyMap() ActionConditionKeyMap {
 				condition.S3ObjectLockLegalHold.ToKey(),
 				condition.RequestObjectTagKeys.ToKey(),
 				condition.RequestObjectTag.ToKey(),
+				condition.S3ContentType.ToKey(),
 			}, commonKeys...)...),
 
 		// https://docs.aws.amazon.com/AmazonS3/latest/dev/list_amazons3.html

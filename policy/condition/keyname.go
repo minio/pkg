@@ -160,6 +160,9 @@ const (
 	// S3ExpressSessionMode - optionally use this condition key to control who can create a ReadWrite or ReadOnly session.
 	S3ExpressSessionMode = "s3express:SessionMode"
 
+	// S3ContentType represents the policy key for enforcing content type.
+	S3ContentType KeyName = "s3:content-type"
+
 	// Refer https://docs.aws.amazon.com/AmazonS3/latest/userguide/tagging-and-policies.html
 	ExistingObjectTag    KeyName = "s3:ExistingObjectTag"
 	RequestObjectTagKeys KeyName = "s3:RequestObjectTagKeys"
@@ -261,6 +264,7 @@ var AllSupportedKeys = []KeyName{
 	S3XAmzContentSha256,
 	S3LocationConstraint,
 	S3Prefix,
+	S3ContentType,
 	S3Delimiter,
 	S3MaxKeys,
 	S3VersionID,
