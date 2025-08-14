@@ -138,7 +138,7 @@ func TestActionSetUnmarshalJSON(t *testing.T) {
 		{[]byte(`["s3:PutObject"]`), NewActionSet(PutObjectAction), false, false},
 		{[]byte(`["s3:PutObject", "s3:GetObject"]`), NewActionSet(PutObjectAction, GetObjectAction), false, false},
 		{[]byte(`["s3:PutObject", "s3:GetObject", "s3:PutObject"]`), NewActionSet(PutObjectAction, GetObjectAction), false, false},
-		{[]byte(`[]`), NewActionSet(), true, false},           // Empty array.
+		{[]byte(`[]`), NewActionSet(), false, false},          // Empty array.
 		{[]byte(`"foo"`), nil, false, true},                   // Invalid action.
 		{[]byte(`["s3:PutObject", "foo"]`), nil, false, true}, // Invalid action.
 	}

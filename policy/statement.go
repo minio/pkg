@@ -31,7 +31,7 @@ import (
 type Statement struct {
 	SID          ID                  `json:"Sid,omitempty"`
 	Effect       Effect              `json:"Effect"`
-	Actions      ActionSet           `json:"Action"`
+	Actions      ActionSet           `json:"Action,omitempty"`
 	NotActions   ActionSet           `json:"NotAction,omitempty"`
 	Resources    ResourceSet         `json:"Resource,omitempty"`
 	NotResources ResourceSet         `json:"NotResource,omitempty"`

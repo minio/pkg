@@ -168,10 +168,6 @@ func (actionSet *ActionSet) UnmarshalJSON(data []byte) error {
 		return err
 	}
 
-	if sset.IsEmpty() {
-		return Errorf("empty actions not allowed")
-	}
-
 	*actionSet = make(ActionSet)
 	for _, s := range sset.ToSlice() {
 		actionSet.Add(Action(s))
