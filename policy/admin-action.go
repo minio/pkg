@@ -74,6 +74,8 @@ const (
 	ServiceStopAdminAction = "admin:ServiceStop"
 	// ServiceFreezeAdminAction - allow freeze/unfreeze MinIO service.
 	ServiceFreezeAdminAction = "admin:ServiceFreeze"
+	// ServiceCordonAdminAction - allow cordon/uncordon MinIO service.
+	ServiceCordonAdminAction = "admin:ServiceCordon"
 
 	// ConfigUpdateAdminAction - allow MinIO config management
 	ConfigUpdateAdminAction = "admin:ConfigUpdate"
