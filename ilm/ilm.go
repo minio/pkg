@@ -172,7 +172,7 @@ func (opts LifecycleOptions) ToILMRule() (lifecycle.Rule, error) {
 	return newRule, nil
 }
 
-// ApplyRuleFields applies non nil fields of LifcycleOptions to the existing lifecycle rule
+// ApplyRuleFields applies non nil fields of LifecycleOptions to the existing lifecycle rule
 func ApplyRuleFields(dest *lifecycle.Rule, opts LifecycleOptions) error {
 	// If src has tags, it should override the destination
 	if opts.Tags != nil {

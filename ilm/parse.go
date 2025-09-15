@@ -28,19 +28,19 @@ import (
 
 // Used in tags. Ex: --tags "key1=value1&key2=value2&key3=value3"
 const (
-	tagSeperator    string = "&"
-	keyValSeperator string = "="
+	tagSeparator    string = "&"
+	keyValSeparator string = "="
 )
 
 func extractILMTags(tagLabelVal string) []lifecycle.Tag {
 	var ilmTagKVList []lifecycle.Tag
-	for _, tag := range strings.Split(tagLabelVal, tagSeperator) {
+	for _, tag := range strings.Split(tagLabelVal, tagSeparator) {
 		if tag == "" {
 			// split returns empty for empty tagLabelVal, skip it.
 			continue
 		}
 		lfcTag := lifecycle.Tag{}
-		kvs := strings.SplitN(tag, keyValSeperator, 2)
+		kvs := strings.SplitN(tag, keyValSeparator, 2)
 		if len(kvs) == 2 {
 			lfcTag.Key = kvs[0]
 			lfcTag.Value = kvs[1]
