@@ -23,6 +23,7 @@ import (
 
 const defaultILMDateFormat string = "2006-01-02"
 
+// LifecycleOptions - options for ILM rule
 type LifecycleOptions struct {
 	ID string
 
