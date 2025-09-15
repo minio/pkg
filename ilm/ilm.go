@@ -15,7 +15,7 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-package lifecycle
+package ilm
 
 import (
 	"github.com/minio/minio-go/v7/pkg/lifecycle"
@@ -46,6 +46,130 @@ type LifecycleOptions struct {
 	NoncurrentVersionTransitionStorageClass *string
 	PurgeAllVersionsDays                    *string
 	PurgeAllVersionsDeleteMarker            *bool
+}
+
+// Filter returns lifecycle.Filter appropriate for opts
+func (opts LifecycleOptions) Filter() lifecycle.Filter {
+	var f lifecycle.Filter
+	var tags []lifecycle.Tag
+	var predCount int
+	if opts.Tags != nil {
+		tags = extractILMTags(*opts.Tags)
+		predCount += len(tags)
+	}
+	var prefix string
+	if opts.Prefix != nil {
+		prefix = *opts.Prefix
+		predCount++
+	}
+
+	var szLt, szGt int64
+	if opts.ObjectSizeLessThan != nil {
+		szLt = *opts.ObjectSizeLessThan
+		predCount++
+	}
+
+	if opts.ObjectSizeGreaterThan != nil {
+		szGt = *opts.ObjectSizeGreaterThan
+		predCount++
+	}
+
+	if predCount >= 2 {
+		f.And = lifecycle.And{
+			Tags:                  tags,
+			Prefix:                prefix,
+			ObjectSizeLessThan:    szLt,
+			ObjectSizeGreaterThan: szGt,
+		}
+	} else {
+		// In a valid lifecycle rule filter at most one of the
+		// following will only be set.
+		f.Prefix = prefix
+		f.ObjectSizeGreaterThan = szGt
+		f.ObjectSizeLessThan = szLt
+		if len(tags) >= 1 {
+			f.Tag = tags[0]
+		}
+	}
+
+	return f
+}
+
+// ToILMRule creates lifecycle.Configuration based on LifecycleOptions
+func (opts LifecycleOptions) ToILMRule() (lifecycle.Rule, error) {
+	var (
+		id, status string
+
+		nonCurrentVersionExpirationDays         lifecycle.ExpirationDays
+		newerNonCurrentExpirationVersions       int
+		nonCurrentVersionTransitionDays         lifecycle.ExpirationDays
+		newerNonCurrentTransitionVersions       int
+		nonCurrentVersionTransitionStorageClass string
+	)
+
+	id = opts.ID
+	status = func() string {
+		if opts.Status != nil && !*opts.Status {
+			return "Disabled"
+		}
+		// Generating a new ILM rule without explicit status is enabled
+		return "Enabled"
+	}()
+
+	expiry, err := parseExpiry(opts.ExpiryDate, opts.ExpiryDays, opts.ExpiredObjectDeleteMarker)
+	if err != nil {
+		return lifecycle.Rule{}, err
+	}
+
+	allVersExpiry, err := parseAllVersionsExpiry(opts.PurgeAllVersionsDays, opts.PurgeAllVersionsDeleteMarker)
+	if err != nil {
+		return lifecycle.Rule{}, err
+	}
+
+	transition, err := parseTransition(opts.StorageClass, opts.TransitionDate, opts.TransitionDays)
+	if err != nil {
+		return lifecycle.Rule{}, err
+	}
+
+	if opts.NoncurrentVersionExpirationDays != nil {
+		nonCurrentVersionExpirationDays = lifecycle.ExpirationDays(*opts.NoncurrentVersionExpirationDays)
+	}
+	if opts.NewerNoncurrentExpirationVersions != nil {
+		newerNonCurrentExpirationVersions = *opts.NewerNoncurrentExpirationVersions
+	}
+	if opts.NoncurrentVersionTransitionDays != nil {
+		nonCurrentVersionTransitionDays = lifecycle.ExpirationDays(*opts.NoncurrentVersionTransitionDays)
+	}
+	if opts.NewerNoncurrentTransitionVersions != nil {
+		newerNonCurrentTransitionVersions = *opts.NewerNoncurrentTransitionVersions
+	}
+	if opts.NoncurrentVersionTransitionStorageClass != nil {
+		nonCurrentVersionTransitionStorageClass = *opts.NoncurrentVersionTransitionStorageClass
+	}
+
+	newRule := lifecycle.Rule{
+		ID:                    id,
+		RuleFilter:            opts.Filter(),
+		Status:                status,
+		Expiration:            expiry,
+		Transition:            transition,
+		AllVersionsExpiration: allVersExpiry,
+		NoncurrentVersionExpiration: lifecycle.NoncurrentVersionExpiration{
+			NoncurrentDays:          nonCurrentVersionExpirationDays,
+			NewerNoncurrentVersions: newerNonCurrentExpirationVersions,
+		},
+		NoncurrentVersionTransition: lifecycle.NoncurrentVersionTransition{
+			NoncurrentDays:          nonCurrentVersionTransitionDays,
+			NewerNoncurrentVersions: newerNonCurrentTransitionVersions,
+			StorageClass:            nonCurrentVersionTransitionStorageClass,
+		},
+	}
+
+	if err := validateILMRule(newRule); err != nil {
+		return lifecycle.Rule{}, err
+	}
+
+	return newRule, nil
 }
 
 // ApplyRuleFields applies non nil fields of LifcycleOptions to the existing lifecycle rule
