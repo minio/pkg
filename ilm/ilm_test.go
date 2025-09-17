@@ -21,7 +21,6 @@ import (
 	"fmt"
 	"strings"
 	"testing"
-	"time"
 
 	"github.com/dustin/go-humanize"
 	"github.com/go-openapi/swag/conv"
@@ -823,10 +822,4 @@ func TestParseFunctions(t *testing.T) {
 			t.Errorf("parseAllVersionsExpiry() delete marker = %v, want %v", expiry.DeleteMarker, deleteMarker)
 		}
 	})
-}
-
-// Helper function to parse time for tests
-func parseTime(timeStr string) time.Time {
-	t, _ := time.Parse(defaultILMDateFormat, timeStr)
-	return t
 }
