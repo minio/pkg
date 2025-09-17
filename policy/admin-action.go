@@ -327,6 +327,8 @@ var supportedAdminActions = map[AdminAction]struct{}{
 	SetQOSConfigAction: {},
 	GetQOSConfigAction: {},
 
+	ServiceCordonAdminAction: {},
+
 	AllAdminActions: {},
 }
 
