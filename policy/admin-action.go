@@ -207,6 +207,11 @@ const (
 	// GenerateBatchJobAction allow requesting batch job templates
 	GenerateBatchJobAction = "admin:GenerateBatchJob"
 
+	// Inventory Control Actions
+
+	// InventoryControlAction - allows control of inventory jobs
+	InventoryControlAction = "admin:InventoryControl"
+
 	// All new v4 APIs
 
 	// ClusterInfoAction - allow cluster summary
@@ -306,6 +311,8 @@ var supportedAdminActions = map[AdminAction]struct{}{
 	DescribeBatchJobAction: {},
 	StartBatchJobAction:    {},
 	CancelBatchJobAction:   {},
+
+	InventoryControlAction: {},
 
 	ClusterInfoAction: {},
 	PoolListAction:    {},
