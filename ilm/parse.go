@@ -32,6 +32,11 @@ const (
 	keyValSeparator string = "="
 )
 
+var (
+	errRuleAction     = errors.New("at least one of Expiry, Transition, NoncurrentExpiry, NoncurrentVersionTransition, AllVersionsExpiration actions should be specified in a rule")
+	errZeroExpiryDays = errors.New("expiration days cannot be set to zero")
+)
+
 func extractILMTags(tagLabelVal string) []lifecycle.Tag {
 	var ilmTagKVList []lifecycle.Tag
 	for _, tag := range strings.Split(tagLabelVal, tagSeparator) {
@@ -91,7 +96,7 @@ func validateRuleAction(rule lifecycle.Rule) error {
 	newerNoncurrentVersionsTransition := rule.NoncurrentVersionTransition.NewerNoncurrentVersions > 0
 	if !expirySet && !allVersExpirySet && !transitionSet && !noncurrentExpirySet && !noncurrentTransitionSet &&
 		!newerNoncurrentVersionsExpiry && !newerNoncurrentVersionsTransition {
-		return errors.New("at least one of Expiry, Transition, NoncurrentExpiry, NoncurrentVersionTransition, AllVersionsExpiration actions should be specified in a rule")
+		return errRuleAction
 	}
 	return nil
 }
@@ -255,7 +260,7 @@ func parseExpiryDays(expiryDayStr string) (lifecycle.ExpirationDays, error) {
 		return lifecycle.ExpirationDays(0), e
 	}
 	if days == 0 {
-		return lifecycle.ExpirationDays(0), errors.New("expiration days cannot be set to zero")
+		return lifecycle.ExpirationDays(0), errZeroExpiryDays
 	}
 	return lifecycle.ExpirationDays(days), nil
 }

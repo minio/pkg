@@ -10,6 +10,7 @@ require (
 	github.com/fatih/color v1.18.0
 	github.com/fatih/structs v1.1.0
 	github.com/go-ldap/ldap/v3 v3.4.11
+	github.com/go-openapi/swag/conv v0.24.0
 	github.com/lestrrat-go/jwx/v2 v2.1.6
 	github.com/mattn/go-colorable v0.1.14
 	github.com/mattn/go-isatty v0.0.20
@@ -26,11 +27,17 @@ require (
 )
 
 require (
+	github.com/go-openapi/swag/typeutils v0.24.0 // indirect
+	github.com/stretchr/testify v1.11.1 // indirect
+)
+
+require (
 	github.com/Azure/go-ntlmssp v0.0.0-20221128193559-754e69321358 // indirect
 	github.com/coreos/go-semver v0.3.1 // indirect
 	github.com/coreos/go-systemd/v22 v22.5.0 // indirect
 	github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc // indirect
 	github.com/decred/dcrd/dcrec/secp256k1/v4 v4.4.0 // indirect
+	github.com/dustin/go-humanize v1.0.1
 	github.com/go-asn1-ber/asn1-ber v1.5.8-0.20250403174932-29230038a667 // indirect
 	github.com/go-jose/go-jose/v4 v4.0.5 // indirect
 	github.com/goccy/go-json v0.10.5 // indirect
