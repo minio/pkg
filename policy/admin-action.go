@@ -232,13 +232,6 @@ const (
 
 	// DriveInfoAction - allow drive specific summary and detail
 	DriveInfoAction = "admin:DriveInfo"
-
-	//  SetQOSConfigAction - allow set QOS configuration
-	SetQOSConfigAction = "admin:SetQOSConfig"
-
-	//  GetQOSConfigAction - allow get QOS configuration
-	GetQOSConfigAction = "admin:GetQOSConfig"
-
 	// AllAdminActions - provides all admin permissions
 	AllAdminActions = "admin:*"
 )
@@ -314,16 +307,14 @@ var supportedAdminActions = map[AdminAction]struct{}{
 	StartBatchJobAction:    {},
 	CancelBatchJobAction:   {},
 
-	ClusterInfoAction:  {},
-	PoolListAction:     {},
-	PoolInfoAction:     {},
-	NodeListAction:     {},
-	NodeInfoAction:     {},
-	SetInfoAction:      {},
-	DriveListAction:    {},
-	DriveInfoAction:    {},
-	SetQOSConfigAction: {},
-	GetQOSConfigAction: {},
+	ClusterInfoAction: {},
+	PoolListAction:    {},
+	PoolInfoAction:    {},
+	NodeListAction:    {},
+	NodeInfoAction:    {},
+	SetInfoAction:     {},
+	DriveListAction:   {},
+	DriveInfoAction:   {},
 
 	AllAdminActions: {},
 }
