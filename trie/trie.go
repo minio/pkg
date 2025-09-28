@@ -82,7 +82,7 @@ func (t *Trie) Walk(node *Node) (ret []string) {
 	for _, v := range node.child {
 		ret = append(ret, t.Walk(v)...)
 	}
-	return
+	return ret
 }
 
 // find nodes corresponding to key.

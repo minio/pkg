@@ -32,6 +32,7 @@ func TestActionIsObjectAction(t *testing.T) {
 		{ListMultipartUploadPartsAction, true},
 		{PutObjectAction, true},
 		{CreateBucketAction, false},
+		{S3TablesGetTableAction, false},
 	}
 
 	for i, testCase := range testCases {
@@ -50,6 +51,7 @@ func TestActionIsValid(t *testing.T) {
 	}{
 		{PutObjectAction, true},
 		{AbortMultipartUploadAction, true},
+		{S3TablesGetTableAction, true},
 		{Action("foo"), false},
 	}
 

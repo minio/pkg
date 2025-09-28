@@ -29,12 +29,13 @@ type KeyName string
 
 // Prefixes to trim from key names.
 var toTrim = map[string]bool{
-	"aws":  true,
-	"jwt":  true,
-	"ldap": true,
-	"sts":  true,
-	"svc":  true,
-	"s3":   true,
+	"aws":      true,
+	"jwt":      true,
+	"ldap":     true,
+	"sts":      true,
+	"svc":      true,
+	"s3":       true,
+	"s3tables": true,
 }
 
 // Name - returns key name which is stripped value of prefixes "aws:", "s3:", "jwt:" and "ldap:"
@@ -58,6 +59,18 @@ func (key KeyName) ToKey() Key {
 
 // Condition key names.
 const (
+	// S3TablesKMSKeyArn filters access by the AWS KMS key ARN used for S3 Tables encryption.
+	S3TablesKMSKeyArn KeyName = "s3tables:KMSKeyArn"
+
+	// S3TablesSSEAlgorithm filters access by the server-side encryption algorithm for S3 Tables.
+	S3TablesSSEAlgorithm KeyName = "s3tables:SSEAlgorithm"
+
+	// S3TablesNamespace filters access by the namespace within an S3 Tables bucket.
+	S3TablesNamespace KeyName = "s3tables:namespace"
+
+	// S3TablesTableName filters access by the S3 Tables table name within a namespace.
+	S3TablesTableName KeyName = "s3tables:tableName"
+
 	// S3XAmzCopySource - key representing x-amz-copy-source HTTP header applicable to PutObject API only.
 	S3XAmzCopySource KeyName = "s3:x-amz-copy-source"
 
@@ -268,6 +281,10 @@ var AllSupportedKeys = []KeyName{
 	S3ObjectLockMode,
 	S3ObjectLockLegalHold,
 	S3ObjectLockRetainUntilDate,
+	S3TablesKMSKeyArn,
+	S3TablesSSEAlgorithm,
+	S3TablesNamespace,
+	S3TablesTableName,
 	AWSReferer,
 	AWSSourceIP,
 	AWSUserAgent,

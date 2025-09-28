@@ -31,6 +31,9 @@ const (
 	// ResourceARNPrefix - resource S3 ARN prefix as per S3 specification.
 	ResourceARNPrefix = "arn:aws:s3:::"
 
+	// ResourceARNS3TablesPrefix - resource prefix for Amazon S3 Tables resources.
+	ResourceARNS3TablesPrefix = "arn:aws:s3tables:"
+
 	// ResourceARNKMSPrefix is for KMS key resources. MinIO specific API.
 	ResourceARNKMSPrefix = "arn:minio:kms:::"
 )
@@ -45,6 +48,9 @@ const (
 	// ResourceARNS3 is the ARN prefix type for S3 resources.
 	ResourceARNS3
 
+	// ResourceARNS3Tables is the ARN prefix type for Amazon S3 Tables resources.
+	ResourceARNS3Tables
+
 	// ResourceARNKMS is the ARN prefix type for MinIO KMS resources.
 	ResourceARNKMS
 
@@ -54,9 +60,10 @@ const (
 
 // ARNTypeToPrefix maps the type to prefix string
 var ARNTypeToPrefix = map[ResourceARNType]string{
-	ResourceARNS3:  ResourceARNPrefix,
-	ResourceARNKMS: ResourceARNKMSPrefix,
-	ResourceARNAll: "*",
+	ResourceARNS3:       ResourceARNPrefix,
+	ResourceARNS3Tables: ResourceARNS3TablesPrefix,
+	ResourceARNKMS:      ResourceARNKMSPrefix,
+	ResourceARNAll:      "*",
 }
 
 // ARNPrefixToType maps prefix to types.
@@ -84,7 +91,7 @@ func (r Resource) isKMS() bool {
 }
 
 func (r Resource) isS3() bool {
-	return r.Type == ResourceARNS3 || r.Type == ResourceARNAll
+	return r.Type == ResourceARNS3 || r.Type == ResourceARNS3Tables || r.Type == ResourceARNAll
 }
 
 func (r Resource) isBucketPattern() bool {

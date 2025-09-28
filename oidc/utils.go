@@ -106,7 +106,6 @@ func MockOpenIDTestUserInteraction(ctx context.Context, pro OpenIDClientAppParam
 		return "", "", "", fmt.Errorf("new request err: %v", err)
 	}
 	resp, err := dexClient.Do(req)
-
 	if err != nil {
 		return "", "", "", fmt.Errorf("auth url request err: %v", err)
 	}

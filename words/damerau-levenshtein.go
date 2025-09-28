@@ -27,7 +27,7 @@ func minimum(integers []int) (minVal int) {
 			minVal = v
 		}
 	}
-	return
+	return minVal
 }
 
 // DamerauLevenshteinDistance calculates distance between two strings using an algorithm

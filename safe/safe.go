@@ -35,11 +35,11 @@ type File struct {
 func (file *File) Write(b []byte) (n int, err error) {
 	if file.closed {
 		err = errors.New("write on closed file")
-		return
+		return n, err
 	}
 	if file.aborted {
 		err = errors.New("write on aborted file")
-		return
+		return n, err
 	}
 
 	defer func() {
@@ -50,7 +50,7 @@ func (file *File) Write(b []byte) (n int, err error) {
 	}()
 
 	n, err = file.tmpfile.Write(b)
-	return
+	return n, err
 }
 
 // Close closes the temporary File and renames to the named file.  In case of error, the temporary file is removed.
@@ -64,38 +64,38 @@ func (file *File) Close() (err error) {
 
 	if file.closed {
 		err = errors.New("close on closed file")
-		return
+		return err
 	}
 	if file.aborted {
 		err = errors.New("close on aborted file")
-		return
+		return err
 	}
 
 	if err = file.tmpfile.Close(); err != nil {
-		return
+		return err
 	}
 
 	err = os.Rename(file.tmpfile.Name(), file.name)
 
 	file.closed = true
-	return
+	return err
 }
 
 // Abort aborts the temporary File by closing and removing the temporary file.
 func (file *File) Abort() (err error) {
 	if file.closed {
 		err = errors.New("abort on closed file")
-		return
+		return err
 	}
 	if file.aborted {
 		err = errors.New("abort on aborted file")
-		return
+		return err
 	}
 
 	file.tmpfile.Close()
 	err = os.Remove(file.tmpfile.Name())
 	file.aborted = true
-	return
+	return err
 }
 
 // CreateFile creates the named file safely from unique temporary file.

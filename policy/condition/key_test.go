@@ -42,6 +42,10 @@ func TestKeyIsValid(t *testing.T) {
 		{ExistingObjectTag.ToKey(), true},
 		{RequestObjectTagKeys.ToKey(), true},
 		{RequestObjectTag.ToKey(), true},
+		{S3TablesNamespace.ToKey(), true},
+		{S3TablesTableName.ToKey(), true},
+		{S3TablesKMSKeyArn.ToKey(), true},
+		{S3TablesSSEAlgorithm.ToKey(), true},
 		{Key{name: "foo"}, false},
 	}
 
@@ -87,6 +91,8 @@ func TestKeyName(t *testing.T) {
 	}{
 		{S3XAmzCopySource.ToKey(), "x-amz-copy-source"},
 		{AWSReferer.ToKey(), "Referer"},
+		{S3TablesNamespace.ToKey(), "namespace"},
+		{S3TablesKMSKeyArn.ToKey(), "KMSKeyArn"},
 	}
 
 	for i, testCase := range testCases {

@@ -374,7 +374,7 @@ func (iamp Policy) isValid() error {
 // duplicate statements.
 func MergePolicies(inputs ...Policy) (merged Policy) {
 	if len(inputs) == 0 {
-		return
+		return merged
 	}
 
 	if len(inputs) == 1 {
