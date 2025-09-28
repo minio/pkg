@@ -273,6 +273,7 @@ func TestResourceSetS3Validate(t *testing.T) {
 		{NewResourceSet(NewResource("mybucket/myobject*")), false},
 		{NewResourceSet(NewResource("/")), true},
 		{NewResourceSet(NewResource("mybucket"), NewKMSResource("mykey")), true}, // mismatching types
+		{NewResourceSet(Resource{Pattern: "us-east-1:111122223333:bucket/demo/table/*", Type: ResourceARNS3Tables}), false},
 	}
 
 	for i, testCase := range testCases {

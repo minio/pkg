@@ -49,6 +49,7 @@ func TestActionSetMatches(t *testing.T) {
 		expectedResult bool
 	}{
 		{NewActionSet(AllActions), AbortMultipartUploadAction, true},
+		{NewActionSet(AllS3TablesActions), S3TablesCreateTableAction, true},
 		{NewActionSet(PutObjectAction), PutObjectAction, true},
 		{NewActionSet(PutObjectAction, GetObjectAction), PutObjectAction, true},
 		{NewActionSet(PutObjectAction, GetObjectAction), AbortMultipartUploadAction, false},

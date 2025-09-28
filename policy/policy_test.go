@@ -2078,3 +2078,136 @@ func TestDropDuplicateStatements(t *testing.T) {
 		})
 	}
 }
+
+func TestPolicyParseS3TablesExamples(t *testing.T) {
+	tests := []struct {
+		name              string
+		policyJSON        string
+		expectedActions   []Action
+		expectedResources []string
+		expectedCondKeys  []condition.KeyName
+	}{
+		{
+			name: "TableBucketMaintenance",
+			policyJSON: `{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Action": [
+        "s3tables:PutTableBucketMaintenanceConfiguration"
+      ],
+      "Resource": "arn:aws:s3tables:us-east-1:111122223333:bucket/*"
+    }
+  ]
+}`,
+			expectedActions:   []Action{S3TablesPutTableBucketMaintenanceConfigurationAction},
+			expectedResources: []string{"arn:aws:s3tables:us-east-1:111122223333:bucket/*"},
+		},
+		{
+			name: "NamespaceSelectAccess",
+			policyJSON: `{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Action": [
+        "s3tables:GetTableData",
+        "s3tables:GetTableMetadataLocation"
+      ],
+      "Resource": "arn:aws:s3tables:us-east-1:111122223333:bucket/amzn-s3-demo-table-bucket/table/*",
+      "Condition": {
+        "StringLike": {
+          "s3tables:namespace": "hr"
+        }
+      }
+    }
+  ]
+}`,
+			expectedActions:   []Action{S3TablesGetTableDataAction, S3TablesGetTableMetadataLocationAction},
+			expectedResources: []string{"arn:aws:s3tables:us-east-1:111122223333:bucket/amzn-s3-demo-table-bucket/table/*"},
+			expectedCondKeys:  []condition.KeyName{condition.S3TablesNamespace},
+		},
+		{
+			name: "TableDeleteFlow",
+			policyJSON: `{
+  "Version": "2012-10-17",
+  "Id": "DeleteTable",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Action": [
+        "s3tables:DeleteTable",
+        "s3tables:UpdateTableMetadataLocation",
+        "s3tables:PutTableData",
+        "s3tables:GetTableMetadataLocation"
+      ],
+      "Resource": "arn:aws:s3tables:us-east-1:111122223333:bucket/amzn-s3-demo-bucket/table/tableUUID"
+    }
+  ]
+}`,
+			expectedActions: []Action{
+				S3TablesDeleteTableAction,
+				S3TablesUpdateTableMetadataLocationAction,
+				S3TablesPutTableDataAction,
+				S3TablesGetTableMetadataLocationAction,
+			},
+			expectedResources: []string{"arn:aws:s3tables:us-east-1:111122223333:bucket/amzn-s3-demo-bucket/table/tableUUID"},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			p, err := ParseConfig(strings.NewReader(tt.policyJSON))
+			if err != nil {
+				t.Fatalf("unexpected parse error: %v", err)
+			}
+			if len(p.Statements) != 1 {
+				t.Fatalf("expected 1 statement, got %d", len(p.Statements))
+			}
+			st := p.Statements[0]
+
+			actions := st.Actions.ToSlice()
+			if len(actions) != len(tt.expectedActions) {
+				t.Fatalf("expected %d actions, got %d", len(tt.expectedActions), len(actions))
+			}
+			actionSet := make(map[Action]struct{}, len(actions))
+			for _, a := range actions {
+				actionSet[a] = struct{}{}
+			}
+			for _, want := range tt.expectedActions {
+				if _, ok := actionSet[want]; !ok {
+					t.Fatalf("expected action %v missing", want)
+				}
+			}
+
+			resources := st.Resources.ToSlice()
+			if len(resources) != len(tt.expectedResources) {
+				t.Fatalf("expected %d resources, got %d", len(tt.expectedResources), len(resources))
+			}
+			resourceSet := make(map[string]struct{}, len(resources))
+			for _, r := range resources {
+				resourceSet[r.String()] = struct{}{}
+			}
+			for _, want := range tt.expectedResources {
+				if _, ok := resourceSet[want]; !ok {
+					t.Fatalf("expected resource %q missing", want)
+				}
+			}
+
+			if len(tt.expectedCondKeys) > 0 {
+				keys := st.Conditions.Keys()
+				if len(keys) != len(tt.expectedCondKeys) {
+					t.Fatalf("expected %d condition keys, got %d", len(tt.expectedCondKeys), len(keys))
+				}
+				for _, keyName := range tt.expectedCondKeys {
+					if !keys.Match(keyName.ToKey()) {
+						t.Fatalf("expected condition key %v", keyName)
+					}
+				}
+			} else if len(st.Conditions) != 0 {
+				t.Fatalf("expected no conditions, got %v", st.Conditions)
+			}
+		})
+	}
+}

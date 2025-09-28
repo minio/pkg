@@ -83,7 +83,7 @@ type Server struct {
 func (s *Server) ShutDown() (err error) {
 	close(s.quit)
 	err = s.listener.Close()
-	return
+	return err
 }
 
 // Options defines required configurations
@@ -147,7 +147,7 @@ func NewServer(options *Options) (sftpServer *Server, err error) {
 		net.JoinHostPort(options.PublicIP, strconv.Itoa(options.Port)),
 	)
 	if err != nil {
-		return
+		return sftpServer, err
 	}
 
 	sftpServer.publicIP = options.PublicIP
@@ -158,7 +158,7 @@ func NewServer(options *Options) (sftpServer *Server, err error) {
 	sftpServer.handleSFTPSession = options.HandleSFTPSession
 	sftpServer.logger = options.Logger
 	sftpServer.quit = make(chan struct{})
-	return
+	return sftpServer, err
 }
 
 // Listen starts the SFTP server

@@ -70,7 +70,7 @@ func splitHostPort(hostPort string) (host, port string) {
 		host = host[1 : len(host)-1]
 	}
 
-	return
+	return host, port
 }
 
 // Hostname returns u.Host, stripping any valid port number if present

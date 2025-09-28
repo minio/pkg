@@ -28,12 +28,12 @@ import (
 const unsafeEnabled = true
 
 func load64(b []byte, i int) uint64 {
-	//return binary.LittleEndian.Uint64(b[i:])
-	//return *(*uint64)(unsafe.Pointer(&b[i]))
+	// return binary.LittleEndian.Uint64(b[i:])
+	// return *(*uint64)(unsafe.Pointer(&b[i]))
 	return *(*uint64)(unsafe.Pointer(uintptr(unsafe.Pointer(&b[0])) + uintptr(i)*unsafe.Sizeof(b[0])))
 }
 
 func store64(b []byte, i int, v uint64) {
-	//binary.LittleEndian.PutUint64(b, v)
+	// binary.LittleEndian.PutUint64(b, v)
 	*(*uint64)(unsafe.Pointer(uintptr(unsafe.Pointer(&b[0])) + uintptr(i)*unsafe.Sizeof(b[0]))) = v
 }

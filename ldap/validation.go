@@ -413,7 +413,7 @@ func splitAndTrim(s, sep string) (res []string) {
 		}
 		res = append(res, v)
 	}
-	return
+	return res
 }
 
 // Validates that the given DNs are present in the LDAP server.
