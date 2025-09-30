@@ -143,7 +143,7 @@ func (iamp Policy) MatchResource(resource string) bool {
 // IsAllowedActions returns all supported actions for this policy.
 func (iamp Policy) IsAllowedActions(bucketName, objectName string, conditionValues map[string][]string) ActionSet {
 	actionSet := make(ActionSet)
-	for action := range supportedActions {
+	for action := range SupportedActions {
 		if iamp.IsAllowed(Args{
 			BucketName:      bucketName,
 			ObjectName:      objectName,
@@ -153,7 +153,7 @@ func (iamp Policy) IsAllowedActions(bucketName, objectName string, conditionValu
 			actionSet.Add(action)
 		}
 	}
-	for action := range supportedAdminActions {
+	for action := range SupportedAdminActions {
 		admAction := Action(action)
 		if iamp.IsAllowed(Args{
 			BucketName:      bucketName,
