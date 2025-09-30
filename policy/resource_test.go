@@ -162,7 +162,7 @@ func TestResourceMarshalJSON(t *testing.T) {
 		{NewResource("mybucket/*"), []byte(`"arn:aws:s3:::mybucket/*"`), false},
 		{NewResource("mybucket*/myobject"), []byte(`"arn:aws:s3:::mybucket*/myobject"`), false},
 		{NewResource("mybucket?0/2010/photos/*"), []byte(`"arn:aws:s3:::mybucket?0/2010/photos/*"`), false},
-		{Resource{Pattern: "us-east-1:111122223333:bucket/demo/table/*", Type: ResourceARNS3Tables}, []byte(`"arn:aws:s3tables:us-east-1:111122223333:bucket/demo/table/*"`), false},
+		{Resource{Pattern: "bucket/demo/table/*", Type: ResourceARNS3Tables}, []byte(`"arn:aws:s3tables:::bucket/demo/table/*"`), false},
 		{Resource{}, nil, true},
 	}
 
@@ -195,7 +195,7 @@ func TestResourceUnmarshalJSON(t *testing.T) {
 		{[]byte(`"arn:aws:s3:::mybucket/*"`), NewResource("mybucket/*"), false},
 		{[]byte(`"arn:aws:s3:::mybucket*/myobject"`), NewResource("mybucket*/myobject"), false},
 		{[]byte(`"arn:aws:s3:::mybucket?0/2010/photos/*"`), NewResource("mybucket?0/2010/photos/*"), false},
-		{[]byte(`"arn:aws:s3tables:us-east-1:111122223333:bucket/demo/table/*"`), Resource{Pattern: "us-east-1:111122223333:bucket/demo/table/*", Type: ResourceARNS3Tables}, false},
+		{[]byte(`"arn:aws:s3tables:::bucket/demo/table/*"`), Resource{Pattern: "bucket/demo/table/*", Type: ResourceARNS3Tables}, false},
 		{[]byte(`"mybucket/myobject*"`), Resource{}, true},
 		{[]byte(`"arn:aws:s3:::/*"`), Resource{}, true},
 	}

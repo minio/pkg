@@ -2097,12 +2097,12 @@ func TestPolicyParseS3TablesExamples(t *testing.T) {
       "Action": [
         "s3tables:PutTableBucketMaintenanceConfiguration"
       ],
-      "Resource": "arn:aws:s3tables:us-east-1:111122223333:bucket/*"
+      "Resource": "arn:aws:s3tables:::bucket/*"
     }
   ]
 }`,
 			expectedActions:   []Action{S3TablesPutTableBucketMaintenanceConfigurationAction},
-			expectedResources: []string{"arn:aws:s3tables:us-east-1:111122223333:bucket/*"},
+			expectedResources: []string{"arn:aws:s3tables:::bucket/*"},
 		},
 		{
 			name: "NamespaceSelectAccess",
@@ -2115,7 +2115,7 @@ func TestPolicyParseS3TablesExamples(t *testing.T) {
         "s3tables:GetTableData",
         "s3tables:GetTableMetadataLocation"
       ],
-      "Resource": "arn:aws:s3tables:us-east-1:111122223333:bucket/amzn-s3-demo-table-bucket/table/*",
+      "Resource": "arn:aws:s3tables:::bucket/amzn-s3-demo-table-bucket/table/*",
       "Condition": {
         "StringLike": {
           "s3tables:namespace": "hr"
@@ -2125,7 +2125,7 @@ func TestPolicyParseS3TablesExamples(t *testing.T) {
   ]
 }`,
 			expectedActions:   []Action{S3TablesGetTableDataAction, S3TablesGetTableMetadataLocationAction},
-			expectedResources: []string{"arn:aws:s3tables:us-east-1:111122223333:bucket/amzn-s3-demo-table-bucket/table/*"},
+			expectedResources: []string{"arn:aws:s3tables:::bucket/amzn-s3-demo-table-bucket/table/*"},
 			expectedCondKeys:  []condition.KeyName{condition.S3TablesNamespace},
 		},
 		{
@@ -2142,7 +2142,7 @@ func TestPolicyParseS3TablesExamples(t *testing.T) {
         "s3tables:PutTableData",
         "s3tables:GetTableMetadataLocation"
       ],
-      "Resource": "arn:aws:s3tables:us-east-1:111122223333:bucket/amzn-s3-demo-bucket/table/tableUUID"
+      "Resource": "arn:aws:s3tables:::bucket/amzn-s3-demo-bucket/table/tableUUID"
     }
   ]
 }`,
@@ -2152,7 +2152,7 @@ func TestPolicyParseS3TablesExamples(t *testing.T) {
 				S3TablesPutTableDataAction,
 				S3TablesGetTableMetadataLocationAction,
 			},
-			expectedResources: []string{"arn:aws:s3tables:us-east-1:111122223333:bucket/amzn-s3-demo-bucket/table/tableUUID"},
+			expectedResources: []string{"arn:aws:s3tables:::bucket/amzn-s3-demo-bucket/table/tableUUID"},
 		},
 	}
 

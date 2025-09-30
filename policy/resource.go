@@ -32,7 +32,7 @@ const (
 	ResourceARNPrefix = "arn:aws:s3:::"
 
 	// ResourceARNS3TablesPrefix - resource prefix for Amazon S3 Tables resources.
-	ResourceARNS3TablesPrefix = "arn:aws:s3tables:"
+	ResourceARNS3TablesPrefix = "arn:aws:s3tables:::"
 
 	// ResourceARNKMSPrefix is for KMS key resources. MinIO specific API.
 	ResourceARNKMSPrefix = "arn:minio:kms:::"
