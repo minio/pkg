@@ -203,7 +203,7 @@ func (r *Resource) UnmarshalJSON(data []byte) error {
 		return err
 	}
 
-	parsedResource, err := parseResource(s)
+	parsedResource, err := ParseResource(s)
 	if err != nil {
 		return err
 	}
@@ -244,8 +244,8 @@ func (r Resource) ValidateBucket(bucketName string) error {
 	return nil
 }
 
-// parseResource - parses string to Resource.
-func parseResource(s string) (Resource, error) {
+// ParseResource - parses string to Resource.
+func ParseResource(s string) (Resource, error) {
 	r := Resource{}
 	for k, v := range ARNPrefixToType {
 		if s == k {

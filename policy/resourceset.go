@@ -135,7 +135,7 @@ func (resourceSet *ResourceSet) UnmarshalJSON(data []byte) error {
 
 	*resourceSet = make(ResourceSet)
 	for _, s := range sset.ToSlice() {
-		resource, err := parseResource(s)
+		resource, err := ParseResource(s)
 		if err != nil {
 			return err
 		}
