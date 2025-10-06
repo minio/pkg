@@ -225,7 +225,7 @@ func newStringFunc(n string, key Key, values ValueSet, qualifier string, ignoreC
 		return nil, err
 	}
 
-	if _, found := qualifiers[qualifier]; qualifier != "" && !found {
+	if _, found := Qualifiers[qualifier]; qualifier != "" && !found {
 		return nil, fmt.Errorf("set qualifier must be %v or %v", forAllValues, forAllValues)
 	}
 

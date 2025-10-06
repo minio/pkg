@@ -56,7 +56,8 @@ const (
 	forAnyValue  = "ForAnyValue"
 )
 
-var names = map[string]struct{}{
+// Names - list of all supported condition names.
+var Names = map[string]struct{}{
 	stringEquals:               {},
 	stringNotEquals:            {},
 	stringEqualsIgnoreCase:     {},
@@ -83,7 +84,8 @@ var names = map[string]struct{}{
 	dateGreaterThanEquals:      {},
 }
 
-var qualifiers = map[string]struct{}{
+// Qualifiers - list of all supported condition qualifiers.
+var Qualifiers = map[string]struct{}{
 	forAllValues: {},
 	forAnyValue:  {},
 }
@@ -103,12 +105,12 @@ func (n name) String() string {
 // IsValid - checks if name is valid or not.
 func (n name) IsValid() bool {
 	if n.qualifier != "" {
-		if _, found := qualifiers[n.qualifier]; !found {
+		if _, found := Qualifiers[n.qualifier]; !found {
 			return false
 		}
 	}
 
-	_, found := names[n.name]
+	_, found := Names[n.name]
 	return found
 }
 

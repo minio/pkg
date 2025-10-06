@@ -263,10 +263,10 @@ func BenchmarkDropDuplicateStatements(b *testing.B) {
 func BenchmarkDedupe(b *testing.B) {
 	var allActions []Action
 	var allAdminActions []Action
-	for action := range supportedActions {
+	for action := range SupportedActions {
 		allActions = append(allActions, action)
 	}
-	for action := range supportedAdminActions {
+	for action := range SupportedAdminActions {
 		allAdminActions = append(allAdminActions, Action(action))
 	}
 

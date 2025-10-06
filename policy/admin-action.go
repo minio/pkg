@@ -243,8 +243,8 @@ const (
 	AllAdminActions = "admin:*"
 )
 
-// List of all supported admin actions.
-var supportedAdminActions = map[AdminAction]struct{}{
+// SupportedAdminActions - list of all supported admin actions.
+var SupportedAdminActions = map[AdminAction]struct{}{
 	HealAdminAction:                  {},
 	StorageInfoAdminAction:           {},
 	DataUsageInfoAdminAction:         {},
@@ -332,7 +332,7 @@ var supportedAdminActions = map[AdminAction]struct{}{
 
 // IsValid - checks if action is valid or not.
 func (action AdminAction) IsValid() bool {
-	_, ok := supportedAdminActions[action]
+	_, ok := SupportedAdminActions[action]
 	return ok
 }
 
@@ -343,7 +343,7 @@ func createAdminActionConditionKeyMap() map[Action]condition.KeySet {
 	}
 
 	adminActionConditionKeyMap := map[Action]condition.KeySet{}
-	for act := range supportedAdminActions {
+	for act := range SupportedAdminActions {
 		adminActionConditionKeyMap[Action(act)] = condition.NewKeySet(allSupportedAdminKeys...)
 	}
 	return adminActionConditionKeyMap
