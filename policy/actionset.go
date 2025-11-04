@@ -49,6 +49,13 @@ func (actionSet ActionSet) IsEmpty() bool {
 	return len(actionSet) == 0
 }
 
+var implicitActions = map[Action]ActionSet{
+	GetObjectVersionAction:             NewActionSet(GetObjectAction),
+	Action(S3TablesGetTableDataAction): NewActionSet(GetObjectAction, ListMultipartUploadPartsAction),
+	Action(S3TablesPutTableDataAction): NewActionSet(PutObjectAction, AbortMultipartUploadAction),
+	Action(AllS3TablesActions):         NewActionSet(GetObjectAction, PutObjectAction, ListMultipartUploadPartsAction, AbortMultipartUploadAction),
+}
+
 // Match - matches object name with anyone of action pattern in action set.
 func (actionSet ActionSet) Match(action Action) bool {
 	for r := range actionSet {
@@ -56,11 +63,8 @@ func (actionSet ActionSet) Match(action Action) bool {
 			return true
 		}
 
-		// This is a special case where GetObjectVersion
-		// means GetObject is enabled implicitly.
-		switch r {
-		case GetObjectVersionAction:
-			if action == GetObjectAction {
+		if implicits, ok := implicitActions[r]; ok {
+			if implicits.Contains(action) {
 				return true
 			}
 		}
@@ -161,6 +165,19 @@ func (actionSet ActionSet) ToKMSSlice() (actions []KMSAction) {
 	return actions
 }
 
+// ToTableSlice - returns slice of table actions from the action set.
+func (actionSet ActionSet) ToTableSlice() []TableAction {
+	if len(actionSet) == 0 {
+		return nil
+	}
+	actions := make([]TableAction, 0, len(actionSet))
+	for action := range actionSet {
+		actions = append(actions, TableAction(action))
+	}
+
+	return actions
+}
+
 // UnmarshalJSON - decodes JSON data to ActionSet.
 func (actionSet *ActionSet) UnmarshalJSON(data []byte) error {
 	var sset set.StringSet
@@ -201,6 +218,16 @@ func (actionSet ActionSet) ValidateKMS() error {
 	for _, action := range actionSet.ToKMSSlice() {
 		if !action.IsValid() {
 			return Errorf("unsupported KMS action '%v'", action)
+		}
+	}
+	return nil
+}
+
+// ValidateTable checks if all actions are valid Table actions
+func (actionSet ActionSet) ValidateTable() error {
+	for _, action := range actionSet.ToTableSlice() {
+		if !action.IsValid() {
+			return Errorf("unsupported table action '%v'", action)
 		}
 	}
 	return nil

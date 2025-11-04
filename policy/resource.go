@@ -91,7 +91,11 @@ func (r Resource) isKMS() bool {
 }
 
 func (r Resource) isS3() bool {
-	return r.Type == ResourceARNS3 || r.Type == ResourceARNS3Tables || r.Type == ResourceARNAll
+	return r.Type == ResourceARNS3 || r.Type == ResourceARNAll
+}
+
+func (r Resource) isTable() bool {
+	return r.Type == ResourceARNS3Tables || r.Type == ResourceARNAll
 }
 
 func (r Resource) isBucketPattern() bool {
@@ -108,6 +112,11 @@ func (r Resource) IsValid() bool {
 		return false
 	}
 	if r.isS3() {
+		if strings.HasPrefix(r.Pattern, "/") {
+			return false
+		}
+	}
+	if r.isTable() {
 		if strings.HasPrefix(r.Pattern, "/") {
 			return false
 		}

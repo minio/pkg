@@ -2211,3 +2211,279 @@ func TestPolicyParseS3TablesExamples(t *testing.T) {
 		})
 	}
 }
+
+func TestS3TablesActionsWithImplicitMatching(t *testing.T) {
+	policy1JSON := `{
+		"Version": "2012-10-17",
+		"Statement": [
+			{
+				"Effect": "Allow",
+				"Action": ["s3tables:GetTableData"],
+				"Resource": ["arn:aws:s3tables:::bucket/my-warehouse/table/table-uuid-123"]
+			}
+		]
+	}`
+
+	policy2JSON := `{
+		"Version": "2012-10-17",
+		"Statement": [
+			{
+				"Effect": "Allow",
+				"Action": ["s3tables:PutTableData"],
+				"Resource": ["arn:aws:s3tables:::bucket/test-warehouse/table/uuid-456"]
+			}
+		]
+	}`
+
+	policy3JSON := `{
+		"Version": "2012-10-17",
+		"Statement": [
+			{
+				"Effect": "Allow",
+				"Action": ["s3tables:GetTableData", "s3tables:PutTableData"],
+				"Resource": ["arn:aws:s3tables:::bucket/wh/table/id"]
+			}
+		]
+	}`
+
+	policy4JSON := `{
+		"Version": "2012-10-17",
+		"Statement": [
+			{
+				"Effect": "Allow",
+				"Action": ["s3tables:*"],
+				"Resource": ["arn:aws:s3tables:::bucket/all-warehouse/table/all-uuid"]
+			}
+		]
+	}`
+
+	testCases := []struct {
+		name           string
+		policyJSON     string
+		args           Args
+		expectedResult bool
+		description    string
+	}{
+		{
+			name:       "GetTableData direct match",
+			policyJSON: policy1JSON,
+			args: Args{
+				Action:     S3TablesGetTableDataAction,
+				BucketName: "bucket/my-warehouse/table/table-uuid-123",
+			},
+			expectedResult: true,
+			description:    "S3 Tables action should match S3 Tables resource directly",
+		},
+		{
+			name:       "GetTableData implicit GetObject match with resource conversion",
+			policyJSON: policy1JSON,
+			args: Args{
+				Action:     GetObjectAction,
+				BucketName: "my-warehouse",
+				ObjectName: "table-uuid-123--aistor-table",
+			},
+			expectedResult: true,
+			description:    "GetObject (implicit from GetTableData) should match when resource is converted from S3 to S3Tables format",
+		},
+		{
+			name:       "GetTableData implicit GetObject with extra path",
+			policyJSON: policy1JSON,
+			args: Args{
+				Action:     GetObjectAction,
+				BucketName: "my-warehouse",
+				ObjectName: "table-uuid-123--aistor-table/data/file.parquet",
+			},
+			expectedResult: true,
+			description:    "GetObject should match even with extra path segments (should be discarded in conversion)",
+		},
+		{
+			name:       "GetTableData implicit ListMultipartUploadParts match",
+			policyJSON: policy1JSON,
+			args: Args{
+				Action:     ListMultipartUploadPartsAction,
+				BucketName: "my-warehouse",
+				ObjectName: "table-uuid-123--aistor-table",
+			},
+			expectedResult: true,
+			description:    "ListMultipartUploadParts (implicit from GetTableData) should match with resource conversion",
+		},
+		{
+			name:       "GetTableData wrong warehouse - should not match",
+			policyJSON: policy1JSON,
+			args: Args{
+				Action:     GetObjectAction,
+				BucketName: "wrong-warehouse",
+				ObjectName: "table-uuid-123--aistor-table",
+			},
+			expectedResult: false,
+			description:    "Should not match when warehouse name doesn't match",
+		},
+		{
+			name:       "GetTableData wrong table uuid - should not match",
+			policyJSON: policy1JSON,
+			args: Args{
+				Action:     GetObjectAction,
+				BucketName: "my-warehouse",
+				ObjectName: "wrong-uuid--aistor-table",
+			},
+			expectedResult: false,
+			description:    "Should not match when table UUID doesn't match",
+		},
+		{
+			name:       "PutTableData direct match",
+			policyJSON: policy2JSON,
+			args: Args{
+				Action:     Action(S3TablesPutTableDataAction),
+				BucketName: "bucket/test-warehouse/table/uuid-456",
+			},
+			expectedResult: true,
+			description:    "PutTableData action should match S3 Tables resource directly",
+		},
+		{
+			name:       "PutTableData implicit PutObject match",
+			policyJSON: policy2JSON,
+			args: Args{
+				Action:     PutObjectAction,
+				BucketName: "test-warehouse",
+				ObjectName: "uuid-456--aistor-table",
+			},
+			expectedResult: true,
+			description:    "PutObject (implicit from PutTableData) should match with resource conversion",
+		},
+		{
+			name:       "PutTableData implicit AbortMultipartUpload match",
+			policyJSON: policy2JSON,
+			args: Args{
+				Action:     AbortMultipartUploadAction,
+				BucketName: "test-warehouse",
+				ObjectName: "uuid-456--aistor-table/upload",
+			},
+			expectedResult: true,
+			description:    "AbortMultipartUpload (implicit from PutTableData) should match",
+		},
+		{
+			name:       "Multiple actions - GetObject implicit match",
+			policyJSON: policy3JSON,
+			args: Args{
+				Action:     GetObjectAction,
+				BucketName: "wh",
+				ObjectName: "id--aistor-table",
+			},
+			expectedResult: true,
+			description:    "Should match with multiple S3 Tables actions in statement",
+		},
+		{
+			name:       "Multiple actions - PutObject implicit match",
+			policyJSON: policy3JSON,
+			args: Args{
+				Action:     PutObjectAction,
+				BucketName: "wh",
+				ObjectName: "id--aistor-table",
+			},
+			expectedResult: true,
+			description:    "Should match PutObject when both GetTableData and PutTableData are allowed",
+		},
+		{
+			name:       "Non-implicit action should not match",
+			policyJSON: policy1JSON,
+			args: Args{
+				Action:     DeleteObjectAction,
+				BucketName: "my-warehouse",
+				ObjectName: "table-uuid-123--aistor-table",
+			},
+			expectedResult: false,
+			description:    "DeleteObject is not implicit from GetTableData, should not match",
+		},
+		{
+			name:       "s3tables:* allows GetObject implicitly",
+			policyJSON: policy4JSON,
+			args: Args{
+				Action:     GetObjectAction,
+				BucketName: "all-warehouse",
+				ObjectName: "all-uuid--aistor-table",
+			},
+			expectedResult: true,
+			description:    "s3tables:* should allow GetObject through implicit matching with resource conversion",
+		},
+		{
+			name:       "s3tables:* allows PutObject implicitly",
+			policyJSON: policy4JSON,
+			args: Args{
+				Action:     PutObjectAction,
+				BucketName: "all-warehouse",
+				ObjectName: "all-uuid--aistor-table",
+			},
+			expectedResult: true,
+			description:    "s3tables:* should allow PutObject through implicit matching",
+		},
+		{
+			name:       "s3tables:* allows ListMultipartUploadParts implicitly",
+			policyJSON: policy4JSON,
+			args: Args{
+				Action:     ListMultipartUploadPartsAction,
+				BucketName: "all-warehouse",
+				ObjectName: "all-uuid--aistor-table",
+			},
+			expectedResult: true,
+			description:    "s3tables:* should allow ListMultipartUploadParts through implicit matching",
+		},
+		{
+			name:       "s3tables:* allows AbortMultipartUpload implicitly",
+			policyJSON: policy4JSON,
+			args: Args{
+				Action:     AbortMultipartUploadAction,
+				BucketName: "all-warehouse",
+				ObjectName: "all-uuid--aistor-table",
+			},
+			expectedResult: true,
+			description:    "s3tables:* should allow AbortMultipartUpload through implicit matching",
+		},
+		{
+			name:       "s3tables:* with extra path segments",
+			policyJSON: policy4JSON,
+			args: Args{
+				Action:     GetObjectAction,
+				BucketName: "all-warehouse",
+				ObjectName: "all-uuid--aistor-table/extra/path/data.parquet",
+			},
+			expectedResult: true,
+			description:    "s3tables:* should match with extra path segments discarded",
+		},
+		{
+			name:       "s3tables:* wrong warehouse should not match",
+			policyJSON: policy4JSON,
+			args: Args{
+				Action:     GetObjectAction,
+				BucketName: "wrong-warehouse",
+				ObjectName: "all-uuid--aistor-table",
+			},
+			expectedResult: false,
+			description:    "s3tables:* should not match when warehouse name is wrong",
+		},
+		{
+			name:       "s3tables:* wrong uuid should not match",
+			policyJSON: policy4JSON,
+			args: Args{
+				Action:     PutObjectAction,
+				BucketName: "all-warehouse",
+				ObjectName: "wrong-uuid--aistor-table",
+			},
+			expectedResult: false,
+			description:    "s3tables:* should not match when table UUID is wrong",
+		},
+	}
+
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			p, err := ParseConfig(strings.NewReader(tc.policyJSON))
+			if err != nil {
+				t.Fatalf("failed to parse policy: %v", err)
+			}
+
+			result := p.IsAllowed(tc.args)
+			if result != tc.expectedResult {
+				t.Errorf("%s: expected %v, got %v", tc.description, tc.expectedResult, result)
+			}
+		})
+	}
+}
