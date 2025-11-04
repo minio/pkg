@@ -1,5 +1,4 @@
 //go:build !amd64 || noasm || appengine || gccgo
-// +build !amd64 noasm appengine gccgo
 
 // Copyright (c) 2015-2021 MinIO, Inc.
 //
