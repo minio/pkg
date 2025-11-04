@@ -13,6 +13,11 @@ lint: getdeps
 	@${GOPATH}/bin/golangci-lint cache clean
 	@${GOPATH}/bin/golangci-lint run --build-tags kqueue --timeout=10m --config ./.golangci.yml
 
+lint-fix: getdeps
+	@echo "Running $@ check"
+	@${GOPATH}/bin/golangci-lint cache clean
+	@${GOPATH}/bin/golangci-lint run --build-tags kqueue --timeout=10m --config ./.golangci.yml --fix
+
 test: lint
 	@echo "Running unit tests"
 	@go test -race -tags kqueue ./...
