@@ -31,23 +31,11 @@ const (
 	// S3TablesCreateTableAction maps to the AWS `CreateTable` S3 Tables action.
 	S3TablesCreateTableAction = "s3tables:CreateTable"
 
-	// S3TablesCreateTableBucketAction maps to the AWS `CreateTableBucket` S3 Tables action.
-	S3TablesCreateTableBucketAction = "s3tables:CreateTableBucket"
-
 	// S3TablesDeleteNamespaceAction maps to the AWS `DeleteNamespace` S3 Tables action.
 	S3TablesDeleteNamespaceAction = "s3tables:DeleteNamespace"
 
 	// S3TablesDeleteTableAction maps to the AWS `DeleteTable` S3 Tables action.
 	S3TablesDeleteTableAction = "s3tables:DeleteTable"
-
-	// S3TablesDeleteTableBucketAction maps to the AWS `DeleteTableBucket` S3 Tables action.
-	S3TablesDeleteTableBucketAction = "s3tables:DeleteTableBucket"
-
-	// S3TablesDeleteTableBucketEncryptionAction maps to the AWS `DeleteTableBucketEncryption` S3 Tables action.
-	S3TablesDeleteTableBucketEncryptionAction = "s3tables:DeleteTableBucketEncryption"
-
-	// S3TablesDeleteTableBucketPolicyAction maps to the AWS `DeleteTableBucketPolicy` S3 Tables action.
-	S3TablesDeleteTableBucketPolicyAction = "s3tables:DeleteTableBucketPolicy"
 
 	// S3TablesDeleteTablePolicyAction maps to the AWS `DeleteTablePolicy` S3 Tables action.
 	S3TablesDeleteTablePolicyAction = "s3tables:DeleteTablePolicy"
@@ -57,18 +45,6 @@ const (
 
 	// S3TablesGetTableAction maps to the AWS `GetTable` S3 Tables action.
 	S3TablesGetTableAction = "s3tables:GetTable"
-
-	// S3TablesGetTableBucketAction maps to the AWS `GetTableBucket` S3 Tables action.
-	S3TablesGetTableBucketAction = "s3tables:GetTableBucket"
-
-	// S3TablesGetTableBucketEncryptionAction maps to the AWS `GetTableBucketEncryption` S3 Tables action.
-	S3TablesGetTableBucketEncryptionAction = "s3tables:GetTableBucketEncryption"
-
-	// S3TablesGetTableBucketMaintenanceConfigurationAction maps to the AWS `GetTableBucketMaintenanceConfiguration` S3 Tables action.
-	S3TablesGetTableBucketMaintenanceConfigurationAction = "s3tables:GetTableBucketMaintenanceConfiguration"
-
-	// S3TablesGetTableBucketPolicyAction maps to the AWS `GetTableBucketPolicy` S3 Tables action.
-	S3TablesGetTableBucketPolicyAction = "s3tables:GetTableBucketPolicy"
 
 	// S3TablesGetTableDataAction maps to the AWS `GetTableData` S3 Tables action.
 	S3TablesGetTableDataAction = "s3tables:GetTableData"
@@ -91,20 +67,8 @@ const (
 	// S3TablesListNamespacesAction maps to the AWS `ListNamespaces` S3 Tables action.
 	S3TablesListNamespacesAction = "s3tables:ListNamespaces"
 
-	// S3TablesListTableBucketsAction maps to the AWS `ListTableBuckets` S3 Tables action.
-	S3TablesListTableBucketsAction = "s3tables:ListTableBuckets" // TODO: map tableBuckets to warehouse for all actions
-
 	// S3TablesListTablesAction maps to the AWS `ListTables` S3 Tables action.
 	S3TablesListTablesAction = "s3tables:ListTables"
-
-	// S3TablesPutTableBucketEncryptionAction maps to the AWS `PutTableBucketEncryption` S3 Tables action.
-	S3TablesPutTableBucketEncryptionAction = "s3tables:PutTableBucketEncryption"
-
-	// S3TablesPutTableBucketMaintenanceConfigurationAction maps to the AWS `PutTableBucketMaintenanceConfiguration` S3 Tables action.
-	S3TablesPutTableBucketMaintenanceConfigurationAction = "s3tables:PutTableBucketMaintenanceConfiguration"
-
-	// S3TablesPutTableBucketPolicyAction maps to the AWS `PutTableBucketPolicy` S3 Tables action.
-	S3TablesPutTableBucketPolicyAction = "s3tables:PutTableBucketPolicy"
 
 	// S3TablesPutTableDataAction maps to the AWS `PutTableData` S3 Tables action.
 	S3TablesPutTableDataAction = "s3tables:PutTableData"
@@ -127,8 +91,86 @@ const (
 	// S3TablesCreateWarehouseAction is a MinIO extension for Iceberg warehouse provisioning.
 	S3TablesCreateWarehouseAction = "s3tables:CreateWarehouse"
 
+	// S3TablesCreateTableBucketAction maps to the AWS `CreateTableBucket` S3 Tables action.
+	// Prefer using S3TablesCreateWarehouseAction instead.
+	S3TablesCreateTableBucketAction = "s3tables:CreateTableBucket"
+
+	// S3TablesDeleteWarehouseAction is a MinIO extension for deleting Iceberg warehouses.
+	S3TablesDeleteWarehouseAction = "s3tables:DeleteWarehouse"
+
+	// S3TablesDeleteTableBucketAction maps to the AWS `DeleteTableBucket` S3 Tables action.
+	// Prefer using S3TablesDeleteWarehouseAction instead.
+	S3TablesDeleteTableBucketAction = "s3tables:DeleteTableBucket"
+
+	// S3TablesDeleteWarehouseEncryptionAction is a MinIO extension for deleting warehouse encryption configuration.
+	S3TablesDeleteWarehouseEncryptionAction = "s3tables:DeleteWarehouseEncryption"
+
+	// S3TablesDeleteTableBucketEncryptionAction maps to the AWS `DeleteTableBucketEncryption` S3 Tables action.
+	// Prefer using S3TablesDeleteWarehouseEncryptionAction instead.
+	S3TablesDeleteTableBucketEncryptionAction = "s3tables:DeleteTableBucketEncryption"
+
+	// S3TablesDeleteWarehousePolicyAction is a MinIO extension for deleting warehouse policies.
+	S3TablesDeleteWarehousePolicyAction = "s3tables:DeleteWarehousePolicy"
+
+	// S3TablesDeleteTableBucketPolicyAction maps to the AWS `DeleteTableBucketPolicy` S3 Tables action.
+	// Prefer using S3TablesDeleteWarehousePolicyAction instead.
+	S3TablesDeleteTableBucketPolicyAction = "s3tables:DeleteTableBucketPolicy"
+
+	// S3TablesGetWarehouseAction is a MinIO extension for retrieving warehouse details.
+	S3TablesGetWarehouseAction = "s3tables:GetWarehouse"
+
+	// S3TablesGetTableBucketAction maps to the AWS `GetTableBucket` S3 Tables action.
+	// Prefer using S3TablesGetWarehouseAction instead.
+	S3TablesGetTableBucketAction = "s3tables:GetTableBucket"
+
+	// S3TablesGetWarehouseEncryptionAction is a MinIO extension for retrieving warehouse encryption configuration.
+	S3TablesGetWarehouseEncryptionAction = "s3tables:GetWarehouseEncryption"
+
+	// S3TablesGetTableBucketEncryptionAction maps to the AWS `GetTableBucketEncryption` S3 Tables action.
+	// Prefer using S3TablesGetWarehouseEncryptionAction instead.
+	S3TablesGetTableBucketEncryptionAction = "s3tables:GetTableBucketEncryption"
+
+	// S3TablesGetWarehouseMaintenanceConfigurationAction is a MinIO extension for retrieving warehouse maintenance configuration.
+	S3TablesGetWarehouseMaintenanceConfigurationAction = "s3tables:GetWarehouseMaintenanceConfiguration"
+
+	// S3TablesGetTableBucketMaintenanceConfigurationAction maps to the AWS `GetTableBucketMaintenanceConfiguration` S3 Tables action.
+	// Prefer using S3TablesGetWarehouseMaintenanceConfigurationAction instead.
+	S3TablesGetTableBucketMaintenanceConfigurationAction = "s3tables:GetTableBucketMaintenanceConfiguration"
+
+	// S3TablesGetWarehousePolicyAction is a MinIO extension for retrieving warehouse policies.
+	S3TablesGetWarehousePolicyAction = "s3tables:GetWarehousePolicy"
+
+	// S3TablesGetTableBucketPolicyAction maps to the AWS `GetTableBucketPolicy` S3 Tables action.
+	// Prefer using S3TablesGetWarehousePolicyAction instead.
+	S3TablesGetTableBucketPolicyAction = "s3tables:GetTableBucketPolicy"
+
 	// S3TablesListWarehousesAction is a MinIO extension for listing Iceberg warehouses.
 	S3TablesListWarehousesAction = "s3tables:ListWarehouses"
+
+	// S3TablesListTableBucketsAction maps to the AWS `ListTableBuckets` S3 Tables action.
+	// Prefer using S3TablesListWarehousesAction instead.
+	S3TablesListTableBucketsAction = "s3tables:ListTableBuckets"
+
+	// S3TablesPutWarehouseEncryptionAction is a MinIO extension for setting warehouse encryption configuration.
+	S3TablesPutWarehouseEncryptionAction = "s3tables:PutWarehouseEncryption"
+
+	// S3TablesPutTableBucketEncryptionAction maps to the AWS `PutTableBucketEncryption` S3 Tables action.
+	// Prefer using S3TablesPutWarehouseEncryptionAction instead.
+	S3TablesPutTableBucketEncryptionAction = "s3tables:PutTableBucketEncryption"
+
+	// S3TablesPutWarehouseMaintenanceConfigurationAction is a MinIO extension for setting warehouse maintenance configuration.
+	S3TablesPutWarehouseMaintenanceConfigurationAction = "s3tables:PutWarehouseMaintenanceConfiguration"
+
+	// S3TablesPutTableBucketMaintenanceConfigurationAction maps to the AWS `PutTableBucketMaintenanceConfiguration` S3 Tables action.
+	// Prefer using S3TablesPutWarehouseMaintenanceConfigurationAction instead.
+	S3TablesPutTableBucketMaintenanceConfigurationAction = "s3tables:PutTableBucketMaintenanceConfiguration"
+
+	// S3TablesPutWarehousePolicyAction is a MinIO extension for setting warehouse policies.
+	S3TablesPutWarehousePolicyAction = "s3tables:PutWarehousePolicy"
+
+	// S3TablesPutTableBucketPolicyAction maps to the AWS `PutTableBucketPolicy` S3 Tables action.
+	// Prefer using S3TablesPutWarehousePolicyAction instead.
+	S3TablesPutTableBucketPolicyAction = "s3tables:PutTableBucketPolicy"
 
 	// S3TablesCommitMultiTableTransactionAction is a MinIO extension enabling multi-table transactions.
 	S3TablesCommitMultiTableTransactionAction = "s3tables:CommitMultiTableTransaction"
@@ -182,7 +224,17 @@ var SupportedTableActions = map[TableAction]struct{}{
 	S3TablesRenameTableAction:                            {},
 	S3TablesUpdateTableMetadataLocationAction:            {},
 	S3TablesCreateWarehouseAction:                        {},
+	S3TablesDeleteWarehouseAction:                        {},
+	S3TablesDeleteWarehouseEncryptionAction:              {},
+	S3TablesDeleteWarehousePolicyAction:                  {},
+	S3TablesGetWarehouseAction:                           {},
+	S3TablesGetWarehouseEncryptionAction:                 {},
+	S3TablesGetWarehouseMaintenanceConfigurationAction:   {},
+	S3TablesGetWarehousePolicyAction:                     {},
 	S3TablesListWarehousesAction:                         {},
+	S3TablesPutWarehouseEncryptionAction:                 {},
+	S3TablesPutWarehouseMaintenanceConfigurationAction:   {},
+	S3TablesPutWarehousePolicyAction:                     {},
 	S3TablesCommitMultiTableTransactionAction:            {},
 	S3TablesGetConfigAction:                              {},
 	S3TablesTableMetricsAction:                           {},
@@ -259,7 +311,17 @@ func createTableActionConditionKeyMap() map[Action]condition.KeySet {
 	tableActionConditionKeyMap[S3TablesRenameTableAction] = withCommon(s3TablesNamespaceKey, s3TablesTableNameKey)
 	tableActionConditionKeyMap[S3TablesUpdateTableMetadataLocationAction] = withCommon(s3TablesNamespaceKey, s3TablesTableNameKey)
 	tableActionConditionKeyMap[S3TablesCreateWarehouseAction] = withCommon(s3TablesKMSKeyKey, s3TablesSSEAlgorithmKey)
+	tableActionConditionKeyMap[S3TablesDeleteWarehouseAction] = withCommon()
+	tableActionConditionKeyMap[S3TablesDeleteWarehouseEncryptionAction] = withCommon()
+	tableActionConditionKeyMap[S3TablesDeleteWarehousePolicyAction] = withCommon()
+	tableActionConditionKeyMap[S3TablesGetWarehouseAction] = withCommon()
+	tableActionConditionKeyMap[S3TablesGetWarehouseEncryptionAction] = withCommon()
+	tableActionConditionKeyMap[S3TablesGetWarehouseMaintenanceConfigurationAction] = withCommon()
+	tableActionConditionKeyMap[S3TablesGetWarehousePolicyAction] = withCommon()
 	tableActionConditionKeyMap[S3TablesListWarehousesAction] = withCommon()
+	tableActionConditionKeyMap[S3TablesPutWarehouseEncryptionAction] = withCommon(s3TablesKMSKeyKey, s3TablesSSEAlgorithmKey)
+	tableActionConditionKeyMap[S3TablesPutWarehouseMaintenanceConfigurationAction] = withCommon()
+	tableActionConditionKeyMap[S3TablesPutWarehousePolicyAction] = withCommon()
 	tableActionConditionKeyMap[S3TablesCommitMultiTableTransactionAction] = withCommon(s3TablesNamespaceKey, s3TablesTableNameKey)
 	tableActionConditionKeyMap[S3TablesGetConfigAction] = withCommon()
 	tableActionConditionKeyMap[S3TablesTableMetricsAction] = withCommon(s3TablesNamespaceKey, s3TablesTableNameKey)

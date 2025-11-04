@@ -2333,7 +2333,7 @@ func TestS3TablesActionsWithImplicitMatching(t *testing.T) {
 			name:       "PutTableData direct match",
 			policyJSON: policy2JSON,
 			args: Args{
-				Action:     Action(S3TablesPutTableDataAction),
+				Action:     S3TablesPutTableDataAction,
 				BucketName: "bucket/test-warehouse/table/uuid-456",
 			},
 			expectedResult: true,
