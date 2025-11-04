@@ -1,5 +1,4 @@
 //go:build freebsd || dragonfly
-// +build freebsd dragonfly
 
 // Copyright (c) 2015-2021 MinIO, Inc.
 //

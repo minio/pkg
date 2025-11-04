@@ -16,7 +16,6 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 //go:build linux
-// +build linux
 
 package net
 
