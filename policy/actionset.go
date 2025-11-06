@@ -49,6 +49,43 @@ func (actionSet ActionSet) IsEmpty() bool {
 	return len(actionSet) == 0
 }
 
+var implicitActions = map[Action]ActionSet{
+	GetObjectVersionAction: NewActionSet(GetObjectAction),
+
+	// S3Tables actions implicitly allow their data actions
+	S3TablesGetTableDataAction: NewActionSet(GetObjectAction, ListMultipartUploadPartsAction),
+	S3TablesPutTableDataAction: NewActionSet(PutObjectAction, AbortMultipartUploadAction),
+	AllS3TablesActions:         NewActionSet(GetObjectAction, PutObjectAction, ListMultipartUploadPartsAction, AbortMultipartUploadAction),
+
+	// TableBucket actions implicitly allow their Warehouse counterparts
+	S3TablesCreateTableBucketAction:                      NewActionSet(S3TablesCreateWarehouseAction),
+	S3TablesDeleteTableBucketAction:                      NewActionSet(S3TablesDeleteWarehouseAction),
+	S3TablesDeleteTableBucketEncryptionAction:            NewActionSet(S3TablesDeleteWarehouseEncryptionAction),
+	S3TablesDeleteTableBucketPolicyAction:                NewActionSet(S3TablesDeleteWarehousePolicyAction),
+	S3TablesGetTableBucketAction:                         NewActionSet(S3TablesGetWarehouseAction),
+	S3TablesGetTableBucketEncryptionAction:               NewActionSet(S3TablesGetWarehouseEncryptionAction),
+	S3TablesGetTableBucketMaintenanceConfigurationAction: NewActionSet(S3TablesGetWarehouseMaintenanceConfigurationAction),
+	S3TablesGetTableBucketPolicyAction:                   NewActionSet(S3TablesGetWarehousePolicyAction),
+	S3TablesListTableBucketsAction:                       NewActionSet(S3TablesListWarehousesAction),
+	S3TablesPutTableBucketEncryptionAction:               NewActionSet(S3TablesPutWarehouseEncryptionAction),
+	S3TablesPutTableBucketMaintenanceConfigurationAction: NewActionSet(S3TablesPutWarehouseMaintenanceConfigurationAction),
+	S3TablesPutTableBucketPolicyAction:                   NewActionSet(S3TablesPutWarehousePolicyAction),
+
+	// Warehouse actions implicitly allow their TableBucket counterparts
+	S3TablesCreateWarehouseAction:                      NewActionSet(S3TablesCreateTableBucketAction),
+	S3TablesDeleteWarehouseAction:                      NewActionSet(S3TablesDeleteTableBucketAction),
+	S3TablesDeleteWarehouseEncryptionAction:            NewActionSet(S3TablesDeleteTableBucketEncryptionAction),
+	S3TablesDeleteWarehousePolicyAction:                NewActionSet(S3TablesDeleteTableBucketPolicyAction),
+	S3TablesGetWarehouseAction:                         NewActionSet(S3TablesGetTableBucketAction),
+	S3TablesGetWarehouseEncryptionAction:               NewActionSet(S3TablesGetTableBucketEncryptionAction),
+	S3TablesGetWarehouseMaintenanceConfigurationAction: NewActionSet(S3TablesGetTableBucketMaintenanceConfigurationAction),
+	S3TablesGetWarehousePolicyAction:                   NewActionSet(S3TablesGetTableBucketPolicyAction),
+	S3TablesListWarehousesAction:                       NewActionSet(S3TablesListTableBucketsAction),
+	S3TablesPutWarehouseEncryptionAction:               NewActionSet(S3TablesPutTableBucketEncryptionAction),
+	S3TablesPutWarehouseMaintenanceConfigurationAction: NewActionSet(S3TablesPutTableBucketMaintenanceConfigurationAction),
+	S3TablesPutWarehousePolicyAction:                   NewActionSet(S3TablesPutTableBucketPolicyAction),
+}
+
 // Match - matches object name with anyone of action pattern in action set.
 func (actionSet ActionSet) Match(action Action) bool {
 	for r := range actionSet {
@@ -56,11 +93,8 @@ func (actionSet ActionSet) Match(action Action) bool {
 			return true
 		}
 
-		// This is a special case where GetObjectVersion
-		// means GetObject is enabled implicitly.
-		switch r {
-		case GetObjectVersionAction:
-			if action == GetObjectAction {
+		if implicits, ok := implicitActions[r]; ok {
+			if implicits.Contains(action) {
 				return true
 			}
 		}
@@ -161,6 +195,19 @@ func (actionSet ActionSet) ToKMSSlice() (actions []KMSAction) {
 	return actions
 }
 
+// ToTableSlice - returns slice of table actions from the action set.
+func (actionSet ActionSet) ToTableSlice() []TableAction {
+	if len(actionSet) == 0 {
+		return nil
+	}
+	actions := make([]TableAction, 0, len(actionSet))
+	for action := range actionSet {
+		actions = append(actions, TableAction(action))
+	}
+
+	return actions
+}
+
 // UnmarshalJSON - decodes JSON data to ActionSet.
 func (actionSet *ActionSet) UnmarshalJSON(data []byte) error {
 	var sset set.StringSet
@@ -201,6 +248,16 @@ func (actionSet ActionSet) ValidateKMS() error {
 	for _, action := range actionSet.ToKMSSlice() {
 		if !action.IsValid() {
 			return Errorf("unsupported KMS action '%v'", action)
+		}
+	}
+	return nil
+}
+
+// ValidateTable checks if all actions are valid Table actions
+func (actionSet ActionSet) ValidateTable() error {
+	for _, action := range actionSet.ToTableSlice() {
+		if !action.IsValid() {
+			return Errorf("unsupported table action '%v'", action)
 		}
 	}
 	return nil

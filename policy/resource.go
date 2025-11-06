@@ -91,8 +91,15 @@ func (r Resource) isKMS() bool {
 }
 
 func (r Resource) isS3() bool {
-	return r.Type == ResourceARNS3 || r.Type == ResourceARNS3Tables || r.Type == ResourceARNAll
+	return r.Type == ResourceARNS3 || r.Type == ResourceARNAll
 }
+
+func (r Resource) isTable() bool {
+	return r.Type == ResourceARNS3Tables || r.Type == ResourceARNAll
+}
+
+// AIStorTableTag is the tag used to identify an S3 prefix as underlying store for AIStor tables.
+const AIStorTableTag = "--table-aistor"
 
 func (r Resource) isBucketPattern() bool {
 	return !strings.Contains(r.Pattern, "/") || r.Pattern == "*"
@@ -108,6 +115,11 @@ func (r Resource) IsValid() bool {
 		return false
 	}
 	if r.isS3() {
+		if strings.HasPrefix(r.Pattern, "/") {
+			return false
+		}
+	}
+	if r.isTable() {
 		if strings.HasPrefix(r.Pattern, "/") {
 			return false
 		}

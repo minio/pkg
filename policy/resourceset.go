@@ -178,6 +178,20 @@ func (resourceSet ResourceSet) ValidateKMS() error {
 	return nil
 }
 
+// ValidateTable - validates ResourceSet is S3 Tables.
+func (resourceSet ResourceSet) ValidateTable() error {
+	for resource := range resourceSet {
+		if !resource.isTable() {
+			return Errorf("resource '%v' type is not S3 Tables", resource)
+		}
+		if err := resource.Validate(); err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
 // ValidateBucket - validates ResourceSet is for given bucket or not.
 func (resourceSet ResourceSet) ValidateBucket(bucketName string) error {
 	for resource := range resourceSet {

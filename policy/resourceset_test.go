@@ -273,7 +273,7 @@ func TestResourceSetS3Validate(t *testing.T) {
 		{NewResourceSet(NewResource("mybucket/myobject*")), false},
 		{NewResourceSet(NewResource("/")), true},
 		{NewResourceSet(NewResource("mybucket"), NewKMSResource("mykey")), true}, // mismatching types
-		{NewResourceSet(Resource{Pattern: "us-east-1:111122223333:bucket/demo/table/*", Type: ResourceARNS3Tables}), false},
+		{NewResourceSet(Resource{Pattern: "us-east-1:111122223333:bucket/demo/table/*", Type: ResourceARNS3Tables}), true},
 	}
 
 	for i, testCase := range testCases {
@@ -299,6 +299,29 @@ func TestResourceSetKMSValidate(t *testing.T) {
 
 	for i, testCase := range testCases {
 		err := testCase.resourceSet.ValidateKMS()
+		expectErr := (err != nil)
+
+		if expectErr != testCase.expectErr {
+			t.Fatalf("case %v: error: expected: %v, got: %v", i+1, testCase.expectErr, expectErr)
+		}
+	}
+}
+
+func TestResourceSetTableValidate(t *testing.T) {
+	testCases := []struct {
+		resourceSet ResourceSet
+		expectErr   bool
+	}{
+		{NewResourceSet(Resource{Pattern: "us-east-1:111122223333:bucket/demo/table/*", Type: ResourceARNS3Tables}), false},
+		{NewResourceSet(Resource{Pattern: "bucket/demo/table/*", Type: ResourceARNS3Tables}), false},
+		{NewResourceSet(Resource{Pattern: "/", Type: ResourceARNS3Tables}), true},
+		{NewResourceSet(Resource{Pattern: "", Type: ResourceARNS3Tables}), true},
+		{NewResourceSet(Resource{Pattern: "bucket/demo/table/*", Type: ResourceARNS3Tables}, NewResource("mybucket")), true},
+		{NewResourceSet(Resource{Pattern: "bucket/demo/table/*", Type: ResourceARNS3Tables}, NewKMSResource("mykey")), true},
+	}
+
+	for i, testCase := range testCases {
+		err := testCase.resourceSet.ValidateTable()
 		expectErr := (err != nil)
 
 		if expectErr != testCase.expectErr {

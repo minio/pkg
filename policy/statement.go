@@ -55,19 +55,33 @@ func (statement Statement) IsAllowedPtr(args *Args) bool {
 			statement.NotActions.Match(args.Action) {
 			return false
 		}
+
 		resource := smallBufPool.Get().(*bytes.Buffer)
 		defer smallBufPool.Put(resource)
 		resource.Reset()
 
-		resource.WriteString(args.BucketName)
-		if args.ObjectName != "" {
-			if !strings.HasPrefix(args.ObjectName, "/") {
+		if statement.isTable() && !TableAction(args.Action).IsValid() {
+			// must convert to table resource only for s3 actions on table resources
+
+			idx := strings.Index(args.ObjectName, AIStorTableTag)
+			if idx < 0 {
+				// table actions don't apply to non --aistor-table suffixed object names
+				return false
+			}
+			resource.WriteString("bucket/")
+			resource.WriteString(args.BucketName)
+			resource.WriteString("/table/")
+			resource.WriteString(args.ObjectName[:idx])
+		} else {
+			resource.WriteString(args.BucketName)
+			if args.ObjectName != "" {
+				if !strings.HasPrefix(args.ObjectName, "/") {
+					resource.WriteByte('/')
+				}
+				resource.WriteString(args.ObjectName)
+			} else {
 				resource.WriteByte('/')
 			}
-
-			resource.WriteString(args.ObjectName)
-		} else {
-			resource.WriteByte('/')
 		}
 
 		if statement.isKMS() {
@@ -126,6 +140,15 @@ func (statement Statement) isKMS() bool {
 	return false
 }
 
+func (statement Statement) isTable() bool {
+	for action := range statement.Actions {
+		if TableAction(action).IsValid() {
+			return true
+		}
+	}
+	return false
+}
+
 // isValid - checks whether statement is valid or not.
 func (statement Statement) isValid() error {
 	if !statement.Effect.IsValid() {
@@ -178,6 +201,46 @@ func (statement Statement) isValid() error {
 		if err := statement.NotResources.ValidateKMS(); err != nil {
 			return err
 		}
+		return nil
+	}
+
+	if statement.isTable() {
+		if err := statement.Actions.ValidateTable(); err != nil {
+			return err
+		}
+		for action := range statement.Actions {
+			keys := statement.Conditions.Keys()
+			keyDiff := keys.Difference(tableActionConditionKeyMap[action])
+			if !keyDiff.IsEmpty() {
+				return Errorf("unsupported condition keys '%v' used for action '%v'", keyDiff, action)
+			}
+		}
+
+		if len(statement.Resources) == 0 && len(statement.NotResources) == 0 {
+			return Errorf("Resource must not be empty")
+		}
+
+		if len(statement.Resources) > 0 && len(statement.NotResources) > 0 {
+			return Errorf("Resource and NotResource cannot be specified in the same statement")
+		}
+
+		if err := statement.Resources.ValidateTable(); err != nil {
+			return err
+		}
+
+		if err := statement.NotResources.ValidateTable(); err != nil {
+			return err
+		}
+
+		for action := range statement.Actions {
+			if len(statement.Resources) > 0 && !statement.Resources.ObjectResourceExists() && !statement.Resources.BucketResourceExists() {
+				return Errorf("unsupported Resource found %v for action %v", statement.Resources, action)
+			}
+			if len(statement.NotResources) > 0 && !statement.NotResources.ObjectResourceExists() && !statement.NotResources.BucketResourceExists() {
+				return Errorf("unsupported NotResource found %v for action %v", statement.NotResources, action)
+			}
+		}
+
 		return nil
 	}
 
