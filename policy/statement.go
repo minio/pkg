@@ -48,8 +48,6 @@ func (statement Statement) IsAllowed(args Args) bool {
 	return statement.IsAllowedPtr(&args)
 }
 
-const AIStorTableTag = "--table-aistor"
-
 // IsAllowedPtr - checks given policy args is allowed to continue the Rest API.
 func (statement Statement) IsAllowedPtr(args *Args) bool {
 	check := func() bool {
