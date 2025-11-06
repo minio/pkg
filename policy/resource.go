@@ -98,7 +98,7 @@ func (r Resource) isTable() bool {
 	return r.Type == ResourceARNS3Tables || r.Type == ResourceARNAll
 }
 
-// AIStorTableTag is the tag used to identify an AIStor table resource prefix.
+// AIStorTableTag is the tag used to identify an S3 prefix as underlying store for AIStor tables.
 const AIStorTableTag = "--table-aistor"
 
 func (r Resource) isBucketPattern() bool {
