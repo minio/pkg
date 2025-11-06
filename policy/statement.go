@@ -48,6 +48,8 @@ func (statement Statement) IsAllowed(args Args) bool {
 	return statement.IsAllowedPtr(&args)
 }
 
+const S3TableTag = "--table-s3"
+
 // IsAllowedPtr - checks given policy args is allowed to continue the Rest API.
 func (statement Statement) IsAllowedPtr(args *Args) bool {
 	check := func() bool {
@@ -62,7 +64,8 @@ func (statement Statement) IsAllowedPtr(args *Args) bool {
 
 		if statement.isTable() && !TableAction(args.Action).IsValid() {
 			// must convert to table resource only for s3 actions on table resources
-			idx := strings.Index(args.ObjectName, "--aistor-table")
+
+			idx := strings.Index(args.ObjectName, S3TableTag)
 			if idx < 0 {
 				// table actions don't apply to non --aistor-table suffixed object names
 				return false
