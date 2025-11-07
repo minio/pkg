@@ -2517,6 +2517,10 @@ var DB = map[string]struct {
 		ContentType:  "application/x-dtbncx+xml",
 		Compressible: false,
 	},
+	"ndjson": {
+		ContentType:  "application/x-ndjson",
+		Compressible: false,
+	},
 	"nfo": {
 		ContentType:  "text/x-nfo",
 		Compressible: false,
@@ -2811,6 +2815,10 @@ var DB = map[string]struct {
 	},
 	"pac": {
 		ContentType:  "application/x-ns-proxy-autoconfig",
+		Compressible: false,
+	},
+	"parquet": {
+		ContentType:  "application/vnd.apache.parquet",
 		Compressible: false,
 	},
 	"pages": {
