@@ -2280,7 +2280,7 @@ func TestS3TablesActionsWithImplicitMatching(t *testing.T) {
 			args: Args{
 				Action:     GetObjectAction,
 				BucketName: "my-warehouse",
-				ObjectName: "table-uuid-123--table-aistor",
+				ObjectName: "table-uuid-123",
 			},
 			expectedResult: true,
 			description:    "GetObject (implicit from GetTableData) should match when resource is converted from S3 to S3Tables format",
@@ -2291,7 +2291,7 @@ func TestS3TablesActionsWithImplicitMatching(t *testing.T) {
 			args: Args{
 				Action:     GetObjectAction,
 				BucketName: "my-warehouse",
-				ObjectName: "table-uuid-123--table-aistor/data/file.parquet",
+				ObjectName: "table-uuid-123/data/file.parquet",
 			},
 			expectedResult: true,
 			description:    "GetObject should match even with extra path segments (should be discarded in conversion)",
@@ -2302,7 +2302,7 @@ func TestS3TablesActionsWithImplicitMatching(t *testing.T) {
 			args: Args{
 				Action:     ListMultipartUploadPartsAction,
 				BucketName: "my-warehouse",
-				ObjectName: "table-uuid-123--table-aistor",
+				ObjectName: "table-uuid-123",
 			},
 			expectedResult: true,
 			description:    "ListMultipartUploadParts (implicit from GetTableData) should match with resource conversion",
@@ -2313,7 +2313,7 @@ func TestS3TablesActionsWithImplicitMatching(t *testing.T) {
 			args: Args{
 				Action:     GetObjectAction,
 				BucketName: "wrong-warehouse",
-				ObjectName: "table-uuid-123--table-aistor",
+				ObjectName: "table-uuid-123",
 			},
 			expectedResult: false,
 			description:    "Should not match when warehouse name doesn't match",
@@ -2324,7 +2324,7 @@ func TestS3TablesActionsWithImplicitMatching(t *testing.T) {
 			args: Args{
 				Action:     GetObjectAction,
 				BucketName: "my-warehouse",
-				ObjectName: "wrong-uuid--table-aistor",
+				ObjectName: "wrong-uuid",
 			},
 			expectedResult: false,
 			description:    "Should not match when table UUID doesn't match",
@@ -2345,7 +2345,7 @@ func TestS3TablesActionsWithImplicitMatching(t *testing.T) {
 			args: Args{
 				Action:     PutObjectAction,
 				BucketName: "test-warehouse",
-				ObjectName: "uuid-456--table-aistor",
+				ObjectName: "uuid-456",
 			},
 			expectedResult: true,
 			description:    "PutObject (implicit from PutTableData) should match with resource conversion",
@@ -2356,7 +2356,7 @@ func TestS3TablesActionsWithImplicitMatching(t *testing.T) {
 			args: Args{
 				Action:     AbortMultipartUploadAction,
 				BucketName: "test-warehouse",
-				ObjectName: "uuid-456--table-aistor/upload",
+				ObjectName: "uuid-456/upload",
 			},
 			expectedResult: true,
 			description:    "AbortMultipartUpload (implicit from PutTableData) should match",
@@ -2367,7 +2367,7 @@ func TestS3TablesActionsWithImplicitMatching(t *testing.T) {
 			args: Args{
 				Action:     GetObjectAction,
 				BucketName: "wh",
-				ObjectName: "id--table-aistor",
+				ObjectName: "id",
 			},
 			expectedResult: true,
 			description:    "Should match with multiple S3 Tables actions in statement",
@@ -2378,7 +2378,7 @@ func TestS3TablesActionsWithImplicitMatching(t *testing.T) {
 			args: Args{
 				Action:     PutObjectAction,
 				BucketName: "wh",
-				ObjectName: "id--table-aistor",
+				ObjectName: "id",
 			},
 			expectedResult: true,
 			description:    "Should match PutObject when both GetTableData and PutTableData are allowed",
@@ -2389,7 +2389,7 @@ func TestS3TablesActionsWithImplicitMatching(t *testing.T) {
 			args: Args{
 				Action:     DeleteObjectAction,
 				BucketName: "my-warehouse",
-				ObjectName: "table-uuid-123--table-aistor",
+				ObjectName: "table-uuid-123",
 			},
 			expectedResult: false,
 			description:    "DeleteObject is not implicit from GetTableData, should not match",
@@ -2400,7 +2400,7 @@ func TestS3TablesActionsWithImplicitMatching(t *testing.T) {
 			args: Args{
 				Action:     GetObjectAction,
 				BucketName: "all-warehouse",
-				ObjectName: "all-uuid--table-aistor",
+				ObjectName: "all-uuid",
 			},
 			expectedResult: true,
 			description:    "s3tables:* should allow GetObject through implicit matching with resource conversion",
@@ -2411,7 +2411,7 @@ func TestS3TablesActionsWithImplicitMatching(t *testing.T) {
 			args: Args{
 				Action:     PutObjectAction,
 				BucketName: "all-warehouse",
-				ObjectName: "all-uuid--table-aistor",
+				ObjectName: "all-uuid",
 			},
 			expectedResult: true,
 			description:    "s3tables:* should allow PutObject through implicit matching",
@@ -2422,7 +2422,7 @@ func TestS3TablesActionsWithImplicitMatching(t *testing.T) {
 			args: Args{
 				Action:     ListMultipartUploadPartsAction,
 				BucketName: "all-warehouse",
-				ObjectName: "all-uuid--table-aistor",
+				ObjectName: "all-uuid",
 			},
 			expectedResult: true,
 			description:    "s3tables:* should allow ListMultipartUploadParts through implicit matching",
@@ -2433,7 +2433,7 @@ func TestS3TablesActionsWithImplicitMatching(t *testing.T) {
 			args: Args{
 				Action:     AbortMultipartUploadAction,
 				BucketName: "all-warehouse",
-				ObjectName: "all-uuid--table-aistor",
+				ObjectName: "all-uuid",
 			},
 			expectedResult: true,
 			description:    "s3tables:* should allow AbortMultipartUpload through implicit matching",
@@ -2444,7 +2444,7 @@ func TestS3TablesActionsWithImplicitMatching(t *testing.T) {
 			args: Args{
 				Action:     GetObjectAction,
 				BucketName: "all-warehouse",
-				ObjectName: "all-uuid--table-aistor/extra/path/data.parquet",
+				ObjectName: "all-uuid/extra/path/data.parquet",
 			},
 			expectedResult: true,
 			description:    "s3tables:* should match with extra path segments discarded",
@@ -2455,7 +2455,7 @@ func TestS3TablesActionsWithImplicitMatching(t *testing.T) {
 			args: Args{
 				Action:     GetObjectAction,
 				BucketName: "wrong-warehouse",
-				ObjectName: "all-uuid--table-aistor",
+				ObjectName: "all-uuid",
 			},
 			expectedResult: false,
 			description:    "s3tables:* should not match when warehouse name is wrong",
@@ -2466,7 +2466,7 @@ func TestS3TablesActionsWithImplicitMatching(t *testing.T) {
 			args: Args{
 				Action:     PutObjectAction,
 				BucketName: "all-warehouse",
-				ObjectName: "wrong-uuid--table-aistor",
+				ObjectName: "wrong-uuid",
 			},
 			expectedResult: false,
 			description:    "s3tables:* should not match when table UUID is wrong",
