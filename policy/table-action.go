@@ -184,6 +184,21 @@ const (
 	// S3TablesUpdateTableAction is a MinIO extension for Iceberg-compatible table updates.
 	S3TablesUpdateTableAction = "s3tables:UpdateTable"
 
+	// S3TablesCreateViewAction is a MinIO extension for creating Iceberg views.
+	S3TablesCreateViewAction = "s3tables:CreateView"
+
+	// S3TablesDeleteViewAction is a MinIO extension for deleting Iceberg views.
+	S3TablesDeleteViewAction = "s3tables:DeleteView"
+
+	// S3TablesGetViewAction is a MinIO extension for retrieving Iceberg views.
+	S3TablesGetViewAction = "s3tables:GetView"
+
+	// S3TablesRenameViewAction is a MinIO extension for renaming Iceberg views.
+	S3TablesRenameViewAction = "s3tables:RenameView"
+
+	// S3TablesListViewsAction is a MinIO extension for listing Iceberg views.
+	S3TablesListViewsAction = "s3tables:ListViews"
+
 	// AllS3TablesActions - all Amazon S3 Tables actions
 	AllS3TablesActions = "s3tables:*"
 )
@@ -239,6 +254,11 @@ var SupportedTableActions = map[TableAction]struct{}{
 	S3TablesGetConfigAction:                              {},
 	S3TablesTableMetricsAction:                           {},
 	S3TablesUpdateTableAction:                            {},
+	S3TablesCreateViewAction:                             {},
+	S3TablesDeleteViewAction:                             {},
+	S3TablesGetViewAction:                                {},
+	S3TablesRenameViewAction:                             {},
+	S3TablesListViewsAction:                              {},
 	AllS3TablesActions:                                   {},
 }
 
@@ -256,6 +276,7 @@ func createTableActionConditionKeyMap() map[Action]condition.KeySet {
 
 	s3TablesNamespaceKey := condition.S3TablesNamespace.ToKey()
 	s3TablesTableNameKey := condition.S3TablesTableName.ToKey()
+	s3TablesViewNameKey := condition.S3TablesViewName.ToKey()
 	s3TablesKMSKeyKey := condition.S3TablesKMSKeyArn.ToKey()
 	s3TablesSSEAlgorithmKey := condition.S3TablesSSEAlgorithm.ToKey()
 
@@ -274,6 +295,7 @@ func createTableActionConditionKeyMap() map[Action]condition.KeySet {
 	tableActionConditionKeyMap[AllS3TablesActions] = withCommon(
 		s3TablesNamespaceKey,
 		s3TablesTableNameKey,
+		s3TablesViewNameKey,
 		s3TablesKMSKeyKey,
 		s3TablesSSEAlgorithmKey,
 	)
@@ -326,6 +348,11 @@ func createTableActionConditionKeyMap() map[Action]condition.KeySet {
 	tableActionConditionKeyMap[S3TablesGetConfigAction] = withCommon()
 	tableActionConditionKeyMap[S3TablesTableMetricsAction] = withCommon(s3TablesNamespaceKey, s3TablesTableNameKey)
 	tableActionConditionKeyMap[S3TablesUpdateTableAction] = withCommon(s3TablesNamespaceKey, s3TablesTableNameKey)
+	tableActionConditionKeyMap[S3TablesCreateViewAction] = withCommon(s3TablesNamespaceKey)
+	tableActionConditionKeyMap[S3TablesDeleteViewAction] = withCommon(s3TablesNamespaceKey, s3TablesViewNameKey)
+	tableActionConditionKeyMap[S3TablesGetViewAction] = withCommon(s3TablesNamespaceKey, s3TablesViewNameKey)
+	tableActionConditionKeyMap[S3TablesRenameViewAction] = withCommon(s3TablesNamespaceKey, s3TablesViewNameKey)
+	tableActionConditionKeyMap[S3TablesListViewsAction] = withCommon(s3TablesNamespaceKey)
 
 	return tableActionConditionKeyMap
 }
