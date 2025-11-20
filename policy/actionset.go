@@ -54,8 +54,8 @@ var implicitActions = map[Action]ActionSet{
 
 	// S3Tables actions implicitly allow their data actions
 	S3TablesGetTableDataAction: NewActionSet(GetObjectAction, ListMultipartUploadPartsAction),
-	S3TablesPutTableDataAction: NewActionSet(PutObjectAction, AbortMultipartUploadAction),
-	AllS3TablesActions:         NewActionSet(GetObjectAction, PutObjectAction, ListMultipartUploadPartsAction, AbortMultipartUploadAction),
+	S3TablesPutTableDataAction: NewActionSet(PutObjectAction, AbortMultipartUploadAction, ListBucketAction),
+	AllS3TablesActions:         NewActionSet(GetObjectAction, PutObjectAction, ListBucketAction, ListMultipartUploadPartsAction, AbortMultipartUploadAction),
 
 	// TableBucket actions implicitly allow their Warehouse counterparts
 	S3TablesCreateTableBucketAction:                      NewActionSet(S3TablesCreateWarehouseAction),
