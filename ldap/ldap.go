@@ -104,7 +104,18 @@ func (l *Config) connect(ldapAddr string) (ldapConn *ldap.Conn, err error) {
 	if ldapConn != nil {
 		ldapConn.SetTimeout(30 * time.Second) // Change default timeout to 30 seconds.
 		if l.ServerStartTLS {
-			err = ldapConn.StartTLS(l.TLS)
+			// we need to fix up the ServerName in the TLS config to match the
+			// host name to which we are actually connecting - this may be
+			// different from the originally configured host name if this
+			// ldapAddr was derived from an SRV lookup
+			var host string
+			host, _, err = net.SplitHostPort(ldapAddr)
+			if err != nil {
+				return nil, err
+			}
+			tlsConfig := l.TLS.Clone()
+			tlsConfig.ServerName = host
+			err = ldapConn.StartTLS(tlsConfig)
 		}
 	}
 

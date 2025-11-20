@@ -62,11 +62,9 @@ func (statement Statement) IsAllowedPtr(args *Args) bool {
 
 		if statement.isTable() && !TableAction(args.Action).IsValid() {
 			// must convert to table resource only for s3 actions on table resources
-
-			idx := strings.Index(args.ObjectName, AIStorTableTag)
+			idx := strings.IndexRune(args.ObjectName, '/')
 			if idx < 0 {
-				// table actions don't apply to non --aistor-table suffixed object names
-				return false
+				idx = len(args.ObjectName)
 			}
 			resource.WriteString("bucket/")
 			resource.WriteString(args.BucketName)
