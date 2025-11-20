@@ -59,27 +59,21 @@ func (statement Statement) IsAllowedPtr(args *Args) bool {
 		resource := smallBufPool.Get().(*bytes.Buffer)
 		defer smallBufPool.Put(resource)
 		resource.Reset()
-
-		if statement.isTable() && !TableAction(args.Action).IsValid() {
-			// must convert to table resource only for s3 actions on table resources
-			idx := strings.IndexRune(args.ObjectName, '/')
-			if idx < 0 {
-				idx = len(args.ObjectName)
-			}
-			resource.WriteString("bucket/")
-			resource.WriteString(args.BucketName)
-			resource.WriteString("/table/")
-			resource.WriteString(args.ObjectName[:idx])
-		} else {
-			resource.WriteString(args.BucketName)
-			if args.ObjectName != "" {
-				if !strings.HasPrefix(args.ObjectName, "/") {
-					resource.WriteByte('/')
-				}
-				resource.WriteString(args.ObjectName)
-			} else {
+		resource.WriteString(args.BucketName)
+		if args.ObjectName != "" {
+			if !strings.HasPrefix(args.ObjectName, "/") {
 				resource.WriteByte('/')
 			}
+			resource.WriteString(args.ObjectName)
+		} else {
+			resource.WriteByte('/')
+		}
+
+		if statement.isTable() &&
+			!TableAction(args.Action).IsValid() &&
+			!tableStringResourceRegexp.MatchString(resource.String()) {
+			// S3 calls for table actions should have table resource format
+			return false
 		}
 
 		if statement.isKMS() {

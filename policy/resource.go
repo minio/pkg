@@ -21,6 +21,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"path"
+	"regexp"
 	"strings"
 
 	"github.com/minio/pkg/v3/policy/condition"
@@ -295,3 +296,10 @@ func NewKMSResource(pattern string) Resource {
 		Type:    ResourceARNKMS,
 	}
 }
+
+// This regexp matches table/view resources of the form:
+//   bucket/<bucket-name>/table
+//   bucket/<bucket-name>/table/<table-uuid>
+//   bucket/<bucket-name>/view
+//   bucket/<bucket-name>/view/<view-uuid>
+var tableStringResourceRegexp = regexp.MustCompile(`^bucket/[^/]+/(?:table|view)(?:/[^/]*)?$`)
