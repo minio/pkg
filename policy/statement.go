@@ -69,11 +69,41 @@ func (statement Statement) IsAllowedPtr(args *Args) bool {
 			resource.WriteByte('/')
 		}
 
-		if statement.isTable() &&
-			!TableAction(args.Action).IsValid() &&
-			!tableStringResourceRegexp.MatchString(resource.String()) {
-			// S3 calls for table actions should have table resource format
-			return false
+		if statement.isTable() && !TableAction(args.Action).IsValid() {
+			// When a tables policy statement (for example
+			//   "Action":   ["s3tables:GetTableData"],
+			//   "Resource": ["arn:aws:s3tables:::bucket/wh/table/uuid"]
+			// ) is evaluated for a plain S3 data-path action such as
+			// GetObject on (BucketName "wh", ObjectName "uuid[/...]"), the
+			// action match succeeds via implicitActions. However, the
+			// resource string built from Args ("wh/uuid[/...]") does not
+			// look like a tables ARN suffix ("bucket/wh/table/uuid"), so a
+			// direct string match against the S3 Tables resource
+			// would fail. In this specific case we know:
+			//   - the statement is a tables statement,
+			//   - the incoming action is covered implicitly (not a table API),
+			//   - and the stored policy resource is S3 Tables style.
+			// To allow GetObject/ListMultipartUploadParts/etc. when
+			// s3tables:GetTableData (or similar) is granted, normalize the
+			// S3 data-path resource into the canonical tables form before
+			// running the usual resource match.
+			if !isTableResourceString(resource.String()) {
+				if args.BucketName == "" || args.ObjectName == "" {
+					return false
+				}
+				objectName := args.ObjectName
+				if idx := strings.IndexByte(objectName, '/'); idx >= 0 {
+					objectName = objectName[:idx]
+				}
+				resource.Reset()
+				resource.WriteString("bucket/")
+				resource.WriteString(args.BucketName)
+				resource.WriteString("/table/")
+				resource.WriteString(objectName)
+				if !isTableResourceString(resource.String()) {
+					return false
+				}
+			}
 		}
 
 		if statement.isKMS() {

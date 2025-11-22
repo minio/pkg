@@ -21,7 +21,6 @@ import (
 	"bytes"
 	"encoding/json"
 	"path"
-	"regexp"
 	"strings"
 
 	"github.com/minio/pkg/v3/policy/condition"
@@ -297,10 +296,22 @@ func NewKMSResource(pattern string) Resource {
 	}
 }
 
-// This regexp matches table/view resources of the form:
-//
-//	bucket/<bucket-name>/table
-//	bucket/<bucket-name>/table/<table-uuid>
-//	bucket/<bucket-name>/view
-//	bucket/<bucket-name>/view/<view-uuid>
-var tableStringResourceRegexp = regexp.MustCompile(`^bucket/[^/]+/(?:table|view)(?:/[^/]*)?$`)
+// isTableResourceString reports whether s has the form
+// bucket/<bucket-name>/(table|view)[/<id>].
+func isTableResourceString(s string) bool {
+	if !strings.HasPrefix(s, "bucket/") {
+		return false
+	}
+	rest := strings.TrimPrefix(s, "bucket/")
+	parts := strings.Split(rest, "/")
+	if len(parts) < 2 || len(parts) > 3 {
+		return false
+	}
+	if parts[0] == "" {
+		return false
+	}
+	if parts[1] != "table" && parts[1] != "view" {
+		return false
+	}
+	return true
+}
