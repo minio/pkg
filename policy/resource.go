@@ -295,3 +295,11 @@ func NewKMSResource(pattern string) Resource {
 		Type:    ResourceARNKMS,
 	}
 }
+
+// NewS3TablesResource - creates new resource with type S3 Tables
+func NewS3TablesResource(pattern string) Resource {
+	return Resource{
+		Pattern: pattern,
+		Type:    ResourceARNS3Tables,
+	}
+}
