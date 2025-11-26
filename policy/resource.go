@@ -296,6 +296,26 @@ func NewKMSResource(pattern string) Resource {
 	}
 }
 
+// isTableResourceString reports whether s has the form
+// bucket/<bucket-name>/(table|view)[/<id>].
+func isTableResourceString(s string) bool {
+	if !strings.HasPrefix(s, "bucket/") {
+		return false
+	}
+	rest := strings.TrimPrefix(s, "bucket/")
+	parts := strings.Split(rest, "/")
+	if len(parts) < 2 || len(parts) > 3 {
+		return false
+	}
+	if parts[0] == "" {
+		return false
+	}
+	if parts[1] != "table" && parts[1] != "view" {
+		return false
+	}
+	return true
+}
+
 // NewS3TablesResource - creates new resource with type S3 Tables
 func NewS3TablesResource(pattern string) Resource {
 	return Resource{

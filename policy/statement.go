@@ -59,26 +59,50 @@ func (statement Statement) IsAllowedPtr(args *Args) bool {
 		resource := smallBufPool.Get().(*bytes.Buffer)
 		defer smallBufPool.Put(resource)
 		resource.Reset()
+		resource.WriteString(args.BucketName)
+		if args.ObjectName != "" {
+			if !strings.HasPrefix(args.ObjectName, "/") {
+				resource.WriteByte('/')
+			}
+			resource.WriteString(args.ObjectName)
+		} else {
+			resource.WriteByte('/')
+		}
 
 		if statement.isTable() && !TableAction(args.Action).IsValid() {
-			// must convert to table resource only for s3 actions on table resources
-			idx := strings.IndexRune(args.ObjectName, '/')
-			if idx < 0 {
-				idx = len(args.ObjectName)
-			}
-			resource.WriteString("bucket/")
-			resource.WriteString(args.BucketName)
-			resource.WriteString("/table/")
-			resource.WriteString(args.ObjectName[:idx])
-		} else {
-			resource.WriteString(args.BucketName)
-			if args.ObjectName != "" {
-				if !strings.HasPrefix(args.ObjectName, "/") {
-					resource.WriteByte('/')
+			// When a tables policy statement (for example
+			//   "Action":   ["s3tables:GetTableData"],
+			//   "Resource": ["arn:aws:s3tables:::bucket/wh/table/uuid"]
+			// ) is evaluated for a plain S3 data-path action such as
+			// GetObject on (BucketName "wh", ObjectName "uuid[/...]"), the
+			// action match succeeds via implicitActions. However, the
+			// resource string built from Args ("wh/uuid[/...]") does not
+			// look like a tables ARN suffix ("bucket/wh/table/uuid"), so a
+			// direct string match against the S3 Tables resource
+			// would fail. In this specific case we know:
+			//   - the statement is a tables statement,
+			//   - the incoming action is covered implicitly (not a table API),
+			//   - and the stored policy resource is S3 Tables style.
+			// To allow GetObject/ListMultipartUploadParts/etc. when
+			// s3tables:GetTableData (or similar) is granted, normalize the
+			// S3 data-path resource into the canonical tables form before
+			// running the usual resource match.
+			if !isTableResourceString(resource.String()) {
+				if args.BucketName == "" || args.ObjectName == "" {
+					return false
 				}
-				resource.WriteString(args.ObjectName)
-			} else {
-				resource.WriteByte('/')
+				objectName := args.ObjectName
+				if idx := strings.IndexByte(objectName, '/'); idx >= 0 {
+					objectName = objectName[:idx]
+				}
+				resource.Reset()
+				resource.WriteString("bucket/")
+				resource.WriteString(args.BucketName)
+				resource.WriteString("/table/")
+				resource.WriteString(objectName)
+				if !isTableResourceString(resource.String()) {
+					return false
+				}
 			}
 		}
 

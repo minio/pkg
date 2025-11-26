@@ -217,6 +217,68 @@ func TestResourceUnmarshalJSON(t *testing.T) {
 	}
 }
 
+func TestIsTableResourceString(t *testing.T) {
+	tests := []struct {
+		name string
+		s    string
+		want bool
+	}{
+		{
+			name: "table without id",
+			s:    "bucket/warehouse/table",
+			want: true,
+		},
+		{
+			name: "table with id",
+			s:    "bucket/warehouse/table/uuid-123",
+			want: true,
+		},
+		{
+			name: "view without id",
+			s:    "bucket/warehouse/view",
+			want: true,
+		},
+		{
+			name: "view with id",
+			s:    "bucket/warehouse/view/view-uuid",
+			want: true,
+		},
+		{
+			name: "missing bucket name",
+			s:    "bucket//table/uuid",
+			want: false,
+		},
+		{
+			name: "wrong prefix",
+			s:    "wh/table/uuid",
+			want: false,
+		},
+		{
+			name: "not table or view kind",
+			s:    "bucket/warehouse/other/uuid",
+			want: false,
+		},
+		{
+			name: "too many segments",
+			s:    "bucket/wh/table/uuid/extra",
+			want: false,
+		},
+		{
+			name: "too few segments",
+			s:    "bucket/onlybucket",
+			want: false,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := isTableResourceString(tt.s); got != tt.want {
+				t.Fatalf("isTableResourceString(%q) = %v, want %v", tt.s, got, tt.want)
+			}
+		})
+	}
+}
+
 func TestResourceValidate(t *testing.T) {
 	testCases := []struct {
 		resource  Resource
