@@ -107,6 +107,23 @@ var DefaultPolicies = []struct {
 		},
 	},
 
+	// TablesAdmin - provides admin access to S3 Tables
+	{
+		Name: "tablesAdmin",
+		Definition: Policy{
+			Version: DefaultVersion,
+			Statements: []Statement{
+				{
+					SID:        ID(""),
+					Effect:     Allow,
+					Actions:    NewActionSet(AllS3TablesActions),
+					Resources:  NewResourceSet(NewS3TablesResource("*")),
+					Conditions: condition.NewFunctions(),
+				},
+			},
+		},
+	},
+
 	// Admin - provides admin all-access canned policy
 	{
 		Name: "consoleAdmin",
@@ -132,6 +149,13 @@ var DefaultPolicies = []struct {
 					Effect:     Allow,
 					Actions:    NewActionSet(AllActions),
 					Resources:  NewResourceSet(NewResource("*")),
+					Conditions: condition.NewFunctions(),
+				},
+				{
+					SID:        ID(""),
+					Effect:     Allow,
+					Actions:    NewActionSet(AllS3TablesActions),
+					Resources:  NewResourceSet(NewS3TablesResource("*")),
 					Conditions: condition.NewFunctions(),
 				},
 			},
