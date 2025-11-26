@@ -172,9 +172,6 @@ const (
 	// Prefer using S3TablesPutWarehousePolicyAction instead.
 	S3TablesPutTableBucketPolicyAction = "s3tables:PutTableBucketPolicy"
 
-	// S3TablesCommitMultiTableTransactionAction is a MinIO extension enabling multi-table transactions.
-	S3TablesCommitMultiTableTransactionAction = "s3tables:CommitMultiTableTransaction"
-
 	// S3TablesGetConfigAction is a MinIO extension for retrieving catalog configuration.
 	S3TablesGetConfigAction = "s3tables:GetConfig"
 
@@ -250,7 +247,6 @@ var SupportedTableActions = map[TableAction]struct{}{
 	S3TablesPutWarehouseEncryptionAction:                 {},
 	S3TablesPutWarehouseMaintenanceConfigurationAction:   {},
 	S3TablesPutWarehousePolicyAction:                     {},
-	S3TablesCommitMultiTableTransactionAction:            {},
 	S3TablesGetConfigAction:                              {},
 	S3TablesTableMetricsAction:                           {},
 	S3TablesUpdateTableAction:                            {},
@@ -344,7 +340,6 @@ func createTableActionConditionKeyMap() map[Action]condition.KeySet {
 	tableActionConditionKeyMap[S3TablesPutWarehouseEncryptionAction] = withCommon(s3TablesKMSKeyKey, s3TablesSSEAlgorithmKey)
 	tableActionConditionKeyMap[S3TablesPutWarehouseMaintenanceConfigurationAction] = withCommon()
 	tableActionConditionKeyMap[S3TablesPutWarehousePolicyAction] = withCommon()
-	tableActionConditionKeyMap[S3TablesCommitMultiTableTransactionAction] = withCommon(s3TablesNamespaceKey, s3TablesTableNameKey)
 	tableActionConditionKeyMap[S3TablesGetConfigAction] = withCommon()
 	tableActionConditionKeyMap[S3TablesTableMetricsAction] = withCommon(s3TablesNamespaceKey, s3TablesTableNameKey)
 	tableActionConditionKeyMap[S3TablesUpdateTableAction] = withCommon(s3TablesNamespaceKey, s3TablesTableNameKey)
