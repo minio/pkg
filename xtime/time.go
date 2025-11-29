@@ -22,7 +22,7 @@ import (
 	"time"
 
 	"github.com/tinylib/msgp/msgp"
-	"gopkg.in/yaml.v3"
+	"go.yaml.in/yaml/v3"
 )
 
 // Additional durations, a day is considered to be 24 hours
