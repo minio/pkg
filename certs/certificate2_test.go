@@ -128,6 +128,50 @@ func testCertificate2AutoReload(t *testing.T, symlink bool) {
 	}
 }
 
+func TestCertificate2_AutoReloadWithRename(t *testing.T) {
+	tmpDir := t.TempDir()
+	tmpCert := filepath.Join(tmpDir, "test.crt")
+	tmpKey := filepath.Join(tmpDir, "test.key")
+	tmpCert2 := filepath.Join(tmpDir, "test.crt~")
+	tmpKey2 := filepath.Join(tmpDir, "test.key~")
+
+	copyFile(t, "public.crt", tmpCert, false)
+	copyFile(t, "private.key", tmpKey, false)
+	copyFile(t, "new-public.crt", tmpCert2, false)
+	copyFile(t, "new-private.key", tmpKey2, false)
+
+	cert, err := NewCertificate2(tmpCert, tmpKey)
+	if err != nil {
+		t.Fatalf("Failed to create certificate: %v", err)
+	}
+	defer cert.Close()
+
+	originalCert := cert.Load()
+
+	updateCertWithWait(t, cert, false, func() {
+		if err := os.Rename(tmpCert2, tmpCert); err != nil {
+			t.Fatalf("Unable to rename %s to %s: %s", tmpCert2, tmpCert, err)
+		}
+		if err := os.Rename(tmpKey2, tmpKey); err != nil {
+			t.Fatalf("Unable to rename %s to %s: %s", tmpKey2, tmpKey, err)
+		}
+	})
+
+	newCert := cert.Load()
+	if reflect.DeepEqual(originalCert.Certificate, newCert.Certificate) {
+		t.Error("Certificate was not reloaded after file change")
+	}
+
+	expectedCert, err := tls.LoadX509KeyPair("new-public.crt", "new-private.key")
+	if err != nil {
+		t.Fatalf("Failed to load expected certificate: %v", err)
+	}
+
+	if !reflect.DeepEqual(newCert.Certificate, expectedCert.Certificate) {
+		t.Error("Reloaded certificate doesn't match expected certificate")
+	}
+}
+
 func TestCertificate2_AutoReloadCertFileOnly(t *testing.T) {
 	testCertificate2AutoReloadCertFileOnly(t, false)
 }
