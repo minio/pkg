@@ -289,6 +289,8 @@ var SupportedActions = map[Action]struct{}{
 	RestoreObjectAction:                    {},
 	ResetBucketReplicationStateAction:      {},
 	PutObjectFanOutAction:                  {},
+	PutInventoryConfigurationAction:        {},
+	GetInventoryConfigurationAction:        {},
 	CreateSessionAction:                    {},
 	AllActions:                             {},
 }
