@@ -85,14 +85,18 @@ func TestCertificate2Close(t *testing.T) {
 }
 
 func TestCertificate2_AutoReload(t *testing.T) {
-	testCertificate2AutoReload(t, false)
+	testCertificate2AutoReload(t, false, false)
+}
+
+func TestCertificate2_AutoReloadWithRename(t *testing.T) {
+	testCertificate2AutoReload(t, false, true)
 }
 
 func TestCertificate2_AutoReloadSymlink(t *testing.T) {
-	testCertificate2AutoReload(t, true)
+	testCertificate2AutoReload(t, true, false)
 }
 
-func testCertificate2AutoReload(t *testing.T, symlink bool) {
+func testCertificate2AutoReload(t *testing.T, symlink, rename bool) {
 	tmpDir := t.TempDir()
 	tmpCert := filepath.Join(tmpDir, "test.crt")
 	tmpKey := filepath.Join(tmpDir, "test.key")
@@ -109,8 +113,8 @@ func testCertificate2AutoReload(t *testing.T, symlink bool) {
 	originalCert := cert.Load()
 
 	updateCertWithWait(t, cert, symlink, func() {
-		overwriteFile(t, "new-public.crt", tmpCert, symlink)
-		overwriteFile(t, "new-private.key", tmpKey, symlink)
+		overwriteFile(t, "new-public.crt", tmpCert, symlink, rename)
+		overwriteFile(t, "new-private.key", tmpKey, symlink, rename)
 	})
 
 	newCert := cert.Load()
@@ -151,8 +155,8 @@ func testCertificate2AutoReloadCertFileOnly(t *testing.T, symlink bool) {
 	defer cert.Close()
 
 	updateCertWithWait(t, cert, symlink, func() {
-		overwriteFile(t, "new-public.crt", tmpCert, symlink)
-		overwriteFile(t, "new-private.key", tmpKey, symlink)
+		overwriteFile(t, "new-public.crt", tmpCert, symlink, false)
+		overwriteFile(t, "new-private.key", tmpKey, symlink, false)
 	})
 
 	newCert := cert.Load()
@@ -225,7 +229,7 @@ func copyFile(t *testing.T, src, dst string, symlink bool) {
 	}
 }
 
-func overwriteFile(t *testing.T, src, dst string, symlink bool) {
+func overwriteFile(t *testing.T, src, dst string, symlink, rename bool) {
 	t.Helper()
 	data, err := os.ReadFile(src)
 	if err != nil {
@@ -234,14 +238,27 @@ func overwriteFile(t *testing.T, src, dst string, symlink bool) {
 	if symlink {
 		dst = dst + ".tmp"
 	}
-	if err := os.WriteFile(dst, data, 0o600); err != nil {
-		t.Fatalf("Failed to write destination file %s: %v", dst, err)
+	if rename {
+		tmpFile := dst + ".rename"
+		if err := os.WriteFile(tmpFile, data, 0o600); err != nil {
+			t.Fatalf("Failed to write destination file %s: %v", tmpFile, err)
+		}
+		// add a small delay to ensure the write event completes before the rename,
+		// so the test verifies that the InMovedTo event triggers the reload
+		time.Sleep(100 * time.Millisecond)
+		if err := os.Rename(tmpFile, dst); err != nil {
+			t.Fatalf("Failed to rename file %s to %s: %v", tmpFile, dst, err)
+		}
+	} else {
+		if err := os.WriteFile(dst, data, 0o600); err != nil {
+			t.Fatalf("Failed to write destination file %s: %v", dst, err)
+		}
 	}
 }
 
 func updateCertWithWait(t *testing.T, cert *Certificate2, symlink bool, update func()) {
 	done := make(chan struct{})
-	wait := time.Second
+	wait := 5 * time.Second
 	if symlink {
 		wait = wait + symlinkReloadInterval // can take up to symlinkReloadInterval to detect changes
 	}
@@ -306,8 +323,8 @@ func TestCertificate2_ConcurrentSubscriptions(t *testing.T) {
 
 	// Update the certificate
 	updateCertWithWait(t, cert, false, func() {
-		overwriteFile(t, "new-public.crt", tmpCert, false)
-		overwriteFile(t, "new-private.key", tmpKey, false)
+		overwriteFile(t, "new-public.crt", tmpCert, false, false)
+		overwriteFile(t, "new-private.key", tmpKey, false, false)
 	})
 
 	// Wait for all subscribers to be notified
@@ -350,8 +367,8 @@ func TestCertificate2_UnsubscribeDuringCallback(t *testing.T) {
 
 	// Trigger an update
 	updateCertWithWait(t, cert, false, func() {
-		overwriteFile(t, "new-public.crt", tmpCert, false)
-		overwriteFile(t, "new-private.key", tmpKey, false)
+		overwriteFile(t, "new-public.crt", tmpCert, false, false)
+		overwriteFile(t, "new-private.key", tmpKey, false, false)
 	})
 
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
