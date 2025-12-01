@@ -6,7 +6,7 @@ toolchain go1.25.4
 
 require (
 	github.com/cheggaaa/pb v1.0.29
-	github.com/coreos/go-oidc/v3 v3.16.0
+	github.com/coreos/go-oidc/v3 v3.17.0
 	github.com/fatih/color v1.18.0
 	github.com/fatih/structs v1.1.0
 	github.com/go-ldap/ldap/v3 v3.4.12
@@ -21,10 +21,10 @@ require (
 	github.com/tinylib/msgp v1.5.0
 	github.com/zeebo/xxh3 v1.0.2
 	go.etcd.io/etcd/client/v3 v3.6.6
+	go.yaml.in/yaml/v3 v3.0.4
 	golang.org/x/crypto v0.45.0
 	golang.org/x/oauth2 v0.33.0
 	golang.org/x/sys v0.38.0
-	gopkg.in/yaml.v3 v3.0.1
 )
 
 require (
@@ -66,8 +66,8 @@ require (
 	go.uber.org/zap v1.27.1 // indirect
 	golang.org/x/net v0.47.0 // indirect
 	golang.org/x/text v0.31.0 // indirect
-	google.golang.org/genproto/googleapis/api v0.0.0-20251111163417-95abcf5c77ba // indirect
-	google.golang.org/genproto/googleapis/rpc v0.0.0-20251111163417-95abcf5c77ba // indirect
+	google.golang.org/genproto/googleapis/api v0.0.0-20251124214823-79d6a2a48846 // indirect
+	google.golang.org/genproto/googleapis/rpc v0.0.0-20251124214823-79d6a2a48846 // indirect
 	google.golang.org/grpc v1.77.0 // indirect
 	google.golang.org/protobuf v1.36.10 // indirect
 )
