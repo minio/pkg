@@ -315,3 +315,11 @@ func isTableResourceString(s string) bool {
 	}
 	return true
 }
+
+// NewS3TablesResource - creates new resource with type S3 Tables
+func NewS3TablesResource(pattern string) Resource {
+	return Resource{
+		Pattern: pattern,
+		Type:    ResourceARNS3Tables,
+	}
+}
