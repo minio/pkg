@@ -239,6 +239,28 @@ const (
 
 	// DriveInfoAction - allow drive specific summary and detail
 	DriveInfoAction = "admin:DriveInfo"
+
+	// Delta Sharing Actions
+
+	// DeltaSharingAdminAction - allow managing Delta Sharing shares and tokens
+	DeltaSharingAdminAction = "admin:DeltaSharing"
+	// DeltaSharingCreateShareAction - allow creating Delta Sharing shares
+	DeltaSharingCreateShareAction = "admin:DeltaSharingCreateShare"
+	// DeltaSharingDeleteShareAction - allow deleting Delta Sharing shares
+	DeltaSharingDeleteShareAction = "admin:DeltaSharingDeleteShare"
+	// DeltaSharingListSharesAction - allow listing Delta Sharing shares
+	DeltaSharingListSharesAction = "admin:DeltaSharingListShares"
+	// DeltaSharingGetShareAction - allow getting Delta Sharing share details
+	DeltaSharingGetShareAction = "admin:DeltaSharingGetShare"
+	// DeltaSharingUpdateShareAction - allow updating Delta Sharing shares
+	DeltaSharingUpdateShareAction = "admin:DeltaSharingUpdateShare"
+	// DeltaSharingCreateTokenAction - allow creating Delta Sharing tokens
+	DeltaSharingCreateTokenAction = "admin:DeltaSharingCreateToken"
+	// DeltaSharingDeleteTokenAction - allow deleting Delta Sharing tokens
+	DeltaSharingDeleteTokenAction = "admin:DeltaSharingDeleteToken"
+	// DeltaSharingListTokensAction - allow listing Delta Sharing tokens
+	DeltaSharingListTokensAction = "admin:DeltaSharingListTokens"
+
 	// AllAdminActions - provides all admin permissions
 	AllAdminActions = "admin:*"
 )
@@ -326,6 +348,16 @@ var SupportedAdminActions = map[AdminAction]struct{}{
 	DriveInfoAction:   {},
 
 	ServiceCordonAdminAction: {},
+
+	DeltaSharingAdminAction:       {},
+	DeltaSharingCreateShareAction: {},
+	DeltaSharingDeleteShareAction: {},
+	DeltaSharingListSharesAction:  {},
+	DeltaSharingGetShareAction:    {},
+	DeltaSharingUpdateShareAction: {},
+	DeltaSharingCreateTokenAction: {},
+	DeltaSharingDeleteTokenAction: {},
+	DeltaSharingListTokensAction:  {},
 
 	AllAdminActions: {},
 }
