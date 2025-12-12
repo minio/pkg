@@ -177,7 +177,7 @@ func TestToILMRule(t *testing.T) {
 			opts: LifecycleOptions{
 				ID:         "test-rule-2",
 				Status:     conv.Pointer(true),
-				ExpiryDate: conv.Pointer("2025-12-01"),
+				ExpiryDate: conv.Pointer("2100-12-01"),
 			},
 			wantErr: false,
 		},
