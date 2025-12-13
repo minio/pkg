@@ -24,6 +24,8 @@ linters:
         text: "SA1019: ldap.Dial(TLS)?"
       - path: sftp/sftp.go$
         text: "SA1019: ne.Temporary"
+      - path: net/.+\.go$
+        text: "var-naming: avoid package names that conflict with Go standard library package names"
     paths:
       - third_party$
       - builtin$
