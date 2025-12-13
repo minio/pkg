@@ -55,7 +55,14 @@ var implicitActions = map[Action]ActionSet{
 	// S3Tables actions implicitly allow their data actions
 	S3TablesGetTableDataAction: NewActionSet(GetObjectAction, ListMultipartUploadPartsAction),
 	S3TablesPutTableDataAction: NewActionSet(PutObjectAction, AbortMultipartUploadAction, ListBucketAction),
-	AllS3TablesActions:         NewActionSet(GetObjectAction, PutObjectAction, ListBucketAction, ListMultipartUploadPartsAction, AbortMultipartUploadAction),
+	// S3TablesDeleteTableAction implicitly allows DeleteObjectAction to support table purging.
+	// This is needed because Spark's DROP TABLE ... PURGE performs client-side deletes rather than
+	// using purgeRequested=true to let the catalog handle deletion. This workaround grants the
+	// necessary privilege until the issue is fixed in Spark/Iceberg upstream.
+	// See: https://github.com/apache/iceberg/issues/14743
+	//      https://github.com/apache/iceberg/issues/11023
+	S3TablesDeleteTableAction: NewActionSet(DeleteObjectAction),
+	AllS3TablesActions:        NewActionSet(GetObjectAction, PutObjectAction, DeleteObjectAction, ListBucketAction, ListMultipartUploadPartsAction, AbortMultipartUploadAction),
 
 	// TableBucket actions implicitly allow their Warehouse counterparts
 	S3TablesCreateTableBucketAction:                      NewActionSet(S3TablesCreateWarehouseAction),
