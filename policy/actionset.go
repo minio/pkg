@@ -215,6 +215,19 @@ func (actionSet ActionSet) ToTableSlice() []TableAction {
 	return actions
 }
 
+// ToVectorsSlice - returns slice of vectors actions from the action set.
+func (actionSet ActionSet) ToVectorsSlice() []VectorsAction {
+	if len(actionSet) == 0 {
+		return nil
+	}
+	actions := make([]VectorsAction, 0, len(actionSet))
+	for action := range actionSet {
+		actions = append(actions, VectorsAction(action))
+	}
+
+	return actions
+}
+
 // UnmarshalJSON - decodes JSON data to ActionSet.
 func (actionSet *ActionSet) UnmarshalJSON(data []byte) error {
 	var sset set.StringSet
@@ -265,6 +278,16 @@ func (actionSet ActionSet) ValidateTable() error {
 	for _, action := range actionSet.ToTableSlice() {
 		if !action.IsValid() {
 			return Errorf("unsupported table action '%v'", action)
+		}
+	}
+	return nil
+}
+
+// ValidateVectors checks if all actions are valid Vectors actions
+func (actionSet ActionSet) ValidateVectors() error {
+	for _, action := range actionSet.ToVectorsSlice() {
+		if !action.IsValid() {
+			return Errorf("unsupported vectors action '%v'", action)
 		}
 	}
 	return nil
