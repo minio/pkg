@@ -2487,3 +2487,232 @@ func TestS3TablesActionsWithImplicitMatching(t *testing.T) {
 		})
 	}
 }
+
+func TestPolicyParseS3VectorsExamples(t *testing.T) {
+	tests := []struct {
+		name              string
+		policyJSON        string
+		expectedActions   []Action
+		expectedResources []string
+	}{
+		{
+			name: "VectorBucketFullAccess",
+			policyJSON: `{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Action": [
+        "s3vectors:CreateVectorBucket",
+        "s3vectors:DeleteVectorBucket",
+        "s3vectors:GetVectorBucket",
+        "s3vectors:ListVectorBuckets"
+      ],
+      "Resource": "arn:aws:s3:::vectors-bucket/*"
+    }
+  ]
+}`,
+			expectedActions: []Action{
+				Action(S3VectorsCreateVectorBucketAction),
+				Action(S3VectorsDeleteVectorBucketAction),
+				Action(S3VectorsGetVectorBucketAction),
+				Action(S3VectorsListVectorBucketsAction),
+			},
+			expectedResources: []string{"arn:aws:s3:::vectors-bucket/*"},
+		},
+		{
+			name: "IndexOperations",
+			policyJSON: `{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Action": [
+        "s3vectors:CreateIndex",
+        "s3vectors:DeleteIndex",
+        "s3vectors:GetIndex",
+        "s3vectors:ListIndexes"
+      ],
+      "Resource": "arn:aws:s3:::vectors-bucket/*"
+    }
+  ]
+}`,
+			expectedActions: []Action{
+				Action(S3VectorsCreateIndexAction),
+				Action(S3VectorsDeleteIndexAction),
+				Action(S3VectorsGetIndexAction),
+				Action(S3VectorsListIndexesAction),
+			},
+			expectedResources: []string{"arn:aws:s3:::vectors-bucket/*"},
+		},
+		{
+			name: "VectorDataOperations",
+			policyJSON: `{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Action": [
+        "s3vectors:PutVectors",
+        "s3vectors:GetVectors",
+        "s3vectors:DeleteVectors",
+        "s3vectors:ListVectors",
+        "s3vectors:QueryVectors"
+      ],
+      "Resource": "arn:aws:s3:::vectors-bucket/*"
+    }
+  ]
+}`,
+			expectedActions: []Action{
+				Action(S3VectorsPutVectorsAction),
+				Action(S3VectorsGetVectorsAction),
+				Action(S3VectorsDeleteVectorsAction),
+				Action(S3VectorsListVectorsAction),
+				Action(S3VectorsQueryVectorsAction),
+			},
+			expectedResources: []string{"arn:aws:s3:::vectors-bucket/*"},
+		},
+		{
+			name: "AllVectorsActions",
+			policyJSON: `{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Action": "s3vectors:*",
+      "Resource": "arn:aws:s3:::vectors-bucket/*"
+    }
+  ]
+}`,
+			expectedActions:   []Action{Action(AllS3VectorsActions)},
+			expectedResources: []string{"arn:aws:s3:::vectors-bucket/*"},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			p, err := ParseConfig(strings.NewReader(tt.policyJSON))
+			if err != nil {
+				t.Fatalf("failed to parse policy: %v", err)
+			}
+
+			if len(p.Statements) != 1 {
+				t.Fatalf("expected 1 statement, got %d", len(p.Statements))
+			}
+
+			stmt := p.Statements[0]
+
+			// Check actions
+			if len(stmt.Actions) != len(tt.expectedActions) {
+				t.Errorf("expected %d actions, got %d", len(tt.expectedActions), len(stmt.Actions))
+			}
+			for _, expectedAction := range tt.expectedActions {
+				if !stmt.Actions.Contains(expectedAction) {
+					t.Errorf("expected action %v not found in statement", expectedAction)
+				}
+			}
+
+			// Check resources
+			if len(stmt.Resources) != len(tt.expectedResources) {
+				t.Errorf("expected %d resources, got %d", len(tt.expectedResources), len(stmt.Resources))
+			}
+			for _, expectedResource := range tt.expectedResources {
+				found := false
+				for r := range stmt.Resources {
+					if r.String() == expectedResource {
+						found = true
+						break
+					}
+				}
+				if !found {
+					t.Errorf("expected resource %v not found in statement", expectedResource)
+				}
+			}
+		})
+	}
+}
+
+func TestS3VectorsActionsAllowed(t *testing.T) {
+	policyJSON := `{
+		"Version": "2012-10-17",
+		"Statement": [
+			{
+				"Effect": "Allow",
+				"Action": ["s3vectors:*"],
+				"Resource": ["arn:aws:s3:::vectors-bucket/*"]
+			}
+		]
+	}`
+
+	testCases := []struct {
+		name           string
+		args           Args
+		expectedResult bool
+		description    string
+	}{
+		{
+			name: "CreateVectorBucket allowed",
+			args: Args{
+				Action:     Action(S3VectorsCreateVectorBucketAction),
+				BucketName: "vectors-bucket",
+				ObjectName: "my-vector-bucket",
+			},
+			expectedResult: true,
+			description:    "CreateVectorBucket should be allowed with s3vectors:*",
+		},
+		{
+			name: "ListIndexes allowed",
+			args: Args{
+				Action:     Action(S3VectorsListIndexesAction),
+				BucketName: "vectors-bucket",
+				ObjectName: "my-vector-bucket/indexes",
+			},
+			expectedResult: true,
+			description:    "ListIndexes should be allowed with s3vectors:*",
+		},
+		{
+			name: "PutVectors allowed",
+			args: Args{
+				Action:     Action(S3VectorsPutVectorsAction),
+				BucketName: "vectors-bucket",
+				ObjectName: "my-vector-bucket/index/my-index",
+			},
+			expectedResult: true,
+			description:    "PutVectors should be allowed with s3vectors:*",
+		},
+		{
+			name: "QueryVectors allowed",
+			args: Args{
+				Action:     Action(S3VectorsQueryVectorsAction),
+				BucketName: "vectors-bucket",
+				ObjectName: "my-vector-bucket/index/my-index",
+			},
+			expectedResult: true,
+			description:    "QueryVectors should be allowed with s3vectors:*",
+		},
+		{
+			name: "Wrong bucket not allowed",
+			args: Args{
+				Action:     Action(S3VectorsCreateVectorBucketAction),
+				BucketName: "wrong-bucket",
+				ObjectName: "my-vector-bucket",
+			},
+			expectedResult: false,
+			description:    "CreateVectorBucket should not be allowed on wrong bucket",
+		},
+	}
+
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			p, err := ParseConfig(strings.NewReader(policyJSON))
+			if err != nil {
+				t.Fatalf("failed to parse policy: %v", err)
+			}
+
+			result := p.IsAllowed(tc.args)
+			if result != tc.expectedResult {
+				t.Errorf("%s: expected %v, got %v", tc.description, tc.expectedResult, result)
+			}
+		})
+	}
+}

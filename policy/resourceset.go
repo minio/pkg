@@ -192,6 +192,21 @@ func (resourceSet ResourceSet) ValidateTable() error {
 	return nil
 }
 
+// ValidateVectors - validates ResourceSet for S3 Vectors.
+// S3 Vectors uses S3 ARN format for resources (e.g., arn:aws:s3:::vectors-bucket/*).
+func (resourceSet ResourceSet) ValidateVectors() error {
+	for resource := range resourceSet {
+		if !resource.isS3() {
+			return Errorf("resource '%v' type is not S3", resource)
+		}
+		if err := resource.Validate(); err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
 // ValidateBucket - validates ResourceSet is for given bucket or not.
 func (resourceSet ResourceSet) ValidateBucket(bucketName string) error {
 	for resource := range resourceSet {
