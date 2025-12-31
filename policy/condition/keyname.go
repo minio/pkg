@@ -74,6 +74,9 @@ const (
 	// S3TablesViewName filters access by the S3 Tables view name within a namespace.
 	S3TablesViewName KeyName = "s3tables:viewName"
 
+	// S3TablesRegisterLocation filters access by the metadata location for table registration.
+	S3TablesRegisterLocation KeyName = "s3tables:registerLocation"
+
 	// S3XAmzCopySource - key representing x-amz-copy-source HTTP header applicable to PutObject API only.
 	S3XAmzCopySource KeyName = "s3:x-amz-copy-source"
 
@@ -289,6 +292,7 @@ var AllSupportedKeys = []KeyName{
 	S3TablesNamespace,
 	S3TablesTableName,
 	S3TablesViewName,
+	S3TablesRegisterLocation,
 	AWSReferer,
 	AWSSourceIP,
 	AWSUserAgent,

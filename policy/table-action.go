@@ -82,6 +82,9 @@ const (
 	// S3TablesPutTablePolicyAction maps to the AWS `PutTablePolicy` S3 Tables action.
 	S3TablesPutTablePolicyAction = "s3tables:PutTablePolicy"
 
+	// S3TablesRegisterTableAction maps to the AWS `RegisterTable` S3 Tables action.
+	S3TablesRegisterTableAction = "s3tables:RegisterTable"
+
 	// S3TablesRenameTableAction maps to the AWS `RenameTable` S3 Tables action.
 	S3TablesRenameTableAction = "s3tables:RenameTable"
 
@@ -239,6 +242,7 @@ var SupportedTableActions = map[TableAction]struct{}{
 	S3TablesPutTableEncryptionAction:                     {},
 	S3TablesPutTableMaintenanceConfigurationAction:       {},
 	S3TablesPutTablePolicyAction:                         {},
+	S3TablesRegisterTableAction:                          {},
 	S3TablesRenameTableAction:                            {},
 	S3TablesUpdateTableMetadataLocationAction:            {},
 	S3TablesCreateWarehouseAction:                        {},
@@ -283,6 +287,7 @@ func createTableActionConditionKeyMap() map[Action]condition.KeySet {
 	s3TablesViewNameKey := condition.S3TablesViewName.ToKey()
 	s3TablesKMSKeyKey := condition.S3TablesKMSKeyArn.ToKey()
 	s3TablesSSEAlgorithmKey := condition.S3TablesSSEAlgorithm.ToKey()
+	s3TablesRegisterLocationKey := condition.S3TablesRegisterLocation.ToKey()
 
 	withCommon := func(keys ...condition.Key) condition.KeySet {
 		merged := append([]condition.Key{}, commonKeys...)
@@ -302,6 +307,7 @@ func createTableActionConditionKeyMap() map[Action]condition.KeySet {
 		s3TablesViewNameKey,
 		s3TablesKMSKeyKey,
 		s3TablesSSEAlgorithmKey,
+		s3TablesRegisterLocationKey,
 	)
 	tableActionConditionKeyMap[S3TablesCreateNamespaceAction] = withCommon()
 	tableActionConditionKeyMap[S3TablesCreateTableAction] = withCommon(s3TablesNamespaceKey, s3TablesKMSKeyKey, s3TablesSSEAlgorithmKey)
@@ -334,6 +340,7 @@ func createTableActionConditionKeyMap() map[Action]condition.KeySet {
 	tableActionConditionKeyMap[S3TablesPutTableEncryptionAction] = withCommon(s3TablesNamespaceKey, s3TablesKMSKeyKey, s3TablesSSEAlgorithmKey)
 	tableActionConditionKeyMap[S3TablesPutTableMaintenanceConfigurationAction] = withCommon(s3TablesNamespaceKey, s3TablesTableNameKey)
 	tableActionConditionKeyMap[S3TablesPutTablePolicyAction] = withCommon(s3TablesNamespaceKey, s3TablesTableNameKey)
+	tableActionConditionKeyMap[S3TablesRegisterTableAction] = withCommon(s3TablesNamespaceKey, s3TablesTableNameKey, s3TablesRegisterLocationKey)
 	tableActionConditionKeyMap[S3TablesRenameTableAction] = withCommon(s3TablesNamespaceKey, s3TablesTableNameKey)
 	tableActionConditionKeyMap[S3TablesUpdateTableMetadataLocationAction] = withCommon(s3TablesNamespaceKey, s3TablesTableNameKey)
 	tableActionConditionKeyMap[S3TablesCreateWarehouseAction] = withCommon(s3TablesKMSKeyKey, s3TablesSSEAlgorithmKey)
