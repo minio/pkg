@@ -303,8 +303,8 @@ func createTableActionConditionKeyMap() map[Action]condition.KeySet {
 		s3TablesKMSKeyKey,
 		s3TablesSSEAlgorithmKey,
 	)
-	tableActionConditionKeyMap[S3TablesCreateNamespaceAction] = withCommon()
-	tableActionConditionKeyMap[S3TablesCreateTableAction] = withCommon(s3TablesNamespaceKey, s3TablesKMSKeyKey, s3TablesSSEAlgorithmKey)
+	tableActionConditionKeyMap[S3TablesCreateNamespaceAction] = withCommon(s3TablesNamespaceKey)
+	tableActionConditionKeyMap[S3TablesCreateTableAction] = withCommon(s3TablesNamespaceKey, s3TablesTableNameKey, s3TablesKMSKeyKey, s3TablesSSEAlgorithmKey)
 	tableActionConditionKeyMap[S3TablesCreateTableBucketAction] = withCommon(s3TablesKMSKeyKey, s3TablesSSEAlgorithmKey)
 	tableActionConditionKeyMap[S3TablesDeleteNamespaceAction] = withCommon(s3TablesNamespaceKey)
 	tableActionConditionKeyMap[S3TablesDeleteTableAction] = withCommon(s3TablesNamespaceKey, s3TablesTableNameKey)
@@ -331,7 +331,7 @@ func createTableActionConditionKeyMap() map[Action]condition.KeySet {
 	tableActionConditionKeyMap[S3TablesPutTableBucketMaintenanceConfigurationAction] = withCommon()
 	tableActionConditionKeyMap[S3TablesPutTableBucketPolicyAction] = withCommon()
 	tableActionConditionKeyMap[S3TablesPutTableDataAction] = withCommon(s3TablesNamespaceKey, s3TablesTableNameKey)
-	tableActionConditionKeyMap[S3TablesPutTableEncryptionAction] = withCommon(s3TablesNamespaceKey, s3TablesKMSKeyKey, s3TablesSSEAlgorithmKey)
+	tableActionConditionKeyMap[S3TablesPutTableEncryptionAction] = withCommon(s3TablesNamespaceKey, s3TablesTableNameKey, s3TablesKMSKeyKey, s3TablesSSEAlgorithmKey)
 	tableActionConditionKeyMap[S3TablesPutTableMaintenanceConfigurationAction] = withCommon(s3TablesNamespaceKey, s3TablesTableNameKey)
 	tableActionConditionKeyMap[S3TablesPutTablePolicyAction] = withCommon(s3TablesNamespaceKey, s3TablesTableNameKey)
 	tableActionConditionKeyMap[S3TablesRenameTableAction] = withCommon(s3TablesNamespaceKey, s3TablesTableNameKey)
@@ -351,7 +351,7 @@ func createTableActionConditionKeyMap() map[Action]condition.KeySet {
 	tableActionConditionKeyMap[S3TablesGetConfigAction] = withCommon()
 	tableActionConditionKeyMap[S3TablesTableMetricsAction] = withCommon(s3TablesNamespaceKey, s3TablesTableNameKey)
 	tableActionConditionKeyMap[S3TablesUpdateTableAction] = withCommon(s3TablesNamespaceKey, s3TablesTableNameKey)
-	tableActionConditionKeyMap[S3TablesCreateViewAction] = withCommon(s3TablesNamespaceKey)
+	tableActionConditionKeyMap[S3TablesCreateViewAction] = withCommon(s3TablesNamespaceKey, s3TablesViewNameKey)
 	tableActionConditionKeyMap[S3TablesDeleteViewAction] = withCommon(s3TablesNamespaceKey, s3TablesViewNameKey)
 	tableActionConditionKeyMap[S3TablesGetViewAction] = withCommon(s3TablesNamespaceKey, s3TablesViewNameKey)
 	tableActionConditionKeyMap[S3TablesRenameViewAction] = withCommon(s3TablesNamespaceKey, s3TablesViewNameKey)
