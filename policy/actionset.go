@@ -55,7 +55,14 @@ var implicitActions = map[Action]ActionSet{
 	// S3Tables actions implicitly allow their data actions
 	S3TablesGetTableDataAction: NewActionSet(GetObjectAction, ListMultipartUploadPartsAction),
 	S3TablesPutTableDataAction: NewActionSet(PutObjectAction, AbortMultipartUploadAction, ListBucketAction),
-	AllS3TablesActions:         NewActionSet(GetObjectAction, PutObjectAction, ListBucketAction, ListMultipartUploadPartsAction, AbortMultipartUploadAction),
+	// S3TablesDeleteTableAction implicitly allows DeleteObjectAction to support table purging.
+	// This is needed because Spark's DROP TABLE ... PURGE performs client-side deletes rather than
+	// using purgeRequested=true to let the catalog handle deletion. This workaround grants the
+	// necessary privilege until the issue is fixed in Spark/Iceberg upstream.
+	// See: https://github.com/apache/iceberg/issues/14743
+	//      https://github.com/apache/iceberg/issues/11023
+	S3TablesDeleteTableAction: NewActionSet(DeleteObjectAction),
+	AllS3TablesActions:        NewActionSet(GetObjectAction, PutObjectAction, DeleteObjectAction, ListBucketAction, ListMultipartUploadPartsAction, AbortMultipartUploadAction),
 
 	// TableBucket actions implicitly allow their Warehouse counterparts
 	S3TablesCreateTableBucketAction:                      NewActionSet(S3TablesCreateWarehouseAction),
@@ -208,6 +215,19 @@ func (actionSet ActionSet) ToTableSlice() []TableAction {
 	return actions
 }
 
+// ToVectorsSlice - returns slice of vectors actions from the action set.
+func (actionSet ActionSet) ToVectorsSlice() []VectorsAction {
+	if len(actionSet) == 0 {
+		return nil
+	}
+	actions := make([]VectorsAction, 0, len(actionSet))
+	for action := range actionSet {
+		actions = append(actions, VectorsAction(action))
+	}
+
+	return actions
+}
+
 // UnmarshalJSON - decodes JSON data to ActionSet.
 func (actionSet *ActionSet) UnmarshalJSON(data []byte) error {
 	var sset set.StringSet
@@ -258,6 +278,16 @@ func (actionSet ActionSet) ValidateTable() error {
 	for _, action := range actionSet.ToTableSlice() {
 		if !action.IsValid() {
 			return Errorf("unsupported table action '%v'", action)
+		}
+	}
+	return nil
+}
+
+// ValidateVectors checks if all actions are valid Vectors actions
+func (actionSet ActionSet) ValidateVectors() error {
+	for _, action := range actionSet.ToVectorsSlice() {
+		if !action.IsValid() {
+			return Errorf("unsupported vectors action '%v'", action)
 		}
 	}
 	return nil

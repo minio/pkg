@@ -19,6 +19,7 @@ package policy
 
 import (
 	"github.com/minio/pkg/v3/policy/condition"
+	"github.com/minio/pkg/v3/wildcard"
 )
 
 // AdminAction - admin policy action.
@@ -239,6 +240,28 @@ const (
 
 	// DriveInfoAction - allow drive specific summary and detail
 	DriveInfoAction = "admin:DriveInfo"
+
+	// Delta Sharing Actions
+
+	// DeltaSharingAdminAction - allow managing Delta Sharing shares and tokens
+	DeltaSharingAdminAction = "admin:DeltaSharing"
+	// DeltaSharingCreateShareAction - allow creating Delta Sharing shares
+	DeltaSharingCreateShareAction = "admin:DeltaSharingCreateShare"
+	// DeltaSharingDeleteShareAction - allow deleting Delta Sharing shares
+	DeltaSharingDeleteShareAction = "admin:DeltaSharingDeleteShare"
+	// DeltaSharingListSharesAction - allow listing Delta Sharing shares
+	DeltaSharingListSharesAction = "admin:DeltaSharingListShares"
+	// DeltaSharingGetShareAction - allow getting Delta Sharing share details
+	DeltaSharingGetShareAction = "admin:DeltaSharingGetShare"
+	// DeltaSharingUpdateShareAction - allow updating Delta Sharing shares
+	DeltaSharingUpdateShareAction = "admin:DeltaSharingUpdateShare"
+	// DeltaSharingCreateTokenAction - allow creating Delta Sharing tokens
+	DeltaSharingCreateTokenAction = "admin:DeltaSharingCreateToken"
+	// DeltaSharingDeleteTokenAction - allow deleting Delta Sharing tokens
+	DeltaSharingDeleteTokenAction = "admin:DeltaSharingDeleteToken"
+	// DeltaSharingListTokensAction - allow listing Delta Sharing tokens
+	DeltaSharingListTokensAction = "admin:DeltaSharingListTokens"
+
 	// AllAdminActions - provides all admin permissions
 	AllAdminActions = "admin:*"
 )
@@ -327,13 +350,32 @@ var SupportedAdminActions = map[AdminAction]struct{}{
 
 	ServiceCordonAdminAction: {},
 
+	DeltaSharingAdminAction:       {},
+	DeltaSharingCreateShareAction: {},
+	DeltaSharingDeleteShareAction: {},
+	DeltaSharingListSharesAction:  {},
+	DeltaSharingGetShareAction:    {},
+	DeltaSharingUpdateShareAction: {},
+	DeltaSharingCreateTokenAction: {},
+	DeltaSharingDeleteTokenAction: {},
+	DeltaSharingListTokensAction:  {},
+
 	AllAdminActions: {},
+}
+
+// Match - matches action name with action pattern.
+func (action AdminAction) Match(a AdminAction) bool {
+	return wildcard.Match(string(action), string(a))
 }
 
 // IsValid - checks if action is valid or not.
 func (action AdminAction) IsValid() bool {
-	_, ok := SupportedAdminActions[action]
-	return ok
+	for supAction := range SupportedAdminActions {
+		if action.Match(supAction) {
+			return true
+		}
+	}
+	return false
 }
 
 func createAdminActionConditionKeyMap() map[Action]condition.KeySet {
