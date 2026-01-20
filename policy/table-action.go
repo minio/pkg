@@ -202,6 +202,9 @@ const (
 	// S3TablesListViewsAction is a MinIO extension for listing Iceberg views.
 	S3TablesListViewsAction = "s3tables:ListViews"
 
+	// S3TablesRegisterViewAction is a MinIO extension for registering Iceberg views.
+	S3TablesRegisterViewAction = "s3tables:RegisterView"
+
 	// S3TablesUpdateNamespacePropertiesAction is a MinIO extension for updating namespace properties.
 	S3TablesUpdateNamespacePropertiesAction = "s3tables:UpdateNamespaceProperties"
 
@@ -266,6 +269,7 @@ var SupportedTableActions = map[TableAction]struct{}{
 	S3TablesRenameViewAction:                             {},
 	S3TablesUpdateViewAction:                             {},
 	S3TablesListViewsAction:                              {},
+	S3TablesRegisterViewAction:                           {},
 	S3TablesUpdateNamespacePropertiesAction:              {},
 	AllS3TablesActions:                                   {},
 }
@@ -363,6 +367,7 @@ func createTableActionConditionKeyMap() map[Action]condition.KeySet {
 	tableActionConditionKeyMap[S3TablesGetViewAction] = withCommon(s3TablesNamespaceKey, s3TablesViewNameKey)
 	tableActionConditionKeyMap[S3TablesRenameViewAction] = withCommon(s3TablesNamespaceKey, s3TablesViewNameKey)
 	tableActionConditionKeyMap[S3TablesUpdateViewAction] = withCommon(s3TablesNamespaceKey, s3TablesViewNameKey)
+	tableActionConditionKeyMap[S3TablesRegisterViewAction] = withCommon(s3TablesNamespaceKey, s3TablesViewNameKey, s3TablesRegisterLocationKey)
 	tableActionConditionKeyMap[S3TablesListViewsAction] = withCommon(s3TablesNamespaceKey)
 	tableActionConditionKeyMap[S3TablesUpdateNamespacePropertiesAction] = withCommon(s3TablesNamespaceKey)
 
