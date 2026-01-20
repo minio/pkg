@@ -19,6 +19,7 @@ package policy
 
 import (
 	"github.com/minio/pkg/v3/policy/condition"
+	"github.com/minio/pkg/v3/wildcard"
 )
 
 // AdminAction - admin policy action.
@@ -362,10 +363,19 @@ var SupportedAdminActions = map[AdminAction]struct{}{
 	AllAdminActions: {},
 }
 
+// Match - matches action name with action pattern.
+func (action AdminAction) Match(a AdminAction) bool {
+	return wildcard.Match(string(action), string(a))
+}
+
 // IsValid - checks if action is valid or not.
 func (action AdminAction) IsValid() bool {
-	_, ok := SupportedAdminActions[action]
-	return ok
+	for supAction := range SupportedAdminActions {
+		if action.Match(supAction) {
+			return true
+		}
+	}
+	return false
 }
 
 func createAdminActionConditionKeyMap() map[Action]condition.KeySet {
