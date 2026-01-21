@@ -334,7 +334,7 @@ func createTableActionConditionKeyMap() map[Action]condition.KeySet {
 	tableActionConditionKeyMap[S3TablesGetTableMaintenanceJobStatusAction] = withCommon(s3TablesNamespaceKey, s3TablesTableNameKey)
 	tableActionConditionKeyMap[S3TablesGetTableMetadataLocationAction] = withCommon(s3TablesNamespaceKey, s3TablesTableNameKey)
 	tableActionConditionKeyMap[S3TablesGetTablePolicyAction] = withCommon(s3TablesNamespaceKey, s3TablesTableNameKey)
-	tableActionConditionKeyMap[S3TablesListNamespacesAction] = withCommon()
+	tableActionConditionKeyMap[S3TablesListNamespacesAction] = withCommon(s3TablesNamespaceKey)
 	tableActionConditionKeyMap[S3TablesListTableBucketsAction] = withCommon()
 	tableActionConditionKeyMap[S3TablesListTablesAction] = withCommon(s3TablesNamespaceKey)
 	tableActionConditionKeyMap[S3TablesPutTableBucketEncryptionAction] = withCommon(s3TablesKMSKeyKey, s3TablesSSEAlgorithmKey)
