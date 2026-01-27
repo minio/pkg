@@ -93,6 +93,8 @@ const (
 	DisableUserAdminAction = "admin:DisableUser"
 	// GetUserAdminAction - allows GET permission on user info
 	GetUserAdminAction = "admin:GetUser"
+	// ChangeMyPasswordAdminAction - allow changing own password
+	ChangeMyPasswordAdminAction = "admin:ChangeMyPassword"
 
 	// Cluster Replicate Actions
 
@@ -294,6 +296,7 @@ var SupportedAdminActions = map[AdminAction]struct{}{
 	EnableUserAdminAction:            {},
 	DisableUserAdminAction:           {},
 	GetUserAdminAction:               {},
+	ChangeMyPasswordAdminAction:      {},
 	AddUserToGroupAdminAction:        {},
 	RemoveUserFromGroupAdminAction:   {},
 	GetGroupAdminAction:              {},
