@@ -537,6 +537,14 @@ func createActionConditionKeyMap() ActionConditionKeyMap {
 				condition.ExistingObjectTag.ToKey(),
 			}, commonKeys...)...),
 
+		UpdateObjectEncryptionAction: condition.NewKeySet(
+			append([]condition.Key{
+				condition.S3XAmzServerSideEncryption.ToKey(),
+				condition.S3XAmzServerSideEncryptionCustomerAlgorithm.ToKey(),
+				condition.S3XAmzServerSideEncryptionAwsKmsKeyID.ToKey(),
+				condition.S3VersionID.ToKey(),
+			}, commonKeys...)...),
+
 		PutObjectVersionTaggingAction: condition.NewKeySet(
 			append([]condition.Key{
 				condition.S3VersionID.ToKey(),
