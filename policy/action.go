@@ -175,6 +175,9 @@ const (
 	// DeleteObjectTaggingAction - Delete Object Tags API action
 	DeleteObjectTaggingAction = "s3:DeleteObjectTagging"
 
+	// UpdateObjectEncryptionAction - UpdateObjectEncryption REST API action
+	UpdateObjectEncryptionAction = "s3:UpdateObjectEncryption"
+
 	// PutBucketEncryptionAction - PutBucketEncryption REST API action
 	PutBucketEncryptionAction = "s3:PutEncryptionConfiguration"
 
@@ -276,6 +279,7 @@ var SupportedActions = map[Action]struct{}{
 	GetObjectTaggingAction:                 {},
 	PutObjectTaggingAction:                 {},
 	DeleteObjectTaggingAction:              {},
+	UpdateObjectEncryptionAction:           {},
 	PutBucketEncryptionAction:              {},
 	GetBucketEncryptionAction:              {},
 	PutBucketVersioningAction:              {},
@@ -311,6 +315,7 @@ var SupportedObjectActions = map[Action]struct{}{
 	GetObjectTaggingAction:               {},
 	PutObjectTaggingAction:               {},
 	DeleteObjectTaggingAction:            {},
+	UpdateObjectEncryptionAction:         {},
 	GetObjectVersionAction:               {},
 	GetObjectVersionTaggingAction:        {},
 	DeleteObjectVersionAction:            {},
