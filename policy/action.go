@@ -175,6 +175,9 @@ const (
 	// DeleteObjectTaggingAction - Delete Object Tags API action
 	DeleteObjectTaggingAction = "s3:DeleteObjectTagging"
 
+	// UpdateObjectEncryptionAction - UpdateObjectEncryption REST API action
+	UpdateObjectEncryptionAction = "s3:UpdateObjectEncryption"
+
 	// PutBucketEncryptionAction - PutBucketEncryption REST API action
 	PutBucketEncryptionAction = "s3:PutEncryptionConfiguration"
 
@@ -276,6 +279,7 @@ var SupportedActions = map[Action]struct{}{
 	GetObjectTaggingAction:                 {},
 	PutObjectTaggingAction:                 {},
 	DeleteObjectTaggingAction:              {},
+	UpdateObjectEncryptionAction:           {},
 	PutBucketEncryptionAction:              {},
 	GetBucketEncryptionAction:              {},
 	PutBucketVersioningAction:              {},
@@ -311,6 +315,7 @@ var SupportedObjectActions = map[Action]struct{}{
 	GetObjectTaggingAction:               {},
 	PutObjectTaggingAction:               {},
 	DeleteObjectTaggingAction:            {},
+	UpdateObjectEncryptionAction:         {},
 	GetObjectVersionAction:               {},
 	GetObjectVersionTaggingAction:        {},
 	DeleteObjectVersionAction:            {},
@@ -530,6 +535,14 @@ func createActionConditionKeyMap() ActionConditionKeyMap {
 			append([]condition.Key{
 				condition.S3VersionID.ToKey(),
 				condition.ExistingObjectTag.ToKey(),
+			}, commonKeys...)...),
+
+		UpdateObjectEncryptionAction: condition.NewKeySet(
+			append([]condition.Key{
+				condition.S3XAmzServerSideEncryption.ToKey(),
+				condition.S3XAmzServerSideEncryptionCustomerAlgorithm.ToKey(),
+				condition.S3XAmzServerSideEncryptionAwsKmsKeyID.ToKey(),
+				condition.S3VersionID.ToKey(),
 			}, commonKeys...)...),
 
 		PutObjectVersionTaggingAction: condition.NewKeySet(
