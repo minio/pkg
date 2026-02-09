@@ -52,10 +52,18 @@ const (
 	TraceAdminAction = "admin:ServerTrace"
 	// ConsoleLogAdminAction - allow listing console logs on terminal
 	ConsoleLogAdminAction = "admin:ConsoleLog"
+	// KMSEnableAdminAction - allow enabling the builtin KMS
+	KMSEnableAdminAction = "admin:KMSEnable"
+	// KMSBackupAdminAction - allow backing up builtin KMS keys
+	KMSBackupAdminAction = "admin:KMSBackup"
+	// KMSRestoreAdminAction - allow restoring builtin KMS keys
+	KMSRestoreAdminAction = "admin:KMSRestore"
 	// KMSCreateKeyAdminAction - allow creating a new KMS master key
 	KMSCreateKeyAdminAction = "admin:KMSCreateKey"
 	// KMSKeyStatusAdminAction - allow getting KMS key status
 	KMSKeyStatusAdminAction = "admin:KMSKeyStatus"
+	// KMSKeyRotateAdminAction - allow rotating KMS keys
+	KMSKeyRotateAdminAction = "admin:KMSKeyRotate"
 	// ServerInfoAdminAction - allow listing server info
 	ServerInfoAdminAction = "admin:ServerInfo"
 	// HealthInfoAdminAction - allow obtaining cluster health information
