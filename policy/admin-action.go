@@ -343,10 +343,13 @@ var SupportedAdminActions = map[AdminAction]struct{}{
 	ExportIAMAction:            {},
 	ImportIAMAction:            {},
 
+	ForceUnlockAdminAction: {},
+
 	ListBatchJobsAction:    {},
 	DescribeBatchJobAction: {},
 	StartBatchJobAction:    {},
 	CancelBatchJobAction:   {},
+	GenerateBatchJobAction: {},
 
 	InventoryControlAction: {},
 
