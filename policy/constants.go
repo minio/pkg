@@ -234,13 +234,6 @@ var DefaultPolicies = []struct {
 						SetInfoAction,
 						DriveListAction,
 						DriveInfoAction,
-						// Site replication
-						SiteReplicationAddAction,
-						SiteReplicationDisableAction,
-						SiteReplicationRemoveAction,
-						SiteReplicationResyncAction,
-						SiteReplicationInfoAction,
-						SiteReplicationOperationAction,
 						// Replication
 						ReplicationDiff,
 					),
