@@ -175,7 +175,7 @@ var DefaultPolicies = []struct {
 	},
 
 	// InfraAdmin - provides infrastructure and server management access
-	// (config, pools, healing, tiers, batch jobs, site replication) but no
+	// (config, pools, healing, tiers, batch jobs) but no
 	// IAM or S3 data access.
 	{
 		Name: "infraAdmin",
