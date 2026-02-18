@@ -12,7 +12,7 @@ require (
 	github.com/go-ldap/ldap/v3 v3.4.12
 	github.com/go-openapi/swag/conv v0.24.0
 	github.com/golang-jwt/jwt/v4 v4.5.2
-	github.com/lestrrat-go/jwx/v2 v2.1.6
+	github.com/lestrrat-go/jwx/v3 v3.0.12
 	github.com/mattn/go-colorable v0.1.14
 	github.com/mattn/go-isatty v0.0.20
 	github.com/minio/minio-go/v7 v7.0.97
@@ -32,8 +32,12 @@ require (
 	github.com/clipperhouse/uax29/v2 v2.3.0 // indirect
 	github.com/go-ini/ini v1.67.0 // indirect
 	github.com/go-openapi/swag/typeutils v0.24.0 // indirect
+	github.com/lestrrat-go/dsig v1.0.0 // indirect
+	github.com/lestrrat-go/dsig-secp256k1 v1.0.0 // indirect
+	github.com/lestrrat-go/httprc/v3 v3.0.1 // indirect
+	github.com/lestrrat-go/option/v2 v2.0.0 // indirect
 	github.com/minio/md5-simd v1.1.2 // indirect
-	github.com/stretchr/testify v1.11.1 // indirect
+	github.com/valyala/fastjson v1.6.4 // indirect
 )
 
 require (
@@ -53,8 +57,6 @@ require (
 	github.com/klauspost/cpuid/v2 v2.3.0 // indirect
 	github.com/lestrrat-go/blackmagic v1.0.4 // indirect
 	github.com/lestrrat-go/httpcc v1.0.1 // indirect
-	github.com/lestrrat-go/httprc v1.0.6 // indirect
-	github.com/lestrrat-go/iter v1.0.2 // indirect
 	github.com/lestrrat-go/option v1.0.1 // indirect
 	github.com/mattn/go-runewidth v0.0.19 // indirect
 	github.com/philhofer/fwd v1.2.0 // indirect
