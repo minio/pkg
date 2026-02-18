@@ -206,8 +206,6 @@ var DefaultPolicies = []struct {
 						// Bucket admin
 						SetBucketQuotaAdminAction,
 						GetBucketQuotaAdminAction,
-						SetBucketTargetAction,
-						GetBucketTargetAction,
 						// Tiers
 						SetTierAction,
 						ListTierAction,
@@ -234,8 +232,6 @@ var DefaultPolicies = []struct {
 						SetInfoAction,
 						DriveListAction,
 						DriveInfoAction,
-						// Replication
-						ReplicationDiff,
 					),
 					Resources:  NewResourceSet(),
 					Conditions: condition.NewFunctions(),
