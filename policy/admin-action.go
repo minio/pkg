@@ -120,6 +120,15 @@ const (
 	// create/update/delete operations to peers
 	SiteReplicationOperationAction = "admin:SiteReplicationOperation"
 
+	// Tables Replication Actions
+
+	// TablesReplicationAddAction - allow adding tables replication targets
+	TablesReplicationAddAction = "admin:TablesReplicationAdd"
+	// TablesReplicationRemoveAction - allow removing tables replication targets
+	TablesReplicationRemoveAction = "admin:TablesReplicationRemove"
+	// TablesReplicationInfoAction - allow getting tables replication info/status
+	TablesReplicationInfoAction = "admin:TablesReplicationInfo"
+
 	// Service account Actions
 
 	// CreateServiceAccountAdminAction - allow create a service account for a user
@@ -346,6 +355,10 @@ var SupportedAdminActions = map[AdminAction]struct{}{
 	SiteReplicationOperationAction:   {},
 	SiteReplicationRemoveAction:      {},
 	SiteReplicationResyncAction:      {},
+
+	TablesReplicationAddAction:    {},
+	TablesReplicationRemoveAction: {},
+	TablesReplicationInfoAction:   {},
 
 	ImportBucketMetadataAction: {},
 	ExportBucketMetadataAction: {},
