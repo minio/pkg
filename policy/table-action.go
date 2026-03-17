@@ -208,6 +208,13 @@ const (
 	// S3TablesUpdateNamespacePropertiesAction is a MinIO extension for updating namespace properties.
 	S3TablesUpdateNamespacePropertiesAction = "s3tables:UpdateNamespaceProperties"
 
+	// S3TablesTagResourceAction maps to the AWS `s3tables:TagResource` action.
+	S3TablesTagResourceAction = "s3tables:TagResource"
+	// S3TablesUntagResourceAction maps to the AWS `s3tables:UntagResource` action.
+	S3TablesUntagResourceAction = "s3tables:UntagResource"
+	// S3TablesListTagsForResourceAction maps to the AWS `s3tables:ListTagsForResource` action.
+	S3TablesListTagsForResourceAction = "s3tables:ListTagsForResource"
+
 	// AllS3TablesActions - all Amazon S3 Tables actions
 	AllS3TablesActions = "s3tables:*"
 )
@@ -271,6 +278,9 @@ var SupportedTableActions = map[TableAction]struct{}{
 	S3TablesListViewsAction:                              {},
 	S3TablesRegisterViewAction:                           {},
 	S3TablesUpdateNamespacePropertiesAction:              {},
+	S3TablesTagResourceAction:                            {},
+	S3TablesUntagResourceAction:                          {},
+	S3TablesListTagsForResourceAction:                    {},
 	AllS3TablesActions:                                   {},
 }
 
@@ -370,6 +380,9 @@ func createTableActionConditionKeyMap() map[Action]condition.KeySet {
 	tableActionConditionKeyMap[S3TablesRegisterViewAction] = withCommon(s3TablesNamespaceKey, s3TablesViewNameKey, s3TablesRegisterLocationKey)
 	tableActionConditionKeyMap[S3TablesListViewsAction] = withCommon(s3TablesNamespaceKey)
 	tableActionConditionKeyMap[S3TablesUpdateNamespacePropertiesAction] = withCommon(s3TablesNamespaceKey)
+	tableActionConditionKeyMap[S3TablesTagResourceAction] = withCommon()
+	tableActionConditionKeyMap[S3TablesUntagResourceAction] = withCommon()
+	tableActionConditionKeyMap[S3TablesListTagsForResourceAction] = withCommon()
 
 	return tableActionConditionKeyMap
 }

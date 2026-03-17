@@ -272,6 +272,15 @@ const (
 	// DeltaSharingListTokensAction - allow listing Delta Sharing tokens
 	DeltaSharingListTokensAction = "admin:DeltaSharingListTokens"
 
+	// Log Actions
+
+	// ReadAPILogsAction - allow reading stored API logs
+	ReadAPILogsAction = "admin:ReadAPILogs"
+	// ReadErrorLogsAction - allow reading stored error logs
+	ReadErrorLogsAction = "admin:ReadErrorLogs"
+	// ReadAuditLogsAction - allow reading stored audit logs
+	ReadAuditLogsAction = "admin:ReadAuditLogs"
+
 	// AllAdminActions - provides all admin permissions
 	AllAdminActions = "admin:*"
 )
@@ -373,6 +382,10 @@ var SupportedAdminActions = map[AdminAction]struct{}{
 	DeltaSharingCreateTokenAction: {},
 	DeltaSharingDeleteTokenAction: {},
 	DeltaSharingListTokensAction:  {},
+
+	ReadAPILogsAction:   {},
+	ReadErrorLogsAction: {},
+	ReadAuditLogsAction: {},
 
 	AllAdminActions: {},
 }
