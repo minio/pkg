@@ -240,38 +240,6 @@ var DefaultPolicies = []struct {
 		},
 	},
 
-	// DiagnosticsAdmin - provides monitoring and observability access
-	// (metrics, profiling, tracing, logs) but no mutating operations or
-	// S3 data access. Extended version of the "diagnostics" policy.
-	{
-		Name: "diagnosticsAdmin",
-		Definition: Policy{
-			Version: DefaultVersion,
-			Statements: []Statement{
-				{
-					SID:    ID(""),
-					Effect: Allow,
-					Actions: NewActionSet(
-						PrometheusAdminAction,
-						ProfilingAdminAction,
-						TraceAdminAction,
-						ConsoleLogAdminAction,
-						ServerInfoAdminAction,
-						StorageInfoAdminAction,
-						HealthInfoAdminAction,
-						TopLocksAdminAction,
-						BandwidthMonitorAction,
-						DataUsageInfoAdminAction,
-						LicenseInfoAdminAction,
-						InspectDataAction,
-					),
-					Resources:  NewResourceSet(),
-					Conditions: condition.NewFunctions(),
-				},
-			},
-		},
-	},
-
 	// Admin - provides admin all-access canned policy
 	{
 		Name: "consoleAdmin",
