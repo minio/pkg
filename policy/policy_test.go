@@ -2716,3 +2716,224 @@ func TestS3VectorsActionsAllowed(t *testing.T) {
 		})
 	}
 }
+
+func TestAdminPolicyResourceScoping(t *testing.T) {
+	tests := []struct {
+		name       string
+		policyJSON string
+		args       Args
+		wantParse  bool // true = parse should succeed
+		want       bool // expected IsAllowed result
+	}{
+		{
+			name: "no resource - allowed on any bucket (backward compat)",
+			policyJSON: `{
+				"Version": "2012-10-17",
+				"Statement": [{
+					"Effect": "Allow",
+					"Action": ["admin:GetBucketQuota"]
+				}]
+			}`,
+			args:      Args{Action: Action(GetBucketQuotaAdminAction), BucketName: "any-bucket"},
+			wantParse: true,
+			want:      true,
+		},
+		{
+			name: "no resource - allowed on different bucket (backward compat)",
+			policyJSON: `{
+				"Version": "2012-10-17",
+				"Statement": [{
+					"Effect": "Allow",
+					"Action": ["admin:GetBucketQuota"]
+				}]
+			}`,
+			args:      Args{Action: Action(GetBucketQuotaAdminAction), BucketName: "other-bucket"},
+			wantParse: true,
+			want:      true,
+		},
+		{
+			name: "scoped resource - allowed on matching bucket",
+			policyJSON: `{
+				"Version": "2012-10-17",
+				"Statement": [{
+					"Effect": "Allow",
+					"Action": ["admin:GetBucketQuota"],
+					"Resource": ["arn:aws:s3:::my-bucket"]
+				}]
+			}`,
+			args:      Args{Action: Action(GetBucketQuotaAdminAction), BucketName: "my-bucket"},
+			wantParse: true,
+			want:      true,
+		},
+		{
+			name: "scoped resource - denied on non-matching bucket",
+			policyJSON: `{
+				"Version": "2012-10-17",
+				"Statement": [{
+					"Effect": "Allow",
+					"Action": ["admin:GetBucketQuota"],
+					"Resource": ["arn:aws:s3:::my-bucket"]
+				}]
+			}`,
+			args:      Args{Action: Action(GetBucketQuotaAdminAction), BucketName: "other-bucket"},
+			wantParse: true,
+			want:      false,
+		},
+		{
+			name: "wildcard resource - allowed on matching bucket",
+			policyJSON: `{
+				"Version": "2012-10-17",
+				"Statement": [{
+					"Effect": "Allow",
+					"Action": ["admin:GetBucketQuota"],
+					"Resource": ["arn:aws:s3:::prod-*"]
+				}]
+			}`,
+			args:      Args{Action: Action(GetBucketQuotaAdminAction), BucketName: "prod-data"},
+			wantParse: true,
+			want:      true,
+		},
+		{
+			name: "wildcard resource - denied on non-matching bucket",
+			policyJSON: `{
+				"Version": "2012-10-17",
+				"Statement": [{
+					"Effect": "Allow",
+					"Action": ["admin:GetBucketQuota"],
+					"Resource": ["arn:aws:s3:::prod-*"]
+				}]
+			}`,
+			args:      Args{Action: Action(GetBucketQuotaAdminAction), BucketName: "dev-data"},
+			wantParse: true,
+			want:      false,
+		},
+		{
+			name: "SetBucketQuota scoped - allowed on matching bucket",
+			policyJSON: `{
+				"Version": "2012-10-17",
+				"Statement": [{
+					"Effect": "Allow",
+					"Action": ["admin:SetBucketQuota", "admin:GetBucketQuota"],
+					"Resource": ["arn:aws:s3:::quota-bucket"]
+				}]
+			}`,
+			args:      Args{Action: Action(SetBucketQuotaAdminAction), BucketName: "quota-bucket"},
+			wantParse: true,
+			want:      true,
+		},
+		{
+			name: "SetBucketQuota scoped - denied on non-matching bucket",
+			policyJSON: `{
+				"Version": "2012-10-17",
+				"Statement": [{
+					"Effect": "Allow",
+					"Action": ["admin:SetBucketQuota", "admin:GetBucketQuota"],
+					"Resource": ["arn:aws:s3:::quota-bucket"]
+				}]
+			}`,
+			args:      Args{Action: Action(SetBucketQuotaAdminAction), BucketName: "other-bucket"},
+			wantParse: true,
+			want:      false,
+		},
+		{
+			name: "deny with resource - allow all then deny specific bucket",
+			policyJSON: `{
+				"Version": "2012-10-17",
+				"Statement": [
+					{
+						"Effect": "Allow",
+						"Action": ["admin:GetBucketQuota"]
+					},
+					{
+						"Effect": "Deny",
+						"Action": ["admin:GetBucketQuota"],
+						"Resource": ["arn:aws:s3:::secret-bucket"]
+					}
+				]
+			}`,
+			args:      Args{Action: Action(GetBucketQuotaAdminAction), BucketName: "normal-bucket"},
+			wantParse: true,
+			want:      true,
+		},
+		{
+			name: "deny with resource - denied on matching bucket",
+			policyJSON: `{
+				"Version": "2012-10-17",
+				"Statement": [
+					{
+						"Effect": "Allow",
+						"Action": ["admin:GetBucketQuota"]
+					},
+					{
+						"Effect": "Deny",
+						"Action": ["admin:GetBucketQuota"],
+						"Resource": ["arn:aws:s3:::secret-bucket"]
+					}
+				]
+			}`,
+			args:      Args{Action: Action(GetBucketQuotaAdminAction), BucketName: "secret-bucket"},
+			wantParse: true,
+			want:      false,
+		},
+		{
+			name: "empty bucket name with scoped resource - denied",
+			policyJSON: `{
+				"Version": "2012-10-17",
+				"Statement": [{
+					"Effect": "Allow",
+					"Action": ["admin:GetBucketQuota"],
+					"Resource": ["arn:aws:s3:::my-bucket"]
+				}]
+			}`,
+			args:      Args{Action: Action(GetBucketQuotaAdminAction), BucketName: ""},
+			wantParse: true,
+			want:      false,
+		},
+		{
+			name: "invalid resource ARN - parse fails",
+			policyJSON: `{
+				"Version": "2012-10-17",
+				"Statement": [{
+					"Effect": "Allow",
+					"Action": ["admin:GetBucketQuota"],
+					"Resource": ["not-a-valid-arn"]
+				}]
+			}`,
+			wantParse: false,
+		},
+		{
+			name: "star resource - allowed on any bucket",
+			policyJSON: `{
+				"Version": "2012-10-17",
+				"Statement": [{
+					"Effect": "Allow",
+					"Action": ["admin:GetBucketQuota"],
+					"Resource": ["*"]
+				}]
+			}`,
+			args:      Args{Action: Action(GetBucketQuotaAdminAction), BucketName: "any-bucket"},
+			wantParse: true,
+			want:      true,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			p, err := ParseConfig(strings.NewReader(tt.policyJSON))
+			if !tt.wantParse {
+				if err == nil {
+					t.Fatal("expected parse error, got nil")
+				}
+				return
+			}
+			if err != nil {
+				t.Fatalf("unexpected parse error: %v", err)
+			}
+
+			got := p.IsAllowed(tt.args)
+			if got != tt.want {
+				t.Errorf("IsAllowed() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
