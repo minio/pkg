@@ -118,8 +118,12 @@ func (statement Statement) IsAllowedPtr(args *Args) bool {
 			}
 		}
 
-		// For some admin statements, resource match can be ignored.
-		ignoreResourceMatch := statement.isAdmin() || statement.isSTS()
+		// For admin statements, resource match is ignored unless the
+		// statement explicitly specifies Resources or NotResources.
+		// This allows optional per-bucket scoping for bucket-level
+		// admin actions (e.g. admin:GetBucketQuota).
+		ignoreResourceMatch := statement.isSTS() ||
+			(statement.isAdmin() && len(statement.Resources) == 0 && len(statement.NotResources) == 0)
 
 		if !ignoreResourceMatch && len(statement.Resources) > 0 && !statement.Resources.Match(resource.String(), args.ConditionValues) {
 			return false
@@ -203,6 +207,18 @@ func (statement Statement) isValid() error {
 			keyDiff := keys.Difference(adminActionConditionKeyMap[action])
 			if !keyDiff.IsEmpty() {
 				return Errorf("unsupported condition keys '%v' used for action '%v'", keyDiff, action)
+			}
+		}
+		// Optionally validate Resources if specified — allows
+		// per-bucket scoping for bucket-level admin actions.
+		if len(statement.Resources) > 0 {
+			if err := statement.Resources.ValidateS3(); err != nil {
+				return err
+			}
+		}
+		if len(statement.NotResources) > 0 {
+			if err := statement.NotResources.ValidateS3(); err != nil {
+				return err
 			}
 		}
 		return nil
