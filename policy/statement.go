@@ -211,6 +211,9 @@ func (statement Statement) isValid() error {
 		}
 		// Optionally validate Resources if specified — allows
 		// per-bucket scoping for bucket-level admin actions.
+		if len(statement.Resources) > 0 && len(statement.NotResources) > 0 {
+			return Errorf("Resource and NotResource cannot be specified in the same statement")
+		}
 		if len(statement.Resources) > 0 {
 			if err := statement.Resources.ValidateS3(); err != nil {
 				return err
