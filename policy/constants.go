@@ -124,6 +124,105 @@ var DefaultPolicies = []struct {
 		},
 	},
 
+	// TablesReadWrite - provides read and write access to S3 Tables data and views
+	// but no DDL (cannot create/delete namespaces or tables). Mirrors the data
+	// access tier of AWS AmazonS3TablesFullAccess minus administrative operations.
+	{
+		Name: "tablesReadWrite",
+		Definition: Policy{
+			Version: DefaultVersion,
+			Statements: []Statement{
+				{
+					SID:    ID(""),
+					Effect: Allow,
+					Actions: NewActionSet(
+						// Warehouse read
+						S3TablesGetWarehouseAction,
+						S3TablesGetWarehouseEncryptionAction,
+						S3TablesGetWarehouseMaintenanceConfigurationAction,
+						S3TablesGetWarehousePolicyAction,
+						S3TablesListWarehousesAction,
+						// Namespace read + property updates
+						S3TablesGetNamespaceAction,
+						S3TablesListNamespacesAction,
+						S3TablesUpdateNamespacePropertiesAction,
+						// Table read + data write
+						S3TablesGetTableAction,
+						S3TablesListTablesAction,
+						S3TablesGetTableDataAction,
+						S3TablesPutTableDataAction,
+						S3TablesGetTableEncryptionAction,
+						S3TablesGetTableMaintenanceConfigurationAction,
+						S3TablesGetTableMaintenanceJobStatusAction,
+						S3TablesGetTableMetadataLocationAction,
+						S3TablesGetTablePolicyAction,
+						// Table mutations (non-destructive)
+						S3TablesUpdateTableAction,
+						S3TablesUpdateTableMetadataLocationAction,
+						S3TablesRenameTableAction,
+						S3TablesRegisterTableAction,
+						// Views full CRUD
+						S3TablesGetViewAction,
+						S3TablesListViewsAction,
+						S3TablesCreateViewAction,
+						S3TablesUpdateViewAction,
+						S3TablesRenameViewAction,
+						S3TablesDeleteViewAction,
+						S3TablesRegisterViewAction,
+						// Catalog config + metrics
+						S3TablesGetConfigAction,
+						S3TablesTableMetricsAction,
+					),
+					Resources:  NewResourceSet(NewS3TablesResource("*")),
+					Conditions: condition.NewFunctions(),
+				},
+			},
+		},
+	},
+
+	// TablesReadOnly - provides read-only access to S3 Tables. Mirrors
+	// AWS AmazonS3TablesReadOnlyAccess (s3tables:Get* + s3tables:List*).
+	{
+		Name: "tablesReadOnly",
+		Definition: Policy{
+			Version: DefaultVersion,
+			Statements: []Statement{
+				{
+					SID:    ID(""),
+					Effect: Allow,
+					Actions: NewActionSet(
+						// Warehouse read
+						S3TablesGetWarehouseAction,
+						S3TablesGetWarehouseEncryptionAction,
+						S3TablesGetWarehouseMaintenanceConfigurationAction,
+						S3TablesGetWarehousePolicyAction,
+						S3TablesListWarehousesAction,
+						// Namespace read
+						S3TablesGetNamespaceAction,
+						S3TablesListNamespacesAction,
+						// Table read
+						S3TablesGetTableAction,
+						S3TablesListTablesAction,
+						S3TablesGetTableDataAction,
+						S3TablesGetTableEncryptionAction,
+						S3TablesGetTableMaintenanceConfigurationAction,
+						S3TablesGetTableMaintenanceJobStatusAction,
+						S3TablesGetTableMetadataLocationAction,
+						S3TablesGetTablePolicyAction,
+						// View read
+						S3TablesGetViewAction,
+						S3TablesListViewsAction,
+						// Catalog config + metrics
+						S3TablesGetConfigAction,
+						S3TablesTableMetricsAction,
+					),
+					Resources:  NewResourceSet(NewS3TablesResource("*")),
+					Conditions: condition.NewFunctions(),
+				},
+			},
+		},
+	},
+
 	// Admin - provides admin all-access canned policy
 	{
 		Name: "consoleAdmin",
