@@ -146,6 +146,27 @@ func (statement Statement) HasResourceConflict() bool {
 	return len(statement.Resources) > 0 && len(statement.NotResources) > 0
 }
 
+// HasUnsupportedResourceActions returns true if a statement specifies
+// Resource/NotResource but contains explicit (non-wildcard) admin
+// actions that are not in AdminActionsResourceSupported.
+func (statement Statement) HasUnsupportedResourceActions() bool {
+	if !statement.isAdmin() {
+		return false
+	}
+	if len(statement.Resources) == 0 && len(statement.NotResources) == 0 {
+		return false
+	}
+	for action := range statement.Actions {
+		if wildcard.Has(string(action)) {
+			continue
+		}
+		if _, ok := AdminActionsResourceSupported[AdminAction(action)]; !ok {
+			return true
+		}
+	}
+	return false
+}
+
 func (statement Statement) isAdmin() bool {
 	for action := range statement.Actions {
 		if AdminAction(action).IsValid() {
@@ -214,18 +235,6 @@ func (statement Statement) isValid() error {
 			keyDiff := keys.Difference(adminActionConditionKeyMap[action])
 			if !keyDiff.IsEmpty() {
 				return Errorf("unsupported condition keys '%v' used for action '%v'", keyDiff, action)
-			}
-		}
-		// If Resources/NotResources specified, all explicit (non-wildcard)
-		// actions must be in AdminActionsResourceSupported.
-		if len(statement.Resources) > 0 || len(statement.NotResources) > 0 {
-			for action := range statement.Actions {
-				if wildcard.Has(string(action)) {
-					continue
-				}
-				if _, ok := AdminActionsResourceSupported[AdminAction(action)]; !ok {
-					return Errorf("action '%v' does not support Resource", action)
-				}
 			}
 		}
 		return nil

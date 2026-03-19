@@ -2903,7 +2903,7 @@ func TestAdminPolicyResourceScoping(t *testing.T) {
 			want:      true,
 		},
 		{
-			name: "unsupported action with resource - parse fails",
+			name: "unsupported action with resource - parse succeeds but resource ignored",
 			policyJSON: `{
 				"Version": "2012-10-17",
 				"Statement": [{
@@ -2912,7 +2912,9 @@ func TestAdminPolicyResourceScoping(t *testing.T) {
 					"Resource": ["arn:aws:s3:::my-bucket"]
 				}]
 			}`,
-			wantParse: false,
+			args:      Args{Action: Action(ServerInfoAdminAction)},
+			wantParse: true,
+			want:      true,
 		},
 		{
 			name: "supported action ignores resource for non-resource action in same policy",
