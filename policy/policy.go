@@ -493,6 +493,23 @@ func (iamp Policy) Validate() error {
 	return iamp.isValid()
 }
 
+// ValidateStrict applies strict validation rules suitable for new
+// policy creation. It rejects policies that would be accepted by
+// Validate for backward compatibility but are invalid going forward
+// (e.g. admin statements with both Resource and NotResource).
+func (iamp Policy) ValidateStrict() error {
+	if iamp.Version != DefaultVersion && iamp.Version != "" {
+		return Errorf("invalid version '%v'", iamp.Version)
+	}
+
+	for _, statement := range iamp.Statements {
+		if err := statement.isValidStrict(); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
 // updateActionIndex with latest statements()
 // maintains a reverse map of Action -> []Statements
 // for faster lookup and short-circuit.
@@ -531,6 +548,21 @@ func ParseConfig(reader io.Reader) (*Policy, error) {
 	}
 
 	return &iamp, iamp.Validate()
+}
+
+// ParseConfigStrict parses and validates with strict rules. Use this
+// when the server is creating or updating policies — it rejects
+// constructs that Validate allows for backward compatibility.
+func ParseConfigStrict(reader io.Reader) (*Policy, error) {
+	var iamp Policy
+
+	decoder := json.NewDecoder(reader)
+	decoder.DisallowUnknownFields()
+	if err := decoder.Decode(&iamp); err != nil {
+		return nil, Errorf("%w", err)
+	}
+
+	return &iamp, iamp.ValidateStrict()
 }
 
 // Equals returns true if the two policies are identical
