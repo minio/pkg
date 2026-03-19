@@ -24,6 +24,7 @@ import (
 	"sync"
 
 	"github.com/minio/pkg/v3/policy/condition"
+	"github.com/minio/pkg/v3/wildcard"
 	"github.com/zeebo/xxh3"
 )
 
@@ -219,7 +220,7 @@ func (statement Statement) isValid() error {
 		// actions must be in AdminActionsResourceSupported.
 		if len(statement.Resources) > 0 || len(statement.NotResources) > 0 {
 			for action := range statement.Actions {
-				if strings.Contains(string(action), "*") {
+				if wildcard.Has(string(action)) {
 					continue
 				}
 				if _, ok := AdminActionsResourceSupported[AdminAction(action)]; !ok {
