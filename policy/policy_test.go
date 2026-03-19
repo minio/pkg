@@ -2863,20 +2863,6 @@ func TestAdminPolicyResourceScoping(t *testing.T) {
 			want:      false,
 		},
 		{
-			name: "empty bucket name with scoped resource - denied",
-			policyJSON: `{
-				"Version": "2012-10-17",
-				"Statement": [{
-					"Effect": "Allow",
-					"Action": ["admin:GetBucketQuota"],
-					"Resource": ["arn:aws:s3:::my-bucket"]
-				}]
-			}`,
-			args:      Args{Action: Action(GetBucketQuotaAdminAction), BucketName: ""},
-			wantParse: true,
-			want:      false,
-		},
-		{
 			name: "invalid resource ARN - rejected by JSON unmarshal",
 			policyJSON: `{
 				"Version": "2012-10-17",

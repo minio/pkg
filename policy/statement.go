@@ -24,7 +24,6 @@ import (
 	"sync"
 
 	"github.com/minio/pkg/v3/policy/condition"
-	"github.com/minio/pkg/v3/wildcard"
 	"github.com/zeebo/xxh3"
 )
 
@@ -119,11 +118,12 @@ func (statement Statement) IsAllowedPtr(args *Args) bool {
 			}
 		}
 
-		// Resource matching is per-action: only admin actions in
-		// AdminActionsResourceSupported enforce bucket-level scoping.
-		_, supportsResource := AdminActionsResourceSupported[AdminAction(args.Action)]
+		// For admin statements, resource matching is enforced only when
+		// the caller provides a BucketName (i.e. the admin action operates
+		// on a specific bucket). Non-bucket admin actions pass an empty
+		// BucketName, so resource matching is skipped for those.
 		ignoreResourceMatch := statement.isSTS() ||
-			(statement.isAdmin() && !supportsResource)
+			(statement.isAdmin() && args.BucketName == "")
 
 		if !ignoreResourceMatch && len(statement.Resources) > 0 && !statement.Resources.Match(resource.String(), args.ConditionValues) {
 			return false
@@ -144,27 +144,6 @@ func (statement Statement) IsAllowedPtr(args *Args) bool {
 // policy validation (matching AWS IAM behavior).
 func (statement Statement) HasResourceConflict() bool {
 	return len(statement.Resources) > 0 && len(statement.NotResources) > 0
-}
-
-// HasUnsupportedResourceActions returns true if a statement specifies
-// Resource/NotResource but contains explicit (non-wildcard) admin
-// actions that are not in AdminActionsResourceSupported.
-func (statement Statement) HasUnsupportedResourceActions() bool {
-	if !statement.isAdmin() {
-		return false
-	}
-	if len(statement.Resources) == 0 && len(statement.NotResources) == 0 {
-		return false
-	}
-	for action := range statement.Actions {
-		if wildcard.Has(string(action)) {
-			continue
-		}
-		if _, ok := AdminActionsResourceSupported[AdminAction(action)]; !ok {
-			return true
-		}
-	}
-	return false
 }
 
 func (statement Statement) isAdmin() bool {
