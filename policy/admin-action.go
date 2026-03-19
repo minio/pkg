@@ -401,6 +401,7 @@ var AdminActionsWithResource = map[AdminAction]struct{}{
 	ImportBucketMetadataAction: {},
 	ExportBucketMetadataAction: {},
 	HealAdminAction:            {},
+	InventoryControlAction:     {},
 }
 
 // HasResource reports whether this admin action operates on a bucket resource.

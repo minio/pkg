@@ -2799,6 +2799,7 @@ func TestAdminActionHasResource(t *testing.T) {
 		ImportBucketMetadataAction,
 		ExportBucketMetadataAction,
 		HealAdminAction,
+		InventoryControlAction,
 	}
 	for _, a := range bucketScoped {
 		if !a.HasResource() {
