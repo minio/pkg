@@ -2739,19 +2739,6 @@ func TestAdminPolicyResourceScoping(t *testing.T) {
 			want:      true,
 		},
 		{
-			name: "no resource - allowed on different bucket (backward compat)",
-			policyJSON: `{
-				"Version": "2012-10-17",
-				"Statement": [{
-					"Effect": "Allow",
-					"Action": ["admin:GetBucketQuota"]
-				}]
-			}`,
-			args:      Args{Action: Action(GetBucketQuotaAdminAction), BucketName: "other-bucket"},
-			wantParse: true,
-			want:      true,
-		},
-		{
 			name: "scoped resource - allowed on matching bucket",
 			policyJSON: `{
 				"Version": "2012-10-17",
@@ -2890,7 +2877,7 @@ func TestAdminPolicyResourceScoping(t *testing.T) {
 			want:      false,
 		},
 		{
-			name: "invalid resource ARN - parse fails",
+			name: "invalid resource ARN - rejected by JSON unmarshal",
 			policyJSON: `{
 				"Version": "2012-10-17",
 				"Statement": [{
@@ -2912,6 +2899,65 @@ func TestAdminPolicyResourceScoping(t *testing.T) {
 				}]
 			}`,
 			args:      Args{Action: Action(GetBucketQuotaAdminAction), BucketName: "any-bucket"},
+			wantParse: true,
+			want:      true,
+		},
+		{
+			name: "unsupported action with resource - parse fails",
+			policyJSON: `{
+				"Version": "2012-10-17",
+				"Statement": [{
+					"Effect": "Allow",
+					"Action": ["admin:ServerInfo"],
+					"Resource": ["arn:aws:s3:::my-bucket"]
+				}]
+			}`,
+			wantParse: false,
+		},
+		{
+			name: "supported action ignores resource for non-resource action in same policy",
+			policyJSON: `{
+				"Version": "2012-10-17",
+				"Statement": [
+					{
+						"Effect": "Allow",
+						"Action": ["admin:GetBucketQuota"],
+						"Resource": ["arn:aws:s3:::my-bucket"]
+					},
+					{
+						"Effect": "Allow",
+						"Action": ["admin:ServerInfo"]
+					}
+				]
+			}`,
+			args:      Args{Action: Action(ServerInfoAdminAction)},
+			wantParse: true,
+			want:      true,
+		},
+		{
+			name: "resource scoping does not affect non-resource admin actions",
+			policyJSON: `{
+				"Version": "2012-10-17",
+				"Statement": [{
+					"Effect": "Allow",
+					"Action": ["admin:ServerInfo"]
+				}]
+			}`,
+			args:      Args{Action: Action(ServerInfoAdminAction)},
+			wantParse: true,
+			want:      true,
+		},
+		{
+			name: "wildcard admin action with resource - parse succeeds",
+			policyJSON: `{
+				"Version": "2012-10-17",
+				"Statement": [{
+					"Effect": "Allow",
+					"Action": ["admin:*"],
+					"Resource": ["arn:aws:s3:::my-bucket"]
+				}]
+			}`,
+			args:      Args{Action: Action(GetBucketQuotaAdminAction), BucketName: "my-bucket"},
 			wantParse: true,
 			want:      true,
 		},

@@ -118,12 +118,11 @@ func (statement Statement) IsAllowedPtr(args *Args) bool {
 			}
 		}
 
-		// For admin statements, resource match is ignored unless the
-		// statement explicitly specifies Resources or NotResources.
-		// This allows optional per-bucket scoping for bucket-level
-		// admin actions (e.g. admin:GetBucketQuota).
+		// Resource matching is per-action: only admin actions in
+		// AdminActionsResourceSupported enforce bucket-level scoping.
+		_, supportsResource := AdminActionsResourceSupported[AdminAction(args.Action)]
 		ignoreResourceMatch := statement.isSTS() ||
-			(statement.isAdmin() && len(statement.Resources) == 0 && len(statement.NotResources) == 0)
+			(statement.isAdmin() && !supportsResource)
 
 		if !ignoreResourceMatch && len(statement.Resources) > 0 && !statement.Resources.Match(resource.String(), args.ConditionValues) {
 			return false
@@ -137,6 +136,13 @@ func (statement Statement) IsAllowedPtr(args *Args) bool {
 	}
 
 	return statement.Effect.IsAllowed(check())
+}
+
+// HasResourceConflict returns true if a statement specifies both
+// Resource and NotResource. Used by servers that opt into strict
+// policy validation (matching AWS IAM behavior).
+func (statement Statement) HasResourceConflict() bool {
+	return len(statement.Resources) > 0 && len(statement.NotResources) > 0
 }
 
 func (statement Statement) isAdmin() bool {
@@ -209,19 +215,16 @@ func (statement Statement) isValid() error {
 				return Errorf("unsupported condition keys '%v' used for action '%v'", keyDiff, action)
 			}
 		}
-		// Optionally validate Resources if specified — allows
-		// per-bucket scoping for bucket-level admin actions.
-		if len(statement.Resources) > 0 && len(statement.NotResources) > 0 {
-			return Errorf("Resource and NotResource cannot be specified in the same statement")
-		}
-		if len(statement.Resources) > 0 {
-			if err := statement.Resources.ValidateS3(); err != nil {
-				return err
-			}
-		}
-		if len(statement.NotResources) > 0 {
-			if err := statement.NotResources.ValidateS3(); err != nil {
-				return err
+		// If Resources/NotResources specified, all explicit (non-wildcard)
+		// actions must be in AdminActionsResourceSupported.
+		if len(statement.Resources) > 0 || len(statement.NotResources) > 0 {
+			for action := range statement.Actions {
+				if strings.Contains(string(action), "*") {
+					continue
+				}
+				if _, ok := AdminActionsResourceSupported[AdminAction(action)]; !ok {
+					return Errorf("action '%v' does not support Resource", action)
+				}
 			}
 		}
 		return nil

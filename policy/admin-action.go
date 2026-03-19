@@ -417,3 +417,15 @@ func createAdminActionConditionKeyMap() map[Action]condition.KeySet {
 
 // adminActionConditionKeyMap - holds mapping of supported condition key for an action.
 var adminActionConditionKeyMap = createAdminActionConditionKeyMap()
+
+// AdminActionsResourceSupported defines admin actions that operate on
+// specific buckets and support optional Resource/NotResource scoping
+// in policy statements.
+var AdminActionsResourceSupported = map[AdminAction]struct{}{
+	GetBucketQuotaAdminAction: {},
+	SetBucketQuotaAdminAction: {},
+	SetBucketTargetAction:     {},
+	GetBucketTargetAction:     {},
+	ReplicationDiff:           {},
+	InventoryControlAction:    {},
+}
