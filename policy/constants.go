@@ -157,6 +157,7 @@ var DefaultPolicies = []struct {
 						S3TablesGetTableMetadataLocationAction,
 						S3TablesGetTablePolicyAction,
 						// Table mutations (non-destructive)
+						S3TablesCreateTableAction,
 						S3TablesUpdateTableAction,
 						S3TablesUpdateTableMetadataLocationAction,
 						S3TablesRenameTableAction,
