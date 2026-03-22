@@ -118,8 +118,11 @@ func (statement Statement) IsAllowedPtr(args *Args) bool {
 			}
 		}
 
-		// For some admin statements, resource match can be ignored.
-		ignoreResourceMatch := statement.isAdmin() || statement.isSTS()
+		// Admin actions that do not operate on a bucket resource
+		// skip resource matching entirely. For the small set of
+		// bucket-scoped admin actions (e.g. SetBucketQuota),
+		// resource matching is enforced when Resources are present.
+		ignoreResourceMatch := statement.isSTS() || (statement.isAdmin() && !statement.hasAdminResource())
 
 		if !ignoreResourceMatch && len(statement.Resources) > 0 && !statement.Resources.Match(resource.String(), args.ConditionValues) {
 			return false
@@ -135,9 +138,57 @@ func (statement Statement) IsAllowedPtr(args *Args) bool {
 	return statement.Effect.IsAllowed(check())
 }
 
+// validateActionTypes rejects statements that mix actions from
+// different namespaces (e.g. s3 + admin, admin + sts). Each
+// statement must contain actions from exactly one namespace.
+func (statement Statement) validateActionTypes() error {
+	actions := statement.Actions
+	if len(actions) == 0 {
+		actions = statement.NotActions
+	}
+	var hasS3, hasAdmin, hasSTS, hasKMS, hasTable, hasVectors bool
+	for action := range actions {
+		switch {
+		case AdminAction(action).IsValid():
+			hasAdmin = true
+		case STSAction(action).IsValid():
+			hasSTS = true
+		case KMSAction(action).IsValid():
+			hasKMS = true
+		case TableAction(action).IsValid():
+			hasTable = true
+		case VectorsAction(action).IsValid():
+			hasVectors = true
+		default:
+			hasS3 = true
+		}
+	}
+	count := 0
+	for _, b := range []bool{hasS3, hasAdmin, hasSTS, hasKMS, hasTable, hasVectors} {
+		if b {
+			count++
+		}
+	}
+	if count > 1 {
+		return Errorf("mixing action types in the same statement is not allowed")
+	}
+	return nil
+}
+
 func (statement Statement) isAdmin() bool {
 	for action := range statement.Actions {
 		if AdminAction(action).IsValid() {
+			return true
+		}
+	}
+	return false
+}
+
+// hasAdminResource reports whether any action in this statement is a
+// bucket-scoped admin action (as declared by AdminActionsWithResource).
+func (statement Statement) hasAdminResource() bool {
+	for action := range statement.Actions {
+		if AdminAction(action).HasResource() {
 			return true
 		}
 	}
@@ -194,18 +245,12 @@ func (statement Statement) isValid() error {
 		return Errorf("Action and NotAction cannot be specified in the same statement")
 	}
 
+	if err := statement.validateActionTypes(); err != nil {
+		return err
+	}
+
 	if statement.isAdmin() {
-		if err := statement.Actions.ValidateAdmin(); err != nil {
-			return err
-		}
-		for action := range statement.Actions {
-			keys := statement.Conditions.Keys()
-			keyDiff := keys.Difference(adminActionConditionKeyMap[action])
-			if !keyDiff.IsEmpty() {
-				return Errorf("unsupported condition keys '%v' used for action '%v'", keyDiff, action)
-			}
-		}
-		return nil
+		return statement.validateAdmin(false)
 	}
 
 	if statement.isSTS() {
@@ -357,9 +402,78 @@ func (statement Statement) isValid() error {
 	return nil
 }
 
+// isValidStrict applies additional checks for new policies. It rejects
+// admin statements that specify both Resource and NotResource, enforces
+// that bucket-scoped admin actions have well-formed Resource ARNs, etc.
+// Servers call this path when creating or updating policies; the
+// permissive isValid path is used when loading existing policies.
+func (statement Statement) isValidStrict() error {
+	if !statement.Effect.IsValid() {
+		return Errorf("invalid Effect %v", statement.Effect)
+	}
+
+	if len(statement.Actions) == 0 && len(statement.NotActions) == 0 {
+		return Errorf("Action must not be empty")
+	}
+
+	if len(statement.Actions) > 0 && len(statement.NotActions) > 0 {
+		return Errorf("Action and NotAction cannot be specified in the same statement")
+	}
+
+	if err := statement.validateActionTypes(); err != nil {
+		return err
+	}
+
+	if statement.isAdmin() {
+		return statement.validateAdmin(true)
+	}
+
+	// For non-admin types, delegate to the standard path which
+	// already enforces Resource/NotResource conflicts.
+	return statement.isValid()
+}
+
+// validateAdmin validates an admin statement. When strict is true,
+// Resource and NotResource in the same statement is rejected, and
+// Resources on bucket-scoped actions are validated as S3 ARNs.
+func (statement Statement) validateAdmin(strict bool) error {
+	if err := statement.Actions.ValidateAdmin(); err != nil {
+		return err
+	}
+	for action := range statement.Actions {
+		keys := statement.Conditions.Keys()
+		keyDiff := keys.Difference(adminActionConditionKeyMap[action])
+		if !keyDiff.IsEmpty() {
+			return Errorf("unsupported condition keys '%v' used for action '%v'", keyDiff, action)
+		}
+	}
+	if strict {
+		if len(statement.Resources) > 0 && len(statement.NotResources) > 0 {
+			return Errorf("Resource and NotResource cannot be specified in the same admin statement")
+		}
+		if len(statement.Resources) > 0 && statement.hasAdminResource() {
+			if err := statement.Resources.ValidateS3(); err != nil {
+				return err
+			}
+		}
+		if len(statement.NotResources) > 0 && statement.hasAdminResource() {
+			if err := statement.NotResources.ValidateS3(); err != nil {
+				return err
+			}
+		}
+	}
+	return nil
+}
+
 // Validate - validates Statement is for given bucket or not.
 func (statement Statement) Validate() error {
 	return statement.isValid()
+}
+
+// ValidateStrict validates the statement with strict rules suitable
+// for new policy creation. See isValidStrict for details.
+func (statement Statement) ValidateStrict() error {
+	return statement.isValidStrict()
 }
 
 // Equals checks if two statements are equal

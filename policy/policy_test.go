@@ -2716,3 +2716,181 @@ func TestS3VectorsActionsAllowed(t *testing.T) {
 		})
 	}
 }
+
+func TestAdminActionResourceScoping(t *testing.T) {
+	// Policy that scopes GetBucketQuota to a specific bucket via Resource.
+	scopedPolicy := `{
+ "Version": "2012-10-17",
+ "Statement": [
+  {
+   "Effect": "Allow",
+   "Action": ["admin:GetBucketQuota"],
+   "Resource": ["arn:aws:s3:::mybucket"]
+  }
+ ]
+}`
+	p, err := ParseConfig(strings.NewReader(scopedPolicy))
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	// Matching bucket must be allowed.
+	allowed := p.IsAllowedActions("mybucket", "", map[string][]string{})
+	if !allowed.Match(GetBucketQuotaAdminAction) {
+		t.Fatal("expected GetBucketQuota allowed for mybucket")
+	}
+
+	// Different bucket must be denied.
+	allowed = p.IsAllowedActions("otherbucket", "", map[string][]string{})
+	if allowed.Match(GetBucketQuotaAdminAction) {
+		t.Fatal("expected GetBucketQuota denied for otherbucket")
+	}
+
+	// Resource-less admin actions ignore Resource even if specified.
+	resourcelessPolicy := `{
+ "Version": "2012-10-17",
+ "Statement": [
+  {
+   "Effect": "Allow",
+   "Action": ["admin:ServerInfo"]
+  }
+ ]
+}`
+	p, err = ParseConfig(strings.NewReader(resourcelessPolicy))
+	if err != nil {
+		t.Fatal(err)
+	}
+	allowed = p.IsAllowedActions("", "", map[string][]string{})
+	if !allowed.Match(ServerInfoAdminAction) {
+		t.Fatal("expected ServerInfo allowed without resource")
+	}
+
+	// admin:* without Resource stays backward compatible for resource-less actions.
+	wildcardPolicy := `{
+ "Version": "2012-10-17",
+ "Statement": [
+  {
+   "Effect": "Allow",
+   "Action": ["admin:*"]
+  }
+ ]
+}`
+	p, err = ParseConfig(strings.NewReader(wildcardPolicy))
+	if err != nil {
+		t.Fatal(err)
+	}
+	allowed = p.IsAllowedActions("", "", map[string][]string{})
+	if !allowed.Match(ServerInfoAdminAction) {
+		t.Fatal("expected ServerInfo allowed with admin:* and no resource")
+	}
+	if !allowed.Match(GetBucketQuotaAdminAction) {
+		t.Fatal("expected GetBucketQuota allowed with admin:* and no resource constraint")
+	}
+}
+
+func TestAdminActionHasResource(t *testing.T) {
+	// Bucket-scoped actions must report HasResource.
+	bucketScoped := []AdminAction{
+		SetBucketQuotaAdminAction,
+		GetBucketQuotaAdminAction,
+		SetBucketTargetAction,
+		GetBucketTargetAction,
+		ReplicationDiff,
+		ImportBucketMetadataAction,
+		ExportBucketMetadataAction,
+		HealAdminAction,
+		InventoryControlAction,
+	}
+	for _, a := range bucketScoped {
+		if !a.HasResource() {
+			t.Errorf("expected %s to have resource", a)
+		}
+	}
+
+	// Resource-less actions must not.
+	resourceless := []AdminAction{
+		ServerInfoAdminAction,
+		ListUsersAdminAction,
+		ConfigUpdateAdminAction,
+		CreateUserAdminAction,
+	}
+	for _, a := range resourceless {
+		if a.HasResource() {
+			t.Errorf("expected %s to not have resource", a)
+		}
+	}
+}
+
+func TestParseConfigStrictRejectsResourceConflict(t *testing.T) {
+	// Strict parsing rejects admin statements with both Resource and NotResource.
+	conflicting := `{
+ "Version": "2012-10-17",
+ "Statement": [
+  {
+   "Effect": "Allow",
+   "Action": ["admin:GetBucketQuota"],
+   "Resource": ["arn:aws:s3:::mybucket"],
+   "NotResource": ["arn:aws:s3:::otherbucket"]
+  }
+ ]
+}`
+	// Permissive parse succeeds (backward compat).
+	_, err := ParseConfig(strings.NewReader(conflicting))
+	if err != nil {
+		t.Fatalf("permissive parse should succeed, got: %v", err)
+	}
+
+	// Strict parse rejects.
+	_, err = ParseConfigStrict(strings.NewReader(conflicting))
+	if err == nil {
+		t.Fatal("strict parse should reject Resource + NotResource in admin statement")
+	}
+
+	// Resource-less admin action with no resources is fine in strict mode.
+	clean := `{
+ "Version": "2012-10-17",
+ "Statement": [
+  {
+   "Effect": "Allow",
+   "Action": ["admin:ServerInfo"]
+  }
+ ]
+}`
+	_, err = ParseConfigStrict(strings.NewReader(clean))
+	if err != nil {
+		t.Fatalf("strict parse should accept clean admin statement, got: %v", err)
+	}
+
+	// Bucket-scoped admin action with valid Resource is fine in strict mode.
+	scoped := `{
+ "Version": "2012-10-17",
+ "Statement": [
+  {
+   "Effect": "Allow",
+   "Action": ["admin:GetBucketQuota"],
+   "Resource": ["arn:aws:s3:::mybucket"]
+  }
+ ]
+}`
+	_, err = ParseConfigStrict(strings.NewReader(scoped))
+	if err != nil {
+		t.Fatalf("strict parse should accept scoped admin statement, got: %v", err)
+	}
+}
+
+func TestMixedActionTypesRejected(t *testing.T) {
+	mixed := `{
+ "Version": "2012-10-17",
+ "Statement": [
+  {
+   "Effect": "Allow",
+   "Action": ["s3:GetObject", "admin:ServerInfo"],
+   "Resource": ["arn:aws:s3:::mybucket/*"]
+  }
+ ]
+}`
+	_, err := ParseConfig(strings.NewReader(mixed))
+	if err == nil {
+		t.Fatal("expected error for mixed s3+admin actions in same statement")
+	}
+}

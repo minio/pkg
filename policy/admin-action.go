@@ -120,6 +120,15 @@ const (
 	// create/update/delete operations to peers
 	SiteReplicationOperationAction = "admin:SiteReplicationOperation"
 
+	// Tables Replication Actions
+
+	// TablesReplicationAddAction - allow adding tables replication targets
+	TablesReplicationAddAction = "admin:TablesReplicationAdd"
+	// TablesReplicationRemoveAction - allow removing tables replication targets
+	TablesReplicationRemoveAction = "admin:TablesReplicationRemove"
+	// TablesReplicationInfoAction - allow getting tables replication info/status
+	TablesReplicationInfoAction = "admin:TablesReplicationInfo"
+
 	// Service account Actions
 
 	// CreateServiceAccountAdminAction - allow create a service account for a user
@@ -271,6 +280,17 @@ const (
 	DeltaSharingDeleteTokenAction = "admin:DeltaSharingDeleteToken"
 	// DeltaSharingListTokensAction - allow listing Delta Sharing tokens
 	DeltaSharingListTokensAction = "admin:DeltaSharingListTokens"
+	// ReadAlertsAction - allow reading stored alerts
+	ReadAlertsAction = "admin:ReadAlerts"
+
+	// Log Actions
+
+	// ReadAPILogsAction - allow reading stored API logs
+	ReadAPILogsAction = "admin:ReadAPILogs"
+	// ReadErrorLogsAction - allow reading stored error logs
+	ReadErrorLogsAction = "admin:ReadErrorLogs"
+	// ReadAuditLogsAction - allow reading stored audit logs
+	ReadAuditLogsAction = "admin:ReadAuditLogs"
 
 	// AllAdminActions - provides all admin permissions
 	AllAdminActions = "admin:*"
@@ -338,15 +358,22 @@ var SupportedAdminActions = map[AdminAction]struct{}{
 	SiteReplicationRemoveAction:      {},
 	SiteReplicationResyncAction:      {},
 
+	TablesReplicationAddAction:    {},
+	TablesReplicationRemoveAction: {},
+	TablesReplicationInfoAction:   {},
+
 	ImportBucketMetadataAction: {},
 	ExportBucketMetadataAction: {},
 	ExportIAMAction:            {},
 	ImportIAMAction:            {},
 
+	ForceUnlockAdminAction: {},
+
 	ListBatchJobsAction:    {},
 	DescribeBatchJobAction: {},
 	StartBatchJobAction:    {},
 	CancelBatchJobAction:   {},
+	GenerateBatchJobAction: {},
 
 	InventoryControlAction: {},
 
@@ -371,7 +398,39 @@ var SupportedAdminActions = map[AdminAction]struct{}{
 	DeltaSharingDeleteTokenAction: {},
 	DeltaSharingListTokensAction:  {},
 
+	ReadAPILogsAction:   {},
+	ReadErrorLogsAction: {},
+	ReadAuditLogsAction: {},
+	ReadAlertsAction:    {},
+
 	AllAdminActions: {},
+}
+
+// AdminActionsWithResource enumerates admin actions that operate on
+// a specific bucket resource. When a policy statement contains one of
+// these actions *and* specifies a Resource, the resource is enforced
+// against the target bucket. All other admin actions are resource-less;
+// any Resource specified in the statement is ignored for them.
+var AdminActionsWithResource = map[AdminAction]struct{}{
+	SetBucketQuotaAdminAction:  {},
+	GetBucketQuotaAdminAction:  {},
+	SetBucketTargetAction:      {},
+	GetBucketTargetAction:      {},
+	ReplicationDiff:            {},
+	ImportBucketMetadataAction: {},
+	ExportBucketMetadataAction: {},
+	HealAdminAction:            {},
+	InventoryControlAction:     {},
+}
+
+// HasResource reports whether this admin action operates on a bucket resource.
+func (action AdminAction) HasResource() bool {
+	for a := range AdminActionsWithResource {
+		if action.Match(a) {
+			return true
+		}
+	}
+	return false
 }
 
 // Match - matches action name with action pattern.

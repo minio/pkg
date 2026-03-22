@@ -19,7 +19,6 @@
 package licverifier
 
 import (
-	"context"
 	"crypto/ecdsa"
 	"crypto/x509"
 	"encoding/pem"
@@ -27,10 +26,10 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/lestrrat-go/jwx/v2/jwa"
-	"github.com/lestrrat-go/jwx/v2/jwk"
-	"github.com/lestrrat-go/jwx/v2/jws"
-	"github.com/lestrrat-go/jwx/v2/jwt"
+	"github.com/lestrrat-go/jwx/v3/jwa"
+	"github.com/lestrrat-go/jwx/v3/jwk"
+	"github.com/lestrrat-go/jwx/v3/jws"
+	"github.com/lestrrat-go/jwx/v3/jwt"
 )
 
 // LicenseVerifier needs an ECDSA public key in PEM format for initialization.
@@ -103,11 +102,11 @@ func NewLicenseVerifier(pemBytes []byte) (*LicenseVerifier, error) {
 	if err != nil {
 		return nil, fmt.Errorf("failed to parse public key: %w", err)
 	}
-	key, err := jwk.FromRaw(pbKey)
+	key, err := jwk.Import(pbKey)
 	if err != nil {
 		return nil, err
 	}
-	key.Set(jwk.AlgorithmKey, jwa.ES384)
+	key.Set(jwk.AlgorithmKey, jwa.ES384())
 	keyset := jwk.NewSet()
 	keyset.AddKey(key)
 	return &LicenseVerifier{
@@ -118,61 +117,72 @@ func NewLicenseVerifier(pemBytes []byte) (*LicenseVerifier, error) {
 // toLicenseInfo extracts LicenseInfo from claims. It returns an error if any of
 // the claim values are invalid.
 func toLicenseInfo(license string, token jwt.Token) (LicenseInfo, error) {
-	claims, err := token.AsMap(context.Background())
-	if err != nil {
-		return LicenseInfo{}, err
-	}
-	accID, ok := claims[accountID].(float64)
-	if !ok || ok && accID < 0 {
+	var accID float64
+	err := token.Get(accountID, &accID)
+	if err != nil || accID < 0 {
 		return LicenseInfo{}, errors.New("invalid accountId in claims")
 	}
 
 	// deployment id may not be present in older licenses.
 	// so don't fail if it's not found.
-	depUUID, _ := claims[deploymentID].(string)
+	var depUUID string
+	_ = token.Get(deploymentID, &depUUID)
 
 	// license id may not be present in older licenses.
 	// so don't fail if it's not found.
-	licID, _ := claims[licenseID].(string)
+	var licID string
+	_ = token.Get(licenseID, &licID)
 
-	orgName, ok := claims[organization].(string)
-	if !ok {
+	var orgName string
+	err = token.Get(organization, &orgName)
+	if err != nil {
 		return LicenseInfo{}, errors.New("invalid organization in claims")
 	}
-	storageCap, ok := claims[capacity].(float64)
-	if !ok {
+
+	var storageCap float64
+	err = token.Get(capacity, &storageCap)
+	if err != nil {
 		return LicenseInfo{}, errors.New("invalid storage capacity in claims")
 	}
-	plan, ok := claims[plan].(string)
-	if !ok {
+
+	var planVar string
+	err = token.Get(plan, &planVar)
+	if err != nil {
 		return LicenseInfo{}, errors.New("invalid plan in claims")
 	}
-	iAt, ok := claims[issuedAt].(time.Time)
-	if !ok {
+
+	var iAt time.Time
+	err = token.Get(issuedAt, &iAt)
+	if err != nil {
 		return LicenseInfo{}, errors.New("invalid issuedAt in claims")
 	}
 
 	// apiKey is optional as it's not present in older licenses
-	apiKey, _ := claims[apiKey].(string)
+	var apiKeyVar string
+	_ = token.Get(apiKey, &apiKeyVar)
 
 	// isTrial is optional as it's not present in older licenses
 	// default value = false
-	isTrial, _ := claims[trial].(bool)
+	var isTrial bool
+	_ = token.Get(trial, &isTrial)
 
-	return LicenseInfo{
+	ret := LicenseInfo{
 		LicenseToken:    license,
 		LicenseID:       licID,
-		Email:           token.Subject(),
 		Organization:    orgName,
 		AccountID:       int64(accID),
 		DeploymentID:    depUUID,
 		StorageCapacity: int64(storageCap),
-		Plan:            plan,
+		Plan:            planVar,
 		IssuedAt:        iAt,
-		ExpiresAt:       token.Expiration(),
-		APIKey:          apiKey,
+		APIKey:          apiKeyVar,
 		IsTrial:         isTrial,
-	}, nil
+	}
+
+	ret.Email, _ = token.Subject()
+	ret.ExpiresAt, _ = token.Expiration()
+
+	return ret, nil
 }
 
 // Verify verifies the license key and validates the claims present in it.
