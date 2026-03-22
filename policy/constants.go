@@ -124,6 +124,122 @@ var DefaultPolicies = []struct {
 		},
 	},
 
+	// IAMAdmin - provides IAM management access (users, groups, policies,
+	// service accounts) but no infrastructure, diagnostics, or S3 data access.
+	{
+		Name: "iamAdmin",
+		Definition: Policy{
+			Version: DefaultVersion,
+			Statements: []Statement{
+				{
+					SID:    ID(""),
+					Effect: Allow,
+					Actions: NewActionSet(
+						// User management
+						CreateUserAdminAction,
+						DeleteUserAdminAction,
+						ListUsersAdminAction,
+						EnableUserAdminAction,
+						DisableUserAdminAction,
+						GetUserAdminAction,
+						// Group management
+						AddUserToGroupAdminAction,
+						RemoveUserFromGroupAdminAction,
+						GetGroupAdminAction,
+						ListGroupsAdminAction,
+						EnableGroupAdminAction,
+						DisableGroupAdminAction,
+						// Policy management
+						CreatePolicyAdminAction,
+						DeletePolicyAdminAction,
+						GetPolicyAdminAction,
+						AttachPolicyAdminAction,
+						UpdatePolicyAssociationAction,
+						ListUserPoliciesAdminAction,
+						// Service account management
+						CreateServiceAccountAdminAction,
+						UpdateServiceAccountAdminAction,
+						RemoveServiceAccountAdminAction,
+						ListServiceAccountsAdminAction,
+						// Temporary accounts
+						ListTemporaryAccountsAdminAction,
+						// IAM import/export
+						ExportIAMAction,
+						ImportIAMAction,
+					),
+					Resources:  NewResourceSet(),
+					Conditions: condition.NewFunctions(),
+				},
+			},
+		},
+	},
+
+	// InfraAdmin - provides infrastructure and server management access
+	// (config, pools, healing, tiers, batch jobs) but no
+	// IAM or S3 data access.
+	{
+		Name: "infraAdmin",
+		Definition: Policy{
+			Version: DefaultVersion,
+			Statements: []Statement{
+				{
+					SID:    ID(""),
+					Effect: Allow,
+					Actions: NewActionSet(
+						// Server lifecycle
+						ServerUpdateAdminAction,
+						ServiceRestartAdminAction,
+						ServiceStopAdminAction,
+						ServiceFreezeAdminAction,
+						ServiceCordonAdminAction,
+						// Server info
+						ServerInfoAdminAction,
+						StorageInfoAdminAction,
+						// Configuration
+						ConfigUpdateAdminAction,
+						// Healing & recovery
+						HealAdminAction,
+						ForceUnlockAdminAction,
+						// Pool management
+						DecommissionAdminAction,
+						RebalanceAdminAction,
+						// Bucket admin
+						SetBucketQuotaAdminAction,
+						GetBucketQuotaAdminAction,
+						// Tiers
+						SetTierAction,
+						ListTierAction,
+						// Data & license info
+						LicenseInfoAdminAction,
+						DataUsageInfoAdminAction,
+						// Bucket metadata import/export
+						ImportBucketMetadataAction,
+						ExportBucketMetadataAction,
+						// Batch jobs
+						StartBatchJobAction,
+						ListBatchJobsAction,
+						DescribeBatchJobAction,
+						CancelBatchJobAction,
+						GenerateBatchJobAction,
+						// Inventory
+						InventoryControlAction,
+						// Cluster topology (v4 APIs)
+						ClusterInfoAction,
+						PoolListAction,
+						PoolInfoAction,
+						NodeListAction,
+						NodeInfoAction,
+						SetInfoAction,
+						DriveListAction,
+						DriveInfoAction,
+					),
+					Resources:  NewResourceSet(),
+					Conditions: condition.NewFunctions(),
+				},
+			},
+		},
+	},
+
 	// Admin - provides admin all-access canned policy
 	{
 		Name: "consoleAdmin",
