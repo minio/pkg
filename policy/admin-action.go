@@ -387,6 +387,33 @@ var SupportedAdminActions = map[AdminAction]struct{}{
 	AllAdminActions: {},
 }
 
+// AdminActionsWithResource enumerates admin actions that operate on
+// a specific bucket resource. When a policy statement contains one of
+// these actions *and* specifies a Resource, the resource is enforced
+// against the target bucket. All other admin actions are resource-less;
+// any Resource specified in the statement is ignored for them.
+var AdminActionsWithResource = map[AdminAction]struct{}{
+	SetBucketQuotaAdminAction:  {},
+	GetBucketQuotaAdminAction:  {},
+	SetBucketTargetAction:      {},
+	GetBucketTargetAction:      {},
+	ReplicationDiff:            {},
+	ImportBucketMetadataAction: {},
+	ExportBucketMetadataAction: {},
+	HealAdminAction:            {},
+	InventoryControlAction:     {},
+}
+
+// HasResource reports whether this admin action operates on a bucket resource.
+func (action AdminAction) HasResource() bool {
+	for a := range AdminActionsWithResource {
+		if action.Match(a) {
+			return true
+		}
+	}
+	return false
+}
+
 // Match - matches action name with action pattern.
 func (action AdminAction) Match(a AdminAction) bool {
 	return wildcard.Match(string(action), string(a))
