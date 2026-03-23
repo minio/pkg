@@ -28,10 +28,10 @@ import (
 
 func getValuesByKey(m map[string][]string, key Key) []string {
 	name := key.Name()
-	if values, found := m[http.CanonicalHeaderKey(name)]; found {
+	if values, found := m[name]; found {
 		return values
 	}
-	return m[name]
+	return m[http.CanonicalHeaderKey(name)]
 }
 
 // Splits an incoming path into bucket and object components.
