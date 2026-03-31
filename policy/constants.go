@@ -1,19 +1,14 @@
-// Copyright (c) 2015-2021 MinIO, Inc.
+// MinIO, Inc. CONFIDENTIAL
 //
-// This file is part of MinIO Object Storage stack
+// [2014] - [2026] MinIO, Inc. All Rights Reserved.
 //
-// This program is free software: you can redistribute it and/or modify
-// it under the terms of the GNU Affero General Public License as published by
-// the Free Software Foundation, either version 3 of the License, or
-// (at your option) any later version.
-//
-// This program is distributed in the hope that it will be useful
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU Affero General Public License for more details.
-//
-// You should have received a copy of the GNU Affero General Public License
-// along with this program.  If not, see <http://www.gnu.org/licenses/>.
+// NOTICE:  All information contained herein is, and remains the property
+// of MinIO, Inc and its suppliers, if any.  The intellectual and technical
+// concepts contained herein are proprietary to MinIO, Inc and its suppliers
+// and may be covered by U.S. and Foreign Patents, patents in process, and are
+// protected by trade secret or copyright law. Dissemination of this information
+// or reproduction of this material is strictly forbidden unless prior written
+// permission is obtained from MinIO, Inc.
 
 package policy
 
@@ -334,6 +329,123 @@ var DefaultPolicies = []struct {
 						S3TablesTableMetricsAction,
 					),
 					Resources:  NewResourceSet(NewS3TablesResource("*")),
+					Conditions: condition.NewFunctions(),
+				},
+			},
+		},
+	},
+
+	// ReplicationAdmin - provides site replication and bucket replication
+	// management access, but no IAM, general infrastructure, or S3 data access.
+	{
+		Name: "replicationAdmin",
+		Definition: Policy{
+			Version: DefaultVersion,
+			Statements: []Statement{
+				{
+					SID:    ID(""),
+					Effect: Allow,
+					Actions: NewActionSet(
+						// Site replication management
+						SiteReplicationAddAction,
+						SiteReplicationDisableAction,
+						SiteReplicationRemoveAction,
+						SiteReplicationResyncAction,
+						SiteReplicationInfoAction,
+						SiteReplicationOperationAction,
+						// Tables replication management
+						TablesReplicationAddAction,
+						TablesReplicationRemoveAction,
+						TablesReplicationInfoAction,
+						// Replication diagnostics
+						ReplicationDiff,
+					),
+					Resources:  NewResourceSet(),
+					Conditions: condition.NewFunctions(),
+				},
+				{
+					SID:    ID(""),
+					Effect: Allow,
+					Actions: NewActionSet(
+						// Bucket-level replication config
+						GetReplicationConfigurationAction,
+						PutReplicationConfigurationAction,
+						ResetBucketReplicationStateAction,
+						GetObjectVersionForReplicationAction,
+					),
+					Resources:  NewResourceSet(NewResource("*")),
+					Conditions: condition.NewFunctions(),
+				},
+			},
+		},
+	},
+
+	// SecurityAuditAdmin - provides read-only access to IAM configuration,
+	// server topology, diagnostics, and bucket security settings for compliance
+	// auditing. Mirrors the intent of AWS SecurityAudit. No write, delete, or
+	// S3 data access.
+	{
+		Name: "securityAuditAdmin",
+		Definition: Policy{
+			Version: DefaultVersion,
+			Statements: []Statement{
+				{
+					SID:    ID(""),
+					Effect: Allow,
+					Actions: NewActionSet(
+						// IAM read
+						ListUsersAdminAction,
+						GetUserAdminAction,
+						ListGroupsAdminAction,
+						GetGroupAdminAction,
+						GetPolicyAdminAction,
+						ListUserPoliciesAdminAction,
+						ListServiceAccountsAdminAction,
+						ListTemporaryAccountsAdminAction,
+						ExportIAMAction,
+						// Replication info (read-only)
+						SiteReplicationInfoAction,
+						TablesReplicationInfoAction,
+						// Server & cluster topology (read-only)
+						ServerInfoAdminAction,
+						StorageInfoAdminAction,
+						DataUsageInfoAdminAction,
+						LicenseInfoAdminAction,
+						ClusterInfoAction,
+						PoolListAction,
+						PoolInfoAction,
+						NodeListAction,
+						NodeInfoAction,
+						SetInfoAction,
+						DriveListAction,
+						DriveInfoAction,
+						// Diagnostics (read-only)
+						ProfilingAdminAction,
+						TraceAdminAction,
+						ConsoleLogAdminAction,
+						TopLocksAdminAction,
+						HealthInfoAdminAction,
+						BandwidthMonitorAction,
+						PrometheusAdminAction,
+					),
+					Resources:  NewResourceSet(),
+					Conditions: condition.NewFunctions(),
+				},
+				{
+					SID:    ID(""),
+					Effect: Allow,
+					Actions: NewActionSet(
+						// Bucket security config (read-only)
+						GetBucketPolicyAction,
+						GetBucketLocationAction,
+						GetBucketNotificationAction,
+						GetBucketObjectLockConfigurationAction,
+						GetBucketEncryptionAction,
+						GetBucketTaggingAction,
+						GetBucketVersioningAction,
+						GetReplicationConfigurationAction,
+					),
+					Resources:  NewResourceSet(NewResource("*")),
 					Conditions: condition.NewFunctions(),
 				},
 			},
