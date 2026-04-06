@@ -25,6 +25,55 @@ import (
 	"testing"
 )
 
+func TestSubkeysInitialized(t *testing.T) {
+	src := rand.New(rand.NewSource(12345))
+	r, err := NewReader(WithRNG(src))
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	allZero := true
+	for _, v := range r.subxor {
+		if v != 0 {
+			allZero = false
+			break
+		}
+	}
+	if allZero {
+		t.Fatal("subxor keys are all zero after initialization")
+	}
+
+	// With fullReset=false (default), the buffer is reused across Reset.
+	// If subkeys were always zero, output would be identical after reset.
+	buf1 := make([]byte, 1024)
+	io.ReadFull(r, buf1)
+
+	r.Reset()
+
+	buf2 := make([]byte, 1024)
+	io.ReadFull(r, buf2)
+
+	if bytes.Equal(buf1, buf2) {
+		t.Fatal("output identical after reset — subkeys not re-initialized")
+	}
+}
+
+func TestResetSizeProducesUniqueOutput(t *testing.T) {
+	const size = 64 << 20 // 64 MiB
+	r, _ := NewReader(WithSize(size))
+
+	out1 := make([]byte, size)
+	io.ReadFull(r, out1)
+
+	r.ResetSize(size)
+	out2 := make([]byte, size)
+	io.ReadFull(r, out2)
+
+	if bytes.Equal(out1, out2) {
+		t.Fatal("ResetSize produced identical output: subxor keys are not being randomized")
+	}
+}
+
 func BenchmarkReader(b *testing.B) {
 	for _, size := range []int{1000, 1024, 16384, 1 << 20} {
 		r, err := NewReader()
