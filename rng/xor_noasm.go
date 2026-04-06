@@ -1,4 +1,4 @@
-//go:build (!amd64 && !arm64) || noasm || appengine || gccgo
+//go:build (!amd64 && !arm64) || noasm || appengine || gccgo || purego
 
 // Copyright (c) 2015-2021 MinIO, Inc.
 //

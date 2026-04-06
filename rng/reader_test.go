@@ -24,6 +24,8 @@ import (
 	"math/rand"
 	"strconv"
 	"testing"
+
+	"github.com/klauspost/cpuid/v2"
 )
 
 func BenchmarkReader(b *testing.B) {
@@ -156,147 +158,173 @@ func TestReaderSeeker(t *testing.T) {
 	}
 }
 
+func forEachXorImpl(t *testing.T, fn func(t *testing.T)) {
+	t.Helper()
+	if !cpuid.CPU.Has(cpuid.SSE2) {
+		fn(t)
+		return
+	}
+	avx2 := cpuid.CPU.Has(cpuid.AVX2)
+	if avx2 {
+		t.Run("AVX2", func(t *testing.T) {
+			fn(t)
+		})
+		t.Run("SSE2", func(t *testing.T) {
+			cpuid.CPU.Disable(cpuid.AVX2)
+			defer cpuid.CPU.Enable(cpuid.AVX2)
+			fn(t)
+		})
+		return
+
+	}
+	fn(t)
+}
+
 func TestXor(t *testing.T) {
-	// Validate asm, if any, otherwise validate ourselves.
-	rng := rand.New(rand.NewSource(0))
-	for _, size := range []int{1000, 1024, 16384, 1 << 20} {
-		bufIn := make([]byte, size)
-		_, err := io.ReadFull(rng, bufIn)
-		if err != nil {
-			t.Fatal(err)
+	forEachXorImpl(t, func(t *testing.T) {
+		rng := rand.New(rand.NewSource(0))
+		for _, size := range []int{1000, 1024, 16384, 1 << 20} {
+			bufIn := make([]byte, size)
+			_, err := io.ReadFull(rng, bufIn)
+			if err != nil {
+				t.Fatal(err)
+			}
+			bufOut := make([]byte, size)
+			bufOut2 := make([]byte, size)
+			var keys [4]uint64
+			for i := range keys {
+				keys[i] = rng.Uint64()
+			}
+			for i := 0; i < 1000; i++ {
+				bSize := (rand.Intn(size) / 32) * 32
+				bufOut := bufOut[:bSize]
+				for i := 0; i < len(bufOut); i++ {
+					bufOut[i] = 0
+				}
+				bufOut2 := bufOut2[:bSize]
+				for i := 0; i < len(bufOut2); i++ {
+					bufOut2[i] = 0
+				}
+				xorSlice(bufIn, bufOut, &keys)
+				xor32Go(bufIn, bufOut2, &keys)
+				if !bytes.Equal(bufOut, bufOut2) {
+					t.Fatalf("\nexpected %x\ngot      %x", bufOut, bufOut2)
+				}
+			}
 		}
-		bufOut := make([]byte, size)
-		bufOut2 := make([]byte, size)
+	})
+}
+
+func TestXorZeroKey(t *testing.T) {
+	forEachXorImpl(t, func(t *testing.T) {
+		var keys [4]uint64
+		for _, size := range []int{0, 32, 64, 96, 128, 1024} {
+			in := make([]byte, size)
+			for i := range in {
+				in[i] = byte(i)
+			}
+			out := make([]byte, size)
+			xorSlice(in, out, &keys)
+			if !bytes.Equal(in, out) {
+				t.Fatalf("size %d: zero-key xor should copy input\nexpected %x\ngot      %x", size, in, out)
+			}
+			out2 := make([]byte, size)
+			xor32Go(in, out2, &keys)
+			if !bytes.Equal(in, out2) {
+				t.Fatalf("size %d: zero-key xor32Go should copy input", size)
+			}
+		}
+	})
+}
+
+func TestXorDoubleApply(t *testing.T) {
+	forEachXorImpl(t, func(t *testing.T) {
+		rng := rand.New(rand.NewSource(42))
 		var keys [4]uint64
 		for i := range keys {
 			keys[i] = rng.Uint64()
 		}
-		for i := 0; i < 1000; i++ {
-			bSize := (rand.Intn(size) / 32) * 32
-			bufOut := bufOut[:bSize]
-			for i := 0; i < len(bufOut); i++ {
-				bufOut[i] = 0
-			}
-			bufOut2 := bufOut2[:bSize]
-			for i := 0; i < len(bufOut2); i++ {
-				bufOut2[i] = 0
-			}
-			xorSlice(bufIn, bufOut, &keys)
-			xor32Go(bufIn, bufOut2, &keys)
-			if !bytes.Equal(bufOut, bufOut2) {
-				t.Fatalf("\nexpected %x\ngot      %x", bufOut, bufOut2)
+		for _, size := range []int{32, 64, 96, 128, 256, 1024, 4096} {
+			in := make([]byte, size)
+			_, _ = io.ReadFull(rng, in)
+			orig := make([]byte, size)
+			copy(orig, in)
+
+			tmp := make([]byte, size)
+			out := make([]byte, size)
+			xorSlice(in, tmp, &keys)
+			xorSlice(tmp, out, &keys)
+			if !bytes.Equal(orig, out) {
+				t.Fatalf("size %d: double xor should return original\nexpected %x\ngot      %x", size, orig[:32], out[:32])
 			}
 		}
-	}
-}
-
-func TestXorZeroKey(t *testing.T) {
-	var keys [4]uint64
-	for _, size := range []int{0, 32, 64, 96, 128, 1024} {
-		in := make([]byte, size)
-		for i := range in {
-			in[i] = byte(i)
-		}
-		out := make([]byte, size)
-		xorSlice(in, out, &keys)
-		if !bytes.Equal(in, out) {
-			t.Fatalf("size %d: zero-key xor should copy input\nexpected %x\ngot      %x", size, in, out)
-		}
-		out2 := make([]byte, size)
-		xor32Go(in, out2, &keys)
-		if !bytes.Equal(in, out2) {
-			t.Fatalf("size %d: zero-key xor32Go should copy input", size)
-		}
-	}
-}
-
-func TestXorDoubleApply(t *testing.T) {
-	rng := rand.New(rand.NewSource(42))
-	var keys [4]uint64
-	for i := range keys {
-		keys[i] = rng.Uint64()
-	}
-	for _, size := range []int{32, 64, 96, 128, 256, 1024, 4096} {
-		in := make([]byte, size)
-		_, _ = io.ReadFull(rng, in)
-		orig := make([]byte, size)
-		copy(orig, in)
-
-		tmp := make([]byte, size)
-		out := make([]byte, size)
-		xorSlice(in, tmp, &keys)
-		xorSlice(tmp, out, &keys)
-		if !bytes.Equal(orig, out) {
-			t.Fatalf("size %d: double xor should return original\nexpected %x\ngot      %x", size, orig[:32], out[:32])
-		}
-	}
+	})
 }
 
 func TestXorAllSizes(t *testing.T) {
-	rng := rand.New(rand.NewSource(99))
-	var keys [4]uint64
-	for i := range keys {
-		keys[i] = rng.Uint64()
-	}
-	in := make([]byte, 8192)
-	_, _ = io.ReadFull(rng, in)
-
-	// Every multiple of 32 up to 8192 exercises different loop paths:
-	// 0 (empty), 32 (single block), 64 (two blocks / 64-byte loop only),
-	// 96 (64-byte loop + 32-byte tail), etc.
-	for size := 0; size <= len(in); size += 32 {
-		outAsm := make([]byte, size)
-		outGo := make([]byte, size)
-		xorSlice(in[:size], outAsm, &keys)
-		xor32Go(in[:size], outGo, &keys)
-		if !bytes.Equal(outAsm, outGo) {
-			t.Fatalf("size %d: asm and Go disagree\nasm %x\ngo  %x", size, outAsm[:min(64, size)], outGo[:min(64, size)])
+	forEachXorImpl(t, func(t *testing.T) {
+		rng := rand.New(rand.NewSource(99))
+		var keys [4]uint64
+		for i := range keys {
+			keys[i] = rng.Uint64()
 		}
-	}
+		in := make([]byte, 8192)
+		_, _ = io.ReadFull(rng, in)
+
+		for size := 0; size <= len(in); size += 32 {
+			outAsm := make([]byte, size)
+			outGo := make([]byte, size)
+			xorSlice(in[:size], outAsm, &keys)
+			xor32Go(in[:size], outGo, &keys)
+			if !bytes.Equal(outAsm, outGo) {
+				t.Fatalf("size %d: asm and Go disagree\nasm %x\ngo  %x", size, outAsm[:min(64, size)], outGo[:min(64, size)])
+			}
+		}
+	})
 }
 
 func TestXorDistinctKeys(t *testing.T) {
-	in := make([]byte, 256)
-	for i := range in {
-		in[i] = byte(i)
-	}
-	keys1 := [4]uint64{1, 2, 3, 4}
-	keys2 := [4]uint64{5, 6, 7, 8}
-	out1 := make([]byte, 256)
-	out2 := make([]byte, 256)
-	xorSlice(in, out1, &keys1)
-	xorSlice(in, out2, &keys2)
-	if bytes.Equal(out1, out2) {
-		t.Fatal("different keys should produce different output")
-	}
+	forEachXorImpl(t, func(t *testing.T) {
+		in := make([]byte, 256)
+		for i := range in {
+			in[i] = byte(i)
+		}
+		keys1 := [4]uint64{1, 2, 3, 4}
+		keys2 := [4]uint64{5, 6, 7, 8}
+		out1 := make([]byte, 256)
+		out2 := make([]byte, 256)
+		xorSlice(in, out1, &keys1)
+		xorSlice(in, out2, &keys2)
+		if bytes.Equal(out1, out2) {
+			t.Fatal("different keys should produce different output")
+		}
+	})
 }
 
 func TestXorKnownValues(t *testing.T) {
-	in := make([]byte, 32)
-	for i := range in {
-		in[i] = byte(i)
-	}
-	keys := [4]uint64{0x0807060504030201, 0x100f0e0d0c0b0a09, 0x1817161514131211, 0x201f1e1d1c1b1a19}
-	out := make([]byte, 32)
-	xor32Go(in, out, &keys)
+	forEachXorImpl(t, func(t *testing.T) {
+		in := make([]byte, 32)
+		for i := range in {
+			in[i] = byte(i)
+		}
+		keys := [4]uint64{0x0807060504030201, 0x100f0e0d0c0b0a09, 0x1817161514131211, 0x201f1e1d1c1b1a19}
+		out := make([]byte, 32)
+		xor32Go(in, out, &keys)
 
-	// Each 8-byte block: out[i..i+7] = in[i..i+7] XOR keys[i/8]
-	// Block 0: in[0..7] = 00 01 02 03 04 05 06 07, key = 01 02 03 04 05 06 07 08 (LE)
-	//   XOR => 01 03 01 07 01 03 01 0f
-	expected := make([]byte, 32)
-	for i := 0; i < 32; i++ {
-		keyBytes := make([]byte, 8)
-		binary.LittleEndian.PutUint64(keyBytes, keys[i/8])
-		expected[i] = in[i] ^ keyBytes[i%8]
-	}
-	if !bytes.Equal(out, expected) {
-		t.Fatalf("known values mismatch\nexpected %x\ngot      %x", expected, out)
-	}
+		expected := make([]byte, 32)
+		for i := 0; i < 32; i++ {
+			keyBytes := make([]byte, 8)
+			binary.LittleEndian.PutUint64(keyBytes, keys[i/8])
+			expected[i] = in[i] ^ keyBytes[i%8]
+		}
+		if !bytes.Equal(out, expected) {
+			t.Fatalf("known values mismatch\nexpected %x\ngot      %x", expected, out)
+		}
 
-	// Now verify xorSlice matches
-	outAsm := make([]byte, 32)
-	xorSlice(in, outAsm, &keys)
-	if !bytes.Equal(outAsm, expected) {
-		t.Fatalf("xorSlice known values mismatch\nexpected %x\ngot      %x", expected, outAsm)
-	}
+		outAsm := make([]byte, 32)
+		xorSlice(in, outAsm, &keys)
+		if !bytes.Equal(outAsm, expected) {
+			t.Fatalf("xorSlice known values mismatch\nexpected %x\ngot      %x", expected, outAsm)
+		}
+	})
 }

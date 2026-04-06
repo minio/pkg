@@ -18,6 +18,7 @@
 //+build !noasm
 //+build !appengine
 //+build !gccgo
+//+build !purego
 
 // func xorSliceNEON(in, out []byte, v *[4]uint64)
 TEXT ·xorSliceNEON(SB), 7, $0
