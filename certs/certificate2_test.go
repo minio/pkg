@@ -296,8 +296,8 @@ func overwriteFile(t *testing.T, src, dst string, symlink bool) {
 func updateCertWithWait(t *testing.T, cert *Certificate2, symlink bool, update func()) {
 	done := make(chan struct{})
 	wait := time.Second
-	if symlink {
-		wait = wait + symlinkReloadInterval // can take up to symlinkReloadInterval to detect changes
+	if symlink || runtime.GOOS == "windows" {
+		wait = wait + symlinkReloadInterval
 	}
 	ctx, cancel := context.WithTimeout(context.Background(), wait)
 	defer cancel()

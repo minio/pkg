@@ -149,14 +149,17 @@ func (c *Certificate) Watch(ctx context.Context, interval time.Duration, signals
 	if !certFileSymLink && !keyFileSymLink && !isk8s {
 		go func() {
 			events := make(chan notify.EventInfo, 1)
-			if err := notify.Watch(filepath.Dir(c.certFile), events, eventWrite...); err != nil {
+			stop1, err := watchDirSafe(filepath.Dir(c.certFile), c.certFile, events, ctx.Done())
+			if err != nil {
 				return
 			}
-			if err := notify.Watch(filepath.Dir(c.keyFile), events, eventWrite...); err != nil {
-				notify.Stop(events)
+			stop2, err := watchDirSafe(filepath.Dir(c.keyFile), c.keyFile, events, ctx.Done())
+			if err != nil {
+				stop1()
 				return
 			}
-			defer notify.Stop(events)
+			defer stop1()
+			defer stop2()
 			for {
 				select {
 				case <-events:
