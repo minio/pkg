@@ -19,15 +19,15 @@
 //+build !appengine
 //+build !gccgo
 
-// func xorSlice(in, out []byte, v *[4]uint64)
-TEXT ·xorSlice(SB), 7, $0
-	MOVQ  v+48(FP), AX         // AX: v
-	MOVQ  in+0(FP), SI         // SI: &in
-	MOVQ  out+24(FP), DX       // DX: &out
-	MOVQ  out_len+32(FP), R9   // R9: len(out)
-	MOVOU (AX), X0             // v[x]
-	MOVOU 16(AX), X1           // v[x+2]
-	SHRQ  $5, R9               // len(in) / 32
+// func xorSliceSSE2(in, out []byte, v *[4]uint64)
+TEXT ·xorSliceSSE2(SB), 7, $0
+	MOVQ  v+48(FP), AX       // AX: v
+	MOVQ  in+0(FP), SI       // SI: &in
+	MOVQ  out+24(FP), DX     // DX: &out
+	MOVQ  out_len+32(FP), R9 // R9: len(out)
+	MOVOU (AX), X0           // v[x]
+	MOVOU 16(AX), X1         // v[x+2]
+	SHRQ  $5, R9             // len(in) / 32
 	JZ    done_xor_sse2_32
 
 loopback_xor_sse2_32:
@@ -43,4 +43,41 @@ loopback_xor_sse2_32:
 	JNZ   loopback_xor_sse2_32
 
 done_xor_sse2_32:
+	RET
+
+// func xorSliceAvx2(in, out []byte, v *[4]uint64)
+TEXT ·xorSliceAvx2(SB), 7, $0
+	MOVQ    v+48(FP), AX         // AX: v
+	MOVQ    in+0(FP), SI         // SI: &in
+	MOVQ    out+24(FP), DX       // DX: &out
+	MOVQ    out_len+32(FP), R9   // R9: len(out)
+	VMOVDQU (AX), Y0             // v[x]
+	SHRQ    $5, R9               // len(in) / 32
+	CMPQ    R9, $1
+	JEQ     loopback_xor_avx2_32
+	JB      end_xor_avx2_32
+
+loopback_xor_avx2_64:
+	SUBQ    $2, R9
+	VMOVDQU (SI), Y1
+	VMOVDQU 32(SI), Y2
+	VPXOR   Y1, Y0, Y1
+	VPXOR   Y2, Y0, Y2
+	VMOVDQU Y1, (DX)
+	VMOVDQU Y2, 32(DX)
+	ADDQ    $64, SI              // in+=64
+	ADDQ    $64, DX              // out+=64
+	CMPQ    R9, $1
+	JA      loopback_xor_avx2_64
+	JEQ     loopback_xor_avx2_32
+	JMP     end_xor_avx2_32
+
+loopback_xor_avx2_32:
+	VPXOR   (SI), Y0, Y1
+	VMOVDQU Y1, (DX)
+	ADDQ    $32, SI      // in+=32
+	ADDQ    $32, DX      // out+=32
+
+end_xor_avx2_32:
+	VZEROUPPER
 	RET

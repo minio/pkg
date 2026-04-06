@@ -19,5 +19,18 @@
 
 package rng
 
+import "github.com/klauspost/cpuid/v2"
+
+func xorSlice(in, out []byte, v *[4]uint64) {
+	if cpuid.CPU.Has(cpuid.AVX2) {
+		xorSliceAvx2(in, out, v)
+	} else {
+		xorSliceSSE2(in, out, v)
+	}
+}
+
 //go:noescape
-func xorSlice(in, out []byte, v *[4]uint64)
+func xorSliceSSE2(in, out []byte, v *[4]uint64)
+
+//go:noescape
+func xorSliceAvx2(in, out []byte, v *[4]uint64)
