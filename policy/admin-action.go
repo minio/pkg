@@ -128,6 +128,8 @@ const (
 	TablesReplicationRemoveAction = "admin:TablesReplicationRemove"
 	// TablesReplicationInfoAction - allow getting tables replication info/status
 	TablesReplicationInfoAction = "admin:TablesReplicationInfo"
+	// TablesReplicationStartFailoverAction - allow starting tables replication failover
+	TablesReplicationStartFailoverAction = "admin:TablesReplicationStartFailover"
 
 	// Service account Actions
 
@@ -358,9 +360,10 @@ var SupportedAdminActions = map[AdminAction]struct{}{
 	SiteReplicationRemoveAction:      {},
 	SiteReplicationResyncAction:      {},
 
-	TablesReplicationAddAction:    {},
-	TablesReplicationRemoveAction: {},
-	TablesReplicationInfoAction:   {},
+	TablesReplicationAddAction:           {},
+	TablesReplicationRemoveAction:        {},
+	TablesReplicationInfoAction:          {},
+	TablesReplicationStartFailoverAction: {},
 
 	ImportBucketMetadataAction: {},
 	ExportBucketMetadataAction: {},
