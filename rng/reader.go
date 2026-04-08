@@ -79,15 +79,14 @@ func (r *Reader) init() error {
 		r.bufferSeeded = !r.o.fullReset
 	}
 	// Always reset subkeys.
-	var tmp [32]byte
 	_, err := io.ReadFull(r.o.rng, r.tmp[:])
 	if err != nil {
 		return err
 	}
-	r.subxor[0] = binary.LittleEndian.Uint64(tmp[:8])
-	r.subxor[1] = binary.LittleEndian.Uint64(tmp[8:16])
-	r.subxor[2] = binary.LittleEndian.Uint64(tmp[16:24])
-	r.subxor[3] = binary.LittleEndian.Uint64(tmp[24:32])
+	r.subxor[0] = binary.LittleEndian.Uint64(r.tmp[:8])
+	r.subxor[1] = binary.LittleEndian.Uint64(r.tmp[8:16])
+	r.subxor[2] = binary.LittleEndian.Uint64(r.tmp[16:24])
+	r.subxor[3] = binary.LittleEndian.Uint64(r.tmp[24:32])
 	r.offset = 0
 	return nil
 }
