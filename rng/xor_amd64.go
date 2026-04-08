@@ -15,7 +15,7 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-//go:build !noasm && !appengine && !gccgo
+//go:build !noasm && !appengine && !gccgo && !purego
 
 package rng
 
