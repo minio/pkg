@@ -23,6 +23,7 @@ import (
 	"os"
 	"path/filepath"
 	"reflect"
+	"runtime"
 	"testing"
 	"time"
 )
@@ -89,6 +90,9 @@ func TestCertificate2_AutoReload(t *testing.T) {
 }
 
 func TestCertificate2_AutoReloadSymlink(t *testing.T) {
+	if runtime.GOOS == "windows" {
+		t.Skip("symlinks require admin on Windows")
+	}
 	testCertificate2AutoReload(t, true)
 }
 
@@ -177,6 +181,9 @@ func TestCertificate2_AutoReloadCertFileOnly(t *testing.T) {
 }
 
 func TestCertificate2_AutoReloadCertFileOnlySymlink(t *testing.T) {
+	if runtime.GOOS == "windows" {
+		t.Skip("symlinks require admin on Windows")
+	}
 	testCertificate2AutoReloadCertFileOnly(t, true)
 }
 
@@ -216,6 +223,9 @@ func TestCertificate2_InvalidReloadIgnored(t *testing.T) {
 }
 
 func TestCertificate2_InvalidReloadIgnoredSymlink(t *testing.T) {
+	if runtime.GOOS == "windows" {
+		t.Skip("symlinks require admin on Windows")
+	}
 	testCertificate2InvalidReloadIgnored(t, true)
 }
 
@@ -286,8 +296,8 @@ func overwriteFile(t *testing.T, src, dst string, symlink bool) {
 func updateCertWithWait(t *testing.T, cert *Certificate2, symlink bool, update func()) {
 	done := make(chan struct{})
 	wait := time.Second
-	if symlink {
-		wait = wait + symlinkReloadInterval // can take up to symlinkReloadInterval to detect changes
+	if symlink || runtime.GOOS == "windows" {
+		wait = wait + symlinkReloadInterval
 	}
 	ctx, cancel := context.WithTimeout(context.Background(), wait)
 	defer cancel()

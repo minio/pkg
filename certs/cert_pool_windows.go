@@ -28,7 +28,11 @@ import (
 func loadSystemRoots() (*x509.CertPool, error) {
 	const CRYPTENOTFOUND = 0x80092004
 
-	store, err := syscall.CertOpenSystemStore(0, syscall.StringToUTF16Ptr("ROOT"))
+	rootPtr, err := syscall.UTF16PtrFromString("ROOT")
+	if err != nil {
+		return nil, err
+	}
+	store, err := syscall.CertOpenSystemStore(0, rootPtr)
 	if err != nil {
 		return nil, err
 	}

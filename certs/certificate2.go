@@ -203,19 +203,17 @@ func watchFile(ctx context.Context, path string, ch chan notify.EventInfo, wg *s
 	}
 	symLink := st.Mode()&os.ModeSymlink == os.ModeSymlink
 	if !symLink {
-		// Windows doesn't allow for watching file changes but instead allows
-		// for directory changes only, while we can still watch for changes
-		// on files on other platforms. For other platforms it's also better
-		// to watch the directory to catch all changes. Some updates are written
-		// to a new file and then renamed to the destination file. This method
-		// ensures we catch all such changes.
-		//
-		// Note: Certificate reloading relies on atomic file updates (write new
-		// file, then rename). If certificate files are updated in-place without
-		// atomicity, there is a window where partial/corrupted data may be read.
-		// The hash comparison will skip reloads when content hasn't changed, but
-		// does not protect against temporary inconsistency during partial writes.
-		return notify.Watch(filepath.Dir(path), ch, eventWrite...)
+		stop, err := watchDirSafe(filepath.Dir(path), path, ch, ctx.Done())
+		if err != nil {
+			return err
+		}
+		wg.Add(1)
+		go func() {
+			defer wg.Done()
+			<-ctx.Done()
+			stop()
+		}()
+		return nil
 	}
 
 	wg.Add(1)

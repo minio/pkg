@@ -26,7 +26,7 @@ func GetMaxOpenFileLimit() (curLimit, maxLimit uint64, err error) {
 }
 
 // SetMaxOpenFileLimit - sets maximum file descriptor number that can be opened by this process.
-func SetMaxOpenFileLimit(curLimit, maxLimit uint64) error {
+func SetMaxOpenFileLimit(_, _ uint64) error {
 	// Nothing to do for windows.
 	return nil
 }

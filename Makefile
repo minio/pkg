@@ -6,16 +6,14 @@ all: test
 
 getdeps:
 	@mkdir -p ${GOPATH}/bin
-	@echo "Installing golangci-lint" && curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b $(GOPATH)/bin
+	@echo "Installing golangci-lint" && go install tool
 
 lint: getdeps
 	@echo "Running $@ check"
-	@${GOPATH}/bin/golangci-lint cache clean
 	@${GOPATH}/bin/golangci-lint run --build-tags kqueue --timeout=10m --config ./.golangci.yml
 
 lint-fix: getdeps
 	@echo "Running $@ check"
-	@${GOPATH}/bin/golangci-lint cache clean
 	@${GOPATH}/bin/golangci-lint run --build-tags kqueue --timeout=10m --config ./.golangci.yml --fix
 
 test: lint

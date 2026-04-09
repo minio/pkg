@@ -197,13 +197,21 @@ func (m *Manager) AddCertificate(certFile, keyFile string) (err error) {
 			// for simplicity.
 			events := make(chan notify.EventInfo, 1)
 
-			if err = notify.Watch(filepath.Dir(certFile), events, eventWrite...); err != nil {
+			stop1, err := watchDirSafe(filepath.Dir(certFile), certFile, events, m.done)
+			if err != nil {
 				return err
 			}
-			if err = notify.Watch(filepath.Dir(keyFile), events, eventWrite...); err != nil {
+			stop2, err := watchDirSafe(filepath.Dir(keyFile), keyFile, events, m.done)
+			if err != nil {
+				stop1()
 				return err
 			}
-			go m.watchFileEvents(p, events, m.reloader())
+			reload := m.reloader()
+			go func() {
+				defer stop1()
+				defer stop2()
+				m.watchFileEvents(p, events, reload)
+			}()
 		}
 	}
 	return nil

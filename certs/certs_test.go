@@ -23,6 +23,7 @@ import (
 	"io"
 	"os"
 	"reflect"
+	"runtime"
 	"testing"
 	"time"
 
@@ -102,8 +103,13 @@ func TestValidPairAfterWrite(t *testing.T) {
 	updateCerts("new-public.crt", "new-private.key")
 	defer updateCerts("original-public.crt", "original-private.key")
 
-	// Wait for the write event..
-	time.Sleep(200 * time.Millisecond)
+	// Wait for the write event. On Windows, file watching uses polling
+	// instead of fsnotify, so we need a longer wait.
+	wait := 200 * time.Millisecond
+	if runtime.GOOS == "windows" {
+		wait = 2 * time.Second
+	}
+	time.Sleep(wait)
 
 	hello := &tls.ClientHelloInfo{}
 	gcert, err := c.GetCertificate(hello)

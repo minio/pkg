@@ -18,6 +18,9 @@
 package certs
 
 import (
+	"runtime"
+	"time"
+
 	"github.com/rjeczalik/notify"
 )
 
@@ -29,4 +32,38 @@ func isWriteEvent(event notify.Event) bool {
 		}
 	}
 	return false
+}
+
+// watchDirSafe watches a directory for write events and sends notifications
+// to ch. On Windows, rjeczalik/notify uses unsafe pointer casts that crash
+// under Go's checkptr validation, so we fall back to polling with eventPath
+// as the reported path in synthetic events.
+func watchDirSafe(dir, eventPath string, ch chan notify.EventInfo, done <-chan struct{}) (stop func(), err error) {
+	if runtime.GOOS == "windows" {
+		quit := make(chan struct{})
+		exited := make(chan struct{})
+		go func() {
+			defer close(exited)
+			t := time.NewTicker(symlinkReloadInterval)
+			defer t.Stop()
+			for {
+				select {
+				case <-quit:
+					return
+				case <-done:
+					return
+				case <-t.C:
+					select {
+					case ch <- eventInfo{eventPath, notify.Write}:
+					default:
+					}
+				}
+			}
+		}()
+		return func() { close(quit); <-exited }, nil
+	}
+	if err := notify.Watch(dir, ch, eventWrite...); err != nil {
+		return nil, err
+	}
+	return func() { notify.Stop(ch) }, nil
 }
