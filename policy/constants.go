@@ -340,6 +340,123 @@ var DefaultPolicies = []struct {
 		},
 	},
 
+	// ReplicationAdmin - provides site replication and bucket replication
+	// management access, but no IAM, general infrastructure, or S3 data access.
+	{
+		Name: "replicationAdmin",
+		Definition: Policy{
+			Version: DefaultVersion,
+			Statements: []Statement{
+				{
+					SID:    ID(""),
+					Effect: Allow,
+					Actions: NewActionSet(
+						// Site replication management
+						SiteReplicationAddAction,
+						SiteReplicationDisableAction,
+						SiteReplicationRemoveAction,
+						SiteReplicationResyncAction,
+						SiteReplicationInfoAction,
+						SiteReplicationOperationAction,
+						// Tables replication management
+						TablesReplicationAddAction,
+						TablesReplicationRemoveAction,
+						TablesReplicationInfoAction,
+						// Replication diagnostics
+						ReplicationDiff,
+					),
+					Resources:  NewResourceSet(),
+					Conditions: condition.NewFunctions(),
+				},
+				{
+					SID:    ID(""),
+					Effect: Allow,
+					Actions: NewActionSet(
+						// Bucket-level replication config
+						GetReplicationConfigurationAction,
+						PutReplicationConfigurationAction,
+						ResetBucketReplicationStateAction,
+						GetObjectVersionForReplicationAction,
+					),
+					Resources:  NewResourceSet(NewResource("*")),
+					Conditions: condition.NewFunctions(),
+				},
+			},
+		},
+	},
+
+	// SecurityAuditAdmin - provides read-only access to IAM configuration,
+	// server topology, diagnostics, and bucket security settings for compliance
+	// auditing. Mirrors the intent of AWS SecurityAudit. No write, delete, or
+	// S3 data access.
+	{
+		Name: "securityAuditAdmin",
+		Definition: Policy{
+			Version: DefaultVersion,
+			Statements: []Statement{
+				{
+					SID:    ID(""),
+					Effect: Allow,
+					Actions: NewActionSet(
+						// IAM read
+						ListUsersAdminAction,
+						GetUserAdminAction,
+						ListGroupsAdminAction,
+						GetGroupAdminAction,
+						GetPolicyAdminAction,
+						ListUserPoliciesAdminAction,
+						ListServiceAccountsAdminAction,
+						ListTemporaryAccountsAdminAction,
+						ExportIAMAction,
+						// Replication info (read-only)
+						SiteReplicationInfoAction,
+						TablesReplicationInfoAction,
+						// Server & cluster topology (read-only)
+						ServerInfoAdminAction,
+						StorageInfoAdminAction,
+						DataUsageInfoAdminAction,
+						LicenseInfoAdminAction,
+						ClusterInfoAction,
+						PoolListAction,
+						PoolInfoAction,
+						NodeListAction,
+						NodeInfoAction,
+						SetInfoAction,
+						DriveListAction,
+						DriveInfoAction,
+						// Diagnostics (read-only)
+						ProfilingAdminAction,
+						TraceAdminAction,
+						ConsoleLogAdminAction,
+						TopLocksAdminAction,
+						HealthInfoAdminAction,
+						BandwidthMonitorAction,
+						PrometheusAdminAction,
+					),
+					Resources:  NewResourceSet(),
+					Conditions: condition.NewFunctions(),
+				},
+				{
+					SID:    ID(""),
+					Effect: Allow,
+					Actions: NewActionSet(
+						// Bucket security config (read-only)
+						GetBucketPolicyAction,
+						GetBucketLocationAction,
+						GetBucketNotificationAction,
+						GetBucketObjectLockConfigurationAction,
+						GetBucketEncryptionAction,
+						GetBucketTaggingAction,
+						GetBucketVersioningAction,
+						GetReplicationConfigurationAction,
+					),
+					Resources:  NewResourceSet(NewResource("*")),
+					Conditions: condition.NewFunctions(),
+				},
+			},
+		},
+	},
+
 	// Admin - provides admin all-access canned policy
 	{
 		Name: "consoleAdmin",
