@@ -130,6 +130,8 @@ const (
 	TablesReplicationInfoAction = "admin:TablesReplicationInfo"
 	// TablesReplicationStartFailoverAction - allow starting tables replication failover
 	TablesReplicationStartFailoverAction = "admin:TablesReplicationStartFailover"
+	// TablesReplicationCatalogAdminAction - allow catalog debugging operations (reset, dump contents)
+	TablesReplicationCatalogAdminAction = "admin:TablesReplicationCatalogAdmin"
 
 	// Service account Actions
 
@@ -364,6 +366,7 @@ var SupportedAdminActions = map[AdminAction]struct{}{
 	TablesReplicationRemoveAction:        {},
 	TablesReplicationInfoAction:          {},
 	TablesReplicationStartFailoverAction: {},
+	TablesReplicationCatalogAdminAction:  {},
 
 	ImportBucketMetadataAction: {},
 	ExportBucketMetadataAction: {},
