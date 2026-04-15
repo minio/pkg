@@ -362,6 +362,8 @@ var DefaultPolicies = []struct {
 						TablesReplicationAddAction,
 						TablesReplicationRemoveAction,
 						TablesReplicationInfoAction,
+						TablesReplicationStartFailoverAction,
+						TablesReplicationCatalogAdminAction,
 						// Replication diagnostics
 						ReplicationDiff,
 					),
