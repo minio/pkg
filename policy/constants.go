@@ -70,6 +70,28 @@ var DefaultPolicies = []struct {
 		},
 	},
 
+	// ConsoleReadOnly - read only with ListBucket for console browsing.
+	{
+		Name: "consolereadonly",
+		Definition: Policy{
+			Version: DefaultVersion,
+			Statements: []Statement{
+				{
+					SID:       ID(""),
+					Effect:    Allow,
+					Actions:   NewActionSet(GetBucketLocationAction, GetObjectAction, ListBucketAction),
+					Resources: NewResourceSet(NewResource("*")),
+				},
+				{
+					SID:       ID(""),
+					Effect:    Deny,
+					Actions:   NewActionSet(CreateUserAdminAction),
+					Resources: NewResourceSet(NewResource("*")),
+				},
+			},
+		},
+	},
+
 	// WriteOnly - provides write access.
 	{
 		Name: "writeonly",
