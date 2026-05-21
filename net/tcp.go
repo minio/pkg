@@ -57,6 +57,15 @@ type TCPConfig struct {
 	// and forwarding (VRF) interface.
 	Interface string
 
+	// BandwidthBytesPerSec, if non-zero, caps aggregate read and write
+	// throughput in bytes per second across all connections served by
+	// the same listener. The cap applies independently to each
+	// direction (i.e. the value is both the inbound ceiling and the
+	// outbound ceiling). Intended for multi-tenant deployments that
+	// share a high-speed fabric (for example, four tenants on a 400G
+	// link, each capped to 100Gbit).
+	BandwidthBytesPerSec int64
+
 	// Trace is a callback for debug logging
 	Trace func(string)
 }
@@ -79,12 +88,13 @@ func (c *TCPConfig) Clone() *TCPConfig {
 		return nil
 	}
 	return &TCPConfig{
-		IdleTimeout: c.IdleTimeout,
-		UserTimeout: c.UserTimeout,
-		SendBufSize: c.SendBufSize,
-		RecvBufSize: c.RecvBufSize,
-		NoDelay:     c.NoDelay,
-		Interface:   c.Interface,
-		Trace:       c.Trace,
+		IdleTimeout:          c.IdleTimeout,
+		UserTimeout:          c.UserTimeout,
+		SendBufSize:          c.SendBufSize,
+		RecvBufSize:          c.RecvBufSize,
+		NoDelay:              c.NoDelay,
+		Interface:            c.Interface,
+		BandwidthBytesPerSec: c.BandwidthBytesPerSec,
+		Trace:                c.Trace,
 	}
 }
