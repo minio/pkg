@@ -19,6 +19,7 @@ package certs
 
 import (
 	"crypto/tls"
+	"crypto/x509"
 	"path/filepath"
 	"sync"
 )
@@ -86,6 +87,31 @@ func GetClientCertificate(certFile, keyFile string) (func(*tls.CertificateReques
 	return func(*tls.CertificateRequestInfo) (*tls.Certificate, error) {
 		return cert.Load(), nil
 	}, nil
+}
+
+// GetAllGlobalCertificates returns the leaf x509 certificate for every
+// cert pair registered via GetClientCertificate or GetCertificate.
+// Entries with no raw DER bytes are silently skipped.
+func GetAllGlobalCertificates() []*x509.Certificate {
+	globalCertsLock.Lock()
+	defer globalCertsLock.Unlock()
+	var result []*x509.Certificate
+	for _, c := range globalCerts {
+		tlsCert := c.Load()
+		if tlsCert == nil || len(tlsCert.Certificate) == 0 {
+			continue
+		}
+		leaf := tlsCert.Leaf
+		if leaf == nil {
+			var err error
+			leaf, err = x509.ParseCertificate(tlsCert.Certificate[0])
+			if err != nil {
+				continue
+			}
+		}
+		result = append(result, leaf)
+	}
+	return result
 }
 
 // GetCertificate returns a function that returns the given
