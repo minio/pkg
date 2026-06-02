@@ -18,10 +18,12 @@
 package certs_test
 
 import (
+	"bytes"
 	"context"
 	"crypto/tls"
 	"io"
 	"os"
+	"path/filepath"
 	"reflect"
 	"runtime"
 	"testing"
@@ -159,5 +161,86 @@ func TestNonMatchingCertificate(t *testing.T) {
 	_, err = certs.NewManager(ctx, "public.crt", "new-private.key", tls.LoadX509KeyPair)
 	if err == nil {
 		t.Fatal("Expected to fail but got success")
+	}
+}
+
+// copyTempCert copies src into dir/name and returns the full path.
+func copyTempCert(t *testing.T, dir, name, src string) string {
+	t.Helper()
+	data, err := os.ReadFile(src)
+	if err != nil {
+		t.Fatalf("read %s: %v", src, err)
+	}
+	dst := filepath.Join(dir, name)
+	if err := os.WriteFile(dst, data, 0o600); err != nil {
+		t.Fatalf("write %s: %v", dst, err)
+	}
+	return dst
+}
+
+func TestGetAllGlobalCertificates_ReturnsCert(t *testing.T) {
+	dir := t.TempDir()
+	crtFile := copyTempCert(t, dir, "public.crt", "public.crt")
+	keyFile := copyTempCert(t, dir, "private.key", "private.key")
+
+	expected, err := tls.LoadX509KeyPair(crtFile, keyFile)
+	if err != nil {
+		t.Fatalf("LoadX509KeyPair: %v", err)
+	}
+
+	if _, err := certs.GetCertificate(crtFile, keyFile); err != nil {
+		t.Fatalf("GetCertificate: %v", err)
+	}
+
+	var found bool
+	for _, c := range certs.GetAllGlobalCertificates() {
+		if bytes.Equal(c.Raw, expected.Certificate[0]) {
+			found = true
+			break
+		}
+	}
+	if !found {
+		t.Error("registered certificate not found in GetAllGlobalCertificates")
+	}
+}
+
+func TestGetAllGlobalCertificates_DeduplicatesSamePair(t *testing.T) {
+	dir := t.TempDir()
+	crtFile := copyTempCert(t, dir, "public.crt", "public.crt")
+	keyFile := copyTempCert(t, dir, "private.key", "private.key")
+
+	if _, err := certs.GetCertificate(crtFile, keyFile); err != nil {
+		t.Fatalf("GetCertificate: %v", err)
+	}
+	before := len(certs.GetAllGlobalCertificates())
+
+	if _, err := certs.GetClientCertificate(crtFile, keyFile); err != nil {
+		t.Fatalf("GetClientCertificate: %v", err)
+	}
+	after := len(certs.GetAllGlobalCertificates())
+
+	if after != before {
+		t.Errorf("duplicate pair increased count from %d to %d", before, after)
+	}
+}
+
+func TestGetAllGlobalCertificates_DeepCopy(t *testing.T) {
+	dir := t.TempDir()
+	crtFile := copyTempCert(t, dir, "public.crt", "public.crt")
+	keyFile := copyTempCert(t, dir, "private.key", "private.key")
+
+	if _, err := certs.GetCertificate(crtFile, keyFile); err != nil {
+		t.Fatalf("GetCertificate: %v", err)
+	}
+
+	first := certs.GetAllGlobalCertificates()
+	for i := range first {
+		first[i].Subject.CommonName = "mutated"
+	}
+
+	for _, c := range certs.GetAllGlobalCertificates() {
+		if c.Subject.CommonName == "mutated" {
+			t.Error("GetAllGlobalCertificates returned a shared pointer instead of a deep copy")
+		}
 	}
 }

@@ -89,27 +89,32 @@ func GetClientCertificate(certFile, keyFile string) (func(*tls.CertificateReques
 	}, nil
 }
 
-// GetAllGlobalCertificates returns the leaf x509 certificate for every
-// cert pair registered via GetClientCertificate or GetCertificate.
+// GetAllGlobalCertificates returns a deep-copied leaf x509 certificate for
+// every cert pair registered via GetClientCertificate or GetCertificate.
 // Entries with no raw DER bytes are silently skipped.
 func GetAllGlobalCertificates() []*x509.Certificate {
 	globalCertsLock.Lock()
-	defer globalCertsLock.Unlock()
-	var result []*x509.Certificate
+	snapshot := make([]*Certificate2, 0, len(globalCerts))
 	for _, c := range globalCerts {
+		snapshot = append(snapshot, c)
+	}
+	globalCertsLock.Unlock()
+
+	var result []*x509.Certificate
+	for _, c := range snapshot {
 		tlsCert := c.Load()
 		if tlsCert == nil || len(tlsCert.Certificate) == 0 {
 			continue
 		}
-		leaf := tlsCert.Leaf
-		if leaf == nil {
-			var err error
-			leaf, err = x509.ParseCertificate(tlsCert.Certificate[0])
-			if err != nil {
-				continue
-			}
+		raw := tlsCert.Certificate[0]
+		if tlsCert.Leaf != nil {
+			raw = tlsCert.Leaf.Raw
 		}
-		result = append(result, leaf)
+		cert, err := x509.ParseCertificate(raw)
+		if err != nil {
+			continue
+		}
+		result = append(result, cert)
 	}
 	return result
 }
