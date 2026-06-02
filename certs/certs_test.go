@@ -234,6 +234,9 @@ func TestGetAllGlobalCertificates_DeepCopy(t *testing.T) {
 	}
 
 	first := certs.GetAllGlobalCertificates()
+	if len(first) == 0 {
+		t.Fatal("expected at least one certificate, got none")
+	}
 	for i := range first {
 		first[i].Subject.CommonName = "mutated"
 	}
