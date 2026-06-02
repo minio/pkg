@@ -213,6 +213,9 @@ func TestGetAllGlobalCertificates_DeduplicatesSamePair(t *testing.T) {
 		t.Fatalf("GetCertificate: %v", err)
 	}
 	before := len(certs.GetAllGlobalCertificates())
+	if before == 0 {
+		t.Fatal("expected at least one certificate after registration, got none")
+	}
 
 	if _, err := certs.GetClientCertificate(crtFile, keyFile); err != nil {
 		t.Fatalf("GetClientCertificate: %v", err)
