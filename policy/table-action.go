@@ -208,12 +208,19 @@ const (
 	// S3TablesUpdateNamespacePropertiesAction is a MinIO extension for updating namespace properties.
 	S3TablesUpdateNamespacePropertiesAction = "s3tables:UpdateNamespaceProperties"
 
-	// S3TablesTagResourceAction maps to the AWS `s3tables:TagResource` action.
-	S3TablesTagResourceAction = "s3tables:TagResource"
-	// S3TablesUntagResourceAction maps to the AWS `s3tables:UntagResource` action.
-	S3TablesUntagResourceAction = "s3tables:UntagResource"
-	// S3TablesListTagsForResourceAction maps to the AWS `s3tables:ListTagsForResource` action.
-	S3TablesListTagsForResourceAction = "s3tables:ListTagsForResource"
+	// S3TablesTagWarehouseAction is a MinIO extension for tagging Iceberg warehouses.
+	S3TablesTagWarehouseAction = "s3tables:TagWarehouse"
+	// S3TablesUntagWarehouseAction is a MinIO extension for removing tags from Iceberg warehouses.
+	S3TablesUntagWarehouseAction = "s3tables:UntagWarehouse"
+	// S3TablesListTagsForWarehouseAction is a MinIO extension for listing tags on Iceberg warehouses.
+	S3TablesListTagsForWarehouseAction = "s3tables:ListTagsForWarehouse"
+
+	// S3TablesTagTableAction is a MinIO extension for tagging tables.
+	S3TablesTagTableAction = "s3tables:TagTable"
+	// S3TablesUntagTableAction is a MinIO extension for removing tags from tables.
+	S3TablesUntagTableAction = "s3tables:UntagTable"
+	// S3TablesListTagsForTableAction is a MinIO extension for listing tags on tables.
+	S3TablesListTagsForTableAction = "s3tables:ListTagsForTable"
 
 	// AllS3TablesActions - all Amazon S3 Tables actions
 	AllS3TablesActions = "s3tables:*"
@@ -278,9 +285,12 @@ var SupportedTableActions = map[TableAction]struct{}{
 	S3TablesListViewsAction:                              {},
 	S3TablesRegisterViewAction:                           {},
 	S3TablesUpdateNamespacePropertiesAction:              {},
-	S3TablesTagResourceAction:                            {},
-	S3TablesUntagResourceAction:                          {},
-	S3TablesListTagsForResourceAction:                    {},
+	S3TablesTagWarehouseAction:                           {},
+	S3TablesUntagWarehouseAction:                         {},
+	S3TablesListTagsForWarehouseAction:                   {},
+	S3TablesTagTableAction:                               {},
+	S3TablesUntagTableAction:                             {},
+	S3TablesListTagsForTableAction:                       {},
 	AllS3TablesActions:                                   {},
 }
 
@@ -304,7 +314,6 @@ func createTableActionConditionKeyMap() map[Action]condition.KeySet {
 	s3TablesRegisterLocationKey := condition.S3TablesRegisterLocation.ToKey()
 	s3TablesWarehouseTagKey := condition.S3TablesWarehouseTag.ToKey()
 	s3TablesTableTagKey := condition.S3TablesTableTag.ToKey()
-	s3TablesViewTagKey := condition.S3TablesViewTag.ToKey()
 
 	withCommon := func(keys ...condition.Key) condition.KeySet {
 		merged := append([]condition.Key{}, commonKeys...)
@@ -328,7 +337,6 @@ func createTableActionConditionKeyMap() map[Action]condition.KeySet {
 		return withWarehouseCommon(append([]condition.Key{
 			s3TablesNamespaceKey,
 			s3TablesViewNameKey,
-			s3TablesViewTagKey,
 		}, keys...)...)
 	}
 
@@ -347,7 +355,6 @@ func createTableActionConditionKeyMap() map[Action]condition.KeySet {
 		s3TablesRegisterLocationKey,
 		s3TablesWarehouseTagKey,
 		s3TablesTableTagKey,
-		s3TablesViewTagKey,
 	)
 	tableActionConditionKeyMap[S3TablesCreateNamespaceAction] = withWarehouseCommon(s3TablesNamespaceKey)
 	tableActionConditionKeyMap[S3TablesCreateTableAction] = withWarehouseCommon(s3TablesNamespaceKey, s3TablesTableNameKey, s3TablesKMSKeyKey, s3TablesSSEAlgorithmKey)
@@ -406,12 +413,12 @@ func createTableActionConditionKeyMap() map[Action]condition.KeySet {
 	tableActionConditionKeyMap[S3TablesRegisterViewAction] = withViewCommon(s3TablesRegisterLocationKey)
 	tableActionConditionKeyMap[S3TablesListViewsAction] = withWarehouseCommon(s3TablesNamespaceKey)
 	tableActionConditionKeyMap[S3TablesUpdateNamespacePropertiesAction] = withWarehouseCommon(s3TablesNamespaceKey)
-	// TODO: the *Resource tag actions can target a warehouse, table, or view.
-	// They are scoped to warehouse common for now; revisit which resource-specific
-	// keys (namespace, table/view name, and table/view tags) each should accept.
-	tableActionConditionKeyMap[S3TablesTagResourceAction] = withCommon()
-	tableActionConditionKeyMap[S3TablesUntagResourceAction] = withCommon()
-	tableActionConditionKeyMap[S3TablesListTagsForResourceAction] = withCommon()
+	tableActionConditionKeyMap[S3TablesTagWarehouseAction] = withWarehouseCommon()
+	tableActionConditionKeyMap[S3TablesUntagWarehouseAction] = withWarehouseCommon()
+	tableActionConditionKeyMap[S3TablesListTagsForWarehouseAction] = withWarehouseCommon()
+	tableActionConditionKeyMap[S3TablesTagTableAction] = withTableCommon()
+	tableActionConditionKeyMap[S3TablesUntagTableAction] = withTableCommon()
+	tableActionConditionKeyMap[S3TablesListTagsForTableAction] = withTableCommon()
 
 	return tableActionConditionKeyMap
 }

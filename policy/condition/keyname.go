@@ -83,9 +83,6 @@ const (
 	// S3TablesTableTag filters access by tags on the table.
 	S3TablesTableTag KeyName = "s3tables:TableTag"
 
-	// S3TablesViewTag filters access by tags on the view.
-	S3TablesViewTag KeyName = "s3tables:ViewTag"
-
 	// S3XAmzCopySource - key representing x-amz-copy-source HTTP header applicable to PutObject API only.
 	S3XAmzCopySource KeyName = "s3:x-amz-copy-source"
 
@@ -304,7 +301,6 @@ var AllSupportedKeys = []KeyName{
 	S3TablesRegisterLocation,
 	S3TablesWarehouseTag,
 	S3TablesTableTag,
-	S3TablesViewTag,
 	AWSReferer,
 	AWSSourceIP,
 	AWSUserAgent,
