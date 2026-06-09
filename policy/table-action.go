@@ -302,11 +302,34 @@ func createTableActionConditionKeyMap() map[Action]condition.KeySet {
 	s3TablesKMSKeyKey := condition.S3TablesKMSKeyArn.ToKey()
 	s3TablesSSEAlgorithmKey := condition.S3TablesSSEAlgorithm.ToKey()
 	s3TablesRegisterLocationKey := condition.S3TablesRegisterLocation.ToKey()
+	s3TablesWarehouseTagKey := condition.S3TablesWarehouseTag.ToKey()
+	s3TablesTableTagKey := condition.S3TablesTableTag.ToKey()
+	s3TablesViewTagKey := condition.S3TablesViewTag.ToKey()
 
 	withCommon := func(keys ...condition.Key) condition.KeySet {
 		merged := append([]condition.Key{}, commonKeys...)
 		merged = append(merged, keys...)
 		return condition.NewKeySet(merged...)
+	}
+
+	withWarehouseCommon := func(keys ...condition.Key) condition.KeySet {
+		return withCommon(append([]condition.Key{s3TablesWarehouseTagKey}, keys...)...)
+	}
+
+	withTableCommon := func(keys ...condition.Key) condition.KeySet {
+		return withWarehouseCommon(append([]condition.Key{
+			s3TablesNamespaceKey,
+			s3TablesTableNameKey,
+			s3TablesTableTagKey,
+		}, keys...)...)
+	}
+
+	withViewCommon := func(keys ...condition.Key) condition.KeySet {
+		return withWarehouseCommon(append([]condition.Key{
+			s3TablesNamespaceKey,
+			s3TablesViewNameKey,
+			s3TablesViewTagKey,
+		}, keys...)...)
 	}
 
 	tableActionConditionKeyMap := map[Action]condition.KeySet{}
@@ -322,64 +345,70 @@ func createTableActionConditionKeyMap() map[Action]condition.KeySet {
 		s3TablesKMSKeyKey,
 		s3TablesSSEAlgorithmKey,
 		s3TablesRegisterLocationKey,
+		s3TablesWarehouseTagKey,
+		s3TablesTableTagKey,
+		s3TablesViewTagKey,
 	)
-	tableActionConditionKeyMap[S3TablesCreateNamespaceAction] = withCommon(s3TablesNamespaceKey)
-	tableActionConditionKeyMap[S3TablesCreateTableAction] = withCommon(s3TablesNamespaceKey, s3TablesTableNameKey, s3TablesKMSKeyKey, s3TablesSSEAlgorithmKey)
+	tableActionConditionKeyMap[S3TablesCreateNamespaceAction] = withWarehouseCommon(s3TablesNamespaceKey)
+	tableActionConditionKeyMap[S3TablesCreateTableAction] = withWarehouseCommon(s3TablesNamespaceKey, s3TablesTableNameKey, s3TablesKMSKeyKey, s3TablesSSEAlgorithmKey)
 	tableActionConditionKeyMap[S3TablesCreateTableBucketAction] = withCommon(s3TablesKMSKeyKey, s3TablesSSEAlgorithmKey)
-	tableActionConditionKeyMap[S3TablesDeleteNamespaceAction] = withCommon(s3TablesNamespaceKey)
-	tableActionConditionKeyMap[S3TablesDeleteTableAction] = withCommon(s3TablesNamespaceKey, s3TablesTableNameKey)
-	tableActionConditionKeyMap[S3TablesDeleteTableBucketAction] = withCommon()
-	tableActionConditionKeyMap[S3TablesDeleteTableBucketEncryptionAction] = withCommon()
-	tableActionConditionKeyMap[S3TablesDeleteTableBucketPolicyAction] = withCommon()
-	tableActionConditionKeyMap[S3TablesDeleteTablePolicyAction] = withCommon(s3TablesNamespaceKey, s3TablesTableNameKey)
-	tableActionConditionKeyMap[S3TablesGetNamespaceAction] = withCommon(s3TablesNamespaceKey)
-	tableActionConditionKeyMap[S3TablesGetTableAction] = withCommon(s3TablesNamespaceKey, s3TablesTableNameKey)
-	tableActionConditionKeyMap[S3TablesGetTableBucketAction] = withCommon()
-	tableActionConditionKeyMap[S3TablesGetTableBucketEncryptionAction] = withCommon()
-	tableActionConditionKeyMap[S3TablesGetTableBucketMaintenanceConfigurationAction] = withCommon()
-	tableActionConditionKeyMap[S3TablesGetTableBucketPolicyAction] = withCommon()
-	tableActionConditionKeyMap[S3TablesGetTableDataAction] = withCommon(s3TablesNamespaceKey, s3TablesTableNameKey)
-	tableActionConditionKeyMap[S3TablesGetTableEncryptionAction] = withCommon(s3TablesNamespaceKey, s3TablesTableNameKey)
-	tableActionConditionKeyMap[S3TablesGetTableMaintenanceConfigurationAction] = withCommon(s3TablesNamespaceKey, s3TablesTableNameKey)
-	tableActionConditionKeyMap[S3TablesGetTableMaintenanceJobStatusAction] = withCommon(s3TablesNamespaceKey, s3TablesTableNameKey)
-	tableActionConditionKeyMap[S3TablesGetTableMetadataLocationAction] = withCommon(s3TablesNamespaceKey, s3TablesTableNameKey)
-	tableActionConditionKeyMap[S3TablesGetTablePolicyAction] = withCommon(s3TablesNamespaceKey, s3TablesTableNameKey)
-	tableActionConditionKeyMap[S3TablesListNamespacesAction] = withCommon(s3TablesNamespaceKey)
+	tableActionConditionKeyMap[S3TablesDeleteNamespaceAction] = withWarehouseCommon(s3TablesNamespaceKey)
+	tableActionConditionKeyMap[S3TablesDeleteTableAction] = withTableCommon()
+	tableActionConditionKeyMap[S3TablesDeleteTableBucketAction] = withWarehouseCommon()
+	tableActionConditionKeyMap[S3TablesDeleteTableBucketEncryptionAction] = withWarehouseCommon()
+	tableActionConditionKeyMap[S3TablesDeleteTableBucketPolicyAction] = withWarehouseCommon()
+	tableActionConditionKeyMap[S3TablesDeleteTablePolicyAction] = withTableCommon()
+	tableActionConditionKeyMap[S3TablesGetNamespaceAction] = withWarehouseCommon(s3TablesNamespaceKey)
+	tableActionConditionKeyMap[S3TablesGetTableAction] = withTableCommon()
+	tableActionConditionKeyMap[S3TablesGetTableBucketAction] = withWarehouseCommon()
+	tableActionConditionKeyMap[S3TablesGetTableBucketEncryptionAction] = withWarehouseCommon()
+	tableActionConditionKeyMap[S3TablesGetTableBucketMaintenanceConfigurationAction] = withWarehouseCommon()
+	tableActionConditionKeyMap[S3TablesGetTableBucketPolicyAction] = withWarehouseCommon()
+	tableActionConditionKeyMap[S3TablesGetTableDataAction] = withTableCommon()
+	tableActionConditionKeyMap[S3TablesGetTableEncryptionAction] = withTableCommon()
+	tableActionConditionKeyMap[S3TablesGetTableMaintenanceConfigurationAction] = withTableCommon()
+	tableActionConditionKeyMap[S3TablesGetTableMaintenanceJobStatusAction] = withTableCommon()
+	tableActionConditionKeyMap[S3TablesGetTableMetadataLocationAction] = withTableCommon()
+	tableActionConditionKeyMap[S3TablesGetTablePolicyAction] = withTableCommon()
+	tableActionConditionKeyMap[S3TablesListNamespacesAction] = withWarehouseCommon(s3TablesNamespaceKey)
 	tableActionConditionKeyMap[S3TablesListTableBucketsAction] = withCommon()
-	tableActionConditionKeyMap[S3TablesListTablesAction] = withCommon(s3TablesNamespaceKey)
-	tableActionConditionKeyMap[S3TablesPutTableBucketEncryptionAction] = withCommon(s3TablesKMSKeyKey, s3TablesSSEAlgorithmKey)
-	tableActionConditionKeyMap[S3TablesPutTableBucketMaintenanceConfigurationAction] = withCommon()
-	tableActionConditionKeyMap[S3TablesPutTableBucketPolicyAction] = withCommon()
-	tableActionConditionKeyMap[S3TablesPutTableDataAction] = withCommon(s3TablesNamespaceKey, s3TablesTableNameKey)
-	tableActionConditionKeyMap[S3TablesPutTableEncryptionAction] = withCommon(s3TablesNamespaceKey, s3TablesTableNameKey, s3TablesKMSKeyKey, s3TablesSSEAlgorithmKey)
-	tableActionConditionKeyMap[S3TablesPutTableMaintenanceConfigurationAction] = withCommon(s3TablesNamespaceKey, s3TablesTableNameKey)
-	tableActionConditionKeyMap[S3TablesPutTablePolicyAction] = withCommon(s3TablesNamespaceKey, s3TablesTableNameKey)
-	tableActionConditionKeyMap[S3TablesRegisterTableAction] = withCommon(s3TablesNamespaceKey, s3TablesTableNameKey, s3TablesRegisterLocationKey)
-	tableActionConditionKeyMap[S3TablesRenameTableAction] = withCommon(s3TablesNamespaceKey, s3TablesTableNameKey)
-	tableActionConditionKeyMap[S3TablesUpdateTableMetadataLocationAction] = withCommon(s3TablesNamespaceKey, s3TablesTableNameKey)
+	tableActionConditionKeyMap[S3TablesListTablesAction] = withWarehouseCommon(s3TablesNamespaceKey)
+	tableActionConditionKeyMap[S3TablesPutTableBucketEncryptionAction] = withWarehouseCommon(s3TablesKMSKeyKey, s3TablesSSEAlgorithmKey)
+	tableActionConditionKeyMap[S3TablesPutTableBucketMaintenanceConfigurationAction] = withWarehouseCommon()
+	tableActionConditionKeyMap[S3TablesPutTableBucketPolicyAction] = withWarehouseCommon()
+	tableActionConditionKeyMap[S3TablesPutTableDataAction] = withTableCommon()
+	tableActionConditionKeyMap[S3TablesPutTableEncryptionAction] = withTableCommon(s3TablesKMSKeyKey, s3TablesSSEAlgorithmKey)
+	tableActionConditionKeyMap[S3TablesPutTableMaintenanceConfigurationAction] = withTableCommon()
+	tableActionConditionKeyMap[S3TablesPutTablePolicyAction] = withTableCommon()
+	tableActionConditionKeyMap[S3TablesRegisterTableAction] = withTableCommon(s3TablesRegisterLocationKey)
+	tableActionConditionKeyMap[S3TablesRenameTableAction] = withTableCommon()
+	tableActionConditionKeyMap[S3TablesUpdateTableMetadataLocationAction] = withTableCommon()
 	tableActionConditionKeyMap[S3TablesCreateWarehouseAction] = withCommon(s3TablesKMSKeyKey, s3TablesSSEAlgorithmKey)
-	tableActionConditionKeyMap[S3TablesDeleteWarehouseAction] = withCommon()
-	tableActionConditionKeyMap[S3TablesDeleteWarehouseEncryptionAction] = withCommon()
-	tableActionConditionKeyMap[S3TablesDeleteWarehousePolicyAction] = withCommon()
-	tableActionConditionKeyMap[S3TablesGetWarehouseAction] = withCommon()
-	tableActionConditionKeyMap[S3TablesGetWarehouseEncryptionAction] = withCommon()
-	tableActionConditionKeyMap[S3TablesGetWarehouseMaintenanceConfigurationAction] = withCommon()
-	tableActionConditionKeyMap[S3TablesGetWarehousePolicyAction] = withCommon()
+	tableActionConditionKeyMap[S3TablesDeleteWarehouseAction] = withWarehouseCommon()
+	tableActionConditionKeyMap[S3TablesDeleteWarehouseEncryptionAction] = withWarehouseCommon()
+	tableActionConditionKeyMap[S3TablesDeleteWarehousePolicyAction] = withWarehouseCommon()
+	tableActionConditionKeyMap[S3TablesGetWarehouseAction] = withWarehouseCommon()
+	tableActionConditionKeyMap[S3TablesGetWarehouseEncryptionAction] = withWarehouseCommon()
+	tableActionConditionKeyMap[S3TablesGetWarehouseMaintenanceConfigurationAction] = withWarehouseCommon()
+	tableActionConditionKeyMap[S3TablesGetWarehousePolicyAction] = withWarehouseCommon()
 	tableActionConditionKeyMap[S3TablesListWarehousesAction] = withCommon()
-	tableActionConditionKeyMap[S3TablesPutWarehouseEncryptionAction] = withCommon(s3TablesKMSKeyKey, s3TablesSSEAlgorithmKey)
-	tableActionConditionKeyMap[S3TablesPutWarehouseMaintenanceConfigurationAction] = withCommon()
-	tableActionConditionKeyMap[S3TablesPutWarehousePolicyAction] = withCommon()
-	tableActionConditionKeyMap[S3TablesGetConfigAction] = withCommon()
-	tableActionConditionKeyMap[S3TablesTableMetricsAction] = withCommon(s3TablesNamespaceKey, s3TablesTableNameKey)
-	tableActionConditionKeyMap[S3TablesUpdateTableAction] = withCommon(s3TablesNamespaceKey, s3TablesTableNameKey)
-	tableActionConditionKeyMap[S3TablesCreateViewAction] = withCommon(s3TablesNamespaceKey, s3TablesViewNameKey)
-	tableActionConditionKeyMap[S3TablesDeleteViewAction] = withCommon(s3TablesNamespaceKey, s3TablesViewNameKey)
-	tableActionConditionKeyMap[S3TablesGetViewAction] = withCommon(s3TablesNamespaceKey, s3TablesViewNameKey)
-	tableActionConditionKeyMap[S3TablesRenameViewAction] = withCommon(s3TablesNamespaceKey, s3TablesViewNameKey)
-	tableActionConditionKeyMap[S3TablesUpdateViewAction] = withCommon(s3TablesNamespaceKey, s3TablesViewNameKey)
-	tableActionConditionKeyMap[S3TablesRegisterViewAction] = withCommon(s3TablesNamespaceKey, s3TablesViewNameKey, s3TablesRegisterLocationKey)
-	tableActionConditionKeyMap[S3TablesListViewsAction] = withCommon(s3TablesNamespaceKey)
-	tableActionConditionKeyMap[S3TablesUpdateNamespacePropertiesAction] = withCommon(s3TablesNamespaceKey)
+	tableActionConditionKeyMap[S3TablesPutWarehouseEncryptionAction] = withWarehouseCommon(s3TablesKMSKeyKey, s3TablesSSEAlgorithmKey)
+	tableActionConditionKeyMap[S3TablesPutWarehouseMaintenanceConfigurationAction] = withWarehouseCommon()
+	tableActionConditionKeyMap[S3TablesPutWarehousePolicyAction] = withWarehouseCommon()
+	tableActionConditionKeyMap[S3TablesGetConfigAction] = withWarehouseCommon()
+	tableActionConditionKeyMap[S3TablesTableMetricsAction] = withTableCommon()
+	tableActionConditionKeyMap[S3TablesUpdateTableAction] = withTableCommon()
+	tableActionConditionKeyMap[S3TablesCreateViewAction] = withWarehouseCommon(s3TablesNamespaceKey, s3TablesViewNameKey)
+	tableActionConditionKeyMap[S3TablesDeleteViewAction] = withViewCommon()
+	tableActionConditionKeyMap[S3TablesGetViewAction] = withViewCommon()
+	tableActionConditionKeyMap[S3TablesRenameViewAction] = withViewCommon()
+	tableActionConditionKeyMap[S3TablesUpdateViewAction] = withViewCommon()
+	tableActionConditionKeyMap[S3TablesRegisterViewAction] = withViewCommon(s3TablesRegisterLocationKey)
+	tableActionConditionKeyMap[S3TablesListViewsAction] = withWarehouseCommon(s3TablesNamespaceKey)
+	tableActionConditionKeyMap[S3TablesUpdateNamespacePropertiesAction] = withWarehouseCommon(s3TablesNamespaceKey)
+	// TODO: the *Resource tag actions can target a warehouse, table, or view.
+	// They are scoped to warehouse common for now; revisit which resource-specific
+	// keys (namespace, table/view name, and table/view tags) each should accept.
 	tableActionConditionKeyMap[S3TablesTagResourceAction] = withCommon()
 	tableActionConditionKeyMap[S3TablesUntagResourceAction] = withCommon()
 	tableActionConditionKeyMap[S3TablesListTagsForResourceAction] = withCommon()

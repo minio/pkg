@@ -77,6 +77,15 @@ const (
 	// S3TablesRegisterLocation filters access by the metadata location for table/view registration.
 	S3TablesRegisterLocation KeyName = "s3tables:registerLocation"
 
+	// S3TablesWarehouseTag filters access by tags on the table warehouse.
+	S3TablesWarehouseTag KeyName = "s3tables:WarehouseTag"
+
+	// S3TablesTableTag filters access by tags on the table.
+	S3TablesTableTag KeyName = "s3tables:TableTag"
+
+	// S3TablesViewTag filters access by tags on the view.
+	S3TablesViewTag KeyName = "s3tables:ViewTag"
+
 	// S3XAmzCopySource - key representing x-amz-copy-source HTTP header applicable to PutObject API only.
 	S3XAmzCopySource KeyName = "s3:x-amz-copy-source"
 
@@ -293,6 +302,9 @@ var AllSupportedKeys = []KeyName{
 	S3TablesTableName,
 	S3TablesViewName,
 	S3TablesRegisterLocation,
+	S3TablesWarehouseTag,
+	S3TablesTableTag,
+	S3TablesViewTag,
 	AWSReferer,
 	AWSSourceIP,
 	AWSUserAgent,
