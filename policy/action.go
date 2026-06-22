@@ -646,6 +646,16 @@ func createActionConditionKeyMap() ActionConditionKeyMap {
 				condition.S3VersionID.ToKey(),
 				condition.ExistingObjectTag.ToKey(),
 			}, commonKeys...)...),
+		ReplicateObjectAnnotationAction: condition.NewKeySet(
+			append([]condition.Key{
+				condition.S3VersionID.ToKey(),
+				condition.ExistingObjectTag.ToKey(),
+			}, commonKeys...)...),
+		GetObjectVersionAnnotationForReplicationAction: condition.NewKeySet(
+			append([]condition.Key{
+				condition.S3VersionID.ToKey(),
+				condition.ExistingObjectTag.ToKey(),
+			}, commonKeys...)...),
 		RestoreObjectAction:               condition.NewKeySet(commonKeys...),
 		ResetBucketReplicationStateAction: condition.NewKeySet(commonKeys...),
 		PutObjectFanOutAction:             condition.NewKeySet(commonKeys...),
