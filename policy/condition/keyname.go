@@ -103,6 +103,10 @@ const (
 	// HTTP header for S3 API calls
 	S3XAmzServerSideEncryptionAwsKmsKeyID KeyName = "s3:x-amz-server-side-encryption-aws-kms-key-id"
 
+	// S3XAmzObjectIfMatch - key representing the x-amz-object-if-match HTTP header used by the
+	// object annotation APIs (PutObjectAnnotation/DeleteObjectAnnotation) for optimistic concurrency.
+	S3XAmzObjectIfMatch KeyName = "s3:x-amz-object-if-match"
+
 	// S3LocationConstraint - key representing LocationConstraint XML tag of CreateBucket API only.
 	S3LocationConstraint KeyName = "s3:LocationConstraint"
 
@@ -277,6 +281,7 @@ var AllSupportedKeys = []KeyName{
 	S3XAmzMetadataDirective,
 	S3XAmzStorageClass,
 	S3XAmzServerSideEncryptionAwsKmsKeyID,
+	S3XAmzObjectIfMatch,
 	S3XAmzContentSha256,
 	S3LocationConstraint,
 	S3Prefix,

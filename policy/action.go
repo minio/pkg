@@ -175,6 +175,18 @@ const (
 	// DeleteObjectTaggingAction - Delete Object Tags API action
 	DeleteObjectTaggingAction = "s3:DeleteObjectTagging"
 
+	// PutObjectAnnotationAction - PutObjectAnnotation API action
+	PutObjectAnnotationAction = "s3:PutObjectAnnotation"
+
+	// GetObjectAnnotationAction - GetObjectAnnotation API action
+	GetObjectAnnotationAction = "s3:GetObjectAnnotation"
+
+	// DeleteObjectAnnotationAction - DeleteObjectAnnotation API action
+	DeleteObjectAnnotationAction = "s3:DeleteObjectAnnotation"
+
+	// ListObjectAnnotationsAction - ListObjectAnnotations API action
+	ListObjectAnnotationsAction = "s3:ListObjectAnnotations"
+
 	// UpdateObjectEncryptionAction - UpdateObjectEncryption REST API action
 	UpdateObjectEncryptionAction = "s3:UpdateObjectEncryption"
 
@@ -279,6 +291,10 @@ var SupportedActions = map[Action]struct{}{
 	GetObjectTaggingAction:                 {},
 	PutObjectTaggingAction:                 {},
 	DeleteObjectTaggingAction:              {},
+	PutObjectAnnotationAction:              {},
+	GetObjectAnnotationAction:              {},
+	DeleteObjectAnnotationAction:           {},
+	ListObjectAnnotationsAction:            {},
 	UpdateObjectEncryptionAction:           {},
 	PutBucketEncryptionAction:              {},
 	GetBucketEncryptionAction:              {},
@@ -315,6 +331,10 @@ var SupportedObjectActions = map[Action]struct{}{
 	GetObjectTaggingAction:               {},
 	PutObjectTaggingAction:               {},
 	DeleteObjectTaggingAction:            {},
+	PutObjectAnnotationAction:            {},
+	GetObjectAnnotationAction:            {},
+	DeleteObjectAnnotationAction:         {},
+	ListObjectAnnotationsAction:          {},
 	UpdateObjectEncryptionAction:         {},
 	GetObjectVersionAction:               {},
 	GetObjectVersionTaggingAction:        {},
@@ -535,6 +555,28 @@ func createActionConditionKeyMap() ActionConditionKeyMap {
 			append([]condition.Key{
 				condition.S3VersionID.ToKey(),
 				condition.ExistingObjectTag.ToKey(),
+			}, commonKeys...)...),
+
+		PutObjectAnnotationAction: condition.NewKeySet(
+			append([]condition.Key{
+				condition.S3VersionID.ToKey(),
+				condition.ExistingObjectTag.ToKey(),
+				condition.S3XAmzObjectIfMatch.ToKey(),
+			}, commonKeys...)...),
+		GetObjectAnnotationAction: condition.NewKeySet(
+			append([]condition.Key{
+				condition.S3VersionID.ToKey(),
+				condition.ExistingObjectTag.ToKey(),
+			}, commonKeys...)...),
+		DeleteObjectAnnotationAction: condition.NewKeySet(
+			append([]condition.Key{
+				condition.S3VersionID.ToKey(),
+				condition.ExistingObjectTag.ToKey(),
+				condition.S3XAmzObjectIfMatch.ToKey(),
+			}, commonKeys...)...),
+		ListObjectAnnotationsAction: condition.NewKeySet(
+			append([]condition.Key{
+				condition.S3VersionID.ToKey(),
 			}, commonKeys...)...),
 
 		UpdateObjectEncryptionAction: condition.NewKeySet(
