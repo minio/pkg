@@ -113,6 +113,10 @@ const (
 	// object annotation APIs (PutObjectAnnotation/DeleteObjectAnnotation) for optimistic concurrency.
 	S3XAmzObjectIfMatch KeyName = "s3:x-amz-object-if-match"
 
+	// S3XAmzAnnotationDirective - key representing the x-amz-annotation-directive HTTP header
+	// of CopyObject, which controls whether annotations are copied (COPY) or excluded (EXCLUDE).
+	S3XAmzAnnotationDirective KeyName = "s3:x-amz-annotation-directive"
+
 	// S3LocationConstraint - key representing LocationConstraint XML tag of CreateBucket API only.
 	S3LocationConstraint KeyName = "s3:LocationConstraint"
 
@@ -288,6 +292,7 @@ var AllSupportedKeys = []KeyName{
 	S3XAmzStorageClass,
 	S3XAmzServerSideEncryptionAwsKmsKeyID,
 	S3XAmzObjectIfMatch,
+	S3XAmzAnnotationDirective,
 	S3XAmzContentSha256,
 	S3LocationConstraint,
 	S3Prefix,
