@@ -233,6 +233,13 @@ const (
 	// GenerateBatchJobAction allow requesting batch job templates
 	GenerateBatchJobAction = "admin:GenerateBatchJob"
 
+	// Distributed Job APIs
+
+	// DistJobStatusAction allow viewing status of distributed jobs
+	// (decommission and any future job type built on the same framework),
+	// regardless of which job type is being queried.
+	DistJobStatusAction = "admin:DistJobStatus"
+
 	// Inventory Control Actions
 
 	// InventoryControlAction - allows control of inventory jobs
@@ -380,6 +387,8 @@ var SupportedAdminActions = map[AdminAction]struct{}{
 	StartBatchJobAction:    {},
 	CancelBatchJobAction:   {},
 	GenerateBatchJobAction: {},
+
+	DistJobStatusAction: {},
 
 	InventoryControlAction: {},
 
