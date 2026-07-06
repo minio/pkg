@@ -205,6 +205,27 @@ const (
 	// S3TablesRegisterViewAction is a MinIO extension for registering Iceberg views.
 	S3TablesRegisterViewAction = "s3tables:RegisterView"
 
+	// S3TablesCreateFunctionAction is a MinIO extension for creating Iceberg functions (SQL UDFs).
+	S3TablesCreateFunctionAction = "s3tables:CreateFunction"
+
+	// S3TablesDeleteFunctionAction is a MinIO extension for deleting Iceberg functions (SQL UDFs).
+	S3TablesDeleteFunctionAction = "s3tables:DeleteFunction"
+
+	// S3TablesGetFunctionAction is a MinIO extension for retrieving Iceberg functions (SQL UDFs).
+	S3TablesGetFunctionAction = "s3tables:GetFunction"
+
+	// S3TablesRenameFunctionAction is a MinIO extension for renaming Iceberg functions (SQL UDFs).
+	S3TablesRenameFunctionAction = "s3tables:RenameFunction"
+
+	// S3TablesUpdateFunctionAction is a MinIO extension for updating Iceberg functions (SQL UDFs).
+	S3TablesUpdateFunctionAction = "s3tables:UpdateFunction"
+
+	// S3TablesListFunctionsAction is a MinIO extension for listing Iceberg functions (SQL UDFs).
+	S3TablesListFunctionsAction = "s3tables:ListFunctions"
+
+	// S3TablesRegisterFunctionAction is a MinIO extension for registering Iceberg functions (SQL UDFs).
+	S3TablesRegisterFunctionAction = "s3tables:RegisterFunction"
+
 	// S3TablesUpdateNamespacePropertiesAction is a MinIO extension for updating namespace properties.
 	S3TablesUpdateNamespacePropertiesAction = "s3tables:UpdateNamespaceProperties"
 
@@ -284,6 +305,13 @@ var SupportedTableActions = map[TableAction]struct{}{
 	S3TablesUpdateViewAction:                             {},
 	S3TablesListViewsAction:                              {},
 	S3TablesRegisterViewAction:                           {},
+	S3TablesCreateFunctionAction:                         {},
+	S3TablesDeleteFunctionAction:                         {},
+	S3TablesGetFunctionAction:                            {},
+	S3TablesRenameFunctionAction:                         {},
+	S3TablesUpdateFunctionAction:                         {},
+	S3TablesListFunctionsAction:                          {},
+	S3TablesRegisterFunctionAction:                       {},
 	S3TablesUpdateNamespacePropertiesAction:              {},
 	S3TablesTagWarehouseAction:                           {},
 	S3TablesUntagWarehouseAction:                         {},
@@ -309,6 +337,7 @@ func createTableActionConditionKeyMap() map[Action]condition.KeySet {
 	s3TablesNamespaceKey := condition.S3TablesNamespace.ToKey()
 	s3TablesTableNameKey := condition.S3TablesTableName.ToKey()
 	s3TablesViewNameKey := condition.S3TablesViewName.ToKey()
+	s3TablesFunctionNameKey := condition.S3TablesFunctionName.ToKey()
 	s3TablesKMSKeyKey := condition.S3TablesKMSKeyArn.ToKey()
 	s3TablesSSEAlgorithmKey := condition.S3TablesSSEAlgorithm.ToKey()
 	s3TablesRegisterLocationKey := condition.S3TablesRegisterLocation.ToKey()
@@ -340,6 +369,13 @@ func createTableActionConditionKeyMap() map[Action]condition.KeySet {
 		}, keys...)...)
 	}
 
+	withFunctionCommon := func(keys ...condition.Key) condition.KeySet {
+		return withWarehouseCommon(append([]condition.Key{
+			s3TablesNamespaceKey,
+			s3TablesFunctionNameKey,
+		}, keys...)...)
+	}
+
 	tableActionConditionKeyMap := map[Action]condition.KeySet{}
 	for act := range SupportedTableActions {
 		tableActionConditionKeyMap[Action(act)] = condition.NewKeySet(commonKeys...)
@@ -350,6 +386,7 @@ func createTableActionConditionKeyMap() map[Action]condition.KeySet {
 		s3TablesNamespaceKey,
 		s3TablesTableNameKey,
 		s3TablesViewNameKey,
+		s3TablesFunctionNameKey,
 		s3TablesKMSKeyKey,
 		s3TablesSSEAlgorithmKey,
 		s3TablesRegisterLocationKey,
@@ -412,6 +449,13 @@ func createTableActionConditionKeyMap() map[Action]condition.KeySet {
 	tableActionConditionKeyMap[S3TablesUpdateViewAction] = withViewCommon()
 	tableActionConditionKeyMap[S3TablesRegisterViewAction] = withViewCommon(s3TablesRegisterLocationKey)
 	tableActionConditionKeyMap[S3TablesListViewsAction] = withWarehouseCommon(s3TablesNamespaceKey)
+	tableActionConditionKeyMap[S3TablesCreateFunctionAction] = withWarehouseCommon(s3TablesNamespaceKey, s3TablesFunctionNameKey)
+	tableActionConditionKeyMap[S3TablesDeleteFunctionAction] = withFunctionCommon()
+	tableActionConditionKeyMap[S3TablesGetFunctionAction] = withFunctionCommon()
+	tableActionConditionKeyMap[S3TablesRenameFunctionAction] = withFunctionCommon()
+	tableActionConditionKeyMap[S3TablesUpdateFunctionAction] = withFunctionCommon()
+	tableActionConditionKeyMap[S3TablesRegisterFunctionAction] = withFunctionCommon(s3TablesRegisterLocationKey)
+	tableActionConditionKeyMap[S3TablesListFunctionsAction] = withWarehouseCommon(s3TablesNamespaceKey)
 	tableActionConditionKeyMap[S3TablesUpdateNamespacePropertiesAction] = withWarehouseCommon(s3TablesNamespaceKey)
 	tableActionConditionKeyMap[S3TablesTagWarehouseAction] = withWarehouseCommon()
 	tableActionConditionKeyMap[S3TablesUntagWarehouseAction] = withWarehouseCommon()

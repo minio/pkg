@@ -308,6 +308,14 @@ var DefaultPolicies = []struct {
 						S3TablesRenameViewAction,
 						S3TablesDeleteViewAction,
 						S3TablesRegisterViewAction,
+						// Functions (SQL UDFs) full CRUD
+						S3TablesGetFunctionAction,
+						S3TablesListFunctionsAction,
+						S3TablesCreateFunctionAction,
+						S3TablesUpdateFunctionAction,
+						S3TablesRenameFunctionAction,
+						S3TablesDeleteFunctionAction,
+						S3TablesRegisterFunctionAction,
 						// Catalog config + metrics
 						S3TablesGetConfigAction,
 						S3TablesTableMetricsAction,
@@ -351,6 +359,9 @@ var DefaultPolicies = []struct {
 						// View read
 						S3TablesGetViewAction,
 						S3TablesListViewsAction,
+						// Function read
+						S3TablesGetFunctionAction,
+						S3TablesListFunctionsAction,
 						// Catalog config + metrics
 						S3TablesGetConfigAction,
 						S3TablesTableMetricsAction,
