@@ -18,6 +18,7 @@
 package xtime
 
 import (
+	"encoding/json"
 	"fmt"
 	"time"
 
@@ -90,6 +91,11 @@ func (d *Duration) UnmarshalJSON(bs []byte) error {
 	}
 	*d = Duration(dur)
 	return nil
+}
+
+// MarshalJSON implements json.Marshaler - Converts duration to human-readable format (e.g., "2h", "30m")
+func (d Duration) MarshalJSON() ([]byte, error) {
+	return json.Marshal(time.Duration(d).String())
 }
 
 // MarshalMsg appends the marshaled form of the object to the provided

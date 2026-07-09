@@ -141,4 +141,22 @@ durationPointer: 168h0m1s
 	if string(yamlData) != expected {
 		t.Errorf("Expected:\n%s\nGot:\n%s", expected, string(yamlData))
 	}
+
+	jsonData, err := json.Marshal(&testData)
+	if err != nil {
+		t.Fatalf("Failed to marshal JSON: %v", err)
+	}
+	expectedJSON := `{"a":"1s","dur":"0s","durationPointer":"168h0m1s"}`
+	if string(jsonData) != expectedJSON {
+		t.Errorf("Expected:\n%s\nGot:\n%s", expectedJSON, string(jsonData))
+	}
+
+	// The marshaled JSON must be readable back by UnmarshalJSON.
+	var back testDuration
+	if err := json.Unmarshal(jsonData, &back); err != nil {
+		t.Fatalf("Failed to unmarshal JSON: %v", err)
+	}
+	if back.A != d1 || back.Dur != d2 || back.DurationPointer == nil || *back.DurationPointer != d3 {
+		t.Errorf("JSON round-trip mismatch: got %+v", back)
+	}
 }
