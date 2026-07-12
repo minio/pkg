@@ -2793,6 +2793,8 @@ func TestAdminActionHasResource(t *testing.T) {
 	bucketScoped := []AdminAction{
 		SetBucketQuotaAdminAction,
 		GetBucketQuotaAdminAction,
+		SetBucketCompressionAdminAction,
+		GetBucketCompressionAdminAction,
 		SetBucketTargetAction,
 		GetBucketTargetAction,
 		ReplicationDiff,

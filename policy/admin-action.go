@@ -185,6 +185,13 @@ const (
 	// GetBucketQuotaAdminAction - allow getting bucket quota
 	GetBucketQuotaAdminAction = "admin:GetBucketQuota"
 
+	// Bucket compression Actions
+
+	// SetBucketCompressionAdminAction - allow setting per-bucket compression config
+	SetBucketCompressionAdminAction = "admin:SetBucketCompression"
+	// GetBucketCompressionAdminAction - allow getting per-bucket compression config
+	GetBucketCompressionAdminAction = "admin:GetBucketCompression"
+
 	// Bucket Target admin Actions
 
 	// SetBucketTargetAction - allow setting bucket target
@@ -355,6 +362,8 @@ var SupportedAdminActions = map[AdminAction]struct{}{
 	ListUserPoliciesAdminAction:      {},
 	SetBucketQuotaAdminAction:        {},
 	GetBucketQuotaAdminAction:        {},
+	SetBucketCompressionAdminAction:  {},
+	GetBucketCompressionAdminAction:  {},
 	SetBucketTargetAction:            {},
 	GetBucketTargetAction:            {},
 	ReplicationDiff:                  {},
@@ -427,15 +436,17 @@ var SupportedAdminActions = map[AdminAction]struct{}{
 // against the target bucket. All other admin actions are resource-less;
 // any Resource specified in the statement is ignored for them.
 var AdminActionsWithResource = map[AdminAction]struct{}{
-	SetBucketQuotaAdminAction:  {},
-	GetBucketQuotaAdminAction:  {},
-	SetBucketTargetAction:      {},
-	GetBucketTargetAction:      {},
-	ReplicationDiff:            {},
-	ImportBucketMetadataAction: {},
-	ExportBucketMetadataAction: {},
-	HealAdminAction:            {},
-	InventoryControlAction:     {},
+	SetBucketQuotaAdminAction:       {},
+	GetBucketQuotaAdminAction:       {},
+	SetBucketCompressionAdminAction: {},
+	GetBucketCompressionAdminAction: {},
+	SetBucketTargetAction:           {},
+	GetBucketTargetAction:           {},
+	ReplicationDiff:                 {},
+	ImportBucketMetadataAction:      {},
+	ExportBucketMetadataAction:      {},
+	HealAdminAction:                 {},
+	InventoryControlAction:          {},
 }
 
 // HasResource reports whether this admin action operates on a bucket resource.

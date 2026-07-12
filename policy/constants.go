@@ -228,6 +228,8 @@ var DefaultPolicies = []struct {
 						// Bucket admin
 						SetBucketQuotaAdminAction,
 						GetBucketQuotaAdminAction,
+						SetBucketCompressionAdminAction,
+						GetBucketCompressionAdminAction,
 						// Tiers
 						SetTierAction,
 						ListTierAction,
