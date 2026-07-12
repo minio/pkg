@@ -278,26 +278,68 @@ const (
 	// DriveInfoAction - allow drive specific summary and detail
 	DriveInfoAction = "admin:DriveInfo"
 
-	// Delta Sharing Actions
+	// Table Sharing Actions (MinIO AIStor canonical name; OpenSharing is the open-standard name)
+
+	// TableSharingAdminAction - allow managing Table Sharing shares and tokens
+	TableSharingAdminAction = "admin:TableSharing"
+	// TableSharingCreateShareAction - allow creating Table Sharing shares
+	TableSharingCreateShareAction = "admin:TableSharingCreateShare"
+	// TableSharingDeleteShareAction - allow deleting Table Sharing shares
+	TableSharingDeleteShareAction = "admin:TableSharingDeleteShare"
+	// TableSharingListSharesAction - allow listing Table Sharing shares
+	TableSharingListSharesAction = "admin:TableSharingListShares"
+	// TableSharingGetShareAction - allow getting Table Sharing share details
+	TableSharingGetShareAction = "admin:TableSharingGetShare"
+	// TableSharingUpdateShareAction - allow updating Table Sharing shares
+	TableSharingUpdateShareAction = "admin:TableSharingUpdateShare"
+	// TableSharingCreateTokenAction - allow creating Table Sharing tokens
+	TableSharingCreateTokenAction = "admin:TableSharingCreateToken"
+	// TableSharingDeleteTokenAction - allow deleting Table Sharing tokens
+	TableSharingDeleteTokenAction = "admin:TableSharingDeleteToken"
+	// TableSharingListTokensAction - allow listing Table Sharing tokens
+	TableSharingListTokensAction = "admin:TableSharingListTokens"
+
+	// OpenSharing aliases — same action strings as TableSharing; prefer TableSharing* for new code.
+
+	// OpenSharingAdminAction - allow managing Open Sharing shares and tokens
+	OpenSharingAdminAction = TableSharingAdminAction
+	// OpenSharingCreateShareAction - allow creating Open Sharing shares
+	OpenSharingCreateShareAction = TableSharingCreateShareAction
+	// OpenSharingDeleteShareAction - allow deleting Open Sharing shares
+	OpenSharingDeleteShareAction = TableSharingDeleteShareAction
+	// OpenSharingListSharesAction - allow listing Open Sharing shares
+	OpenSharingListSharesAction = TableSharingListSharesAction
+	// OpenSharingGetShareAction - allow getting Open Sharing share details
+	OpenSharingGetShareAction = TableSharingGetShareAction
+	// OpenSharingUpdateShareAction - allow updating Open Sharing shares
+	OpenSharingUpdateShareAction = TableSharingUpdateShareAction
+	// OpenSharingCreateTokenAction - allow creating Open Sharing tokens
+	OpenSharingCreateTokenAction = TableSharingCreateTokenAction
+	// OpenSharingDeleteTokenAction - allow deleting Open Sharing tokens
+	OpenSharingDeleteTokenAction = TableSharingDeleteTokenAction
+	// OpenSharingListTokensAction - allow listing Open Sharing tokens
+	OpenSharingListTokensAction = TableSharingListTokensAction
+
+	// DeltaSharing aliases — same action strings as TableSharing; prefer TableSharing* for new code.
 
 	// DeltaSharingAdminAction - allow managing Delta Sharing shares and tokens
-	DeltaSharingAdminAction = "admin:DeltaSharing"
+	DeltaSharingAdminAction = TableSharingAdminAction
 	// DeltaSharingCreateShareAction - allow creating Delta Sharing shares
-	DeltaSharingCreateShareAction = "admin:DeltaSharingCreateShare"
+	DeltaSharingCreateShareAction = TableSharingCreateShareAction
 	// DeltaSharingDeleteShareAction - allow deleting Delta Sharing shares
-	DeltaSharingDeleteShareAction = "admin:DeltaSharingDeleteShare"
+	DeltaSharingDeleteShareAction = TableSharingDeleteShareAction
 	// DeltaSharingListSharesAction - allow listing Delta Sharing shares
-	DeltaSharingListSharesAction = "admin:DeltaSharingListShares"
+	DeltaSharingListSharesAction = TableSharingListSharesAction
 	// DeltaSharingGetShareAction - allow getting Delta Sharing share details
-	DeltaSharingGetShareAction = "admin:DeltaSharingGetShare"
+	DeltaSharingGetShareAction = TableSharingGetShareAction
 	// DeltaSharingUpdateShareAction - allow updating Delta Sharing shares
-	DeltaSharingUpdateShareAction = "admin:DeltaSharingUpdateShare"
+	DeltaSharingUpdateShareAction = TableSharingUpdateShareAction
 	// DeltaSharingCreateTokenAction - allow creating Delta Sharing tokens
-	DeltaSharingCreateTokenAction = "admin:DeltaSharingCreateToken"
+	DeltaSharingCreateTokenAction = TableSharingCreateTokenAction
 	// DeltaSharingDeleteTokenAction - allow deleting Delta Sharing tokens
-	DeltaSharingDeleteTokenAction = "admin:DeltaSharingDeleteToken"
+	DeltaSharingDeleteTokenAction = TableSharingDeleteTokenAction
 	// DeltaSharingListTokensAction - allow listing Delta Sharing tokens
-	DeltaSharingListTokensAction = "admin:DeltaSharingListTokens"
+	DeltaSharingListTokensAction = TableSharingListTokensAction
 	// ReadAlertsAction - allow reading stored alerts
 	ReadAlertsAction = "admin:ReadAlerts"
 
@@ -412,15 +454,15 @@ var SupportedAdminActions = map[AdminAction]struct{}{
 
 	ServiceCordonAdminAction: {},
 
-	DeltaSharingAdminAction:       {},
-	DeltaSharingCreateShareAction: {},
-	DeltaSharingDeleteShareAction: {},
-	DeltaSharingListSharesAction:  {},
-	DeltaSharingGetShareAction:    {},
-	DeltaSharingUpdateShareAction: {},
-	DeltaSharingCreateTokenAction: {},
-	DeltaSharingDeleteTokenAction: {},
-	DeltaSharingListTokensAction:  {},
+	TableSharingAdminAction:       {},
+	TableSharingCreateShareAction: {},
+	TableSharingDeleteShareAction: {},
+	TableSharingListSharesAction:  {},
+	TableSharingGetShareAction:    {},
+	TableSharingUpdateShareAction: {},
+	TableSharingCreateTokenAction: {},
+	TableSharingDeleteTokenAction: {},
+	TableSharingListTokensAction:  {},
 
 	ReadAPILogsAction:   {},
 	ReadErrorLogsAction: {},
