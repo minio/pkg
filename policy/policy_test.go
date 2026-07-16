@@ -103,11 +103,11 @@ func TestAdminPolicyResource(t *testing.T) {
 	}
 
 	allowedActions := p.IsAllowedActions("", "", map[string][]string{})
-	if !allowedActions.Match(ListServiceAccountsAdminAction) {
+	if !allowedActions.Match(Action(ListServiceAccountsAdminAction)) {
 		t.Fatal("expected success for ListServiceAccounts, but failed to match")
 	}
 
-	if !allowedActions.Match(GetBucketQuotaAdminAction) {
+	if !allowedActions.Match(Action(GetBucketQuotaAdminAction)) {
 		t.Fatal("expected success for GetBucketQuota, but failed to match")
 	}
 }
@@ -1298,7 +1298,7 @@ func TestPolicyUnmarshalJSONAndValidate(t *testing.T) {
 			NewStatement(
 				"",
 				Allow,
-				NewActionSet(AllAdminActions),
+				NewActionSet(Action(AllAdminActions)),
 				ResourceSet{},
 				condition.NewFunctions(),
 			),
@@ -1354,14 +1354,14 @@ func TestPolicyUnmarshalJSONAndValidate(t *testing.T) {
 			NewStatement(
 				"",
 				Deny,
-				NewActionSet(AllAdminActions),
+				NewActionSet(Action(AllAdminActions)),
 				ResourceSet{},
 				condition.NewFunctions(),
 			),
 			NewStatement(
 				"",
 				Allow,
-				NewActionSet(AllAdminActions),
+				NewActionSet(Action(AllAdminActions)),
 				ResourceSet{},
 				condition.NewFunctions(),
 			),
@@ -1411,7 +1411,7 @@ func TestPolicyUnmarshalJSONAndValidate(t *testing.T) {
 			NewStatement(
 				"",
 				Deny,
-				NewActionSet(AllAdminActions),
+				NewActionSet(Action(AllAdminActions)),
 				ResourceSet{},
 				condition.NewFunctions(),
 			),
@@ -1554,7 +1554,7 @@ func TestMergePolicies(t *testing.T) {
 			NewStatement(
 				"",
 				Deny,
-				NewActionSet(AllAdminActions),
+				NewActionSet(Action(AllAdminActions)),
 				ResourceSet{},
 				condition.NewFunctions(),
 			),
@@ -1575,7 +1575,7 @@ func TestMergePolicies(t *testing.T) {
 			NewStatement(
 				"",
 				Deny,
-				NewActionSet(AllAdminActions),
+				NewActionSet(Action(AllAdminActions)),
 				ResourceSet{},
 				condition.NewFunctions(),
 			),
@@ -1636,7 +1636,7 @@ func TestMergePolicies(t *testing.T) {
 					NewStatement(
 						"",
 						Deny,
-						NewActionSet(AllAdminActions),
+						NewActionSet(Action(AllAdminActions)),
 						ResourceSet{},
 						condition.NewFunctions(),
 					),
@@ -1665,7 +1665,7 @@ func TestMergePolicies(t *testing.T) {
 					NewStatement(
 						"",
 						Deny,
-						NewActionSet(AllAdminActions),
+						NewActionSet(Action(AllAdminActions)),
 						ResourceSet{},
 						condition.NewFunctions(),
 					),
@@ -2101,7 +2101,7 @@ func TestPolicyParseS3TablesExamples(t *testing.T) {
     }
   ]
 }`,
-			expectedActions:   []Action{S3TablesPutTableBucketMaintenanceConfigurationAction},
+			expectedActions:   []Action{Action(S3TablesPutTableBucketMaintenanceConfigurationAction)},
 			expectedResources: []string{"arn:aws:s3tables:::bucket/*"},
 		},
 		{
@@ -2124,7 +2124,7 @@ func TestPolicyParseS3TablesExamples(t *testing.T) {
     }
   ]
 }`,
-			expectedActions:   []Action{S3TablesGetTableDataAction, S3TablesGetTableMetadataLocationAction},
+			expectedActions:   []Action{Action(S3TablesGetTableDataAction), Action(S3TablesGetTableMetadataLocationAction)},
 			expectedResources: []string{"arn:aws:s3tables:::bucket/amzn-s3-demo-table-bucket/table/*"},
 			expectedCondKeys:  []condition.KeyName{condition.S3TablesNamespace},
 		},
@@ -2147,10 +2147,10 @@ func TestPolicyParseS3TablesExamples(t *testing.T) {
   ]
 }`,
 			expectedActions: []Action{
-				S3TablesDeleteTableAction,
-				S3TablesUpdateTableMetadataLocationAction,
-				S3TablesPutTableDataAction,
-				S3TablesGetTableMetadataLocationAction,
+				Action(S3TablesDeleteTableAction),
+				Action(S3TablesUpdateTableMetadataLocationAction),
+				Action(S3TablesPutTableDataAction),
+				Action(S3TablesGetTableMetadataLocationAction),
 			},
 			expectedResources: []string{"arn:aws:s3tables:::bucket/amzn-s3-demo-bucket/table/tableUUID"},
 		},
@@ -2268,7 +2268,7 @@ func TestS3TablesActionsWithImplicitMatching(t *testing.T) {
 			name:       "GetTableData direct match",
 			policyJSON: policy1JSON,
 			args: Args{
-				Action:     S3TablesGetTableDataAction,
+				Action:     Action(S3TablesGetTableDataAction),
 				BucketName: "bucket/my-warehouse/table/table-uuid-123",
 			},
 			expectedResult: true,
@@ -2333,7 +2333,7 @@ func TestS3TablesActionsWithImplicitMatching(t *testing.T) {
 			name:       "PutTableData direct match",
 			policyJSON: policy2JSON,
 			args: Args{
-				Action:     S3TablesPutTableDataAction,
+				Action:     Action(S3TablesPutTableDataAction),
 				BucketName: "bucket/test-warehouse/table/uuid-456",
 			},
 			expectedResult: true,
@@ -2736,13 +2736,13 @@ func TestAdminActionResourceScoping(t *testing.T) {
 
 	// Matching bucket must be allowed.
 	allowed := p.IsAllowedActions("mybucket", "", map[string][]string{})
-	if !allowed.Match(GetBucketQuotaAdminAction) {
+	if !allowed.Match(Action(GetBucketQuotaAdminAction)) {
 		t.Fatal("expected GetBucketQuota allowed for mybucket")
 	}
 
 	// Different bucket must be denied.
 	allowed = p.IsAllowedActions("otherbucket", "", map[string][]string{})
-	if allowed.Match(GetBucketQuotaAdminAction) {
+	if allowed.Match(Action(GetBucketQuotaAdminAction)) {
 		t.Fatal("expected GetBucketQuota denied for otherbucket")
 	}
 
@@ -2761,7 +2761,7 @@ func TestAdminActionResourceScoping(t *testing.T) {
 		t.Fatal(err)
 	}
 	allowed = p.IsAllowedActions("", "", map[string][]string{})
-	if !allowed.Match(ServerInfoAdminAction) {
+	if !allowed.Match(Action(ServerInfoAdminAction)) {
 		t.Fatal("expected ServerInfo allowed without resource")
 	}
 
@@ -2780,10 +2780,10 @@ func TestAdminActionResourceScoping(t *testing.T) {
 		t.Fatal(err)
 	}
 	allowed = p.IsAllowedActions("", "", map[string][]string{})
-	if !allowed.Match(ServerInfoAdminAction) {
+	if !allowed.Match(Action(ServerInfoAdminAction)) {
 		t.Fatal("expected ServerInfo allowed with admin:* and no resource")
 	}
-	if !allowed.Match(GetBucketQuotaAdminAction) {
+	if !allowed.Match(Action(GetBucketQuotaAdminAction)) {
 		t.Fatal("expected GetBucketQuota allowed with admin:* and no resource constraint")
 	}
 }

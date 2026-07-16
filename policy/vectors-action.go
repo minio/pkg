@@ -29,43 +29,43 @@ const (
 	S3VectorsCreateVectorBucketAction VectorsAction = "s3vectors:CreateVectorBucket"
 
 	// S3VectorsDeleteVectorBucketAction maps to the AWS `DeleteVectorBucket` S3 Vectors action.
-	S3VectorsDeleteVectorBucketAction = "s3vectors:DeleteVectorBucket"
+	S3VectorsDeleteVectorBucketAction VectorsAction = "s3vectors:DeleteVectorBucket"
 
 	// S3VectorsGetVectorBucketAction maps to the AWS `GetVectorBucket` S3 Vectors action.
-	S3VectorsGetVectorBucketAction = "s3vectors:GetVectorBucket"
+	S3VectorsGetVectorBucketAction VectorsAction = "s3vectors:GetVectorBucket"
 
 	// S3VectorsListVectorBucketsAction maps to the AWS `ListVectorBuckets` S3 Vectors action.
-	S3VectorsListVectorBucketsAction = "s3vectors:ListVectorBuckets"
+	S3VectorsListVectorBucketsAction VectorsAction = "s3vectors:ListVectorBuckets"
 
 	// S3VectorsCreateIndexAction maps to the AWS `CreateIndex` S3 Vectors action.
-	S3VectorsCreateIndexAction = "s3vectors:CreateIndex"
+	S3VectorsCreateIndexAction VectorsAction = "s3vectors:CreateIndex"
 
 	// S3VectorsDeleteIndexAction maps to the AWS `DeleteIndex` S3 Vectors action.
-	S3VectorsDeleteIndexAction = "s3vectors:DeleteIndex"
+	S3VectorsDeleteIndexAction VectorsAction = "s3vectors:DeleteIndex"
 
 	// S3VectorsGetIndexAction maps to the AWS `GetIndex` S3 Vectors action.
-	S3VectorsGetIndexAction = "s3vectors:GetIndex"
+	S3VectorsGetIndexAction VectorsAction = "s3vectors:GetIndex"
 
 	// S3VectorsListIndexesAction maps to the AWS `ListIndexes` S3 Vectors action.
-	S3VectorsListIndexesAction = "s3vectors:ListIndexes"
+	S3VectorsListIndexesAction VectorsAction = "s3vectors:ListIndexes"
 
 	// S3VectorsPutVectorsAction maps to the AWS `PutVectors` S3 Vectors action.
-	S3VectorsPutVectorsAction = "s3vectors:PutVectors"
+	S3VectorsPutVectorsAction VectorsAction = "s3vectors:PutVectors"
 
 	// S3VectorsGetVectorsAction maps to the AWS `GetVectors` S3 Vectors action.
-	S3VectorsGetVectorsAction = "s3vectors:GetVectors"
+	S3VectorsGetVectorsAction VectorsAction = "s3vectors:GetVectors"
 
 	// S3VectorsDeleteVectorsAction maps to the AWS `DeleteVectors` S3 Vectors action.
-	S3VectorsDeleteVectorsAction = "s3vectors:DeleteVectors"
+	S3VectorsDeleteVectorsAction VectorsAction = "s3vectors:DeleteVectors"
 
 	// S3VectorsListVectorsAction maps to the AWS `ListVectors` S3 Vectors action.
-	S3VectorsListVectorsAction = "s3vectors:ListVectors"
+	S3VectorsListVectorsAction VectorsAction = "s3vectors:ListVectors"
 
 	// S3VectorsQueryVectorsAction maps to the AWS `QueryVectors` S3 Vectors action.
-	S3VectorsQueryVectorsAction = "s3vectors:QueryVectors"
+	S3VectorsQueryVectorsAction VectorsAction = "s3vectors:QueryVectors"
 
 	// AllS3VectorsActions - all Amazon S3 Vectors actions
-	AllS3VectorsActions = "s3vectors:*"
+	AllS3VectorsActions VectorsAction = "s3vectors:*"
 )
 
 // SupportedVectorsActions - list of all supported S3 Vectors actions.

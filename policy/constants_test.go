@@ -38,7 +38,7 @@ func TestDefaultPolicyReadOnly(t *testing.T) {
 	}
 
 	allowed := NewActionSet(GetBucketLocationAction, GetObjectAction)
-	denied := NewActionSet(CreateUserAdminAction)
+	denied := NewActionSet(Action(CreateUserAdminAction))
 
 	var sawAllow, sawDeny bool
 	for _, s := range p.Statements {
@@ -70,7 +70,7 @@ func TestDefaultPolicyConsoleReadOnly(t *testing.T) {
 	}
 
 	allowed := NewActionSet(GetBucketLocationAction, GetObjectAction, ListBucketAction)
-	denied := NewActionSet(CreateUserAdminAction)
+	denied := NewActionSet(Action(CreateUserAdminAction))
 
 	var sawAllow, sawDeny bool
 	for _, s := range p.Statements {

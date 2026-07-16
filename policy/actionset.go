@@ -53,44 +53,44 @@ var implicitActions = map[Action]ActionSet{
 	GetObjectVersionAction: NewActionSet(GetObjectAction),
 
 	// S3Tables actions implicitly allow their data actions
-	S3TablesGetTableDataAction: NewActionSet(GetObjectAction, ListMultipartUploadPartsAction),
-	S3TablesPutTableDataAction: NewActionSet(PutObjectAction, AbortMultipartUploadAction, ListBucketAction),
-	// S3TablesDeleteTableAction implicitly allows DeleteObjectAction to support table purging.
+	Action(S3TablesGetTableDataAction): NewActionSet(GetObjectAction, ListMultipartUploadPartsAction),
+	Action(S3TablesPutTableDataAction): NewActionSet(PutObjectAction, AbortMultipartUploadAction, ListBucketAction),
+	// Action(S3TablesDeleteTableAction) implicitly allows DeleteObjectAction to support table purging.
 	// This is needed because Spark's DROP TABLE ... PURGE performs client-side deletes rather than
 	// using purgeRequested=true to let the catalog handle deletion. This workaround grants the
 	// necessary privilege until the issue is fixed in Spark/Iceberg upstream.
 	// See: https://github.com/apache/iceberg/issues/14743
 	//      https://github.com/apache/iceberg/issues/11023
-	S3TablesDeleteTableAction: NewActionSet(DeleteObjectAction),
-	AllS3TablesActions:        NewActionSet(GetObjectAction, PutObjectAction, DeleteObjectAction, ListBucketAction, ListMultipartUploadPartsAction, AbortMultipartUploadAction),
+	Action(S3TablesDeleteTableAction): NewActionSet(DeleteObjectAction),
+	Action(AllS3TablesActions):        NewActionSet(GetObjectAction, PutObjectAction, DeleteObjectAction, ListBucketAction, ListMultipartUploadPartsAction, AbortMultipartUploadAction),
 
 	// TableBucket actions implicitly allow their Warehouse counterparts
-	S3TablesCreateTableBucketAction:                      NewActionSet(S3TablesCreateWarehouseAction),
-	S3TablesDeleteTableBucketAction:                      NewActionSet(S3TablesDeleteWarehouseAction),
-	S3TablesDeleteTableBucketEncryptionAction:            NewActionSet(S3TablesDeleteWarehouseEncryptionAction),
-	S3TablesDeleteTableBucketPolicyAction:                NewActionSet(S3TablesDeleteWarehousePolicyAction),
-	S3TablesGetTableBucketAction:                         NewActionSet(S3TablesGetWarehouseAction),
-	S3TablesGetTableBucketEncryptionAction:               NewActionSet(S3TablesGetWarehouseEncryptionAction),
-	S3TablesGetTableBucketMaintenanceConfigurationAction: NewActionSet(S3TablesGetWarehouseMaintenanceConfigurationAction),
-	S3TablesGetTableBucketPolicyAction:                   NewActionSet(S3TablesGetWarehousePolicyAction),
-	S3TablesListTableBucketsAction:                       NewActionSet(S3TablesListWarehousesAction),
-	S3TablesPutTableBucketEncryptionAction:               NewActionSet(S3TablesPutWarehouseEncryptionAction),
-	S3TablesPutTableBucketMaintenanceConfigurationAction: NewActionSet(S3TablesPutWarehouseMaintenanceConfigurationAction),
-	S3TablesPutTableBucketPolicyAction:                   NewActionSet(S3TablesPutWarehousePolicyAction),
+	Action(S3TablesCreateTableBucketAction):                      NewActionSet(Action(S3TablesCreateWarehouseAction)),
+	Action(S3TablesDeleteTableBucketAction):                      NewActionSet(Action(S3TablesDeleteWarehouseAction)),
+	Action(S3TablesDeleteTableBucketEncryptionAction):            NewActionSet(Action(S3TablesDeleteWarehouseEncryptionAction)),
+	Action(S3TablesDeleteTableBucketPolicyAction):                NewActionSet(Action(S3TablesDeleteWarehousePolicyAction)),
+	Action(S3TablesGetTableBucketAction):                         NewActionSet(Action(S3TablesGetWarehouseAction)),
+	Action(S3TablesGetTableBucketEncryptionAction):               NewActionSet(Action(S3TablesGetWarehouseEncryptionAction)),
+	Action(S3TablesGetTableBucketMaintenanceConfigurationAction): NewActionSet(Action(S3TablesGetWarehouseMaintenanceConfigurationAction)),
+	Action(S3TablesGetTableBucketPolicyAction):                   NewActionSet(Action(S3TablesGetWarehousePolicyAction)),
+	Action(S3TablesListTableBucketsAction):                       NewActionSet(Action(S3TablesListWarehousesAction)),
+	Action(S3TablesPutTableBucketEncryptionAction):               NewActionSet(Action(S3TablesPutWarehouseEncryptionAction)),
+	Action(S3TablesPutTableBucketMaintenanceConfigurationAction): NewActionSet(Action(S3TablesPutWarehouseMaintenanceConfigurationAction)),
+	Action(S3TablesPutTableBucketPolicyAction):                   NewActionSet(Action(S3TablesPutWarehousePolicyAction)),
 
 	// Warehouse actions implicitly allow their TableBucket counterparts
-	S3TablesCreateWarehouseAction:                      NewActionSet(S3TablesCreateTableBucketAction),
-	S3TablesDeleteWarehouseAction:                      NewActionSet(S3TablesDeleteTableBucketAction),
-	S3TablesDeleteWarehouseEncryptionAction:            NewActionSet(S3TablesDeleteTableBucketEncryptionAction),
-	S3TablesDeleteWarehousePolicyAction:                NewActionSet(S3TablesDeleteTableBucketPolicyAction),
-	S3TablesGetWarehouseAction:                         NewActionSet(S3TablesGetTableBucketAction),
-	S3TablesGetWarehouseEncryptionAction:               NewActionSet(S3TablesGetTableBucketEncryptionAction),
-	S3TablesGetWarehouseMaintenanceConfigurationAction: NewActionSet(S3TablesGetTableBucketMaintenanceConfigurationAction),
-	S3TablesGetWarehousePolicyAction:                   NewActionSet(S3TablesGetTableBucketPolicyAction),
-	S3TablesListWarehousesAction:                       NewActionSet(S3TablesListTableBucketsAction),
-	S3TablesPutWarehouseEncryptionAction:               NewActionSet(S3TablesPutTableBucketEncryptionAction),
-	S3TablesPutWarehouseMaintenanceConfigurationAction: NewActionSet(S3TablesPutTableBucketMaintenanceConfigurationAction),
-	S3TablesPutWarehousePolicyAction:                   NewActionSet(S3TablesPutTableBucketPolicyAction),
+	Action(S3TablesCreateWarehouseAction):                      NewActionSet(Action(S3TablesCreateTableBucketAction)),
+	Action(S3TablesDeleteWarehouseAction):                      NewActionSet(Action(S3TablesDeleteTableBucketAction)),
+	Action(S3TablesDeleteWarehouseEncryptionAction):            NewActionSet(Action(S3TablesDeleteTableBucketEncryptionAction)),
+	Action(S3TablesDeleteWarehousePolicyAction):                NewActionSet(Action(S3TablesDeleteTableBucketPolicyAction)),
+	Action(S3TablesGetWarehouseAction):                         NewActionSet(Action(S3TablesGetTableBucketAction)),
+	Action(S3TablesGetWarehouseEncryptionAction):               NewActionSet(Action(S3TablesGetTableBucketEncryptionAction)),
+	Action(S3TablesGetWarehouseMaintenanceConfigurationAction): NewActionSet(Action(S3TablesGetTableBucketMaintenanceConfigurationAction)),
+	Action(S3TablesGetWarehousePolicyAction):                   NewActionSet(Action(S3TablesGetTableBucketPolicyAction)),
+	Action(S3TablesListWarehousesAction):                       NewActionSet(Action(S3TablesListTableBucketsAction)),
+	Action(S3TablesPutWarehouseEncryptionAction):               NewActionSet(Action(S3TablesPutTableBucketEncryptionAction)),
+	Action(S3TablesPutWarehouseMaintenanceConfigurationAction): NewActionSet(Action(S3TablesPutTableBucketMaintenanceConfigurationAction)),
+	Action(S3TablesPutWarehousePolicyAction):                   NewActionSet(Action(S3TablesPutTableBucketPolicyAction)),
 }
 
 // Match - matches object name with anyone of action pattern in action set.

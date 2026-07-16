@@ -30,31 +30,31 @@ const (
 	MemoryCreateCortexAction MemoryAction = "memory:CreateCortex"
 
 	// MemoryDeleteCortexAction - delete a Memory cortex.
-	MemoryDeleteCortexAction = "memory:DeleteCortex"
+	MemoryDeleteCortexAction MemoryAction = "memory:DeleteCortex"
 
 	// MemoryGetCortexAction - read a Memory cortex's metadata.
-	MemoryGetCortexAction = "memory:GetCortex"
+	MemoryGetCortexAction MemoryAction = "memory:GetCortex"
 
 	// MemoryListCortexesAction - list Memory cortexes.
-	MemoryListCortexesAction = "memory:ListCortexes"
+	MemoryListCortexesAction MemoryAction = "memory:ListCortexes"
 
 	// MemoryPutSecretAction - write a secret in a cortex.
-	MemoryPutSecretAction = "memory:PutSecret"
+	MemoryPutSecretAction MemoryAction = "memory:PutSecret"
 
 	// MemoryGetSecretAction - read a secret's decrypted value from a cortex.
-	MemoryGetSecretAction = "memory:GetSecret"
+	MemoryGetSecretAction MemoryAction = "memory:GetSecret"
 
 	// MemoryDeleteSecretAction - delete a secret from a cortex.
-	MemoryDeleteSecretAction = "memory:DeleteSecret"
+	MemoryDeleteSecretAction MemoryAction = "memory:DeleteSecret"
 
 	// MemoryListSecretsAction - list the secrets in a cortex.
-	MemoryListSecretsAction = "memory:ListSecrets"
+	MemoryListSecretsAction MemoryAction = "memory:ListSecrets"
 
 	// MemorySearchAction - search (corpus-grep) the objects in a cortex.
-	MemorySearchAction = "memory:Search"
+	MemorySearchAction MemoryAction = "memory:Search"
 
 	// AllMemoryActions - all AIStor Memory API actions.
-	AllMemoryActions = "memory:*"
+	AllMemoryActions MemoryAction = "memory:*"
 )
 
 // SupportedMemoryActions - list of all supported AIStor Memory API actions.

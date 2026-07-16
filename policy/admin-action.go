@@ -27,291 +27,291 @@ type AdminAction string
 
 const (
 	// HealAdminAction - allows heal command
-	HealAdminAction = "admin:Heal"
+	HealAdminAction AdminAction = "admin:Heal"
 
 	// DecommissionAdminAction - allows decomissioning of pools
-	DecommissionAdminAction = "admin:Decommission"
+	DecommissionAdminAction AdminAction = "admin:Decommission"
 
 	// RebalanceAdminAction - allows rebalancing of pools
-	RebalanceAdminAction = "admin:Rebalance"
+	RebalanceAdminAction AdminAction = "admin:Rebalance"
 	// Service Actions
 
 	// StorageInfoAdminAction - allow listing server info
-	StorageInfoAdminAction = "admin:StorageInfo"
+	StorageInfoAdminAction AdminAction = "admin:StorageInfo"
 	// PrometheusAdminAction - prometheus info action
-	PrometheusAdminAction = "admin:Prometheus"
+	PrometheusAdminAction AdminAction = "admin:Prometheus"
 	// DataUsageInfoAdminAction - allow listing data usage info
-	DataUsageInfoAdminAction = "admin:DataUsageInfo"
+	DataUsageInfoAdminAction AdminAction = "admin:DataUsageInfo"
 	// ForceUnlockAdminAction - allow force unlocking locks
-	ForceUnlockAdminAction = "admin:ForceUnlock"
+	ForceUnlockAdminAction AdminAction = "admin:ForceUnlock"
 	// TopLocksAdminAction - allow listing top locks
-	TopLocksAdminAction = "admin:TopLocksInfo"
+	TopLocksAdminAction AdminAction = "admin:TopLocksInfo"
 	// ProfilingAdminAction - allow profiling
-	ProfilingAdminAction = "admin:Profiling"
+	ProfilingAdminAction AdminAction = "admin:Profiling"
 	// TraceAdminAction - allow listing server trace
-	TraceAdminAction = "admin:ServerTrace"
+	TraceAdminAction AdminAction = "admin:ServerTrace"
 	// ConsoleLogAdminAction - allow listing console logs on terminal
-	ConsoleLogAdminAction = "admin:ConsoleLog"
+	ConsoleLogAdminAction AdminAction = "admin:ConsoleLog"
 	// KMSEnableAdminAction - allow enabling the builtin KMS
-	KMSEnableAdminAction = "admin:KMSEnable"
+	KMSEnableAdminAction AdminAction = "admin:KMSEnable"
 	// KMSBackupAdminAction - allow backing up builtin KMS keys
-	KMSBackupAdminAction = "admin:KMSBackup"
+	KMSBackupAdminAction AdminAction = "admin:KMSBackup"
 	// KMSRestoreAdminAction - allow restoring builtin KMS keys
-	KMSRestoreAdminAction = "admin:KMSRestore"
+	KMSRestoreAdminAction AdminAction = "admin:KMSRestore"
 	// KMSCreateKeyAdminAction - allow creating a new KMS master key
-	KMSCreateKeyAdminAction = "admin:KMSCreateKey"
+	KMSCreateKeyAdminAction AdminAction = "admin:KMSCreateKey"
 	// KMSKeyStatusAdminAction - allow getting KMS key status
-	KMSKeyStatusAdminAction = "admin:KMSKeyStatus"
+	KMSKeyStatusAdminAction AdminAction = "admin:KMSKeyStatus"
 	// KMSKeyRotateAdminAction - allow rotating KMS keys
-	KMSKeyRotateAdminAction = "admin:KMSKeyRotate"
+	KMSKeyRotateAdminAction AdminAction = "admin:KMSKeyRotate"
 	// ServerInfoAdminAction - allow listing server info
-	ServerInfoAdminAction = "admin:ServerInfo"
+	ServerInfoAdminAction AdminAction = "admin:ServerInfo"
 	// HealthInfoAdminAction - allow obtaining cluster health information
-	HealthInfoAdminAction = "admin:OBDInfo"
+	HealthInfoAdminAction AdminAction = "admin:OBDInfo"
 	// LicenseInfoAdminAction - allow obtaining license information
-	LicenseInfoAdminAction = "admin:LicenseInfo"
+	LicenseInfoAdminAction AdminAction = "admin:LicenseInfo"
 	// BandwidthMonitorAction - allow monitoring bandwidth usage
-	BandwidthMonitorAction = "admin:BandwidthMonitor"
+	BandwidthMonitorAction AdminAction = "admin:BandwidthMonitor"
 	// InspectDataAction - allows downloading raw files from backend
-	InspectDataAction = "admin:InspectData"
+	InspectDataAction AdminAction = "admin:InspectData"
 
 	// ServerUpdateAdminAction - allow MinIO binary update
-	ServerUpdateAdminAction = "admin:ServerUpdate"
+	ServerUpdateAdminAction AdminAction = "admin:ServerUpdate"
 	// ServiceRestartAdminAction - allow restart of MinIO service.
-	ServiceRestartAdminAction = "admin:ServiceRestart"
+	ServiceRestartAdminAction AdminAction = "admin:ServiceRestart"
 	// ServiceStopAdminAction - allow stopping MinIO service.
-	ServiceStopAdminAction = "admin:ServiceStop"
+	ServiceStopAdminAction AdminAction = "admin:ServiceStop"
 	// ServiceFreezeAdminAction - allow freeze/unfreeze MinIO service.
-	ServiceFreezeAdminAction = "admin:ServiceFreeze"
+	ServiceFreezeAdminAction AdminAction = "admin:ServiceFreeze"
 	// ServiceCordonAdminAction - allow cordon/uncordon MinIO service.
-	ServiceCordonAdminAction = "admin:ServiceCordon"
+	ServiceCordonAdminAction AdminAction = "admin:ServiceCordon"
 
 	// ConfigUpdateAdminAction - allow MinIO config management
-	ConfigUpdateAdminAction = "admin:ConfigUpdate"
+	ConfigUpdateAdminAction AdminAction = "admin:ConfigUpdate"
 
 	// CreateUserAdminAction - allow creating MinIO user
-	CreateUserAdminAction = "admin:CreateUser"
+	CreateUserAdminAction AdminAction = "admin:CreateUser"
 	// DeleteUserAdminAction - allow deleting MinIO user
-	DeleteUserAdminAction = "admin:DeleteUser"
+	DeleteUserAdminAction AdminAction = "admin:DeleteUser"
 	// ListUsersAdminAction - allow list users permission
-	ListUsersAdminAction = "admin:ListUsers"
+	ListUsersAdminAction AdminAction = "admin:ListUsers"
 	// EnableUserAdminAction - allow enable user permission
-	EnableUserAdminAction = "admin:EnableUser"
+	EnableUserAdminAction AdminAction = "admin:EnableUser"
 	// DisableUserAdminAction - allow disable user permission
-	DisableUserAdminAction = "admin:DisableUser"
+	DisableUserAdminAction AdminAction = "admin:DisableUser"
 	// GetUserAdminAction - allows GET permission on user info
-	GetUserAdminAction = "admin:GetUser"
+	GetUserAdminAction AdminAction = "admin:GetUser"
 	// ChangeMyPasswordAdminAction - allow changing own password
-	ChangeMyPasswordAdminAction = "admin:ChangeMyPassword"
+	ChangeMyPasswordAdminAction AdminAction = "admin:ChangeMyPassword"
 
 	// Cluster Replicate Actions
 
 	// SiteReplicationAddAction - allow adding clusters for site-level replication
-	SiteReplicationAddAction = "admin:SiteReplicationAdd"
+	SiteReplicationAddAction AdminAction = "admin:SiteReplicationAdd"
 	// SiteReplicationDisableAction - allow disabling a cluster from replication
-	SiteReplicationDisableAction = "admin:SiteReplicationDisable"
+	SiteReplicationDisableAction AdminAction = "admin:SiteReplicationDisable"
 	// SiteReplicationRemoveAction - allow removing a cluster from replication
-	SiteReplicationRemoveAction = "admin:SiteReplicationRemove"
+	SiteReplicationRemoveAction AdminAction = "admin:SiteReplicationRemove"
 	// SiteReplicationResyncAction - allow resyncing cluster data to another site
-	SiteReplicationResyncAction = "admin:SiteReplicationResync"
+	SiteReplicationResyncAction AdminAction = "admin:SiteReplicationResync"
 	// SiteReplicationInfoAction - allow getting site replication info
-	SiteReplicationInfoAction = "admin:SiteReplicationInfo"
+	SiteReplicationInfoAction AdminAction = "admin:SiteReplicationInfo"
 	// SiteReplicationOperationAction - allow performing site replication
 	// create/update/delete operations to peers
-	SiteReplicationOperationAction = "admin:SiteReplicationOperation"
+	SiteReplicationOperationAction AdminAction = "admin:SiteReplicationOperation"
 
 	// Tables Replication Actions
 
 	// TablesReplicationAddAction - allow adding tables replication targets
-	TablesReplicationAddAction = "admin:TablesReplicationAdd"
+	TablesReplicationAddAction AdminAction = "admin:TablesReplicationAdd"
 	// TablesReplicationRemoveAction - allow removing tables replication targets
-	TablesReplicationRemoveAction = "admin:TablesReplicationRemove"
+	TablesReplicationRemoveAction AdminAction = "admin:TablesReplicationRemove"
 	// TablesReplicationInfoAction - allow getting tables replication info/status
-	TablesReplicationInfoAction = "admin:TablesReplicationInfo"
+	TablesReplicationInfoAction AdminAction = "admin:TablesReplicationInfo"
 	// TablesReplicationStartFailoverAction - allow starting tables replication failover
-	TablesReplicationStartFailoverAction = "admin:TablesReplicationStartFailover"
+	TablesReplicationStartFailoverAction AdminAction = "admin:TablesReplicationStartFailover"
 	// TablesReplicationCatalogAdminAction - allow catalog debugging operations (reset, dump contents)
-	TablesReplicationCatalogAdminAction = "admin:TablesReplicationCatalogAdmin"
+	TablesReplicationCatalogAdminAction AdminAction = "admin:TablesReplicationCatalogAdmin"
 
 	// Service account Actions
 
 	// CreateServiceAccountAdminAction - allow create a service account for a user
-	CreateServiceAccountAdminAction = "admin:CreateServiceAccount"
+	CreateServiceAccountAdminAction AdminAction = "admin:CreateServiceAccount"
 	// UpdateServiceAccountAdminAction - allow updating a service account
-	UpdateServiceAccountAdminAction = "admin:UpdateServiceAccount"
+	UpdateServiceAccountAdminAction AdminAction = "admin:UpdateServiceAccount"
 	// RemoveServiceAccountAdminAction - allow removing a service account
-	RemoveServiceAccountAdminAction = "admin:RemoveServiceAccount"
+	RemoveServiceAccountAdminAction AdminAction = "admin:RemoveServiceAccount"
 	// ListServiceAccountsAdminAction - allow listing service accounts
-	ListServiceAccountsAdminAction = "admin:ListServiceAccounts"
+	ListServiceAccountsAdminAction AdminAction = "admin:ListServiceAccounts"
 
 	// ListTemporaryAccountsAdminAction - allow listing of temporary accounts
-	ListTemporaryAccountsAdminAction = "admin:ListTemporaryAccounts"
+	ListTemporaryAccountsAdminAction AdminAction = "admin:ListTemporaryAccounts"
 
 	// Group Actions
 
 	// AddUserToGroupAdminAction - allow adding user to group permission
-	AddUserToGroupAdminAction = "admin:AddUserToGroup"
+	AddUserToGroupAdminAction AdminAction = "admin:AddUserToGroup"
 	// RemoveUserFromGroupAdminAction - allow removing user to group permission
-	RemoveUserFromGroupAdminAction = "admin:RemoveUserFromGroup"
+	RemoveUserFromGroupAdminAction AdminAction = "admin:RemoveUserFromGroup"
 	// GetGroupAdminAction - allow getting group info
-	GetGroupAdminAction = "admin:GetGroup"
+	GetGroupAdminAction AdminAction = "admin:GetGroup"
 	// ListGroupsAdminAction - allow list groups permission
-	ListGroupsAdminAction = "admin:ListGroups"
+	ListGroupsAdminAction AdminAction = "admin:ListGroups"
 	// EnableGroupAdminAction - allow enable group permission
-	EnableGroupAdminAction = "admin:EnableGroup"
+	EnableGroupAdminAction AdminAction = "admin:EnableGroup"
 	// DisableGroupAdminAction - allow disable group permission
-	DisableGroupAdminAction = "admin:DisableGroup"
+	DisableGroupAdminAction AdminAction = "admin:DisableGroup"
 
 	// Policy Actions
 
 	// CreatePolicyAdminAction - allow create policy permission
-	CreatePolicyAdminAction = "admin:CreatePolicy"
+	CreatePolicyAdminAction AdminAction = "admin:CreatePolicy"
 	// DeletePolicyAdminAction - allow delete policy permission
-	DeletePolicyAdminAction = "admin:DeletePolicy"
+	DeletePolicyAdminAction AdminAction = "admin:DeletePolicy"
 	// GetPolicyAdminAction - allow get policy permission
-	GetPolicyAdminAction = "admin:GetPolicy"
+	GetPolicyAdminAction AdminAction = "admin:GetPolicy"
 	// AttachPolicyAdminAction - allows attaching a policy to a user/group
-	AttachPolicyAdminAction = "admin:AttachUserOrGroupPolicy"
+	AttachPolicyAdminAction AdminAction = "admin:AttachUserOrGroupPolicy"
 	// UpdatePolicyAssociationAction - allows to add/remove policy association
 	// on a user or group.
-	UpdatePolicyAssociationAction = "admin:UpdatePolicyAssociation"
+	UpdatePolicyAssociationAction AdminAction = "admin:UpdatePolicyAssociation"
 	// ListUserPoliciesAdminAction - allows listing user policies
-	ListUserPoliciesAdminAction = "admin:ListUserPolicies"
+	ListUserPoliciesAdminAction AdminAction = "admin:ListUserPolicies"
 
 	// Bucket quota Actions
 
 	// SetBucketQuotaAdminAction - allow setting bucket quota
-	SetBucketQuotaAdminAction = "admin:SetBucketQuota"
+	SetBucketQuotaAdminAction AdminAction = "admin:SetBucketQuota"
 	// GetBucketQuotaAdminAction - allow getting bucket quota
-	GetBucketQuotaAdminAction = "admin:GetBucketQuota"
+	GetBucketQuotaAdminAction AdminAction = "admin:GetBucketQuota"
 
 	// Bucket compression Actions
 
 	// SetBucketCompressionAdminAction - allow setting per-bucket compression config
-	SetBucketCompressionAdminAction = "admin:SetBucketCompression"
+	SetBucketCompressionAdminAction AdminAction = "admin:SetBucketCompression"
 	// GetBucketCompressionAdminAction - allow getting per-bucket compression config
-	GetBucketCompressionAdminAction = "admin:GetBucketCompression"
+	GetBucketCompressionAdminAction AdminAction = "admin:GetBucketCompression"
 
 	// Bucket Target admin Actions
 
 	// SetBucketTargetAction - allow setting bucket target
-	SetBucketTargetAction = "admin:SetBucketTarget"
+	SetBucketTargetAction AdminAction = "admin:SetBucketTarget"
 	// GetBucketTargetAction - allow getting bucket targets
-	GetBucketTargetAction = "admin:GetBucketTarget"
+	GetBucketTargetAction AdminAction = "admin:GetBucketTarget"
 
 	// ReplicationDiff - allow computing the unreplicated objects in a bucket
-	ReplicationDiff = "admin:ReplicationDiff"
+	ReplicationDiff AdminAction = "admin:ReplicationDiff"
 
 	// Bucket import/export admin Actions
 
 	// ImportBucketMetadataAction - allow importing bucket metadata
-	ImportBucketMetadataAction = "admin:ImportBucketMetadata"
+	ImportBucketMetadataAction AdminAction = "admin:ImportBucketMetadata"
 	// ExportBucketMetadataAction - allow exporting bucket metadata
-	ExportBucketMetadataAction = "admin:ExportBucketMetadata"
+	ExportBucketMetadataAction AdminAction = "admin:ExportBucketMetadata"
 
 	// Remote Tier admin Actions
 
 	// SetTierAction - allow adding/editing a remote tier
-	SetTierAction = "admin:SetTier"
+	SetTierAction AdminAction = "admin:SetTier"
 	// ListTierAction - allow listing remote tiers
-	ListTierAction = "admin:ListTier"
+	ListTierAction AdminAction = "admin:ListTier"
 
 	// Migrate IAM admin Actions
 
 	// ExportIAMAction - allow exporting of all IAM info
-	ExportIAMAction = "admin:ExportIAM"
+	ExportIAMAction AdminAction = "admin:ExportIAM"
 	// ImportIAMAction - allow importing IAM info to MinIO
-	ImportIAMAction = "admin:ImportIAM"
+	ImportIAMAction AdminAction = "admin:ImportIAM"
 
 	// Batch Job APIs
 
 	// ListBatchJobsAction allow listing current active jobs
-	ListBatchJobsAction = "admin:ListBatchJobs"
+	ListBatchJobsAction AdminAction = "admin:ListBatchJobs"
 
 	// DescribeBatchJobAction allow getting batch job YAML
-	DescribeBatchJobAction = "admin:DescribeBatchJob"
+	DescribeBatchJobAction AdminAction = "admin:DescribeBatchJob"
 
 	// StartBatchJobAction allow submitting a batch job
-	StartBatchJobAction = "admin:StartBatchJob"
+	StartBatchJobAction AdminAction = "admin:StartBatchJob"
 
 	// CancelBatchJobAction allow canceling a batch job
-	CancelBatchJobAction = "admin:CancelBatchJob"
+	CancelBatchJobAction AdminAction = "admin:CancelBatchJob"
 
 	// GenerateBatchJobAction allow requesting batch job templates
-	GenerateBatchJobAction = "admin:GenerateBatchJob"
+	GenerateBatchJobAction AdminAction = "admin:GenerateBatchJob"
 
 	// Distributed Job APIs
 
 	// DistJobStatusAction allow viewing status of distributed jobs
 	// (decommission and any future job type built on the same framework),
 	// regardless of which job type is being queried.
-	DistJobStatusAction = "admin:DistJobStatus"
+	DistJobStatusAction AdminAction = "admin:DistJobStatus"
 
 	// Inventory Control Actions
 
 	// InventoryControlAction - allows control of inventory jobs
-	InventoryControlAction = "admin:InventoryControl"
+	InventoryControlAction AdminAction = "admin:InventoryControl"
 
 	// All new v4 APIs
 
 	// ClusterInfoAction - allow cluster summary
-	ClusterInfoAction = "admin:ClusterInfo"
+	ClusterInfoAction AdminAction = "admin:ClusterInfo"
 
 	// PoolListAction - allow list how many pools and summary per pool
-	PoolListAction = "admin:PoolList"
+	PoolListAction AdminAction = "admin:PoolList"
 
 	// PoolInfoAction - allow pool specific summary and detail information
-	PoolInfoAction = "admin:PoolInfo"
+	PoolInfoAction AdminAction = "admin:PoolInfo"
 
 	// NodeListAction - allow listing of nodes
-	NodeListAction = "admin:NodeList"
+	NodeListAction AdminAction = "admin:NodeList"
 
 	// NodeInfoAction - allow node specific summary and detailed information
-	NodeInfoAction = "admin:NodeInfo"
+	NodeInfoAction AdminAction = "admin:NodeInfo"
 
 	// SetInfoAction - allow set specific summary and detail
-	SetInfoAction = "admin:SetInfo"
+	SetInfoAction AdminAction = "admin:SetInfo"
 
 	// DriveListAction - allow listing of drives
-	DriveListAction = "admin:DriveList"
+	DriveListAction AdminAction = "admin:DriveList"
 
 	// DriveInfoAction - allow drive specific summary and detail
-	DriveInfoAction = "admin:DriveInfo"
+	DriveInfoAction AdminAction = "admin:DriveInfo"
 
 	// Delta Sharing Actions
 
 	// DeltaSharingAdminAction - allow managing Delta Sharing shares and tokens
-	DeltaSharingAdminAction = "admin:DeltaSharing"
+	DeltaSharingAdminAction AdminAction = "admin:DeltaSharing"
 	// DeltaSharingCreateShareAction - allow creating Delta Sharing shares
-	DeltaSharingCreateShareAction = "admin:DeltaSharingCreateShare"
+	DeltaSharingCreateShareAction AdminAction = "admin:DeltaSharingCreateShare"
 	// DeltaSharingDeleteShareAction - allow deleting Delta Sharing shares
-	DeltaSharingDeleteShareAction = "admin:DeltaSharingDeleteShare"
+	DeltaSharingDeleteShareAction AdminAction = "admin:DeltaSharingDeleteShare"
 	// DeltaSharingListSharesAction - allow listing Delta Sharing shares
-	DeltaSharingListSharesAction = "admin:DeltaSharingListShares"
+	DeltaSharingListSharesAction AdminAction = "admin:DeltaSharingListShares"
 	// DeltaSharingGetShareAction - allow getting Delta Sharing share details
-	DeltaSharingGetShareAction = "admin:DeltaSharingGetShare"
+	DeltaSharingGetShareAction AdminAction = "admin:DeltaSharingGetShare"
 	// DeltaSharingUpdateShareAction - allow updating Delta Sharing shares
-	DeltaSharingUpdateShareAction = "admin:DeltaSharingUpdateShare"
+	DeltaSharingUpdateShareAction AdminAction = "admin:DeltaSharingUpdateShare"
 	// DeltaSharingCreateTokenAction - allow creating Delta Sharing tokens
-	DeltaSharingCreateTokenAction = "admin:DeltaSharingCreateToken"
+	DeltaSharingCreateTokenAction AdminAction = "admin:DeltaSharingCreateToken"
 	// DeltaSharingDeleteTokenAction - allow deleting Delta Sharing tokens
-	DeltaSharingDeleteTokenAction = "admin:DeltaSharingDeleteToken"
+	DeltaSharingDeleteTokenAction AdminAction = "admin:DeltaSharingDeleteToken"
 	// DeltaSharingListTokensAction - allow listing Delta Sharing tokens
-	DeltaSharingListTokensAction = "admin:DeltaSharingListTokens"
+	DeltaSharingListTokensAction AdminAction = "admin:DeltaSharingListTokens"
 	// ReadAlertsAction - allow reading stored alerts
-	ReadAlertsAction = "admin:ReadAlerts"
+	ReadAlertsAction AdminAction = "admin:ReadAlerts"
 
 	// Log Actions
 
 	// ReadAPILogsAction - allow reading stored API logs
-	ReadAPILogsAction = "admin:ReadAPILogs"
+	ReadAPILogsAction AdminAction = "admin:ReadAPILogs"
 	// ReadErrorLogsAction - allow reading stored error logs
-	ReadErrorLogsAction = "admin:ReadErrorLogs"
+	ReadErrorLogsAction AdminAction = "admin:ReadErrorLogs"
 	// ReadAuditLogsAction - allow reading stored audit logs
-	ReadAuditLogsAction = "admin:ReadAuditLogs"
+	ReadAuditLogsAction AdminAction = "admin:ReadAuditLogs"
 
 	// AllAdminActions - provides all admin permissions
-	AllAdminActions = "admin:*"
+	AllAdminActions AdminAction = "admin:*"
 )
 
 // SupportedAdminActions - list of all supported admin actions.
