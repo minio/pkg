@@ -228,6 +228,19 @@ func (actionSet ActionSet) ToVectorsSlice() []VectorsAction {
 	return actions
 }
 
+// ToMemorySlice - returns slice of Memory actions from the action set.
+func (actionSet ActionSet) ToMemorySlice() []MemoryAction {
+	if len(actionSet) == 0 {
+		return nil
+	}
+	actions := make([]MemoryAction, 0, len(actionSet))
+	for action := range actionSet {
+		actions = append(actions, MemoryAction(action))
+	}
+
+	return actions
+}
+
 // UnmarshalJSON - decodes JSON data to ActionSet.
 func (actionSet *ActionSet) UnmarshalJSON(data []byte) error {
 	var sset set.StringSet
@@ -288,6 +301,16 @@ func (actionSet ActionSet) ValidateVectors() error {
 	for _, action := range actionSet.ToVectorsSlice() {
 		if !action.IsValid() {
 			return Errorf("unsupported vectors action '%v'", action)
+		}
+	}
+	return nil
+}
+
+// ValidateMemory checks if all actions are valid Memory actions
+func (actionSet ActionSet) ValidateMemory() error {
+	for _, action := range actionSet.ToMemorySlice() {
+		if !action.IsValid() {
+			return Errorf("unsupported memory action '%v'", action)
 		}
 	}
 	return nil
