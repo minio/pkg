@@ -207,6 +207,22 @@ func (resourceSet ResourceSet) ValidateVectors() error {
 	return nil
 }
 
+// ValidateMemory - validates ResourceSet for the AIStor Memory API.
+// A Memory cortex is an S3 bucket, so resources use S3 ARN format
+// (e.g., arn:aws:s3:::my-cortex or arn:aws:s3:::my-cortex/*).
+func (resourceSet ResourceSet) ValidateMemory() error {
+	for resource := range resourceSet {
+		if !resource.isS3() {
+			return Errorf("resource '%v' type is not S3", resource)
+		}
+		if err := resource.Validate(); err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
 // ValidateBucket - validates ResourceSet is for given bucket or not.
 func (resourceSet ResourceSet) ValidateBucket(bucketName string) error {
 	for resource := range resourceSet {

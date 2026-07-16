@@ -146,7 +146,7 @@ func (statement Statement) validateActionTypes() error {
 	if len(actions) == 0 {
 		actions = statement.NotActions
 	}
-	var hasS3, hasAdmin, hasSTS, hasKMS, hasTable, hasVectors bool
+	var hasS3, hasAdmin, hasSTS, hasKMS, hasTable, hasVectors, hasMemory bool
 	for action := range actions {
 		switch {
 		case AdminAction(action).IsValid():
@@ -159,12 +159,14 @@ func (statement Statement) validateActionTypes() error {
 			hasTable = true
 		case VectorsAction(action).IsValid():
 			hasVectors = true
+		case MemoryAction(action).IsValid():
+			hasMemory = true
 		default:
 			hasS3 = true
 		}
 	}
 	count := 0
-	for _, b := range []bool{hasS3, hasAdmin, hasSTS, hasKMS, hasTable, hasVectors} {
+	for _, b := range []bool{hasS3, hasAdmin, hasSTS, hasKMS, hasTable, hasVectors, hasMemory} {
 		if b {
 			count++
 		}
@@ -225,6 +227,15 @@ func (statement Statement) isTable() bool {
 func (statement Statement) isVectors() bool {
 	for action := range statement.Actions {
 		if VectorsAction(action).IsValid() {
+			return true
+		}
+	}
+	return false
+}
+
+func (statement Statement) isMemory() bool {
+	for action := range statement.Actions {
+		if MemoryAction(action).IsValid() {
 			return true
 		}
 	}
@@ -345,6 +356,46 @@ func (statement Statement) isValid() error {
 		}
 
 		if err := statement.NotResources.ValidateVectors(); err != nil {
+			return err
+		}
+
+		for action := range statement.Actions {
+			if len(statement.Resources) > 0 && !statement.Resources.ObjectResourceExists() && !statement.Resources.BucketResourceExists() {
+				return Errorf("unsupported Resource found %v for action %v", statement.Resources, action)
+			}
+			if len(statement.NotResources) > 0 && !statement.NotResources.ObjectResourceExists() && !statement.NotResources.BucketResourceExists() {
+				return Errorf("unsupported NotResource found %v for action %v", statement.NotResources, action)
+			}
+		}
+
+		return nil
+	}
+
+	if statement.isMemory() {
+		if err := statement.Actions.ValidateMemory(); err != nil {
+			return err
+		}
+		for action := range statement.Actions {
+			keys := statement.Conditions.Keys()
+			keyDiff := keys.Difference(MemoryActionConditionKeyMap[action])
+			if !keyDiff.IsEmpty() {
+				return Errorf("unsupported condition keys '%v' used for action '%v'", keyDiff, action)
+			}
+		}
+
+		if len(statement.Resources) == 0 && len(statement.NotResources) == 0 {
+			return Errorf("Resource must not be empty")
+		}
+
+		if len(statement.Resources) > 0 && len(statement.NotResources) > 0 {
+			return Errorf("Resource and NotResource cannot be specified in the same statement")
+		}
+
+		if err := statement.Resources.ValidateMemory(); err != nil {
+			return err
+		}
+
+		if err := statement.NotResources.ValidateMemory(); err != nil {
 			return err
 		}
 
