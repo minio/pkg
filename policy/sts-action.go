@@ -26,25 +26,25 @@ type STSAction string
 
 const (
 	// AssumeRoleAction - use to deny or allow sts:AssumeRole action under specific conditions.
-	AssumeRoleAction = "sts:AssumeRole"
+	AssumeRoleAction STSAction = "sts:AssumeRole"
 
 	// AssumeRoleLDAPIdentityAction - use to deny or allow sts:AssumeRoleLDAPIdentity action under specific conditions.
-	AssumeRoleLDAPIdentityAction = "sts:AssumeRoleLDAPIdentity"
+	AssumeRoleLDAPIdentityAction STSAction = "sts:AssumeRoleLDAPIdentity"
 
 	// AssumeRoleWithCustomTokenAction - use to deny or allow sts:AssumeRoleWithCustomToken action under specific conditions.
-	AssumeRoleWithCustomTokenAction = "sts:AssumeRoleWithCustomToken"
+	AssumeRoleWithCustomTokenAction STSAction = "sts:AssumeRoleWithCustomToken"
 
 	// AssumeRoleWithWebIdentityAction - use to deny or allow sts:AssumeRoleWithWebIdentity action under specific conditions.
-	AssumeRoleWithWebIdentityAction = "sts:AssumeRoleWithWebIdentity"
+	AssumeRoleWithWebIdentityAction STSAction = "sts:AssumeRoleWithWebIdentity"
 
 	// AssumeRoleWithClientGrantsAction - use to deny or allow sts:AssumeRoleWithClientGrants action under specific conditions.
-	AssumeRoleWithClientGrantsAction = "sts:AssumeRoleWithClientGrants"
+	AssumeRoleWithClientGrantsAction STSAction = "sts:AssumeRoleWithClientGrants"
 
 	// AssumeRoleWithClientCertificateAction - use to deny or allow sts:AssumeRoleWithClientCertificate action under specific conditions.
-	AssumeRoleWithClientCertificateAction = "sts:AssumeRoleWithClientCertificate"
+	AssumeRoleWithClientCertificateAction STSAction = "sts:AssumeRoleWithClientCertificate"
 
 	// AllSTSActions - select all STS actions
-	AllSTSActions = "sts:*"
+	AllSTSActions STSAction = "sts:*"
 )
 
 // List of all supported sts actions.
@@ -71,13 +71,13 @@ func createSTSActionConditionKeyMap() map[Action]condition.KeySet {
 	}
 
 	return ActionConditionKeyMap{
-		AllSTSActions:                         condition.NewKeySet(allSupportedSTSKeys...),
-		AssumeRoleAction:                      condition.NewKeySet(allSupportedSTSKeys...),
-		AssumeRoleLDAPIdentityAction:          condition.NewKeySet(allSupportedSTSKeys...),
-		AssumeRoleWithWebIdentityAction:       condition.NewKeySet(allSupportedSTSKeys...),
-		AssumeRoleWithCustomTokenAction:       condition.NewKeySet(allSupportedSTSKeys...),
-		AssumeRoleWithClientGrantsAction:      condition.NewKeySet(allSupportedSTSKeys...),
-		AssumeRoleWithClientCertificateAction: condition.NewKeySet(allSupportedSTSKeys...),
+		Action(AllSTSActions):                         condition.NewKeySet(allSupportedSTSKeys...),
+		Action(AssumeRoleAction):                      condition.NewKeySet(allSupportedSTSKeys...),
+		Action(AssumeRoleLDAPIdentityAction):          condition.NewKeySet(allSupportedSTSKeys...),
+		Action(AssumeRoleWithWebIdentityAction):       condition.NewKeySet(allSupportedSTSKeys...),
+		Action(AssumeRoleWithCustomTokenAction):       condition.NewKeySet(allSupportedSTSKeys...),
+		Action(AssumeRoleWithClientGrantsAction):      condition.NewKeySet(allSupportedSTSKeys...),
+		Action(AssumeRoleWithClientCertificateAction): condition.NewKeySet(allSupportedSTSKeys...),
 	}
 }
 

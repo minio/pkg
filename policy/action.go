@@ -32,219 +32,219 @@ const (
 	AbortMultipartUploadAction Action = "s3:AbortMultipartUpload"
 
 	// CreateBucketAction - CreateBucket Rest API action.
-	CreateBucketAction = "s3:CreateBucket"
+	CreateBucketAction Action = "s3:CreateBucket"
 
 	// DeleteBucketAction - DeleteBucket Rest API action.
-	DeleteBucketAction = "s3:DeleteBucket"
+	DeleteBucketAction Action = "s3:DeleteBucket"
 
 	// ForceDeleteBucketAction - DeleteBucket Rest API action when x-minio-force-delete flag
 	// is specified.
-	ForceDeleteBucketAction = "s3:ForceDeleteBucket"
+	ForceDeleteBucketAction Action = "s3:ForceDeleteBucket"
 
 	// DeleteBucketPolicyAction - DeleteBucketPolicy Rest API action.
-	DeleteBucketPolicyAction = "s3:DeleteBucketPolicy"
+	DeleteBucketPolicyAction Action = "s3:DeleteBucketPolicy"
 
 	// DeleteBucketCorsAction - DeleteBucketCors Rest API action.
-	DeleteBucketCorsAction = "s3:DeleteBucketCors"
+	DeleteBucketCorsAction Action = "s3:DeleteBucketCors"
 
 	// DeleteObjectAction - DeleteObject Rest API action.
-	DeleteObjectAction = "s3:DeleteObject"
+	DeleteObjectAction Action = "s3:DeleteObject"
 
 	// GetBucketLocationAction - GetBucketLocation Rest API action.
-	GetBucketLocationAction = "s3:GetBucketLocation"
+	GetBucketLocationAction Action = "s3:GetBucketLocation"
 
 	// GetBucketNotificationAction - GetBucketNotification Rest API action.
-	GetBucketNotificationAction = "s3:GetBucketNotification"
+	GetBucketNotificationAction Action = "s3:GetBucketNotification"
 
 	// GetBucketPolicyAction - GetBucketPolicy Rest API action.
-	GetBucketPolicyAction = "s3:GetBucketPolicy"
+	GetBucketPolicyAction Action = "s3:GetBucketPolicy"
 
 	// GetBucketCorsAction - GetBucketCors Rest API action.
-	GetBucketCorsAction = "s3:GetBucketCors"
+	GetBucketCorsAction Action = "s3:GetBucketCors"
 
 	// GetObjectAction - GetObject Rest API action.
-	GetObjectAction = "s3:GetObject"
+	GetObjectAction Action = "s3:GetObject"
 
 	// GetObjectAttributesAction - GetObjectVersionAttributes Rest API action.
-	GetObjectAttributesAction = "s3:GetObjectAttributes"
+	GetObjectAttributesAction Action = "s3:GetObjectAttributes"
 
 	// HeadBucketAction - HeadBucket Rest API action. This action is unused in minio.
-	HeadBucketAction = "s3:HeadBucket"
+	HeadBucketAction Action = "s3:HeadBucket"
 
 	// ListAllMyBucketsAction - ListAllMyBuckets (List buckets) Rest API action.
-	ListAllMyBucketsAction = "s3:ListAllMyBuckets"
+	ListAllMyBucketsAction Action = "s3:ListAllMyBuckets"
 
 	// ListBucketAction - ListBucket Rest API action.
-	ListBucketAction = "s3:ListBucket"
+	ListBucketAction Action = "s3:ListBucket"
 
 	// GetBucketPolicyStatusAction - Retrieves the policy status for a bucket.
-	GetBucketPolicyStatusAction = "s3:GetBucketPolicyStatus"
+	GetBucketPolicyStatusAction Action = "s3:GetBucketPolicyStatus"
 
 	// ListBucketVersionsAction - ListBucketVersions Rest API action.
-	ListBucketVersionsAction = "s3:ListBucketVersions"
+	ListBucketVersionsAction Action = "s3:ListBucketVersions"
 
 	// ListBucketMultipartUploadsAction - ListMultipartUploads Rest API action.
-	ListBucketMultipartUploadsAction = "s3:ListBucketMultipartUploads"
+	ListBucketMultipartUploadsAction Action = "s3:ListBucketMultipartUploads"
 
 	// ListenNotificationAction - ListenNotification Rest API action.
 	// This is MinIO extension.
-	ListenNotificationAction = "s3:ListenNotification"
+	ListenNotificationAction Action = "s3:ListenNotification"
 
 	// ListenBucketNotificationAction - ListenBucketNotification Rest API action.
 	// This is MinIO extension.
-	ListenBucketNotificationAction = "s3:ListenBucketNotification"
+	ListenBucketNotificationAction Action = "s3:ListenBucketNotification"
 
 	// ListMultipartUploadPartsAction - ListParts Rest API action.
-	ListMultipartUploadPartsAction = "s3:ListMultipartUploadParts"
+	ListMultipartUploadPartsAction Action = "s3:ListMultipartUploadParts"
 
 	// PutBucketLifecycleAction - PutBucketLifecycle Rest API action.
-	PutBucketLifecycleAction = "s3:PutLifecycleConfiguration"
+	PutBucketLifecycleAction Action = "s3:PutLifecycleConfiguration"
 
 	// GetBucketLifecycleAction - GetBucketLifecycle Rest API action.
-	GetBucketLifecycleAction = "s3:GetLifecycleConfiguration"
+	GetBucketLifecycleAction Action = "s3:GetLifecycleConfiguration"
 
 	// PutBucketNotificationAction - PutObjectNotification Rest API action.
-	PutBucketNotificationAction = "s3:PutBucketNotification"
+	PutBucketNotificationAction Action = "s3:PutBucketNotification"
 
 	// PutBucketPolicyAction - PutBucketPolicy Rest API action.
-	PutBucketPolicyAction = "s3:PutBucketPolicy"
+	PutBucketPolicyAction Action = "s3:PutBucketPolicy"
 
 	// PutBucketCorsAction - PutBucketCors Rest API action.
-	PutBucketCorsAction = "s3:PutBucketCors"
+	PutBucketCorsAction Action = "s3:PutBucketCors"
 
 	//  PutBucketQOSAction - allow set QOS configuration
-	PutBucketQOSAction = "s3:PutBucketQOS"
+	PutBucketQOSAction Action = "s3:PutBucketQOS"
 
 	//  GetBucketQOSAction - allow get QOS configuration
-	GetBucketQOSAction = "s3:GetBucketQOS"
+	GetBucketQOSAction Action = "s3:GetBucketQOS"
 
 	// PutObjectAction - PutObject Rest API action.
-	PutObjectAction = "s3:PutObject"
+	PutObjectAction Action = "s3:PutObject"
 
 	// DeleteObjectVersionAction - DeleteObjectVersion Rest API action.
-	DeleteObjectVersionAction = "s3:DeleteObjectVersion"
+	DeleteObjectVersionAction Action = "s3:DeleteObjectVersion"
 
 	// DeleteObjectVersionTaggingAction - DeleteObjectVersionTagging Rest API action.
-	DeleteObjectVersionTaggingAction = "s3:DeleteObjectVersionTagging"
+	DeleteObjectVersionTaggingAction Action = "s3:DeleteObjectVersionTagging"
 
 	// GetObjectVersionAction - GetObjectVersionAction Rest API action.
-	GetObjectVersionAction = "s3:GetObjectVersion"
+	GetObjectVersionAction Action = "s3:GetObjectVersion"
 
 	// GetObjectVersionAttributesAction - GetObjectVersionAttributes Rest API action.
-	GetObjectVersionAttributesAction = "s3:GetObjectVersionAttributes"
+	GetObjectVersionAttributesAction Action = "s3:GetObjectVersionAttributes"
 
 	// GetObjectVersionTaggingAction - GetObjectVersionTagging Rest API action.
-	GetObjectVersionTaggingAction = "s3:GetObjectVersionTagging"
+	GetObjectVersionTaggingAction Action = "s3:GetObjectVersionTagging"
 
 	// PutObjectVersionTaggingAction - PutObjectVersionTagging Rest API action.
-	PutObjectVersionTaggingAction = "s3:PutObjectVersionTagging"
+	PutObjectVersionTaggingAction Action = "s3:PutObjectVersionTagging"
 
 	// BypassGovernanceRetentionAction - bypass governance retention for PutObjectRetention, PutObject and DeleteObject Rest API action.
-	BypassGovernanceRetentionAction = "s3:BypassGovernanceRetention"
+	BypassGovernanceRetentionAction Action = "s3:BypassGovernanceRetention"
 
 	// PutObjectRetentionAction - PutObjectRetention Rest API action.
-	PutObjectRetentionAction = "s3:PutObjectRetention"
+	PutObjectRetentionAction Action = "s3:PutObjectRetention"
 
 	// GetObjectRetentionAction - GetObjectRetention, GetObject, HeadObject Rest API action.
-	GetObjectRetentionAction = "s3:GetObjectRetention"
+	GetObjectRetentionAction Action = "s3:GetObjectRetention"
 
 	// GetObjectLegalHoldAction - GetObjectLegalHold, GetObject Rest API action.
-	GetObjectLegalHoldAction = "s3:GetObjectLegalHold"
+	GetObjectLegalHoldAction Action = "s3:GetObjectLegalHold"
 
 	// PutObjectLegalHoldAction - PutObjectLegalHold, PutObject Rest API action.
-	PutObjectLegalHoldAction = "s3:PutObjectLegalHold"
+	PutObjectLegalHoldAction Action = "s3:PutObjectLegalHold"
 
 	// GetBucketObjectLockConfigurationAction - GetBucketObjectLockConfiguration Rest API action
-	GetBucketObjectLockConfigurationAction = "s3:GetBucketObjectLockConfiguration"
+	GetBucketObjectLockConfigurationAction Action = "s3:GetBucketObjectLockConfiguration"
 
 	// PutBucketObjectLockConfigurationAction - PutBucketObjectLockConfiguration Rest API action
-	PutBucketObjectLockConfigurationAction = "s3:PutBucketObjectLockConfiguration"
+	PutBucketObjectLockConfigurationAction Action = "s3:PutBucketObjectLockConfiguration"
 
 	// GetBucketTaggingAction - GetBucketTagging Rest API action
-	GetBucketTaggingAction = "s3:GetBucketTagging"
+	GetBucketTaggingAction Action = "s3:GetBucketTagging"
 
 	// PutBucketTaggingAction - PutBucketTagging Rest API action
-	PutBucketTaggingAction = "s3:PutBucketTagging"
+	PutBucketTaggingAction Action = "s3:PutBucketTagging"
 
 	// GetObjectTaggingAction - Get Object Tags API action
-	GetObjectTaggingAction = "s3:GetObjectTagging"
+	GetObjectTaggingAction Action = "s3:GetObjectTagging"
 
 	// PutObjectTaggingAction - Put Object Tags API action
-	PutObjectTaggingAction = "s3:PutObjectTagging"
+	PutObjectTaggingAction Action = "s3:PutObjectTagging"
 
 	// DeleteObjectTaggingAction - Delete Object Tags API action
-	DeleteObjectTaggingAction = "s3:DeleteObjectTagging"
+	DeleteObjectTaggingAction Action = "s3:DeleteObjectTagging"
 
 	// PutObjectAnnotationAction - PutObjectAnnotation API action
-	PutObjectAnnotationAction = "s3:PutObjectAnnotation"
+	PutObjectAnnotationAction Action = "s3:PutObjectAnnotation"
 
 	// GetObjectAnnotationAction - GetObjectAnnotation API action
-	GetObjectAnnotationAction = "s3:GetObjectAnnotation"
+	GetObjectAnnotationAction Action = "s3:GetObjectAnnotation"
 
 	// DeleteObjectAnnotationAction - DeleteObjectAnnotation API action
-	DeleteObjectAnnotationAction = "s3:DeleteObjectAnnotation"
+	DeleteObjectAnnotationAction Action = "s3:DeleteObjectAnnotation"
 
 	// ListObjectAnnotationsAction - ListObjectAnnotations API action
-	ListObjectAnnotationsAction = "s3:ListObjectAnnotations"
+	ListObjectAnnotationsAction Action = "s3:ListObjectAnnotations"
 
 	// UpdateObjectEncryptionAction - UpdateObjectEncryption REST API action
-	UpdateObjectEncryptionAction = "s3:UpdateObjectEncryption"
+	UpdateObjectEncryptionAction Action = "s3:UpdateObjectEncryption"
 
 	// PutBucketEncryptionAction - PutBucketEncryption REST API action
-	PutBucketEncryptionAction = "s3:PutEncryptionConfiguration"
+	PutBucketEncryptionAction Action = "s3:PutEncryptionConfiguration"
 
 	// GetBucketEncryptionAction - GetBucketEncryption REST API action
-	GetBucketEncryptionAction = "s3:GetEncryptionConfiguration"
+	GetBucketEncryptionAction Action = "s3:GetEncryptionConfiguration"
 
 	// PutBucketVersioningAction - PutBucketVersioning REST API action
-	PutBucketVersioningAction = "s3:PutBucketVersioning"
+	PutBucketVersioningAction Action = "s3:PutBucketVersioning"
 
 	// GetBucketVersioningAction - GetBucketVersioning REST API action
-	GetBucketVersioningAction = "s3:GetBucketVersioning"
+	GetBucketVersioningAction Action = "s3:GetBucketVersioning"
 	// GetReplicationConfigurationAction  - GetReplicationConfiguration REST API action
-	GetReplicationConfigurationAction = "s3:GetReplicationConfiguration"
+	GetReplicationConfigurationAction Action = "s3:GetReplicationConfiguration"
 	// PutReplicationConfigurationAction  - PutReplicationConfiguration REST API action
-	PutReplicationConfigurationAction = "s3:PutReplicationConfiguration"
+	PutReplicationConfigurationAction Action = "s3:PutReplicationConfiguration"
 
 	// ReplicateObjectAction  - ReplicateObject REST API action
-	ReplicateObjectAction = "s3:ReplicateObject"
+	ReplicateObjectAction Action = "s3:ReplicateObject"
 
 	// ReplicateDeleteAction  - ReplicateDelete REST API action
-	ReplicateDeleteAction = "s3:ReplicateDelete"
+	ReplicateDeleteAction Action = "s3:ReplicateDelete"
 
 	// ReplicateTagsAction  - ReplicateTags REST API action
-	ReplicateTagsAction = "s3:ReplicateTags"
+	ReplicateTagsAction Action = "s3:ReplicateTags"
 
 	// GetObjectVersionForReplicationAction  - GetObjectVersionForReplication REST API action
-	GetObjectVersionForReplicationAction = "s3:GetObjectVersionForReplication"
+	GetObjectVersionForReplicationAction Action = "s3:GetObjectVersionForReplication"
 
 	// ReplicateObjectAnnotationAction - ReplicateObjectAnnotation REST API action
-	ReplicateObjectAnnotationAction = "s3:ReplicateObjectAnnotation"
+	ReplicateObjectAnnotationAction Action = "s3:ReplicateObjectAnnotation"
 
 	// GetObjectVersionAnnotationForReplicationAction - GetObjectVersionAnnotationForReplication REST API action
-	GetObjectVersionAnnotationForReplicationAction = "s3:GetObjectVersionAnnotationForReplication"
+	GetObjectVersionAnnotationForReplicationAction Action = "s3:GetObjectVersionAnnotationForReplication"
 
 	// RestoreObjectAction - RestoreObject REST API action
-	RestoreObjectAction = "s3:RestoreObject"
+	RestoreObjectAction Action = "s3:RestoreObject"
 	// ResetBucketReplicationStateAction - MinIO extension API ResetBucketReplicationState to reset replication state
 	// on a bucket
-	ResetBucketReplicationStateAction = "s3:ResetBucketReplicationState"
+	ResetBucketReplicationStateAction Action = "s3:ResetBucketReplicationState"
 
 	// PutObjectFanOutAction - PutObject like API action but allows PostUpload() fan-out.
-	PutObjectFanOutAction = "s3:PutObjectFanOut"
+	PutObjectFanOutAction Action = "s3:PutObjectFanOut"
 
 	// Inventory configuration actions
 
 	// PutInventoryConfigurationAction - Bucket inventory write operations actions
-	PutInventoryConfigurationAction = "s3:PutInventoryConfiguration"
+	PutInventoryConfigurationAction Action = "s3:PutInventoryConfiguration"
 	// GetInventoryConfigurationAction - Bucket inventory read operations actions
-	GetInventoryConfigurationAction = "s3:GetInventoryConfiguration"
+	GetInventoryConfigurationAction Action = "s3:GetInventoryConfiguration"
 
 	// CreateSessionAction - S3Express REST API action
-	CreateSessionAction = "s3express:CreateSession"
+	CreateSessionAction Action = "s3express:CreateSession"
 
 	// AllActions - all API actions
-	AllActions = "s3:*"
+	AllActions Action = "s3:*"
 )
 
 // SupportedActions - list of all supported actions.
