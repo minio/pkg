@@ -94,6 +94,8 @@ var supportedKMSActions = map[KMSAction]struct{}{
 	KMSVersionAction:              {},
 	KMSAuditLogAction:             {},
 	KMSErrorLogAction:             {},
+	KMSEnableAction:               {},
+	KMSKeyRotateAction:            {},
 	AllKMSActions:                 {},
 }
 
