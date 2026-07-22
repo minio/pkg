@@ -63,6 +63,8 @@ const (
 	KMSAuditLogAction KMSAction = "kms:AuditLog"
 	// KMSErrorLogAction - subscribes to the error log
 	KMSErrorLogAction KMSAction = "kms:ErrorLog"
+	// KMSEnableAction - allows enabling builtin KMS
+	KMSEnableAction KMSAction = "kms:Enable"
 	// AllKMSActions - provides all admin permissions
 	AllKMSActions KMSAction = "kms:*"
 )
