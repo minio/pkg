@@ -63,6 +63,10 @@ const (
 	KMSAuditLogAction KMSAction = "kms:AuditLog"
 	// KMSErrorLogAction - subscribes to the error log
 	KMSErrorLogAction KMSAction = "kms:ErrorLog"
+	// KMSEnableAction - allows enabling builtin KMS
+	KMSEnableAction KMSAction = "kms:Enable"
+	// KMSKeyRotateAction - allows rotating KMS keys
+	KMSKeyRotateAction KMSAction = "kms:KeyRotate"
 	// AllKMSActions - provides all admin permissions
 	AllKMSActions KMSAction = "kms:*"
 )
@@ -90,6 +94,8 @@ var supportedKMSActions = map[KMSAction]struct{}{
 	KMSVersionAction:              {},
 	KMSAuditLogAction:             {},
 	KMSErrorLogAction:             {},
+	KMSEnableAction:               {},
+	KMSKeyRotateAction:            {},
 	AllKMSActions:                 {},
 }
 
