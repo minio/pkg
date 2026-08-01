@@ -130,8 +130,11 @@ func TestMemoryResourceRejected(t *testing.T) {
 // Deny that never fired.
 //
 // It parses as its own type with an empty pattern and is marked bare. AWS
-// rejects the form outright; MinIO keeps it loadable so a policy already on
-// disk keeps working, and refuses it on the create and update paths.
+// documents no S3 resource type with an empty bucket name, and its
+// wildcard-completion rule is scoped to ARNs with fewer than six fields, so
+// this six-field form is not equivalent to "*". MinIO keeps it loadable so a
+// policy already on disk keeps working, and refuses it on the create and
+// update paths.
 //
 // Memory ARNs are excluded: see TestBareMemoryARNIsRejected.
 func TestBareARNPrefixIsNotWildcard(t *testing.T) {
