@@ -50,6 +50,18 @@ const (
 	// MemoryListSecretsAction - list the secrets in a cortex.
 	MemoryListSecretsAction MemoryAction = "memory:ListSecrets"
 
+	// MemoryPutAgentAction - write an agent record in a cortex.
+	MemoryPutAgentAction MemoryAction = "memory:PutAgent"
+
+	// MemoryGetAgentAction - read an agent record from a cortex.
+	MemoryGetAgentAction MemoryAction = "memory:GetAgent"
+
+	// MemoryDeleteAgentAction - delete an agent record from a cortex.
+	MemoryDeleteAgentAction MemoryAction = "memory:DeleteAgent"
+
+	// MemoryListAgentsAction - list the agent records in a cortex.
+	MemoryListAgentsAction MemoryAction = "memory:ListAgents"
+
 	// MemorySearchAction - search (corpus-grep) the objects in a cortex.
 	MemorySearchAction MemoryAction = "memory:Search"
 
@@ -67,6 +79,10 @@ var SupportedMemoryActions = map[MemoryAction]struct{}{
 	MemoryGetSecretAction:    {},
 	MemoryDeleteSecretAction: {},
 	MemoryListSecretsAction:  {},
+	MemoryPutAgentAction:     {},
+	MemoryGetAgentAction:     {},
+	MemoryDeleteAgentAction:  {},
+	MemoryListAgentsAction:   {},
 	MemorySearchAction:       {},
 	AllMemoryActions:         {},
 }
