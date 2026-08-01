@@ -475,6 +475,17 @@ func (statement Statement) isValidStrict() error {
 		return err
 	}
 
+	// Applies to every action type: a bare ARN prefix names no resource, so a
+	// statement carrying one is inert — an Allow grants nothing and a Deny
+	// never fires. Existing policies keep loading through isValid; a new one
+	// must not be written.
+	if err := statement.Resources.ValidateStrict(); err != nil {
+		return err
+	}
+	if err := statement.NotResources.ValidateStrict(); err != nil {
+		return err
+	}
+
 	if statement.isAdmin() {
 		return statement.validateAdmin(true)
 	}
