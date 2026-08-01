@@ -129,6 +129,18 @@ const (
 	// S3Delimiter - key representing delimiter query parameter of ListBucket API only.
 	S3Delimiter KeyName = "s3:delimiter"
 
+	// MemoryPrefix - key representing the prefix query parameter of the AIStor
+	// Memory list APIs only. It scopes enumeration within a cortex, which a
+	// resource ARN cannot express: a list names a query, not a record, so
+	// putting the prefix in the resource path would make one ARN mean a single
+	// record under a read action and a set of siblings under a list action.
+	MemoryPrefix KeyName = "memory:prefix"
+
+	// MemoryMaxKeys - key representing the limit query parameter of the AIStor
+	// Memory list APIs only. It caps a single page, bounding what one request
+	// can enumerate.
+	MemoryMaxKeys KeyName = "memory:max-keys"
+
 	// S3VersionID - Enables you to limit the permission for the
 	// s3:PutObjectVersionTagging action to a specific object version.
 	S3VersionID KeyName = "s3:versionid"
@@ -301,6 +313,8 @@ var AllSupportedKeys = []KeyName{
 	S3Prefix,
 	S3Delimiter,
 	S3MaxKeys,
+	MemoryPrefix,
+	MemoryMaxKeys,
 	S3VersionID,
 	S3ObjectLockRemainingRetentionDays,
 	S3ObjectLockMode,

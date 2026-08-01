@@ -21,6 +21,8 @@ import (
 	"encoding/json"
 	"strings"
 	"testing"
+
+	"github.com/minio/pkg/v3/policy/condition"
 )
 
 func TestParseMemoryResource(t *testing.T) {
@@ -723,6 +725,120 @@ func TestMemoryResourceStringNeverLeaksStorage(t *testing.T) {
 		}
 		if !strings.HasPrefix(got, ResourceARNMemoryPrefix) {
 			t.Errorf("Memory ARN %q lost its prefix", got)
+		}
+	}
+}
+
+// TestStarPrefixedResourceParses covers the wildcard forms. Only the exact
+// string "*" is special-cased; anything longer keeps what follows as its
+// pattern.
+func TestStarPrefixedResourceParses(t *testing.T) {
+	testCases := []struct {
+		value       string
+		wantPattern string
+	}{
+		{"*", "*"},
+		{"**", "*"},
+		{"***", "**"},
+		{"*foo", "foo"},
+	}
+
+	for _, tc := range testCases {
+		r, err := ParseResource(tc.value)
+		if err != nil {
+			t.Errorf("ParseResource(%q): unexpected error %v", tc.value, err)
+			continue
+		}
+		if r.Type != ResourceARNAll {
+			t.Errorf("ParseResource(%q): type = %v, want the wildcard type", tc.value, r.Type)
+		}
+		if r.Pattern != tc.wantPattern {
+			t.Errorf("ParseResource(%q): pattern = %q, want %q", tc.value, r.Pattern, tc.wantPattern)
+		}
+		if !r.IsValid() {
+			t.Errorf("ParseResource(%q): parsed but not valid", tc.value)
+		}
+		if r.IsBareARN() {
+			t.Errorf("ParseResource(%q): marked bare; only an ARN prefix is bare", tc.value)
+		}
+	}
+
+	// A policy carrying one must still load and match.
+	const doc = `{"Version":"2012-10-17","Statement":[{
+		"Effect":"Allow","Action":["s3:GetObject"],"Resource":["**"]}]}`
+	var p Policy
+	if err := json.Unmarshal([]byte(doc), &p); err != nil {
+		t.Fatalf("unmarshal: %v", err)
+	}
+	if err := p.Validate(); err != nil {
+		t.Fatalf(`a policy with "**" must load: %v`, err)
+	}
+	if !p.IsAllowed(Args{
+		AccountName: "u",
+		Action:      "s3:GetObject",
+		BucketName:  "bucket",
+		ObjectName:  "key",
+	}) {
+		t.Error(`"**" must still match every resource`)
+	}
+}
+
+// TestMemoryEnumerationConditionKeys covers the keys that scope a listing.
+//
+// A list names a query, not a record, so the prefix cannot live in the resource
+// path: one ARN would then mean a single record under memory:GetAgent and every
+// sibling sharing that prefix under memory:ListAgents, and an operator writing
+// both actions against one resource would leak names without any cue.
+func TestMemoryEnumerationConditionKeys(t *testing.T) {
+	listActions := []string{"memory:ListAgents", "memory:ListSecrets", "memory:ListCortexes"}
+	pointActions := []string{"memory:GetAgent", "memory:PutAgent", "memory:DeleteAgent", "memory:GetSecret"}
+
+	for _, action := range listActions {
+		keys, ok := MemoryActionConditionKeyMap[Action(action)]
+		if !ok {
+			t.Fatalf("%s has no condition key set", action)
+		}
+		for _, key := range []condition.KeyName{condition.MemoryPrefix, condition.MemoryMaxKeys} {
+			if !keys.Match(key.ToKey()) {
+				t.Errorf("%s does not accept %s", action, key)
+			}
+		}
+	}
+
+	// A read or a write has no query to constrain. Accepting the key there would
+	// let a policy look scoped while constraining nothing.
+	for _, action := range pointActions {
+		keys := MemoryActionConditionKeyMap[Action(action)]
+		if keys.Match(condition.MemoryPrefix.ToKey()) {
+			t.Errorf("%s must not accept %s", action, condition.MemoryPrefix)
+		}
+	}
+
+	// A whole policy using the key must validate.
+	const doc = `{"Version":"2012-10-17","Statement":[{
+		"Effect":"Allow",
+		"Action":["memory:ListAgents"],
+		"Resource":["arn:minio:memory:::cortex"],
+		"Condition":{"StringLike":{"memory:prefix":["alpha*"]}}}]}`
+	var p Policy
+	if err := json.Unmarshal([]byte(doc), &p); err != nil {
+		t.Fatalf("unmarshal: %v", err)
+	}
+	if err := p.Validate(); err != nil {
+		t.Fatalf("a policy scoping enumeration by prefix must validate: %v", err)
+	}
+
+	// The same key on a read action must be refused, so the mistake surfaces at
+	// policy-write time rather than as a grant that silently does nothing.
+	const bad = `{"Version":"2012-10-17","Statement":[{
+		"Effect":"Allow",
+		"Action":["memory:GetAgent"],
+		"Resource":["arn:minio:memory:::cortex/agents/alpha"],
+		"Condition":{"StringLike":{"memory:prefix":["alpha*"]}}}]}`
+	var q Policy
+	if err := json.Unmarshal([]byte(bad), &q); err == nil {
+		if err := q.Validate(); err == nil {
+			t.Error("memory:prefix on a read action must be rejected")
 		}
 	}
 }
