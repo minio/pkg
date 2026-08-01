@@ -17,32 +17,38 @@
 
 package condition
 
-import "testing"
+import (
+	"strings"
+	"testing"
+)
 
-// TestServicePrefixedKeysResolveToRequestNames guards the mapping from a
-// condition key to the request value it reads.
+// TestServicePrefixedKeysResolveToRequestNames guards the mapping from every
+// supported condition key to the request value it reads.
 //
-// A key's service prefix is trimmed before lookup, so "s3:prefix" reads the
+// A key's service prefix is stripped before lookup, so "s3:prefix" reads the
 // request's "prefix". A service missing from toTrim keeps its whole name and
-// therefore reads a value nothing populates: the condition then evaluates
-// false, and every statement carrying it silently grants nothing.
+// therefore reads a value nothing populates: the condition evaluates false, and
+// every statement carrying it silently grants nothing.
+//
+// The sweep is over AllSupportedKeys rather than a hand-picked list, so adding a
+// key for a new service without extending toTrim fails here instead of shipping
+// inert.
 func TestServicePrefixedKeysResolveToRequestNames(t *testing.T) {
-	testCases := []struct {
-		key  KeyName
-		want string
-	}{
-		{S3Prefix, "prefix"},
-		{S3Delimiter, "delimiter"},
-		{S3MaxKeys, "max-keys"},
-		{MemoryPrefix, "prefix"},
-		{MemoryMaxKeys, "max-keys"},
-		{AWSUsername, "username"},
-	}
+	for _, key := range AllSupportedKeys {
+		full := string(key)
+		idx := strings.IndexByte(full, ':')
+		if idx < 0 {
+			// Unprefixed keys read their own name.
+			if got := key.Name(); got != full {
+				t.Errorf("%s.Name() = %q, want %q", key, got, full)
+			}
+			continue
+		}
 
-	for _, tc := range testCases {
-		if got := tc.key.Name(); got != tc.want {
-			t.Errorf("%s.Name() = %q, want %q; a key that keeps its service prefix reads a value nothing sets",
-				tc.key, got, tc.want)
+		want := full[idx+1:]
+		if got := key.Name(); got != want {
+			t.Errorf("%s.Name() = %q, want %q; a key that keeps its service prefix reads a value nothing sets — add %q to toTrim",
+				key, got, want, full[:idx])
 		}
 	}
 }

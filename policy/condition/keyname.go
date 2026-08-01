@@ -39,7 +39,10 @@ var toTrim = map[string]bool{
 	"memory":   true,
 }
 
-// Name - returns key name which is stripped value of prefixes "aws:", "s3:", "jwt:" and "ldap:"
+// Name - returns the key name with its service prefix stripped, so a key reads
+// the request value of the same name. The prefixes that are stripped are the
+// keys of toTrim; a service missing from there keeps its whole name and reads a
+// value nothing populates.
 func (key KeyName) Name() string {
 	idx := strings.IndexByte(string(key), ':')
 	if idx == -1 || !toTrim[string(key[:idx])] {
