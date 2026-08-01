@@ -726,3 +726,61 @@ func TestMemoryResourceStringNeverLeaksStorage(t *testing.T) {
 		}
 	}
 }
+
+// TestStarPrefixedResourceParses is a regression guard. Skipping the "*" entry
+// while looping the ARN prefixes made every string starting with "*" — "**",
+// "*foo" — fail to parse, which broke LoadPolicy for any stored policy using
+// one and surfaced as `invalid resource '**'` during IAM authorization.
+//
+// Only the exact string "*" is special-cased, so that its pattern stays "*"
+// rather than the empty remainder. Anything longer keeps what follows.
+func TestStarPrefixedResourceParses(t *testing.T) {
+	testCases := []struct {
+		value       string
+		wantPattern string
+	}{
+		{"*", "*"},
+		{"**", "*"},
+		{"***", "**"},
+		{"*foo", "foo"},
+	}
+
+	for _, tc := range testCases {
+		r, err := ParseResource(tc.value)
+		if err != nil {
+			t.Errorf("ParseResource(%q): unexpected error %v", tc.value, err)
+			continue
+		}
+		if r.Type != ResourceARNAll {
+			t.Errorf("ParseResource(%q): type = %v, want the wildcard type", tc.value, r.Type)
+		}
+		if r.Pattern != tc.wantPattern {
+			t.Errorf("ParseResource(%q): pattern = %q, want %q", tc.value, r.Pattern, tc.wantPattern)
+		}
+		if !r.IsValid() {
+			t.Errorf("ParseResource(%q): parsed but not valid", tc.value)
+		}
+		if r.IsBareARN() {
+			t.Errorf("ParseResource(%q): marked bare; only an ARN prefix is bare", tc.value)
+		}
+	}
+
+	// A policy carrying one must still load and match.
+	const doc = `{"Version":"2012-10-17","Statement":[{
+		"Effect":"Allow","Action":["s3:GetObject"],"Resource":["**"]}]}`
+	var p Policy
+	if err := json.Unmarshal([]byte(doc), &p); err != nil {
+		t.Fatalf("unmarshal: %v", err)
+	}
+	if err := p.Validate(); err != nil {
+		t.Fatalf(`a policy with "**" must load: %v`, err)
+	}
+	if !p.IsAllowed(Args{
+		AccountName: "u",
+		Action:      "s3:GetObject",
+		BucketName:  "bucket",
+		ObjectName:  "key",
+	}) {
+		t.Error(`"**" must still match every resource`)
+	}
+}
