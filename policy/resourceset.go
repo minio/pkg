@@ -150,10 +150,23 @@ func (resourceSet *ResourceSet) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+// ValidateStrict rejects resources that Validate tolerates for backward
+// compatibility. Servers call it when creating or updating a policy.
+func (resourceSet ResourceSet) ValidateStrict() error {
+	for resource := range resourceSet {
+		if resource.IsBareARN() {
+			return Errorf("invalid resource '%v' - an ARN prefix with no resource after it matches nothing; use '%v*' to mean every resource",
+				resource, resource.Type)
+		}
+	}
+
+	return nil
+}
+
 // ValidateS3 - validates ResourceSet is S3.
 func (resourceSet ResourceSet) ValidateS3() error {
 	for resource := range resourceSet {
-		if !resource.isS3() {
+		if !resource.IsBareARN() && !resource.isS3() {
 			return Errorf("resource '%v' type is not S3", resource)
 		}
 		if err := resource.Validate(); err != nil {
@@ -167,7 +180,7 @@ func (resourceSet ResourceSet) ValidateS3() error {
 // ValidateKMS - validates ResourceSet is KMS.
 func (resourceSet ResourceSet) ValidateKMS() error {
 	for resource := range resourceSet {
-		if !resource.isKMS() {
+		if !resource.IsBareARN() && !resource.isKMS() {
 			return Errorf("resource '%v' type is not KMS", resource)
 		}
 		if err := resource.Validate(); err != nil {
@@ -181,7 +194,7 @@ func (resourceSet ResourceSet) ValidateKMS() error {
 // ValidateTable - validates ResourceSet is S3 Tables.
 func (resourceSet ResourceSet) ValidateTable() error {
 	for resource := range resourceSet {
-		if !resource.isTable() {
+		if !resource.IsBareARN() && !resource.isTable() {
 			return Errorf("resource '%v' type is not S3 Tables", resource)
 		}
 		if err := resource.Validate(); err != nil {
@@ -196,7 +209,7 @@ func (resourceSet ResourceSet) ValidateTable() error {
 // S3 Vectors uses S3 ARN format for resources (e.g., arn:aws:s3:::vectors-bucket/*).
 func (resourceSet ResourceSet) ValidateVectors() error {
 	for resource := range resourceSet {
-		if !resource.isS3() {
+		if !resource.IsBareARN() && !resource.isS3() {
 			return Errorf("resource '%v' type is not S3", resource)
 		}
 		if err := resource.Validate(); err != nil {
@@ -208,12 +221,17 @@ func (resourceSet ResourceSet) ValidateVectors() error {
 }
 
 // ValidateMemory - validates ResourceSet for the AIStor Memory API.
-// A Memory cortex is an S3 bucket, so resources use S3 ARN format
-// (e.g., arn:aws:s3:::my-cortex or arn:aws:s3:::my-cortex/*).
+// Memory resources use their own ARN namespace (e.g.
+// arn:minio:memory:::my-cortex/agents/alpha/*) rather than the S3 ARN of the
+// bucket backing the cortex. The two are deliberately separate: a Memory ARN
+// names a logical resource, so it stays valid when the storage layout changes,
+// and granting Memory access never implies raw S3 access to the same bytes.
+//
+// Unlike the other type validators, this one does not tolerate a bare ARN.
 func (resourceSet ResourceSet) ValidateMemory() error {
 	for resource := range resourceSet {
-		if !resource.isS3() {
-			return Errorf("resource '%v' type is not S3", resource)
+		if !resource.isMemory() {
+			return Errorf("resource '%v' type is not Memory", resource)
 		}
 		if err := resource.Validate(); err != nil {
 			return err

@@ -36,6 +36,12 @@ const (
 
 	// ResourceARNKMSPrefix is for KMS key resources. MinIO specific API.
 	ResourceARNKMSPrefix = "arn:minio:kms:::"
+
+	// ResourceARNMemoryPrefix is for AIStor Memory API resources. MinIO specific
+	// API. The pattern is the logical Memory path — <cortex>/agents/<id> — never
+	// a storage key. A "/*" pattern does not match its own parent, so covering a
+	// record and its subtree takes two resources, as it does for S3.
+	ResourceARNMemoryPrefix = "arn:minio:memory:::"
 )
 
 // ResourceARNType - ARN prefix type
@@ -54,6 +60,9 @@ const (
 	// ResourceARNKMS is the ARN prefix type for MinIO KMS resources.
 	ResourceARNKMS
 
+	// ResourceARNMemory is the ARN prefix type for AIStor Memory resources.
+	ResourceARNMemory
+
 	// ResourceARNAll is the ARN '*'
 	ResourceARNAll
 )
@@ -63,6 +72,7 @@ var ARNTypeToPrefix = map[ResourceARNType]string{
 	ResourceARNS3:       ResourceARNPrefix,
 	ResourceARNS3Tables: ResourceARNS3TablesPrefix,
 	ResourceARNKMS:      ResourceARNKMSPrefix,
+	ResourceARNMemory:   ResourceARNMemoryPrefix,
 	ResourceARNAll:      "*",
 }
 
@@ -84,7 +94,17 @@ func (a ResourceARNType) String() string {
 type Resource struct {
 	Pattern string
 	Type    ResourceARNType
+
+	// bareARN marks an ARN prefix with nothing after it, such as "arn:aws:s3:::".
+	// It names no resource and matches nothing, so a Deny written that way never
+	// fires. It loads but cannot be written: isValid accepts it, ValidateStrict
+	// refuses it. Memory ARNs are an error at parse instead.
+	bareARN bool
 }
+
+// IsBareARN reports whether the resource is an ARN prefix naming no resource.
+// Such a resource is inert: it matches nothing.
+func (r Resource) IsBareARN() bool { return r.bareARN }
 
 func (r Resource) isKMS() bool {
 	return r.Type == ResourceARNKMS || r.Type == ResourceARNAll
@@ -96,6 +116,10 @@ func (r Resource) isS3() bool {
 
 func (r Resource) isTable() bool {
 	return r.Type == ResourceARNS3Tables || r.Type == ResourceARNAll
+}
+
+func (r Resource) isMemory() bool {
+	return r.Type == ResourceARNMemory || r.Type == ResourceARNAll
 }
 
 func (r Resource) isBucketPattern() bool {
@@ -111,6 +135,11 @@ func (r Resource) IsValid() bool {
 	if r.Type == unknownARN {
 		return false
 	}
+	// A bare ARN prefix is tolerated here so existing policies keep loading.
+	// It is inert, and ValidateStrict refuses to let a new one be written.
+	if r.bareARN {
+		return true
+	}
 	if r.isS3() {
 		if strings.HasPrefix(r.Pattern, "/") {
 			return false
@@ -118,6 +147,11 @@ func (r Resource) IsValid() bool {
 	}
 	if r.isTable() {
 		if strings.HasPrefix(r.Pattern, "/") {
+			return false
+		}
+	}
+	if r.Type == ResourceARNMemory {
+		if !isValidMemoryPattern(r.Pattern) {
 			return false
 		}
 	}
@@ -132,13 +166,40 @@ func (r Resource) IsValid() bool {
 	return r.Pattern != ""
 }
 
+// isValidMemoryPattern reports whether pattern can name a Memory resource.
+// A Memory pattern is <cortex>[/<collection>[/<name>]], where <cortex> is a
+// bucket name. Rejects a leading separator, a colon, whitespace, a backslash,
+// and any "." or ".." segment.
+func isValidMemoryPattern(pattern string) bool {
+	if pattern == "" || strings.HasPrefix(pattern, "/") {
+		return false
+	}
+	if strings.ContainsAny(pattern, ":\\ \t\r\n") {
+		return false
+	}
+	for _, segment := range strings.Split(pattern, "/") {
+		if segment == "." || segment == ".." {
+			return false
+		}
+	}
+	return true
+}
+
 // MatchResource matches object name with resource pattern only.
 func (r Resource) MatchResource(resource string) bool {
 	return r.Match(resource, nil)
 }
 
 // Match - matches object name with resource pattern, including specific conditionals.
+//
+// A Memory resource names a logical path, so the candidate is cleaned before
+// matching. Other ARN types match verbatim: callers must pass a cleaned path.
 func (r Resource) Match(resource string, conditionValues map[string][]string) bool {
+	if r.Type == ResourceARNMemory {
+		if cleaned := path.Clean(resource); cleaned != "." {
+			resource = cleaned
+		}
+	}
 	// Happy path, with no replacements
 	idx := strings.IndexByte(r.Pattern, '$')
 	if idx < 0 {
@@ -255,12 +316,15 @@ func (r Resource) ValidateBucket(bucketName string) error {
 
 // ParseResource - parses string to Resource.
 func ParseResource(s string) (Resource, error) {
+	// "*" is the only string denoting every resource. A bare ARN prefix names
+	// none, and parses as its own type with an empty pattern.
+	if s == ResourceARNAll.String() {
+		return Resource{Type: ResourceARNAll, Pattern: s}, nil
+	}
+
 	r := Resource{}
 	for k, v := range ARNPrefixToType {
-		if s == k {
-			// all pattern
-			r.Type = ResourceARNAll
-			r.Pattern = k
+		if k == ResourceARNAll.String() {
 			continue
 		}
 		if rem, ok := strings.CutPrefix(s, k); ok {
@@ -271,6 +335,16 @@ func ParseResource(s string) (Resource, error) {
 	}
 	if r.Type == unknownARN {
 		return r, Errorf("invalid resource '%v'", s)
+	}
+
+	if r.Pattern == "" {
+		// Memory ARNs carry no compatibility tolerance.
+		if r.Type == ResourceARNMemory {
+			return r, Errorf("invalid resource '%v' - an ARN prefix with no resource after it matches nothing; use '%v*' to mean every Memory resource",
+				s, ResourceARNMemoryPrefix)
+		}
+		r.bareARN = true
+		return r, nil
 	}
 
 	if strings.HasPrefix(r.Pattern, "/") {
@@ -293,6 +367,16 @@ func NewKMSResource(pattern string) Resource {
 	return Resource{
 		Pattern: pattern,
 		Type:    ResourceARNKMS,
+	}
+}
+
+// NewMemoryResource - creates new resource with type Memory. The pattern is
+// the logical Memory path, <cortex>[/<collection>[/<name>]] — never a storage
+// key, so the Memory API's on-disk layout stays out of policy documents.
+func NewMemoryResource(pattern string) Resource {
+	return Resource{
+		Pattern: pattern,
+		Type:    ResourceARNMemory,
 	}
 }
 
