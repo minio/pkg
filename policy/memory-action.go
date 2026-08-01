@@ -104,6 +104,23 @@ func createMemoryActionConditionKeyMap() map[Action]condition.KeySet {
 		memoryActionConditionKeyMap[Action(act)] = condition.NewKeySet(commonKeys...)
 	}
 
+	// Enumeration keys apply only to the list actions. A read or a write names
+	// one record in its resource and has no query to constrain, so accepting
+	// them elsewhere would let a policy look effective while constraining
+	// nothing.
+	for _, act := range []MemoryAction{
+		MemoryListSecretsAction,
+		MemoryListAgentsAction,
+		MemoryListCortexesAction,
+		AllMemoryActions,
+	} {
+		memoryActionConditionKeyMap[Action(act)] = condition.NewKeySet(
+			append(commonKeys,
+				condition.MemoryPrefix.ToKey(),
+				condition.MemoryMaxKeys.ToKey(),
+			)...)
+	}
+
 	return memoryActionConditionKeyMap
 }
 

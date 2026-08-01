@@ -316,13 +316,8 @@ func (r Resource) ValidateBucket(bucketName string) error {
 
 // ParseResource - parses string to Resource.
 func ParseResource(s string) (Resource, error) {
-	// "*" denotes every resource. It is matched here rather than in the loop
-	// below so its pattern stays "*" instead of the empty remainder; a longer
-	// string starting with "*" still falls through and keeps what follows as
-	// its pattern, so "**" and "*foo" parse as they always have.
-	//
-	// A bare ARN prefix, by contrast, names no resource and parses as its own
-	// type with an empty pattern.
+	// Matched here rather than in the loop below so the pattern stays "*" rather
+	// than the empty remainder CutPrefix would leave.
 	if s == ResourceARNAll.String() {
 		return Resource{Type: ResourceARNAll, Pattern: s}, nil
 	}
