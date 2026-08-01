@@ -37,21 +37,10 @@ const (
 	// ResourceARNKMSPrefix is for KMS key resources. MinIO specific API.
 	ResourceARNKMSPrefix = "arn:minio:kms:::"
 
-	// ResourceARNMemoryPrefix is for AIStor Memory API resources. MinIO
-	// specific API; AWS has no equivalent service to borrow an ARN from.
-	//
-	// The pattern is the logical Memory path — <cortex>, <cortex>/secrets/<name>,
-	// <cortex>/agents/<id> — never a storage key, so the Memory API's on-disk
-	// layout can change without invalidating a policy.
-	//
-	// Granting an agent both its record and everything beneath it takes two
-	// resources, because a "/*" pattern does not match its own parent:
-	//
-	//	arn:minio:memory:::cortex/agents/alpha
-	//	arn:minio:memory:::cortex/agents/alpha/*
-	//
-	// This is the shape S3 already requires for a bucket and its objects.
-	// Collapsing it to "alpha*" would also match an unrelated agent "alpha2".
+	// ResourceARNMemoryPrefix is for AIStor Memory API resources. MinIO specific
+	// API. The pattern is the logical Memory path — <cortex>/agents/<id> — never
+	// a storage key. A "/*" pattern does not match its own parent, so covering a
+	// record and its subtree takes two resources, as it does for S3.
 	ResourceARNMemoryPrefix = "arn:minio:memory:::"
 )
 
@@ -106,22 +95,15 @@ type Resource struct {
 	Pattern string
 	Type    ResourceARNType
 
-	// bareARN marks a resource that named an ARN prefix with nothing after it,
-	// such as "arn:aws:s3:::". It names no resource, so it matches nothing: an
-	// Allow grants nothing and a Deny never fires, which is the direction that
-	// fails open.
-	//
-	// Such a resource loads but cannot be written: isValid accepts it so a
-	// policy already on disk keeps working, and ValidateStrict refuses it on
-	// the create and update paths.
-	//
-	// Only the S3, S3 Tables and KMS ARNs carry this tolerance. A bare Memory
-	// ARN is an error at parse.
+	// bareARN marks an ARN prefix with nothing after it, such as "arn:aws:s3:::".
+	// It names no resource and matches nothing, so a Deny written that way never
+	// fires. It loads but cannot be written: isValid accepts it, ValidateStrict
+	// refuses it. Memory ARNs are an error at parse instead.
 	bareARN bool
 }
 
-// IsBareARN reports whether the resource named an ARN prefix with no resource
-// after it. Such a resource is inert: it matches nothing.
+// IsBareARN reports whether the resource is an ARN prefix naming no resource.
+// Such a resource is inert: it matches nothing.
 func (r Resource) IsBareARN() bool { return r.bareARN }
 
 func (r Resource) isKMS() bool {
@@ -185,16 +167,9 @@ func (r Resource) IsValid() bool {
 }
 
 // isValidMemoryPattern reports whether pattern can name a Memory resource.
-//
 // A Memory pattern is <cortex>[/<collection>[/<name>]], where <cortex> is a
-// bucket name. Anything a bucket name cannot contain is rejected here rather
-// than accepted as a pattern that silently matches nothing — a policy that
-// grants less than its author believes is worse than one that fails to load.
-//
-// Rejected: a leading separator (the cortex would be empty), a colon (an extra
-// ARN field leaked into the resource), whitespace, a backslash, and any "."
-// or ".." path segment (which would let a pattern name a resource other than
-// the one it appears to name).
+// bucket name. Rejects a leading separator, a colon, whitespace, a backslash,
+// and any "." or ".." segment.
 func isValidMemoryPattern(pattern string) bool {
 	if pattern == "" || strings.HasPrefix(pattern, "/") {
 		return false
@@ -216,7 +191,15 @@ func (r Resource) MatchResource(resource string) bool {
 }
 
 // Match - matches object name with resource pattern, including specific conditionals.
+//
+// A Memory resource names a logical path, so the candidate is cleaned before
+// matching. Other ARN types match verbatim: callers must pass a cleaned path.
 func (r Resource) Match(resource string, conditionValues map[string][]string) bool {
+	if r.Type == ResourceARNMemory {
+		if cleaned := path.Clean(resource); cleaned != "." {
+			resource = cleaned
+		}
+	}
 	// Happy path, with no replacements
 	idx := strings.IndexByte(r.Pattern, '$')
 	if idx < 0 {
@@ -333,9 +316,8 @@ func (r Resource) ValidateBucket(bucketName string) error {
 
 // ParseResource - parses string to Resource.
 func ParseResource(s string) (Resource, error) {
-	// "*" is the only string that denotes every resource. A bare ARN prefix
-	// such as "arn:aws:s3:::" names no resource and is not a wildcard; it
-	// parses as its own type with an empty pattern and is marked bareARN.
+	// "*" is the only string denoting every resource. A bare ARN prefix names
+	// none, and parses as its own type with an empty pattern.
 	if s == ResourceARNAll.String() {
 		return Resource{Type: ResourceARNAll, Pattern: s}, nil
 	}

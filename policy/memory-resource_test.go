@@ -157,7 +157,7 @@ func TestBareARNPrefixIsNotWildcard(t *testing.T) {
 			t.Errorf("ParseResource(%q): pattern = %q, want empty", prefix, r.Pattern)
 		}
 
-		// Inert: it matches nothing, which is the behaviour already on disk.
+		// Inert: it matches nothing, which is the behavior already on disk.
 		for _, probe := range []string{"bucket", "bucket/key", prefix, "*"} {
 			if r.MatchResource(probe) {
 				t.Errorf("bare %q matched %q; it must match nothing", prefix, probe)
@@ -246,7 +246,7 @@ func TestBareARNPolicyLoadsButCannotBeWritten(t *testing.T) {
 		BucketName:  "secret",
 		ObjectName:  "data",
 	}) {
-		t.Error("behaviour of an already-stored policy changed")
+		t.Error("behavior of an already-stored policy changed")
 	}
 }
 
@@ -385,31 +385,102 @@ func TestMemoryResourceMatch(t *testing.T) {
 	}
 }
 
-// TestMemoryMatchRequiresCleanResource documents a caller contract that is
-// security relevant. Match compares a cleaned resource only on the exact-match
-// fast path; the wildcard fallback sees the raw string. So a resource carrying
-// traversal segments matches a subtree pattern it does not logically belong
-// to. Callers must pass an already-normalized resource path.
-//
-// Patterns cannot carry traversal — IsValid rejects that — so this is purely a
-// constraint on what the server computes from a request.
-func TestMemoryMatchRequiresCleanResource(t *testing.T) {
+// TestMemoryMatchCleansResource covers traversal in the candidate. Match cleans
+// a Memory resource before comparing, so a raw request path cannot escape the
+// subtree its pattern names.
+func TestMemoryMatchCleansResource(t *testing.T) {
+	escaping := []string{
+		"cortex/agents/alpha/../../secrets/db",
+		"cortex/agents/alpha/../beta/notes",
+		"cortex/agents/alpha/./../../secrets/db",
+	}
 	r := NewMemoryResource("cortex/agents/alpha/*")
-
-	const escaping = "cortex/agents/alpha/../../secrets/db"
-	if !r.MatchResource(escaping) {
-		t.Skip("Match now normalizes the resource; tighten this test to assert that instead")
-	}
-	t.Logf("contract: Match(%q) is true for an unnormalized resource; callers must clean first", escaping)
-
-	// The normalized form of that same string is correctly outside the pattern.
-	if r.MatchResource("cortex/secrets/db") {
-		t.Error("a cleaned resource outside the pattern must not match")
+	for _, resource := range escaping {
+		if r.MatchResource(resource) {
+			t.Errorf("Match(%q) escaped the alpha subtree", resource)
+		}
 	}
 
-	// And a pattern can never carry traversal in the first place.
+	// Cleaning must not break the resources that do belong to it.
+	for _, resource := range []string{
+		"cortex/agents/alpha/notes",
+		"cortex/agents/alpha//notes",
+		"cortex/agents/alpha/seen/workspace",
+	} {
+		if !r.MatchResource(resource) {
+			t.Errorf("Match(%q) rejected a resource inside the subtree", resource)
+		}
+	}
+
+	// Traversal that resolves into the subtree still matches it.
+	if !r.MatchResource("cortex/agents/beta/../alpha/notes") {
+		t.Error("a path resolving into the subtree must match")
+	}
+
+	// A pattern can never carry traversal in the first place.
 	if NewMemoryResource("cortex/agents/alpha/../../secrets/*").IsValid() {
 		t.Error("a pattern with traversal must be invalid")
+	}
+}
+
+// TestBareARNLoadsInsideForeignStatement pins cross-type load compatibility. A
+// bare prefix used to parse as ResourceARNAll, which satisfied every type
+// predicate, so a KMS or Table statement carrying one loaded. It now carries a
+// concrete type, and the type validators tolerate it so those keep loading.
+func TestBareARNLoadsInsideForeignStatement(t *testing.T) {
+	testCases := []struct {
+		name    string
+		policy  string
+		wantErr bool
+	}{
+		{
+			name: "bare S3 prefix in a KMS statement",
+			policy: `{"Version":"2012-10-17","Statement":[{
+				"Effect":"Allow","Action":["kms:ListKeys"],
+				"Resource":["arn:aws:s3:::"]}]}`,
+		},
+		{
+			name: "bare S3 prefix in a Tables statement",
+			policy: `{"Version":"2012-10-17","Statement":[{
+				"Effect":"Allow","Action":["s3tables:GetTableData"],
+				"Resource":["arn:aws:s3:::"]}]}`,
+		},
+		{
+			name: "bare KMS prefix in an S3 statement",
+			policy: `{"Version":"2012-10-17","Statement":[{
+				"Effect":"Allow","Action":["s3:GetObject"],
+				"Resource":["arn:minio:kms:::"]}]}`,
+		},
+		{
+			// Memory statements carry no such tolerance.
+			name: "bare S3 prefix in a Memory statement",
+			policy: `{"Version":"2012-10-17","Statement":[{
+				"Effect":"Allow","Action":["memory:GetAgent"],
+				"Resource":["arn:aws:s3:::"]}]}`,
+			wantErr: true,
+		},
+	}
+
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			var p Policy
+			err := json.Unmarshal([]byte(tc.policy), &p)
+			if err == nil {
+				err = p.Validate()
+			}
+			if tc.wantErr && err == nil {
+				t.Error("expected an error, got nil")
+			}
+			if !tc.wantErr && err != nil {
+				t.Errorf("a statement already on disk must keep loading, got %v", err)
+			}
+			// Either way it can never be written.
+			if err == nil {
+				if err := p.ValidateStrict(); err == nil {
+					t.Error("ValidateStrict accepted a bare ARN prefix")
+				}
+			}
+		})
 	}
 }
 
@@ -477,6 +548,13 @@ func TestMemoryPolicyValidation(t *testing.T) {
 				"Resource":["arn:minio:memory:::cortex/agents/*"]}]}`,
 		},
 		{
+			name: "valid Memory NotResource",
+			policy: `{"Version":"2012-10-17","Statement":[{
+				"Effect":"Allow",
+				"Action":["memory:GetAgent"],
+				"NotResource":["arn:minio:memory:::cortex/secrets/*"]}]}`,
+		},
+		{
 			name: "NotResource is validated too",
 			policy: `{"Version":"2012-10-17","Statement":[{
 				"Effect":"Allow",
@@ -542,23 +620,25 @@ func TestMemoryPolicyValidation(t *testing.T) {
 	}
 
 	for _, tc := range testCases {
-		var p Policy
-		err := json.Unmarshal([]byte(tc.policy), &p)
-		if err == nil {
-			err = p.Validate()
-		}
-		if tc.wantErr && err == nil {
-			t.Errorf("%s: expected an error, got nil", tc.name)
-		}
-		if !tc.wantErr && err != nil {
-			t.Errorf("%s: unexpected error %v", tc.name, err)
-		}
+		t.Run(tc.name, func(t *testing.T) {
+			var p Policy
+			err := json.Unmarshal([]byte(tc.policy), &p)
+			if err == nil {
+				err = p.Validate()
+			}
+			if tc.wantErr && err == nil {
+				t.Error("expected an error, got nil")
+			}
+			if !tc.wantErr && err != nil {
+				t.Errorf("unexpected error %v", err)
+			}
+		})
 	}
 }
 
 // TestMemoryPolicyIsAllowed drives the evaluation path end to end: a policy
 // scoped to one agent must allow that agent's resources and deny every
-// neighbour, including one whose id shares a prefix.
+// neighbor, including one whose id shares a prefix.
 func TestMemoryPolicyIsAllowed(t *testing.T) {
 	const doc = `{"Version":"2012-10-17","Statement":[{
 		"Effect":"Allow",
