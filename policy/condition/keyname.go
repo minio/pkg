@@ -36,6 +36,7 @@ var toTrim = map[string]bool{
 	"svc":      true,
 	"s3":       true,
 	"s3tables": true,
+	"memory":   true,
 }
 
 // Name - returns key name which is stripped value of prefixes "aws:", "s3:", "jwt:" and "ldap:"
