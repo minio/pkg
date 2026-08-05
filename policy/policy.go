@@ -28,6 +28,7 @@ import (
 	"sync"
 
 	"github.com/minio/minio-go/v7/pkg/set"
+	"github.com/minio/pkg/v3/policy/condition"
 	"github.com/minio/pkg/v3/wildcard"
 )
 
@@ -138,6 +139,151 @@ func (iamp Policy) MatchResource(resource string) bool {
 		}
 	}
 	return false
+}
+
+// ConditionValues reports the values of key that this policy names for each of
+// actions on resource,so callers can compose Allow and Deny
+// across several policies.
+//
+// Only StringEquals and StringLike contribute; any other form on key sets AllowAll
+// or DenyAll so callers never narrow on a condition they cannot interpret.
+func (iamp Policy) ConditionValues(resource string, actions []Action, key condition.Key) map[Action]*ConditionValueSet {
+	var byAction map[Action]*ConditionValueSet
+
+	for _, statement := range iamp.Statements {
+		if len(statement.Resources) > 0 && !statement.Resources.MatchResource(resource) {
+			continue
+		}
+		if statement.NotResources.MatchResource(resource) {
+			continue
+		}
+
+		values, constrained := interpretableValues(statement.Conditions, key)
+
+		for _, action := range actions {
+			if len(statement.Actions) > 0 && !statement.Actions.Match(action) {
+				continue
+			}
+			if statement.NotActions.Match(action) {
+				continue
+			}
+			if byAction == nil {
+				byAction = make(map[Action]*ConditionValueSet, len(actions))
+			}
+			entry := byAction[action]
+			if entry == nil {
+				entry = &ConditionValueSet{Allow: set.NewStringSet(), Deny: set.NewStringSet()}
+				byAction[action] = entry
+			}
+
+			target, all := entry.Allow, &entry.AllowAll
+			if statement.Effect != Allow {
+				target, all = entry.Deny, &entry.DenyAll
+			}
+			if !constrained {
+				*all = true
+				continue
+			}
+			for _, v := range values {
+				target.Add(v)
+			}
+		}
+	}
+
+	return byAction
+}
+
+// TableResourcePatterns reports the S3 Tables resource patterns this policy names
+// for each of actions, as ARN suffixes such as "bucket/wh1" or "bucket/*". Keying
+// by action keeps a Deny on one action from withdrawing another's grant.
+func (iamp Policy) TableResourcePatterns(actions []Action) map[Action]*ResourcePatternSet {
+	var byAction map[Action]*ResourcePatternSet
+
+	for _, statement := range iamp.Statements {
+		patterns := make([]string, 0, len(statement.Resources))
+		for resource := range statement.Resources {
+			if resource.isTable() {
+				patterns = append(patterns, resource.Pattern)
+			}
+		}
+		// A statement naming only NotResource reaches every resource it does not
+		// exclude, so it names them all rather than none.
+		if len(statement.Resources) == 0 && excludesTableResource(statement.NotResources) {
+			patterns = append(patterns, ResourceARNAll.String())
+		}
+		if len(patterns) == 0 {
+			continue
+		}
+
+		for _, action := range actions {
+			if len(statement.Actions) > 0 && !statement.Actions.Match(action) {
+				continue
+			}
+			if statement.NotActions.Match(action) {
+				continue
+			}
+			if byAction == nil {
+				byAction = make(map[Action]*ResourcePatternSet, len(actions))
+			}
+			entry := byAction[action]
+			if entry == nil {
+				entry = &ResourcePatternSet{Allow: set.NewStringSet(), Deny: set.NewStringSet()}
+				byAction[action] = entry
+			}
+			target := entry.Allow
+			if statement.Effect != Allow {
+				target = entry.Deny
+			}
+			for _, pattern := range patterns {
+				target.Add(pattern)
+			}
+		}
+	}
+
+	return byAction
+}
+
+// excludesTableResource reports whether a NotResource set excludes any S3 Tables
+// resource, meaning the statement reaches the remaining ones.
+func excludesTableResource(notResources ResourceSet) bool {
+	for resource := range notResources {
+		if resource.isTable() {
+			return true
+		}
+	}
+	return false
+}
+
+// ResourcePatternSet holds the resource patterns one action's statements name.
+type ResourcePatternSet struct {
+	Allow set.StringSet
+	Deny  set.StringSet
+}
+
+// ConditionValueSet holds the values one action's statements name for a condition
+// key. AllowAll or DenyAll mean the effect applies without constraining it.
+type ConditionValueSet struct {
+	Allow    set.StringSet
+	Deny     set.StringSet
+	AllowAll bool
+	DenyAll  bool
+}
+
+// interpretableValues returns the literal values functions constrain key to.
+func interpretableValues(functions condition.Functions, key condition.Key) (values []string, constrained bool) {
+	for name, vs := range functions.ValuesByKey(key) {
+		// A set qualifier such as "ForAllValues:" holds when the request carries no
+		// value for the key, so the listed values are not the reachable set.
+		if strings.ContainsRune(name, ':') {
+			continue
+		}
+		if !condition.IsAllowList(name) {
+			continue
+		}
+		constrained = true
+		values = append(values, vs...)
+	}
+	return values, constrained
 }
 
 // IsAllowedActions returns all supported actions for this policy.
