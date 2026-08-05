@@ -305,8 +305,10 @@ func TestBinaryEqualsFuncEvaluate(t *testing.T) {
 
 	case4Function, err := newBinaryEqualsFunc(
 		JWTGroups.ToKey(),
-		NewValueSet(NewStringValue(
-			base64.StdEncoding.EncodeToString([]byte("prod"))),
+		NewValueSet(
+			NewStringValue(
+				base64.StdEncoding.EncodeToString([]byte("prod")),
+			),
 			NewStringValue(base64.StdEncoding.EncodeToString([]byte("art"))),
 		),
 		forAnyValue,
@@ -573,7 +575,8 @@ func TestStringEqualsFuncToMap(t *testing.T) {
 		S3XAmzCopySource.ToKey(): NewValueSet(NewStringValue("mybucket/myobject")),
 	}
 
-	case2Function, err := newStringEqualsFunc(S3XAmzCopySource.ToKey(),
+	case2Function, err := newStringEqualsFunc(
+		S3XAmzCopySource.ToKey(),
 		NewValueSet(
 			NewStringValue("mybucket/myobject"),
 			NewStringValue("yourbucket/myobject"),

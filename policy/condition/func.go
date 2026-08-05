@@ -81,6 +81,36 @@ func (functions Functions) Keys() KeySet {
 	return keySet
 }
 
+// ValuesByKey returns the literal values every function constrains key to,
+// keyed by condition name (for example "StringEquals"). Callers deriving which
+// resources a policy permits use it to read the allowed set;
+func (functions Functions) ValuesByKey(key Key) map[string][]string {
+	var byName map[string][]string
+	for _, f := range functions {
+		if f.key() != key {
+			continue
+		}
+		values, ok := f.toMap()[key]
+		if !ok {
+			continue
+		}
+		fname := f.name().String()
+		for _, v := range values.ToSlice() {
+			s, err := v.GetString()
+			if err != nil {
+				// Non-string values cannot name a resource; skip them so the
+				// caller sees no constraint rather than a bogus one.
+				continue
+			}
+			if byName == nil {
+				byName = make(map[string][]string)
+			}
+			byName[fname] = append(byName[fname], s)
+		}
+	}
+	return byName
+}
+
 // Clone clones Functions structure
 func (functions Functions) Clone() Functions {
 	funcs := []Function{}
