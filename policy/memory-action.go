@@ -65,6 +65,10 @@ const (
 	// MemorySearchAction - search (corpus-grep) the objects in a cortex.
 	MemorySearchAction MemoryAction = "memory:Search"
 
+	// MemoryGetObjectBioAction - read an object's version history in a cortex:
+	// who wrote each version, when, in which session, and what it carries.
+	MemoryGetObjectBioAction MemoryAction = "memory:GetObjectBio"
+
 	// AllMemoryActions - all AIStor Memory API actions.
 	AllMemoryActions MemoryAction = "memory:*"
 )
@@ -84,6 +88,7 @@ var SupportedMemoryActions = map[MemoryAction]struct{}{
 	MemoryDeleteAgentAction:  {},
 	MemoryListAgentsAction:   {},
 	MemorySearchAction:       {},
+	MemoryGetObjectBioAction: {},
 	AllMemoryActions:         {},
 }
 

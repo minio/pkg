@@ -39,6 +39,7 @@ func TestMemoryActionIsValid(t *testing.T) {
 		{MemoryDeleteAgentAction, true},
 		{MemoryListAgentsAction, true},
 		{MemorySearchAction, true},
+		{MemoryGetObjectBioAction, true},
 		{AllMemoryActions, true},
 		{MemoryAction("memory:FooBar"), false},
 		{MemoryAction("s3tables:CreateTable"), false},
