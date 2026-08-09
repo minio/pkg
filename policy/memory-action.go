@@ -65,7 +65,8 @@ const (
 	// MemorySearchAction - search (corpus-grep) the objects in a cortex.
 	MemorySearchAction MemoryAction = "memory:Search"
 
-	// MemoryGetObjectBioAction - read an object's version history in a cortex.
+	// MemoryGetObjectBioAction - read an object's biography in a cortex: who
+	// authored each version, when, and from where.
 	MemoryGetObjectBioAction MemoryAction = "memory:GetObjectBio"
 
 	// AllMemoryActions - all AIStor Memory API actions.
