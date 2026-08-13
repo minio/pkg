@@ -812,8 +812,10 @@ func TestMemoryEnumerationConditionKeys(t *testing.T) {
 	// let a policy look scoped while constraining nothing.
 	for _, action := range pointActions {
 		keys := MemoryActionConditionKeyMap[Action(action)]
-		if keys.Match(condition.MemoryPrefix.ToKey()) {
-			t.Errorf("%s must not accept %s", action, condition.MemoryPrefix)
+		for _, key := range []condition.KeyName{condition.MemoryPrefix, condition.MemoryMaxKeys} {
+			if keys.Match(key.ToKey()) {
+				t.Errorf("%s must not accept %s", action, key)
+			}
 		}
 	}
 
