@@ -50,7 +50,19 @@ const (
 	// MemoryListSecretsAction - list the secrets in a cortex.
 	MemoryListSecretsAction MemoryAction = "memory:ListSecrets"
 
-	// MemoryPutAgentAction - write an agent record in a cortex.
+	// MemoryPutBioTablesAction - create an agent's telemetry namespace and
+	// tables in a cortex's warehouse. Separate from MemoryPutAgentAction because
+	// it writes the Tables catalog, so a principal that may write agent state
+	// must not gain it.
+	MemoryPutBioTablesAction MemoryAction = "memory:PutBioTables"
+
+	// MemoryDeleteBioTablesAction - delete an agent's telemetry namespace and
+	// tables from a cortex's warehouse. Carries the same privilege as creating
+	// them, over history the agent has already written.
+	MemoryDeleteBioTablesAction MemoryAction = "memory:DeleteBioTables"
+
+	// MemoryPutAgentAction - write an agent record, or a memory beneath one, in
+	// a cortex.
 	MemoryPutAgentAction MemoryAction = "memory:PutAgent"
 
 	// MemoryGetAgentAction - read an agent record from a cortex.
@@ -75,21 +87,23 @@ const (
 
 // SupportedMemoryActions - list of all supported AIStor Memory API actions.
 var SupportedMemoryActions = map[MemoryAction]struct{}{
-	MemoryCreateCortexAction: {},
-	MemoryDeleteCortexAction: {},
-	MemoryGetCortexAction:    {},
-	MemoryListCortexesAction: {},
-	MemoryPutSecretAction:    {},
-	MemoryGetSecretAction:    {},
-	MemoryDeleteSecretAction: {},
-	MemoryListSecretsAction:  {},
-	MemoryPutAgentAction:     {},
-	MemoryGetAgentAction:     {},
-	MemoryDeleteAgentAction:  {},
-	MemoryListAgentsAction:   {},
-	MemorySearchAction:       {},
-	MemoryGetObjectBioAction: {},
-	AllMemoryActions:         {},
+	MemoryCreateCortexAction:    {},
+	MemoryDeleteCortexAction:    {},
+	MemoryGetCortexAction:       {},
+	MemoryListCortexesAction:    {},
+	MemoryPutSecretAction:       {},
+	MemoryGetSecretAction:       {},
+	MemoryDeleteSecretAction:    {},
+	MemoryListSecretsAction:     {},
+	MemoryPutBioTablesAction:    {},
+	MemoryDeleteBioTablesAction: {},
+	MemoryPutAgentAction:        {},
+	MemoryGetAgentAction:        {},
+	MemoryDeleteAgentAction:     {},
+	MemoryListAgentsAction:      {},
+	MemorySearchAction:          {},
+	MemoryGetObjectBioAction:    {},
+	AllMemoryActions:            {},
 }
 
 // IsValid - checks if action is valid or not.
