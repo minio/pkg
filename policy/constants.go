@@ -318,6 +318,11 @@ var DefaultPolicies = []struct {
 						Action(S3TablesRenameFunctionAction),
 						Action(S3TablesDeleteFunctionAction),
 						Action(S3TablesRegisterFunctionAction),
+						// Table annotations
+						Action(S3TablesPutTableAnnotationAction),
+						Action(S3TablesGetTableAnnotationAction),
+						Action(S3TablesListTableAnnotationsAction),
+						Action(S3TablesDeleteTableAnnotationAction),
 						// Catalog config + metrics
 						Action(S3TablesGetConfigAction),
 						Action(S3TablesTableMetricsAction),
@@ -364,6 +369,9 @@ var DefaultPolicies = []struct {
 						// Function read
 						Action(S3TablesGetFunctionAction),
 						Action(S3TablesListFunctionsAction),
+						// Table annotation read
+						Action(S3TablesGetTableAnnotationAction),
+						Action(S3TablesListTableAnnotationsAction),
 						// Catalog config + metrics
 						Action(S3TablesGetConfigAction),
 						Action(S3TablesTableMetricsAction),

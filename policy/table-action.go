@@ -247,6 +247,19 @@ const (
 	// S3TablesListTagsForTableAction is a MinIO extension for listing tags on tables.
 	S3TablesListTagsForTableAction TableAction = "s3tables:ListTagsForTable"
 
+	// S3TablesPutTableAnnotationAction is an AIStor extension for attaching a
+	// named annotation payload to a table.
+	S3TablesPutTableAnnotationAction TableAction = "s3tables:PutTableAnnotation"
+	// S3TablesGetTableAnnotationAction is an AIStor extension for reading one of a
+	// table's annotations.
+	S3TablesGetTableAnnotationAction TableAction = "s3tables:GetTableAnnotation"
+	// S3TablesListTableAnnotationsAction is an AIStor extension for listing a
+	// table's annotations.
+	S3TablesListTableAnnotationsAction TableAction = "s3tables:ListTableAnnotations"
+	// S3TablesDeleteTableAnnotationAction is an AIStor extension for removing one
+	// of a table's annotations.
+	S3TablesDeleteTableAnnotationAction TableAction = "s3tables:DeleteTableAnnotation"
+
 	// AllS3TablesActions - all Amazon S3 Tables actions
 	AllS3TablesActions TableAction = "s3tables:*"
 )
@@ -324,6 +337,10 @@ var SupportedTableActions = map[TableAction]struct{}{
 	S3TablesTagTableAction:                               {},
 	S3TablesUntagTableAction:                             {},
 	S3TablesListTagsForTableAction:                       {},
+	S3TablesPutTableAnnotationAction:                     {},
+	S3TablesGetTableAnnotationAction:                     {},
+	S3TablesListTableAnnotationsAction:                   {},
+	S3TablesDeleteTableAnnotationAction:                  {},
 	AllS3TablesActions:                                   {},
 }
 
@@ -469,6 +486,10 @@ func createTableActionConditionKeyMap() map[Action]condition.KeySet {
 	tableActionConditionKeyMap[Action(S3TablesTagTableAction)] = withTableCommon()
 	tableActionConditionKeyMap[Action(S3TablesUntagTableAction)] = withTableCommon()
 	tableActionConditionKeyMap[Action(S3TablesListTagsForTableAction)] = withTableCommon()
+	tableActionConditionKeyMap[Action(S3TablesPutTableAnnotationAction)] = withTableCommon()
+	tableActionConditionKeyMap[Action(S3TablesGetTableAnnotationAction)] = withTableCommon()
+	tableActionConditionKeyMap[Action(S3TablesListTableAnnotationsAction)] = withTableCommon()
+	tableActionConditionKeyMap[Action(S3TablesDeleteTableAnnotationAction)] = withTableCommon()
 
 	return tableActionConditionKeyMap
 }
