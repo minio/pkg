@@ -37,7 +37,7 @@ const (
 	// S3TablesDeleteTableAction maps to the AWS `DeleteTable` S3 Tables action.
 	S3TablesDeleteTableAction TableAction = "s3tables:DeleteTable"
 
-	// S3TablesDeleteTableEncryptionAction is a MinIO extension for deleting a
+	// S3TablesDeleteTableEncryptionAction is an AIStor extension for deleting a
 	// table-level encryption configuration override.
 	S3TablesDeleteTableEncryptionAction TableAction = "s3tables:DeleteTableEncryption"
 
@@ -95,156 +95,156 @@ const (
 	// S3TablesUpdateTableMetadataLocationAction maps to the AWS `UpdateTableMetadataLocation` S3 Tables action.
 	S3TablesUpdateTableMetadataLocationAction TableAction = "s3tables:UpdateTableMetadataLocation"
 
-	// S3TablesCreateWarehouseAction is a MinIO extension for Iceberg warehouse provisioning.
+	// S3TablesCreateWarehouseAction is an AIStor extension for Iceberg warehouse provisioning.
 	S3TablesCreateWarehouseAction TableAction = "s3tables:CreateWarehouse"
 
 	// S3TablesCreateTableBucketAction maps to the AWS `CreateTableBucket` S3 Tables action.
 	// Prefer using S3TablesCreateWarehouseAction instead.
 	S3TablesCreateTableBucketAction TableAction = "s3tables:CreateTableBucket"
 
-	// S3TablesDeleteWarehouseAction is a MinIO extension for deleting Iceberg warehouses.
+	// S3TablesDeleteWarehouseAction is an AIStor extension for deleting Iceberg warehouses.
 	S3TablesDeleteWarehouseAction TableAction = "s3tables:DeleteWarehouse"
 
 	// S3TablesDeleteTableBucketAction maps to the AWS `DeleteTableBucket` S3 Tables action.
 	// Prefer using S3TablesDeleteWarehouseAction instead.
 	S3TablesDeleteTableBucketAction TableAction = "s3tables:DeleteTableBucket"
 
-	// S3TablesDeleteWarehouseEncryptionAction is a MinIO extension for deleting warehouse encryption configuration.
+	// S3TablesDeleteWarehouseEncryptionAction is an AIStor extension for deleting warehouse encryption configuration.
 	S3TablesDeleteWarehouseEncryptionAction TableAction = "s3tables:DeleteWarehouseEncryption"
 
 	// S3TablesDeleteTableBucketEncryptionAction maps to the AWS `DeleteTableBucketEncryption` S3 Tables action.
 	// Prefer using S3TablesDeleteWarehouseEncryptionAction instead.
 	S3TablesDeleteTableBucketEncryptionAction TableAction = "s3tables:DeleteTableBucketEncryption"
 
-	// S3TablesDeleteWarehousePolicyAction is a MinIO extension for deleting warehouse policies.
+	// S3TablesDeleteWarehousePolicyAction is an AIStor extension for deleting warehouse policies.
 	S3TablesDeleteWarehousePolicyAction TableAction = "s3tables:DeleteWarehousePolicy"
 
 	// S3TablesDeleteTableBucketPolicyAction maps to the AWS `DeleteTableBucketPolicy` S3 Tables action.
 	// Prefer using S3TablesDeleteWarehousePolicyAction instead.
 	S3TablesDeleteTableBucketPolicyAction TableAction = "s3tables:DeleteTableBucketPolicy"
 
-	// S3TablesGetWarehouseAction is a MinIO extension for retrieving warehouse details.
+	// S3TablesGetWarehouseAction is an AIStor extension for retrieving warehouse details.
 	S3TablesGetWarehouseAction TableAction = "s3tables:GetWarehouse"
 
 	// S3TablesGetTableBucketAction maps to the AWS `GetTableBucket` S3 Tables action.
 	// Prefer using S3TablesGetWarehouseAction instead.
 	S3TablesGetTableBucketAction TableAction = "s3tables:GetTableBucket"
 
-	// S3TablesGetWarehouseEncryptionAction is a MinIO extension for retrieving warehouse encryption configuration.
+	// S3TablesGetWarehouseEncryptionAction is an AIStor extension for retrieving warehouse encryption configuration.
 	S3TablesGetWarehouseEncryptionAction TableAction = "s3tables:GetWarehouseEncryption"
 
 	// S3TablesGetTableBucketEncryptionAction maps to the AWS `GetTableBucketEncryption` S3 Tables action.
 	// Prefer using S3TablesGetWarehouseEncryptionAction instead.
 	S3TablesGetTableBucketEncryptionAction TableAction = "s3tables:GetTableBucketEncryption"
 
-	// S3TablesGetWarehouseMaintenanceConfigurationAction is a MinIO extension for retrieving warehouse maintenance configuration.
+	// S3TablesGetWarehouseMaintenanceConfigurationAction is an AIStor extension for retrieving warehouse maintenance configuration.
 	S3TablesGetWarehouseMaintenanceConfigurationAction TableAction = "s3tables:GetWarehouseMaintenanceConfiguration"
 
 	// S3TablesGetTableBucketMaintenanceConfigurationAction maps to the AWS `GetTableBucketMaintenanceConfiguration` S3 Tables action.
 	// Prefer using S3TablesGetWarehouseMaintenanceConfigurationAction instead.
 	S3TablesGetTableBucketMaintenanceConfigurationAction TableAction = "s3tables:GetTableBucketMaintenanceConfiguration"
 
-	// S3TablesGetWarehousePolicyAction is a MinIO extension for retrieving warehouse policies.
+	// S3TablesGetWarehousePolicyAction is an AIStor extension for retrieving warehouse policies.
 	S3TablesGetWarehousePolicyAction TableAction = "s3tables:GetWarehousePolicy"
 
 	// S3TablesGetTableBucketPolicyAction maps to the AWS `GetTableBucketPolicy` S3 Tables action.
 	// Prefer using S3TablesGetWarehousePolicyAction instead.
 	S3TablesGetTableBucketPolicyAction TableAction = "s3tables:GetTableBucketPolicy"
 
-	// S3TablesListWarehousesAction is a MinIO extension for listing Iceberg warehouses.
+	// S3TablesListWarehousesAction is an AIStor extension for listing Iceberg warehouses.
 	S3TablesListWarehousesAction TableAction = "s3tables:ListWarehouses"
 
 	// S3TablesListTableBucketsAction maps to the AWS `ListTableBuckets` S3 Tables action.
 	// Prefer using S3TablesListWarehousesAction instead.
 	S3TablesListTableBucketsAction TableAction = "s3tables:ListTableBuckets"
 
-	// S3TablesPutWarehouseEncryptionAction is a MinIO extension for setting warehouse encryption configuration.
+	// S3TablesPutWarehouseEncryptionAction is an AIStor extension for setting warehouse encryption configuration.
 	S3TablesPutWarehouseEncryptionAction TableAction = "s3tables:PutWarehouseEncryption"
 
 	// S3TablesPutTableBucketEncryptionAction maps to the AWS `PutTableBucketEncryption` S3 Tables action.
 	// Prefer using S3TablesPutWarehouseEncryptionAction instead.
 	S3TablesPutTableBucketEncryptionAction TableAction = "s3tables:PutTableBucketEncryption"
 
-	// S3TablesPutWarehouseMaintenanceConfigurationAction is a MinIO extension for setting warehouse maintenance configuration.
+	// S3TablesPutWarehouseMaintenanceConfigurationAction is an AIStor extension for setting warehouse maintenance configuration.
 	S3TablesPutWarehouseMaintenanceConfigurationAction TableAction = "s3tables:PutWarehouseMaintenanceConfiguration"
 
 	// S3TablesPutTableBucketMaintenanceConfigurationAction maps to the AWS `PutTableBucketMaintenanceConfiguration` S3 Tables action.
 	// Prefer using S3TablesPutWarehouseMaintenanceConfigurationAction instead.
 	S3TablesPutTableBucketMaintenanceConfigurationAction TableAction = "s3tables:PutTableBucketMaintenanceConfiguration"
 
-	// S3TablesPutWarehousePolicyAction is a MinIO extension for setting warehouse policies.
+	// S3TablesPutWarehousePolicyAction is an AIStor extension for setting warehouse policies.
 	S3TablesPutWarehousePolicyAction TableAction = "s3tables:PutWarehousePolicy"
 
 	// S3TablesPutTableBucketPolicyAction maps to the AWS `PutTableBucketPolicy` S3 Tables action.
 	// Prefer using S3TablesPutWarehousePolicyAction instead.
 	S3TablesPutTableBucketPolicyAction TableAction = "s3tables:PutTableBucketPolicy"
 
-	// S3TablesGetConfigAction is a MinIO extension for retrieving catalog configuration.
+	// S3TablesGetConfigAction is an AIStor extension for retrieving catalog configuration.
 	S3TablesGetConfigAction TableAction = "s3tables:GetConfig"
 
-	// S3TablesTableMetricsAction is a MinIO extension exposing table metrics.
+	// S3TablesTableMetricsAction is an AIStor extension exposing table metrics.
 	S3TablesTableMetricsAction TableAction = "s3tables:TableMetrics"
 
-	// S3TablesUpdateTableAction is a MinIO extension for Iceberg-compatible table updates.
+	// S3TablesUpdateTableAction is an AIStor extension for Iceberg-compatible table updates.
 	S3TablesUpdateTableAction TableAction = "s3tables:UpdateTable"
 
-	// S3TablesCreateViewAction is a MinIO extension for creating Iceberg views.
+	// S3TablesCreateViewAction is an AIStor extension for creating Iceberg views.
 	S3TablesCreateViewAction TableAction = "s3tables:CreateView"
 
-	// S3TablesDeleteViewAction is a MinIO extension for deleting Iceberg views.
+	// S3TablesDeleteViewAction is an AIStor extension for deleting Iceberg views.
 	S3TablesDeleteViewAction TableAction = "s3tables:DeleteView"
 
-	// S3TablesGetViewAction is a MinIO extension for retrieving Iceberg views.
+	// S3TablesGetViewAction is an AIStor extension for retrieving Iceberg views.
 	S3TablesGetViewAction TableAction = "s3tables:GetView"
 
-	// S3TablesRenameViewAction is a MinIO extension for renaming Iceberg views.
+	// S3TablesRenameViewAction is an AIStor extension for renaming Iceberg views.
 	S3TablesRenameViewAction TableAction = "s3tables:RenameView"
 
-	// S3TablesUpdateViewAction is a MinIO extension for updating Iceberg views.
+	// S3TablesUpdateViewAction is an AIStor extension for updating Iceberg views.
 	S3TablesUpdateViewAction TableAction = "s3tables:UpdateView"
 
-	// S3TablesListViewsAction is a MinIO extension for listing Iceberg views.
+	// S3TablesListViewsAction is an AIStor extension for listing Iceberg views.
 	S3TablesListViewsAction TableAction = "s3tables:ListViews"
 
-	// S3TablesRegisterViewAction is a MinIO extension for registering Iceberg views.
+	// S3TablesRegisterViewAction is an AIStor extension for registering Iceberg views.
 	S3TablesRegisterViewAction TableAction = "s3tables:RegisterView"
 
-	// S3TablesCreateFunctionAction is a MinIO extension for creating Iceberg functions (SQL UDFs).
+	// S3TablesCreateFunctionAction is an AIStor extension for creating Iceberg functions (SQL UDFs).
 	S3TablesCreateFunctionAction TableAction = "s3tables:CreateFunction"
 
-	// S3TablesDeleteFunctionAction is a MinIO extension for deleting Iceberg functions (SQL UDFs).
+	// S3TablesDeleteFunctionAction is an AIStor extension for deleting Iceberg functions (SQL UDFs).
 	S3TablesDeleteFunctionAction TableAction = "s3tables:DeleteFunction"
 
-	// S3TablesGetFunctionAction is a MinIO extension for retrieving Iceberg functions (SQL UDFs).
+	// S3TablesGetFunctionAction is an AIStor extension for retrieving Iceberg functions (SQL UDFs).
 	S3TablesGetFunctionAction TableAction = "s3tables:GetFunction"
 
-	// S3TablesRenameFunctionAction is a MinIO extension for renaming Iceberg functions (SQL UDFs).
+	// S3TablesRenameFunctionAction is an AIStor extension for renaming Iceberg functions (SQL UDFs).
 	S3TablesRenameFunctionAction TableAction = "s3tables:RenameFunction"
 
-	// S3TablesUpdateFunctionAction is a MinIO extension for updating Iceberg functions (SQL UDFs).
+	// S3TablesUpdateFunctionAction is an AIStor extension for updating Iceberg functions (SQL UDFs).
 	S3TablesUpdateFunctionAction TableAction = "s3tables:UpdateFunction"
 
-	// S3TablesListFunctionsAction is a MinIO extension for listing Iceberg functions (SQL UDFs).
+	// S3TablesListFunctionsAction is an AIStor extension for listing Iceberg functions (SQL UDFs).
 	S3TablesListFunctionsAction TableAction = "s3tables:ListFunctions"
 
-	// S3TablesRegisterFunctionAction is a MinIO extension for registering Iceberg functions (SQL UDFs).
+	// S3TablesRegisterFunctionAction is an AIStor extension for registering Iceberg functions (SQL UDFs).
 	S3TablesRegisterFunctionAction TableAction = "s3tables:RegisterFunction"
 
-	// S3TablesUpdateNamespacePropertiesAction is a MinIO extension for updating namespace properties.
+	// S3TablesUpdateNamespacePropertiesAction is an AIStor extension for updating namespace properties.
 	S3TablesUpdateNamespacePropertiesAction TableAction = "s3tables:UpdateNamespaceProperties"
 
-	// S3TablesTagWarehouseAction is a MinIO extension for tagging Iceberg warehouses.
+	// S3TablesTagWarehouseAction is an AIStor extension for tagging Iceberg warehouses.
 	S3TablesTagWarehouseAction TableAction = "s3tables:TagWarehouse"
-	// S3TablesUntagWarehouseAction is a MinIO extension for removing tags from Iceberg warehouses.
+	// S3TablesUntagWarehouseAction is an AIStor extension for removing tags from Iceberg warehouses.
 	S3TablesUntagWarehouseAction TableAction = "s3tables:UntagWarehouse"
-	// S3TablesListTagsForWarehouseAction is a MinIO extension for listing tags on Iceberg warehouses.
+	// S3TablesListTagsForWarehouseAction is an AIStor extension for listing tags on Iceberg warehouses.
 	S3TablesListTagsForWarehouseAction TableAction = "s3tables:ListTagsForWarehouse"
 
-	// S3TablesTagTableAction is a MinIO extension for tagging tables.
+	// S3TablesTagTableAction is an AIStor extension for tagging tables.
 	S3TablesTagTableAction TableAction = "s3tables:TagTable"
-	// S3TablesUntagTableAction is a MinIO extension for removing tags from tables.
+	// S3TablesUntagTableAction is an AIStor extension for removing tags from tables.
 	S3TablesUntagTableAction TableAction = "s3tables:UntagTable"
-	// S3TablesListTagsForTableAction is a MinIO extension for listing tags on tables.
+	// S3TablesListTagsForTableAction is an AIStor extension for listing tags on tables.
 	S3TablesListTagsForTableAction TableAction = "s3tables:ListTagsForTable"
 
 	// S3TablesPutTableAnnotationAction is an AIStor extension for attaching a
