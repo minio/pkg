@@ -791,7 +791,10 @@ func TestStarPrefixedResourceParses(t *testing.T) {
 // both actions against one resource would leak names without any cue.
 func TestMemoryEnumerationConditionKeys(t *testing.T) {
 	listActions := []string{"memory:ListAgents", "memory:ListSecrets", "memory:ListCortexes"}
-	pointActions := []string{"memory:GetAgent", "memory:PutAgent", "memory:DeleteAgent", "memory:GetSecret"}
+	pointActions := []string{
+		"memory:GetAgent", "memory:PutAgent", "memory:DeleteAgent", "memory:GetSecret",
+		"memory:UpdateAgent",
+	}
 
 	for _, action := range listActions {
 		keys, ok := MemoryActionConditionKeyMap[Action(action)]
@@ -809,8 +812,10 @@ func TestMemoryEnumerationConditionKeys(t *testing.T) {
 	// let a policy look scoped while constraining nothing.
 	for _, action := range pointActions {
 		keys := MemoryActionConditionKeyMap[Action(action)]
-		if keys.Match(condition.MemoryPrefix.ToKey()) {
-			t.Errorf("%s must not accept %s", action, condition.MemoryPrefix)
+		for _, key := range []condition.KeyName{condition.MemoryPrefix, condition.MemoryMaxKeys} {
+			if keys.Match(key.ToKey()) {
+				t.Errorf("%s must not accept %s", action, key)
+			}
 		}
 	}
 
