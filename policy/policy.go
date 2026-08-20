@@ -46,6 +46,24 @@ type Args struct {
 	ObjectName      string              `json:"object"`
 	Claims          map[string]any      `json:"claims"`
 	DenyOnly        bool                `json:"denyOnly"` // only applies deny
+
+	// Memoized requestResource output, with the fields it was built from so a
+	// caller that reuses an Args for a second object cannot read a stale one.
+	// A single evaluation must not share one *Args across goroutines.
+	resource     string
+	resourceFrom [2]string
+}
+
+// requestResource returns the resource string this request names, building it
+// at most once per Args. Every statement of every policy needs the same string,
+// and rebuilding it per statement was the largest single source of allocation
+// on the authorization path.
+func (a *Args) requestResource() string {
+	if a.resource == "" || a.resourceFrom[0] != a.BucketName || a.resourceFrom[1] != a.ObjectName {
+		a.resource = buildRequestResource(a)
+		a.resourceFrom = [2]string{a.BucketName, a.ObjectName}
+	}
+	return a.resource
 }
 
 // GetValuesFromClaims returns the list of values for the input claimName.
@@ -126,8 +144,21 @@ type Policy struct {
 }
 
 // HasDenyStatement returns if the policy has a deny statement.
+//
+// hasDeny is only populated by updateActionIndex, which a policy built as a
+// struct literal never reaches — the built-in readonly policies are built that
+// way and do carry a Deny — so the statements are the authority and the field
+// is only a shortcut.
 func (iamp *Policy) HasDenyStatement() bool {
-	return iamp.hasDeny
+	if iamp.hasDeny {
+		return true
+	}
+	for i := range iamp.Statements {
+		if iamp.Statements[i].Effect == Deny {
+			return true
+		}
+	}
+	return false
 }
 
 // MatchResource matches resource with match resource patterns
@@ -247,8 +278,10 @@ func IsAllowedPar(policies []Policy, args Args) bool {
 
 				maxJ := min(i+numPoliciesPerWorker, len(policies))
 				res := NoDecision
+				// Args memoizes per-request state, so each worker needs its own.
+				a := args
 				for j := i; j < maxJ; j++ {
-					decision := policies[j].Decide(&args)
+					decision := policies[j].Decide(&a)
 					if decision == DenyDecision {
 						res = DenyDecision
 						break
@@ -298,9 +331,12 @@ const (
 // statement explicitly allows or denies the operation in the Args, it returns
 // `noDecision`. It is upto the caller to handle such cases.
 func (iamp *Policy) Decide(args *Args) Decision {
+	resource := args.requestResource()
+
 	// Check all deny statements. If any one statement denies, return false.
-	for _, statement := range iamp.Statements {
-		if statement.Effect == Deny && !statement.IsAllowedPtr(args) {
+	for i := range iamp.Statements {
+		statement := &iamp.Statements[i]
+		if statement.Effect == Deny && !statement.isAllowedFor(args, resource) {
 			return DenyDecision
 		}
 	}
@@ -320,19 +356,29 @@ func (iamp *Policy) Decide(args *Args) Decision {
 	}
 
 	// Check all allow statements. If any one statement allows, return true.
+	// The index only covers statements that name args.Action literally, so the
+	// full walk still has to happen; tried records what the index already
+	// evaluated so the walk does not evaluate it a second time.
+	var tried []int
 	if len(iamp.actionStatementIndex) > 0 {
 		if indexes, ok := iamp.actionStatementIndex[args.Action]; ok {
 			for _, index := range indexes {
-				statement := iamp.Statements[index]
-				if statement.Effect == Allow && statement.IsAllowedPtr(args) {
+				statement := &iamp.Statements[index]
+				if statement.Effect == Allow && statement.isAllowedFor(args, resource) {
 					return AllowDecision
 				}
 			}
+			tried = indexes
 		}
 	}
 
-	for _, statement := range iamp.Statements {
-		if statement.Effect == Allow && statement.IsAllowedPtr(args) {
+	for i := range iamp.Statements {
+		if len(tried) > 0 && tried[0] == i {
+			tried = tried[1:]
+			continue
+		}
+		statement := &iamp.Statements[i]
+		if statement.Effect == Allow && statement.isAllowedFor(args, resource) {
 			return AllowDecision
 		}
 	}
@@ -516,6 +562,7 @@ func (iamp Policy) ValidateStrict() error {
 func (iamp *Policy) updateActionIndex() {
 	for i := range iamp.Statements {
 		stmt := &iamp.Statements[i]
+		stmt.class = stmt.computeClass()
 		if stmt.Effect == Deny {
 			iamp.hasDeny = true
 			continue
