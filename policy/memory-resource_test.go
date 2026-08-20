@@ -810,12 +810,16 @@ func TestMemoryEnumerationConditionKeys(t *testing.T) {
 		}
 	}
 
-	// A read or a write has no query to constrain. Accepting the key there would
-	// let a policy look scoped while constraining nothing.
+	// A read or a write has no query to constrain. Accepting either key there
+	// would let a policy look scoped while constraining nothing -- both are
+	// checked, since a rejection test that covers one key cannot show the other
+	// was not quietly admitted.
 	for _, action := range pointActions {
 		keys := MemoryActionConditionKeyMap[Action(action)]
-		if keys.Match(condition.MemoryPrefix.ToKey()) {
-			t.Errorf("%s must not accept %s", action, condition.MemoryPrefix)
+		for _, key := range []condition.KeyName{condition.MemoryPrefix, condition.MemoryMaxKeys} {
+			if keys.Match(key.ToKey()) {
+				t.Errorf("%s must not accept %s", action, key)
+			}
 		}
 	}
 
