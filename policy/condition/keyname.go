@@ -134,10 +134,14 @@ const (
 	S3Delimiter KeyName = "s3:delimiter"
 
 	// MemoryPrefix - key representing the prefix query parameter of the AIStor
-	// Memory list APIs only. It scopes enumeration within a cortex, which a
-	// resource ARN cannot express: a list names a query, not a record, so
+	// Memory list and search APIs. It scopes enumeration within a cortex, which
+	// a resource ARN cannot express: a list names a query, not a record, so
 	// putting the prefix in the resource path would make one ARN mean a single
 	// record under a read action and a set of siblings under a list action.
+	//
+	// memory:Search takes it for the same reason and depends on it more, since
+	// search returns object content: without the key its grant has only two
+	// states, none or the whole cortex.
 	MemoryPrefix KeyName = "memory:prefix"
 
 	// MemoryMaxKeys - key representing the limit query parameter of the AIStor
