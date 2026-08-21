@@ -27,6 +27,15 @@ const (
 	SessionPolicyName = "sessionPolicy"
 )
 
+// The canned policies are struct literals, so none of them has been through
+// the parse path that classifies statements, indexes actions and records that
+// a policy carries a Deny. Do it once here instead of on every evaluation.
+func init() {
+	for i := range DefaultPolicies {
+		DefaultPolicies[i].Definition.updateActionIndex()
+	}
+}
+
 // DefaultPolicies - list of canned policies available in MinIO.
 var DefaultPolicies = []struct {
 	Name       string

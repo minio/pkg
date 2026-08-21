@@ -46,24 +46,6 @@ type Args struct {
 	ObjectName      string              `json:"object"`
 	Claims          map[string]any      `json:"claims"`
 	DenyOnly        bool                `json:"denyOnly"` // only applies deny
-
-	// Memoized requestResource output, with the fields it was built from so a
-	// caller that reuses an Args for a second object cannot read a stale one.
-	// A single evaluation must not share one *Args across goroutines.
-	resource     string
-	resourceFrom [2]string
-}
-
-// requestResource returns the resource string this request names, building it
-// at most once per Args. Every statement of every policy needs the same string,
-// and rebuilding it per statement was the largest single source of allocation
-// on the authorization path.
-func (a *Args) requestResource() string {
-	if a.resource == "" || a.resourceFrom[0] != a.BucketName || a.resourceFrom[1] != a.ObjectName {
-		a.resource = buildRequestResource(a)
-		a.resourceFrom = [2]string{a.BucketName, a.ObjectName}
-	}
-	return a.resource
 }
 
 // GetValuesFromClaims returns the list of values for the input claimName.
@@ -145,10 +127,11 @@ type Policy struct {
 
 // HasDenyStatement returns if the policy has a deny statement.
 //
-// hasDeny is only populated by updateActionIndex, which a policy built as a
-// struct literal never reaches — the built-in readonly policies are built that
-// way and do carry a Deny — so the statements are the authority and the field
-// is only a shortcut.
+// hasDeny is only populated by updateActionIndex, which every policy this
+// package builds goes through, but which a policy a caller assembles as a
+// struct literal never reaches. So the field is a shortcut and the statements
+// stay the authority: trusting the field alone would silently under-report a
+// Deny on such a policy.
 func (iamp *Policy) HasDenyStatement() bool {
 	if iamp.hasDeny {
 		return true
@@ -218,9 +201,10 @@ func (iamp Policy) IsAllowedActions(bucketName, objectName string, conditionValu
 //
 // This is currently the fastest implementation for our basic benchmark.
 func IsAllowedSerial(policies []Policy, args Args) bool {
+	resource := buildRequestResource(&args)
 	gotAllow := false
 	for _, policy := range policies {
-		res := policy.Decide(&args)
+		res := policy.decide(&args, resource)
 		if res == DenyDecision {
 			return false
 		}
@@ -263,6 +247,7 @@ func IsAllowedPar(policies []Policy, args Args) bool {
 	close(jobs)
 
 	resultCh := make(chan Decision, len(policies))
+	resource := buildRequestResource(&args)
 
 	var wg sync.WaitGroup
 	wg.Add(numWorkers)
@@ -278,10 +263,11 @@ func IsAllowedPar(policies []Policy, args Args) bool {
 
 				maxJ := min(i+numPoliciesPerWorker, len(policies))
 				res := NoDecision
-				// Args memoizes per-request state, so each worker needs its own.
+				// Each worker evaluates against its own Args value, so nothing
+				// on the evaluation path is shared between goroutines.
 				a := args
 				for j := i; j < maxJ; j++ {
-					decision := policies[j].Decide(&a)
+					decision := policies[j].decide(&a, resource)
 					if decision == DenyDecision {
 						res = DenyDecision
 						break
@@ -331,8 +317,13 @@ const (
 // statement explicitly allows or denies the operation in the Args, it returns
 // `noDecision`. It is upto the caller to handle such cases.
 func (iamp *Policy) Decide(args *Args) Decision {
-	resource := args.requestResource()
+	return iamp.decide(args, buildRequestResource(args))
+}
 
+// decide is Decide with the request resource string supplied by the caller.
+// Every statement of every policy needs the same string, so a walk over a set
+// of policies builds it once instead of once per statement.
+func (iamp *Policy) decide(args *Args, resource string) Decision {
 	// Check all deny statements. If any one statement denies, return false.
 	for i := range iamp.Statements {
 		statement := &iamp.Statements[i]
@@ -361,7 +352,12 @@ func (iamp *Policy) Decide(args *Args) Decision {
 	// evaluated so the walk does not evaluate it a second time.
 	var tried []int
 	if len(iamp.actionStatementIndex) > 0 {
-		if indexes, ok := iamp.actionStatementIndex[args.Action]; ok {
+		// Statements is exported, so a caller can shrink it after the index was
+		// built. Rather than index out of bounds - or worse, evaluate the wrong
+		// statement - fall back to the plain walk when the index is stale.
+		// Indexes are recorded in ascending order, so the last one bounds them all.
+		if indexes, ok := iamp.actionStatementIndex[args.Action]; ok &&
+			len(indexes) > 0 && indexes[len(indexes)-1] < len(iamp.Statements) {
 			for _, index := range indexes {
 				statement := &iamp.Statements[index]
 				if statement.Effect == Allow && statement.isAllowedFor(args, resource) {

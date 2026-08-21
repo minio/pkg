@@ -138,10 +138,41 @@ func TestMatchStarsAreLinear(t *testing.T) {
 	}
 	// Interleaved stars are the harder shape.
 	pattern := strings.Repeat("*a", 32) + "X"
+	name = strings.Repeat("a", 128)
 	start := time.Now()
-	Match(pattern, strings.Repeat("a", 128))
+	if Match(pattern, name) {
+		t.Errorf("pattern %q should not match %q", pattern, name)
+	}
 	if d := time.Since(start); d > 50*time.Millisecond {
 		t.Errorf("Match with interleaved stars took %v, want well under 50ms", d)
+	}
+}
+
+// Question-mark-heavy patterns take the MatchSimple prefix walk rather than a
+// single deepMatchRune call, so they get their own before/after comparison.
+// Star counts stay low: the old matcher is exponential in them.
+func BenchmarkMatchSimpleQuestionMarks(b *testing.B) {
+	cases := []struct {
+		name    string
+		pattern string
+		text    string
+	}{
+		{"star-free", strings.Repeat("a?", 16), strings.Repeat("aa", 16)},
+		{"all-marks", strings.Repeat("?", 32), strings.Repeat("a", 16)},
+		{"leading-star", "*" + strings.Repeat("a?", 8), strings.Repeat("a", 24)},
+		{"no-mark", "arn:aws:s3:::*", "arn:aws:s3:::bucket/object"},
+	}
+	for _, c := range cases {
+		b.Run("new/"+c.name, func(b *testing.B) {
+			for i := 0; i < b.N; i++ {
+				_ = MatchSimple(c.pattern, c.text)
+			}
+		})
+		b.Run("old/"+c.name, func(b *testing.B) {
+			for i := 0; i < b.N; i++ {
+				_ = oldMatchSimple(c.pattern, c.text)
+			}
+		})
 	}
 }
 

@@ -55,8 +55,7 @@ func (statement Statement) IsAllowed(args Args) bool {
 }
 
 // buildRequestResource renders the resource string an Args names, in the form
-// ResourceSet.Match expects. Callers go through Args.requestResource, which
-// memoizes it.
+// ResourceSet.Match expects.
 func buildRequestResource(args *Args) string {
 	buf := smallBufPool.Get().(*bytes.Buffer)
 	defer smallBufPool.Put(buf)
@@ -75,7 +74,7 @@ func buildRequestResource(args *Args) string {
 
 // IsAllowedPtr - checks given policy args is allowed to continue the Rest API.
 func (statement Statement) IsAllowedPtr(args *Args) bool {
-	return statement.isAllowedFor(args, args.requestResource())
+	return statement.isAllowedFor(args, buildRequestResource(args))
 }
 
 // isAllowedFor is IsAllowedPtr with the request resource string supplied by the

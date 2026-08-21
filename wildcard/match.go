@@ -18,7 +18,6 @@
 package wildcard
 
 import (
-	"cmp"
 	"strings"
 )
 
@@ -39,9 +38,22 @@ func MatchSimple(pattern, name string) bool {
 	// Reaching a '?' with name already exhausted succeeds, and succeeds for
 	// the whole pattern, so the pattern also matches whenever any prefix of it
 	// ending at a '?' consumes name exactly.
+	if !strings.ContainsRune(pattern, '?') {
+		return false
+	}
+	// Every byte that is not a '*' consumes one byte of name, so once a prefix
+	// needs more of them than name has, that prefix and every longer one is
+	// too long to consume name exactly and the walk can stop.
+	lits := 0
 	for i := range len(pattern) {
 		if pattern[i] == '?' && deepMatchRune(name, pattern[:i]) {
 			return true
+		}
+		if pattern[i] != '*' {
+			lits++
+			if lits > len(name) {
+				break
+			}
 		}
 	}
 	return false
@@ -64,7 +76,7 @@ func Match(pattern, name string) (matched bool) {
 
 // Has returns true if the input pattern has a wildcard (pattern).
 func Has(pattern string) bool {
-	return cmp.Or(strings.Contains(pattern, "*"), strings.Contains(pattern, "?"))
+	return strings.ContainsAny(pattern, "*?")
 }
 
 // deepMatchRune walks pattern against str one byte at a time, remembering only

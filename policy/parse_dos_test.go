@@ -19,6 +19,7 @@ package policy
 
 import (
 	"bytes"
+	"fmt"
 	"strings"
 	"testing"
 	"time"
@@ -34,23 +35,31 @@ func TestParseStarHeavyActionIsBounded(t *testing.T) {
 	for _, stars := range []int{9, 16, 64} {
 		action := strings.Repeat("*", stars) + "x"
 
-		t.Run("iam", func(t *testing.T) {
+		t.Run(fmt.Sprintf("iam-%d-stars", stars), func(t *testing.T) {
 			doc := `{"Version":"2012-10-17","Statement":[{"Effect":"Allow","Action":["` +
 				action + `"],"Resource":["arn:aws:s3:::b/*"]}]}`
 			start := time.Now()
-			ParseConfig(bytes.NewReader([]byte(doc)))
+			_, err := ParseConfig(bytes.NewReader([]byte(doc)))
 			if d := time.Since(start); d > budget {
-				t.Errorf("ParseConfig with %d stars took %v, want under %v", stars, d, budget)
+				t.Errorf("ParseConfig took %v, want under %v", d, budget)
+			}
+			// The action names nothing supported, so bounding the cost must not
+			// have come at the price of accepting it.
+			if err == nil {
+				t.Errorf("ParseConfig accepted unsupported action %q", action)
 			}
 		})
 
-		t.Run("bucket", func(t *testing.T) {
+		t.Run(fmt.Sprintf("bucket-%d-stars", stars), func(t *testing.T) {
 			doc := `{"Version":"2012-10-17","Statement":[{"Effect":"Allow","Principal":{"AWS":["*"]},"Action":["` +
 				action + `"],"Resource":["arn:aws:s3:::b/*"]}]}`
 			start := time.Now()
-			ParseBucketPolicyConfig(bytes.NewReader([]byte(doc)), "b")
+			_, err := ParseBucketPolicyConfig(bytes.NewReader([]byte(doc)), "b")
 			if d := time.Since(start); d > budget {
-				t.Errorf("ParseBucketPolicyConfig with %d stars took %v, want under %v", stars, d, budget)
+				t.Errorf("ParseBucketPolicyConfig took %v, want under %v", d, budget)
+			}
+			if err == nil {
+				t.Errorf("ParseBucketPolicyConfig accepted unsupported action %q", action)
 			}
 		})
 	}

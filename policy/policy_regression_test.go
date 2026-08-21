@@ -63,10 +63,24 @@ func TestDropDuplicateStatementsKeepsNotResources(t *testing.T) {
 	}
 }
 
-// Policy.hasDeny is only set by updateActionIndex, which a policy built as a
-// struct literal never reaches. The built-in readonly policies are built that
-// way and do carry a Deny, so HasDenyStatement must not trust the field alone.
+// Policy.hasDeny is only set by updateActionIndex, which a policy assembled as
+// a struct literal outside this package never reaches, so HasDenyStatement must
+// not trust the field alone.
 func TestHasDenyStatementOnStructLiteralPolicy(t *testing.T) {
+	// A literal built here has been through no parse path at all, so it pins
+	// the behavior down regardless of what the canned policies contain.
+	literal := Policy{
+		Version: DefaultVersion,
+		Statements: []Statement{
+			NewStatement("", Deny, NewActionSet(GetObjectAction),
+				NewResourceSet(NewResource("*")), condition.NewFunctions()),
+		},
+	}
+	if !literal.HasDenyStatement() {
+		t.Error("struct literal policy carries a Deny but HasDenyStatement() reports false")
+	}
+
+	checked := 0
 	for _, name := range []string{"readonly", "consolereadonly", "diagnostics"} {
 		for _, dp := range DefaultPolicies {
 			if dp.Name != name {
@@ -80,10 +94,16 @@ func TestHasDenyStatementOnStructLiteralPolicy(t *testing.T) {
 				}
 			}
 			t.Logf("%-16s actual Deny statement=%v  HasDenyStatement()=%v", name, hasDenyStmt, p.HasDenyStatement())
-			if hasDenyStmt && !p.HasDenyStatement() {
-				t.Errorf("%s: carries a Deny but HasDenyStatement() reports false", name)
+			if hasDenyStmt {
+				checked++
+				if !p.HasDenyStatement() {
+					t.Errorf("%s: carries a Deny but HasDenyStatement() reports false", name)
+				}
 			}
 		}
+	}
+	if checked == 0 {
+		t.Error("none of the named canned policies carries a Deny; this test checked nothing")
 	}
 }
 
