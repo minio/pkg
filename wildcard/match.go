@@ -41,12 +41,20 @@ func MatchSimple(pattern, name string) bool {
 	if !strings.ContainsRune(pattern, '?') {
 		return false
 	}
+	// A prefix holding no '*' consumes exactly one byte of name per byte of
+	// pattern, so only the prefix as long as name can consume it: a star-free
+	// pattern costs one deepMatchRune call however many '?' it carries.
+	firstStar := strings.IndexByte(pattern, '*')
+	if firstStar < 0 {
+		firstStar = len(pattern)
+	}
 	// Every byte that is not a '*' consumes one byte of name, so once a prefix
 	// needs more of them than name has, that prefix and every longer one is
 	// too long to consume name exactly and the walk can stop.
 	lits := 0
 	for i := range len(pattern) {
-		if pattern[i] == '?' && deepMatchRune(name, pattern[:i]) {
+		if pattern[i] == '?' && (i > firstStar || i == len(name)) &&
+			deepMatchRune(name, pattern[:i]) {
 			return true
 		}
 		if pattern[i] != '*' {

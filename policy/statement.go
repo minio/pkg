@@ -54,7 +54,7 @@ func (statement Statement) IsAllowed(args Args) bool {
 	return statement.IsAllowedPtr(&args)
 }
 
-// buildRequestResource renders the resource string an Args names, in the form
+// buildRequestResource renders the resource string an args names, in the form
 // ResourceSet.Match expects.
 func buildRequestResource(args *Args) string {
 	buf := smallBufPool.Get().(*bytes.Buffer)
