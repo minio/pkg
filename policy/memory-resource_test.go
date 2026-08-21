@@ -790,8 +790,13 @@ func TestStarPrefixedResourceParses(t *testing.T) {
 // sibling sharing that prefix under memory:ListAgents, and an operator writing
 // both actions against one resource would leak names without any cue.
 func TestMemoryEnumerationConditionKeys(t *testing.T) {
-	listActions := []string{"memory:ListAgents", "memory:ListSecrets", "memory:ListCortexes"}
-	pointActions := []string{"memory:GetAgent", "memory:PutAgent", "memory:DeleteAgent", "memory:GetSecret"}
+	// memory:Search carries a query like a list does, and is the case that most
+	// needs the key: it returns object CONTENT, so a grant that cannot be scoped
+	// to a prefix is a grant over every object in the cortex.
+	listActions := []string{
+		"memory:ListAgents", "memory:ListSecrets", "memory:ListCortexes", "memory:Search",
+	}
+	pointActions := []string{"memory:GetAgent", "memory:PutAgent", "memory:DeleteAgent", "memory:GetSecret", "memory:GetObjectBio"}
 
 	for _, action := range listActions {
 		keys, ok := MemoryActionConditionKeyMap[Action(action)]
@@ -805,21 +810,26 @@ func TestMemoryEnumerationConditionKeys(t *testing.T) {
 		}
 	}
 
-	// A read or a write has no query to constrain. Accepting the key there would
-	// let a policy look scoped while constraining nothing.
+	// A read or a write has no query to constrain. Accepting either key there
+	// would let a policy look scoped while constraining nothing -- both are
+	// checked, since a rejection test that covers one key cannot show the other
+	// was not quietly admitted.
 	for _, action := range pointActions {
 		keys := MemoryActionConditionKeyMap[Action(action)]
-		if keys.Match(condition.MemoryPrefix.ToKey()) {
-			t.Errorf("%s must not accept %s", action, condition.MemoryPrefix)
+		for _, key := range []condition.KeyName{condition.MemoryPrefix, condition.MemoryMaxKeys} {
+			if keys.Match(key.ToKey()) {
+				t.Errorf("%s must not accept %s", action, key)
+			}
 		}
 	}
 
-	// A whole policy using the key must validate.
+	// A whole policy using the key must validate -- written against
+	// memory:Search, the shape a workspace-scoped credential needs.
 	const doc = `{"Version":"2012-10-17","Statement":[{
 		"Effect":"Allow",
-		"Action":["memory:ListAgents"],
+		"Action":["memory:Search"],
 		"Resource":["arn:minio:memory:::cortex"],
-		"Condition":{"StringLike":{"memory:prefix":["alpha*"]}}}]}`
+		"Condition":{"StringLike":{"memory:prefix":["workspaces/alice/app-7/*"]}}}]}`
 	var p Policy
 	if err := json.Unmarshal([]byte(doc), &p); err != nil {
 		t.Fatalf("unmarshal: %v", err)

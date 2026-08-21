@@ -109,14 +109,22 @@ func createMemoryActionConditionKeyMap() map[Action]condition.KeySet {
 		memoryActionConditionKeyMap[Action(act)] = condition.NewKeySet(commonKeys...)
 	}
 
-	// Enumeration keys apply only to the list actions. A read or a write names
-	// one record in its resource and has no query to constrain, so accepting
-	// them elsewhere would let a policy look effective while constraining
-	// nothing.
+	// Enumeration keys apply only to the actions that carry a query. A read or a
+	// write names one record in its resource and has nothing to constrain, so
+	// accepting them elsewhere would let a policy look effective while
+	// constraining nothing.
+	//
+	// Search belongs here for the same reason a list does, and needs it more: it
+	// reads the CONTENT of every object under its prefix, so without the key the
+	// grant has two states -- no search, or search over the whole cortex. Its
+	// resource cannot carry the prefix either, by the argument above: one ARN
+	// would mean a single record under memory:GetObjectBio and every object
+	// sharing that prefix under memory:Search.
 	for _, act := range []MemoryAction{
 		MemoryListSecretsAction,
 		MemoryListAgentsAction,
 		MemoryListCortexesAction,
+		MemorySearchAction,
 		AllMemoryActions,
 	} {
 		memoryActionConditionKeyMap[Action(act)] = condition.NewKeySet(
