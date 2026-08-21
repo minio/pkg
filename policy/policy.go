@@ -569,12 +569,9 @@ func (iamp *Policy) Reindex() {
 	iamp.updateActionIndex()
 }
 
-// updateActionIndex with latest statements()
-// maintains a reverse map of Action -> []Statements
-// for faster lookup and short-circuit.
-//
-// Everything it derives is discarded first, so calling it a second time
-// replaces the previous result rather than accumulating onto it.
+// updateActionIndex fills the Action -> []Statements reverse lookup by
+// appending, so it discards the derived state first: a repeat call has to
+// replace the previous result rather than accumulate onto it.
 func (iamp *Policy) updateActionIndex() {
 	iamp.actionStatementIndex = nil
 	iamp.hasDeny = false
