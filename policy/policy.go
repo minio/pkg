@@ -117,21 +117,29 @@ func (a Args) GetRoleArn() string {
 }
 
 // Policy - iam bucket iamp.
+//
+// The fields below Statements are derived from it by updateActionIndex, so
+// changing Statements on a parsed policy leaves them stale. Call Reindex after
+// doing so.
 type Policy struct {
-	ID                   ID `json:"ID,omitempty"`
-	Version              string
-	Statements           []Statement `json:"Statement"`
+	ID         ID `json:"ID,omitempty"`
+	Version    string
+	Statements []Statement `json:"Statement"`
+
+	// Statement indexes keyed by the actions they name literally, so a request
+	// action can skip statements that cannot match it. Decide falls back to the
+	// full walk when the highest index no longer addresses Statements.
 	actionStatementIndex map[Action][]int
-	hasDeny              bool
+
+	// Whether any statement carries a Deny. See HasDenyStatement for why this
+	// is only a shortcut.
+	hasDeny bool
 }
 
-// HasDenyStatement returns if the policy has a deny statement.
-//
-// hasDeny is only populated by updateActionIndex, which every policy this
-// package builds goes through, but which a policy a caller assembles as a
-// struct literal never reaches. So the field is a shortcut and the statements
-// stay the authority: trusting the field alone would silently under-report a
-// Deny on such a policy.
+// HasDenyStatement returns if the policy has a deny statement. hasDeny is only
+// a shortcut, filled in by updateActionIndex; the statements stay authoritative
+// because a policy assembled directly never reaches that path, and trusting the
+// field alone would silently under-report its Deny.
 func (iamp *Policy) HasDenyStatement() bool {
 	if iamp.hasDeny {
 		return true
@@ -552,10 +560,24 @@ func (iamp Policy) ValidateStrict() error {
 	return nil
 }
 
+// Reindex reclassifies the statements and rebuilds the action index. Call it
+// after changing Statements on a policy that has already been parsed: the
+// derived state is what decides whether a statement's Resources are matched at
+// all, so leaving it stale can skip that check. It also moves a policy
+// assembled by hand onto the indexed evaluation path.
+func (iamp *Policy) Reindex() {
+	iamp.updateActionIndex()
+}
+
 // updateActionIndex with latest statements()
 // maintains a reverse map of Action -> []Statements
 // for faster lookup and short-circuit.
+//
+// Everything it derives is discarded first, so calling it a second time
+// replaces the previous result rather than accumulating onto it.
 func (iamp *Policy) updateActionIndex() {
+	iamp.actionStatementIndex = nil
+	iamp.hasDeny = false
 	for i := range iamp.Statements {
 		stmt := &iamp.Statements[i]
 		stmt.class = stmt.computeClass()

@@ -41,6 +41,12 @@ type Statement struct {
 	// means "not classified yet" — classify() then derives it on the spot, so a
 	// statement built by a path that does not populate it is slower, never
 	// wrong. Statement.Clone deliberately leaves it zero.
+	//
+	// Replacing Actions on a statement already held by a parsed policy leaves
+	// this stale, and the namespace decides whether Resources are matched at
+	// all, so a stale one can skip that check. Call Policy.Reindex after such a
+	// change; recomputing per evaluation instead costs 60-160% on the
+	// authorization path, which is why the value is cached at all.
 	class statementClass
 }
 
@@ -54,8 +60,9 @@ func (statement Statement) IsAllowed(args Args) bool {
 	return statement.IsAllowedPtr(&args)
 }
 
-// buildRequestResource renders the resource string an args names, in the form
-// ResourceSet.Match expects.
+// buildRequestResource is called once per request and its result passed down,
+// because every statement of every policy matches against the same string and
+// rebuilding it per statement dominated allocation on the authorization path.
 func buildRequestResource(args *Args) string {
 	buf := smallBufPool.Get().(*bytes.Buffer)
 	defer smallBufPool.Put(buf)

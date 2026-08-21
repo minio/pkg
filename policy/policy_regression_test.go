@@ -18,7 +18,10 @@
 package policy
 
 import (
+	"bytes"
 	"fmt"
+	"maps"
+	"slices"
 	"testing"
 
 	"github.com/minio/pkg/v3/policy/condition"
@@ -104,6 +107,65 @@ func TestHasDenyStatementOnStructLiteralPolicy(t *testing.T) {
 	}
 	if checked == 0 {
 		t.Error("none of the named canned policies carries a Deny; this test checked nothing")
+	}
+}
+
+// updateActionIndex appended to the action index and only ever set hasDeny to
+// true, so a second pass accumulated onto the first instead of replacing it.
+// Reindex is the exported way to re-derive that state, so repeating it has to
+// land on the same answer as deriving it once.
+func TestReindexIsIdempotent(t *testing.T) {
+	doc := `{"Version":"2012-10-17","Statement":[
+		{"Effect":"Allow","Action":["s3:GetObject"],"Resource":["arn:aws:s3:::b/*"]},
+		{"Effect":"Deny","Action":["s3:PutObject"],"Resource":["arn:aws:s3:::b/*"]}]}`
+	p, err := ParseConfig(bytes.NewReader([]byte(doc)))
+	if err != nil {
+		t.Fatal(err)
+	}
+	want := maps.Clone(p.actionStatementIndex)
+	for i := range 3 {
+		p.Reindex()
+		if !maps.EqualFunc(p.actionStatementIndex, want, slices.Equal) {
+			t.Fatalf("Reindex %d: index = %v, want %v", i+1, p.actionStatementIndex, want)
+		}
+		if !p.hasDeny {
+			t.Fatalf("Reindex %d: hasDeny cleared on a policy that carries a Deny", i+1)
+		}
+	}
+
+	// Dropping the Deny has to clear the flag, not leave it latched on.
+	p.Statements = p.Statements[:1]
+	p.Reindex()
+	if p.hasDeny {
+		t.Error("hasDeny still set after the only Deny statement was removed")
+	}
+	if p.HasDenyStatement() {
+		t.Error("HasDenyStatement() true after the only Deny statement was removed")
+	}
+}
+
+// Replacing Actions on a parsed policy leaves the cached statement class
+// describing the old namespace, and that class decides whether Resources are
+// matched at all -- an admin statement skips the check. So a statement switched
+// from an admin action to an S3 one must stop being resource-exempt once
+// Reindex has run. Without the Reindex call below, the first check fails.
+func TestReindexRefreshesStatementClassAfterActionChange(t *testing.T) {
+	doc := `{"Version":"2012-10-17","Statement":[{"Effect":"Allow","Action":["admin:ServerInfo"],"Resource":[]}]}`
+	p, err := ParseConfig(bytes.NewReader([]byte(doc)))
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	// An S3 action confined to bucket "other" must not reach bucket "b".
+	p.Statements[0].Actions = NewActionSet(GetObjectAction)
+	p.Statements[0].Resources = NewResourceSet(NewResource("other/*"))
+	p.Reindex()
+
+	if p.IsAllowed(Args{Action: GetObjectAction, BucketName: "b", ObjectName: "o"}) {
+		t.Error("GetObject on b/o allowed by a statement scoped to other/*: stale admin class skipped resource matching")
+	}
+	if !p.IsAllowed(Args{Action: GetObjectAction, BucketName: "other", ObjectName: "o"}) {
+		t.Error("GetObject on other/o denied by a statement scoped to other/*")
 	}
 }
 

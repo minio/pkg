@@ -32,7 +32,7 @@ const (
 // a policy carries a Deny. Do it once here instead of on every evaluation.
 func init() {
 	for i := range DefaultPolicies {
-		DefaultPolicies[i].Definition.updateActionIndex()
+		DefaultPolicies[i].Definition.Reindex()
 	}
 }
 
