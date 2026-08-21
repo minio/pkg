@@ -496,3 +496,10 @@ func createTableActionConditionKeyMap() map[Action]condition.KeySet {
 
 // tableActionConditionKeyMap - holds mapping of supported condition key for a table action.
 var tableActionConditionKeyMap = createTableActionConditionKeyMap()
+
+// TableActionConditionKeys returns the condition keys action supports. The keys
+// describe the scope an action can be narrowed to, so callers can tell a
+// namespace- or table-scoped action from a warehouse-level one.
+func TableActionConditionKeys(action TableAction) condition.KeySet {
+	return tableActionConditionKeyMap[Action(action)]
+}

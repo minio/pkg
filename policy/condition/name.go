@@ -56,6 +56,15 @@ const (
 	forAnyValue  = "ForAnyValue"
 )
 
+// IsAllowList reports whether a condition name constrains its key to a set of
+// permitted values, as StringEquals and StringLike do. A caller deriving which
+// resources a policy reaches can read those values as the reachable set; every
+// other form (a negation, a numeric or date comparison) excludes or bounds
+// rather than enumerating, so nothing can be derived from it.
+func IsAllowList(name string) bool {
+	return name == stringEquals || name == stringLike
+}
+
 // Names - list of all supported condition names.
 var Names = map[string]struct{}{
 	stringEquals:               {},
