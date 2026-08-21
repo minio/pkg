@@ -117,17 +117,39 @@ func (a Args) GetRoleArn() string {
 }
 
 // Policy - iam bucket iamp.
+//
+// The fields below Statements are derived from it by updateActionIndex, so
+// changing Statements on a parsed policy leaves them stale. Call Reindex after
+// doing so.
 type Policy struct {
-	ID                   ID `json:"ID,omitempty"`
-	Version              string
-	Statements           []Statement `json:"Statement"`
+	ID         ID `json:"ID,omitempty"`
+	Version    string
+	Statements []Statement `json:"Statement"`
+
+	// Statement indexes keyed by the actions they name literally, so a request
+	// action can skip statements that cannot match it. Decide falls back to the
+	// full walk when the highest index no longer addresses Statements.
 	actionStatementIndex map[Action][]int
-	hasDeny              bool
+
+	// Whether any statement carries a Deny. See HasDenyStatement for why this
+	// is only a shortcut.
+	hasDeny bool
 }
 
-// HasDenyStatement returns if the policy has a deny statement.
+// HasDenyStatement returns if the policy has a deny statement. hasDeny is only
+// a shortcut, filled in by updateActionIndex; the statements stay authoritative
+// because a policy assembled directly never reaches that path, and trusting the
+// field alone would silently under-report its Deny.
 func (iamp *Policy) HasDenyStatement() bool {
-	return iamp.hasDeny
+	if iamp.hasDeny {
+		return true
+	}
+	for i := range iamp.Statements {
+		if iamp.Statements[i].Effect == Deny {
+			return true
+		}
+	}
+	return false
 }
 
 // MatchResource matches resource with match resource patterns
@@ -187,9 +209,10 @@ func (iamp Policy) IsAllowedActions(bucketName, objectName string, conditionValu
 //
 // This is currently the fastest implementation for our basic benchmark.
 func IsAllowedSerial(policies []Policy, args Args) bool {
+	resource := buildRequestResource(&args)
 	gotAllow := false
 	for _, policy := range policies {
-		res := policy.Decide(&args)
+		res := policy.decide(&args, resource)
 		if res == DenyDecision {
 			return false
 		}
@@ -232,6 +255,7 @@ func IsAllowedPar(policies []Policy, args Args) bool {
 	close(jobs)
 
 	resultCh := make(chan Decision, len(policies))
+	resource := buildRequestResource(&args)
 
 	var wg sync.WaitGroup
 	wg.Add(numWorkers)
@@ -247,8 +271,11 @@ func IsAllowedPar(policies []Policy, args Args) bool {
 
 				maxJ := min(i+numPoliciesPerWorker, len(policies))
 				res := NoDecision
+				// Each worker evaluates against its own Args value, so nothing
+				// on the evaluation path is shared between goroutines.
+				a := args
 				for j := i; j < maxJ; j++ {
-					decision := policies[j].Decide(&args)
+					decision := policies[j].decide(&a, resource)
 					if decision == DenyDecision {
 						res = DenyDecision
 						break
@@ -298,9 +325,17 @@ const (
 // statement explicitly allows or denies the operation in the Args, it returns
 // `noDecision`. It is upto the caller to handle such cases.
 func (iamp *Policy) Decide(args *Args) Decision {
+	return iamp.decide(args, buildRequestResource(args))
+}
+
+// decide is Decide with the request resource string supplied by the caller.
+// Every statement of every policy needs the same string, so a walk over a set
+// of policies builds it once instead of once per statement.
+func (iamp *Policy) decide(args *Args, resource string) Decision {
 	// Check all deny statements. If any one statement denies, return false.
-	for _, statement := range iamp.Statements {
-		if statement.Effect == Deny && !statement.IsAllowedPtr(args) {
+	for i := range iamp.Statements {
+		statement := &iamp.Statements[i]
+		if statement.Effect == Deny && !statement.isAllowedFor(args, resource) {
 			return DenyDecision
 		}
 	}
@@ -320,19 +355,34 @@ func (iamp *Policy) Decide(args *Args) Decision {
 	}
 
 	// Check all allow statements. If any one statement allows, return true.
+	// The index only covers statements that name args.Action literally, so the
+	// full walk still has to happen; tried records what the index already
+	// evaluated so the walk does not evaluate it a second time.
+	var tried []int
 	if len(iamp.actionStatementIndex) > 0 {
-		if indexes, ok := iamp.actionStatementIndex[args.Action]; ok {
+		// Statements is exported, so a caller can shrink it after the index was
+		// built. Rather than index out of bounds - or worse, evaluate the wrong
+		// statement - fall back to the plain walk when the index is stale.
+		// Indexes are recorded in ascending order, so the last one bounds them all.
+		if indexes, ok := iamp.actionStatementIndex[args.Action]; ok &&
+			len(indexes) > 0 && indexes[len(indexes)-1] < len(iamp.Statements) {
 			for _, index := range indexes {
-				statement := iamp.Statements[index]
-				if statement.Effect == Allow && statement.IsAllowedPtr(args) {
+				statement := &iamp.Statements[index]
+				if statement.Effect == Allow && statement.isAllowedFor(args, resource) {
 					return AllowDecision
 				}
 			}
+			tried = indexes
 		}
 	}
 
-	for _, statement := range iamp.Statements {
-		if statement.Effect == Allow && statement.IsAllowedPtr(args) {
+	for i := range iamp.Statements {
+		if len(tried) > 0 && tried[0] == i {
+			tried = tried[1:]
+			continue
+		}
+		statement := &iamp.Statements[i]
+		if statement.Effect == Allow && statement.isAllowedFor(args, resource) {
 			return AllowDecision
 		}
 	}
@@ -510,12 +560,24 @@ func (iamp Policy) ValidateStrict() error {
 	return nil
 }
 
-// updateActionIndex with latest statements()
-// maintains a reverse map of Action -> []Statements
-// for faster lookup and short-circuit.
+// Reindex reclassifies the statements and rebuilds the action index. Call it
+// after changing Statements on a policy that has already been parsed: the
+// derived state is what decides whether a statement's Resources are matched at
+// all, so leaving it stale can skip that check. It also moves a policy
+// assembled by hand onto the indexed evaluation path.
+func (iamp *Policy) Reindex() {
+	iamp.updateActionIndex()
+}
+
+// updateActionIndex fills the Action -> []Statements reverse lookup by
+// appending, so it discards the derived state first: a repeat call has to
+// replace the previous result rather than accumulate onto it.
 func (iamp *Policy) updateActionIndex() {
+	iamp.actionStatementIndex = nil
+	iamp.hasDeny = false
 	for i := range iamp.Statements {
 		stmt := &iamp.Statements[i]
+		stmt.class = stmt.computeClass()
 		if stmt.Effect == Deny {
 			iamp.hasDeny = true
 			continue

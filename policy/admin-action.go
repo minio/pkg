@@ -18,6 +18,8 @@
 package policy
 
 import (
+	"strings"
+
 	"github.com/minio/pkg/v3/policy/condition"
 	"github.com/minio/pkg/v3/wildcard"
 )
@@ -451,6 +453,13 @@ var AdminActionsWithResource = map[AdminAction]struct{}{
 
 // HasResource reports whether this admin action operates on a bucket resource.
 func (action AdminAction) HasResource() bool {
+	if _, ok := AdminActionsWithResource[action]; ok {
+		return true
+	}
+	if !wildcard.Has(string(action)) {
+		// A literal action can only match by being in the set.
+		return false
+	}
 	for a := range AdminActionsWithResource {
 		if action.Match(a) {
 			return true
@@ -465,13 +474,45 @@ func (action AdminAction) Match(a AdminAction) bool {
 }
 
 // IsValid - checks if action is valid or not.
+//
+// The receiver is the pattern, so this asks whether the pattern matches any
+// supported admin action. Statement.isAdmin calls it for every action of every
+// statement it evaluates, so the two cases that can be answered without
+// touching SupportedAdminActions are answered first: a literal action can only
+// match by being in the set, and a pattern is only worth scanning when its
+// literal head is prefix-compatible with the admin namespace.
 func (action AdminAction) IsValid() bool {
+	if _, ok := SupportedAdminActions[action]; ok {
+		return true
+	}
+	s := string(action)
+	star := strings.IndexAny(s, "*?")
+	if star < 0 {
+		return false
+	}
+	if !canMatchPrefix(s[:star], adminActionPrefix) {
+		return false
+	}
 	for supAction := range SupportedAdminActions {
 		if action.Match(supAction) {
 			return true
 		}
 	}
 	return false
+}
+
+// adminActionPrefix is the namespace every supported admin action carries.
+const adminActionPrefix = "admin:"
+
+// canMatchPrefix reports whether a wildcard pattern whose literal head (the
+// part before its first metacharacter) is head could match any string starting
+// with prefix. Everything up to the first metacharacter has to match literally,
+// so head and prefix must agree wherever they overlap.
+func canMatchPrefix(head, prefix string) bool {
+	if len(head) > len(prefix) {
+		return strings.HasPrefix(head, prefix)
+	}
+	return strings.HasPrefix(prefix, head)
 }
 
 func createAdminActionConditionKeyMap() map[Action]condition.KeySet {

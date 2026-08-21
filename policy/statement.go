@@ -36,6 +36,18 @@ type Statement struct {
 	Resources    ResourceSet         `json:"Resource,omitempty"`
 	NotResources ResourceSet         `json:"NotResource,omitempty"`
 	Conditions   condition.Functions `json:"Condition,omitempty"`
+
+	// Namespace classification, filled in by Policy.updateActionIndex. Zero
+	// means "not classified yet" — classify() then derives it on the spot, so a
+	// statement built by a path that does not populate it is slower, never
+	// wrong. Statement.Clone deliberately leaves it zero.
+	//
+	// Replacing Actions on a statement already held by a parsed policy leaves
+	// this stale, and the namespace decides whether Resources are matched at
+	// all, so a stale one can skip that check. Call Policy.Reindex after such a
+	// change; recomputing per evaluation instead costs 60-160% on the
+	// authorization path, which is why the value is cached at all.
+	class statementClass
 }
 
 // smallBufPool should always return a non-nil *bytes.Buffer
@@ -48,28 +60,42 @@ func (statement Statement) IsAllowed(args Args) bool {
 	return statement.IsAllowedPtr(&args)
 }
 
+// buildRequestResource is called once per request and its result passed down,
+// because every statement of every policy matches against the same string and
+// rebuilding it per statement dominated allocation on the authorization path.
+func buildRequestResource(args *Args) string {
+	buf := smallBufPool.Get().(*bytes.Buffer)
+	defer smallBufPool.Put(buf)
+	buf.Reset()
+	buf.WriteString(args.BucketName)
+	if args.ObjectName != "" {
+		if !strings.HasPrefix(args.ObjectName, "/") {
+			buf.WriteByte('/')
+		}
+		buf.WriteString(args.ObjectName)
+	} else {
+		buf.WriteByte('/')
+	}
+	return buf.String()
+}
+
 // IsAllowedPtr - checks given policy args is allowed to continue the Rest API.
 func (statement Statement) IsAllowedPtr(args *Args) bool {
+	return statement.isAllowedFor(args, buildRequestResource(args))
+}
+
+// isAllowedFor is IsAllowedPtr with the request resource string supplied by the
+// caller.
+func (statement Statement) isAllowedFor(args *Args, resource string) bool {
 	check := func() bool {
 		if (!statement.Actions.Match(args.Action) && !statement.Actions.IsEmpty()) ||
 			statement.NotActions.Match(args.Action) {
 			return false
 		}
 
-		resource := smallBufPool.Get().(*bytes.Buffer)
-		defer smallBufPool.Put(resource)
-		resource.Reset()
-		resource.WriteString(args.BucketName)
-		if args.ObjectName != "" {
-			if !strings.HasPrefix(args.ObjectName, "/") {
-				resource.WriteByte('/')
-			}
-			resource.WriteString(args.ObjectName)
-		} else {
-			resource.WriteByte('/')
-		}
+		class := statement.classify()
 
-		if statement.isTable() && !TableAction(args.Action).IsValid() {
+		if class.has(classTable) && !TableAction(args.Action).IsValid() {
 			// When a tables policy statement (for example
 			//   "Action":   ["s3tables:GetTableData"],
 			//   "Resource": ["arn:aws:s3tables:::bucket/wh/table/uuid"]
@@ -87,7 +113,7 @@ func (statement Statement) IsAllowedPtr(args *Args) bool {
 			// s3tables:GetTableData (or similar) is granted, normalize the
 			// S3 data-path resource into the canonical tables form before
 			// running the usual resource match.
-			if !isTableResourceString(resource.String()) {
+			if !isTableResourceString(resource) {
 				if args.BucketName == "" || args.ObjectName == "" {
 					return false
 				}
@@ -95,19 +121,15 @@ func (statement Statement) IsAllowedPtr(args *Args) bool {
 				if idx := strings.IndexByte(objectName, '/'); idx >= 0 {
 					objectName = objectName[:idx]
 				}
-				resource.Reset()
-				resource.WriteString("bucket/")
-				resource.WriteString(args.BucketName)
-				resource.WriteString("/table/")
-				resource.WriteString(objectName)
-				if !isTableResourceString(resource.String()) {
+				resource = "bucket/" + args.BucketName + "/table/" + objectName
+				if !isTableResourceString(resource) {
 					return false
 				}
 			}
 		}
 
-		if statement.isKMS() {
-			if resource.Len() == 1 && resource.String() == "/" || len(statement.Resources) == 0 {
+		if class.has(classKMS) {
+			if resource == "/" || len(statement.Resources) == 0 {
 				// In previous MinIO versions, KMS statements ignored Resources, so if len(statement.Resources) == 0,
 				// allow backward compatibility by not trying to Match.
 
@@ -122,13 +144,13 @@ func (statement Statement) IsAllowedPtr(args *Args) bool {
 		// skip resource matching entirely. For the small set of
 		// bucket-scoped admin actions (e.g. SetBucketQuota),
 		// resource matching is enforced when Resources are present.
-		ignoreResourceMatch := statement.isSTS() || (statement.isAdmin() && !statement.hasAdminResource())
+		ignoreResourceMatch := class.has(classSTS) || (class.has(classAdmin) && !class.has(classAdminResource))
 
-		if !ignoreResourceMatch && len(statement.Resources) > 0 && !statement.Resources.Match(resource.String(), args.ConditionValues) {
+		if !ignoreResourceMatch && len(statement.Resources) > 0 && !statement.Resources.Match(resource, args.ConditionValues) {
 			return false
 		}
 
-		if !ignoreResourceMatch && len(statement.NotResources) > 0 && statement.NotResources.Match(resource.String(), args.ConditionValues) {
+		if !ignoreResourceMatch && len(statement.NotResources) > 0 && statement.NotResources.Match(resource, args.ConditionValues) {
 			return false
 		}
 
@@ -175,6 +197,61 @@ func (statement Statement) validateActionTypes() error {
 		return Errorf("mixing action types in the same statement is not allowed")
 	}
 	return nil
+}
+
+// statementClass records which action namespaces a statement's actions belong
+// to. Statements are validated to carry actions from a single namespace, but
+// this is a bit set so that a policy predating that rule classifies exactly as
+// the individual predicates did.
+type statementClass uint8
+
+const (
+	classAdmin statementClass = 1 << iota
+	classSTS
+	classKMS
+	classTable
+	// classAdminResource marks an admin action that is scoped to a bucket.
+	classAdminResource
+	// classKnown distinguishes a computed classification from the zero value.
+	// A plain S3 statement belongs to none of the namespaces above, so without
+	// it "no namespace" and "not computed" would be the same value.
+	classKnown
+)
+
+func (c statementClass) has(f statementClass) bool { return c&f != 0 }
+
+// classify reports the statement's namespaces, using the value cached at parse
+// time when there is one.
+func (statement Statement) classify() statementClass {
+	if statement.class != 0 {
+		return statement.class
+	}
+	return statement.computeClass()
+}
+
+// computeClass walks the action set once. The predicates it stands in for on
+// the authorization path each walked it separately, so a statement paid four
+// map iterator setups per evaluation to learn what one pass can tell it.
+func (statement Statement) computeClass() statementClass {
+	c := classKnown
+	for action := range statement.Actions {
+		if AdminAction(action).IsValid() {
+			c |= classAdmin
+		}
+		if AdminAction(action).HasResource() {
+			c |= classAdminResource
+		}
+		if STSAction(action).IsValid() {
+			c |= classSTS
+		}
+		if KMSAction(action).IsValid() {
+			c |= classKMS
+		}
+		if TableAction(action).IsValid() {
+			c |= classTable
+		}
+	}
+	return c
 }
 
 func (statement Statement) isAdmin() bool {
@@ -636,6 +713,11 @@ func (statement Statement) hash(seed uint64) [16]byte {
 	xorInt(&h, len(statement.Resources), seed+5)
 	for res := range statement.Resources {
 		xorTo(&h, xxh3.HashString128Seed(res.Pattern+res.Type.String(), seed+6))
+	}
+
+	xorInt(&h, len(statement.NotResources), seed+9)
+	for res := range statement.NotResources {
+		xorTo(&h, xxh3.HashString128Seed(res.Pattern+res.Type.String(), seed+10))
 	}
 
 	xorInt(&h, len(statement.Conditions), seed+7)
