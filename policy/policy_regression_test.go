@@ -83,30 +83,32 @@ func TestHasDenyStatementOnStructLiteralPolicy(t *testing.T) {
 		t.Error("struct literal policy carries a Deny but HasDenyStatement() reports false")
 	}
 
-	checked := 0
-	for _, name := range []string{"readonly", "consolereadonly", "diagnostics"} {
-		for _, dp := range DefaultPolicies {
-			if dp.Name != name {
-				continue
-			}
-			p := dp.Definition
-			hasDenyStmt := false
-			for _, s := range p.Statements {
-				if s.Effect == Deny {
-					hasDenyStmt = true
-				}
-			}
-			t.Logf("%-16s actual Deny statement=%v  HasDenyStatement()=%v", name, hasDenyStmt, p.HasDenyStatement())
-			if hasDenyStmt {
-				checked++
-				if !p.HasDenyStatement() {
-					t.Errorf("%s: carries a Deny but HasDenyStatement() reports false", name)
-				}
-			}
-		}
+	// A Deny buried behind an Allow still has to be found, since the field the
+	// naive implementation trusted is only ever set by the parse path.
+	mixed := Policy{
+		Version: DefaultVersion,
+		Statements: []Statement{
+			NewStatement("", Allow, NewActionSet(GetObjectAction),
+				NewResourceSet(NewResource("*")), condition.NewFunctions()),
+			NewStatement("", Deny, NewActionSet(Action(CreateUserAdminAction)),
+				NewResourceSet(NewResource("*")), condition.NewFunctions()),
+		},
 	}
-	if checked == 0 {
-		t.Error("none of the named canned policies carries a Deny; this test checked nothing")
+	if !mixed.HasDenyStatement() {
+		t.Error("struct literal policy with a trailing Deny but HasDenyStatement() reports false")
+	}
+
+	// The negative case matters just as much: reporting a Deny that is not
+	// there would send callers down the slow evaluation path for every policy.
+	allowOnly := Policy{
+		Version: DefaultVersion,
+		Statements: []Statement{
+			NewStatement("", Allow, NewActionSet(GetObjectAction),
+				NewResourceSet(NewResource("*")), condition.NewFunctions()),
+		},
+	}
+	if allowOnly.HasDenyStatement() {
+		t.Error("struct literal policy carries no Deny but HasDenyStatement() reports true")
 	}
 }
 
