@@ -68,47 +68,53 @@ func TestDropDuplicateStatementsKeepsNotResources(t *testing.T) {
 
 // Policy.hasDeny is only set by updateActionIndex, which a policy assembled as
 // a struct literal outside this package never reaches, so HasDenyStatement must
-// not trust the field alone.
+// not trust the field alone. Every policy below is built as a literal here, so
+// none of them has been through a parse path at all.
 func TestHasDenyStatementOnStructLiteralPolicy(t *testing.T) {
-	// A literal built here has been through no parse path at all, so it pins
-	// the behavior down regardless of what the canned policies contain.
-	literal := Policy{
-		Version: DefaultVersion,
-		Statements: []Statement{
-			NewStatement("", Deny, NewActionSet(GetObjectAction),
-				NewResourceSet(NewResource("*")), condition.NewFunctions()),
-		},
-	}
-	if !literal.HasDenyStatement() {
-		t.Error("struct literal policy carries a Deny but HasDenyStatement() reports false")
+	stmt := func(effect Effect, action Action) Statement {
+		return NewStatement("", effect, NewActionSet(action),
+			NewResourceSet(NewResource("*")), condition.NewFunctions())
 	}
 
-	// A Deny buried behind an Allow still has to be found, since the field the
-	// naive implementation trusted is only ever set by the parse path.
-	mixed := Policy{
-		Version: DefaultVersion,
-		Statements: []Statement{
-			NewStatement("", Allow, NewActionSet(GetObjectAction),
-				NewResourceSet(NewResource("*")), condition.NewFunctions()),
-			NewStatement("", Deny, NewActionSet(Action(CreateUserAdminAction)),
-				NewResourceSet(NewResource("*")), condition.NewFunctions()),
+	tests := []struct {
+		name       string
+		statements []Statement
+		want       bool
+	}{
+		{
+			// Pins the behavior regardless of what the canned policies contain.
+			name:       "deny only",
+			statements: []Statement{stmt(Deny, GetObjectAction)},
+			want:       true,
 		},
-	}
-	if !mixed.HasDenyStatement() {
-		t.Error("struct literal policy with a trailing Deny but HasDenyStatement() reports false")
+		{
+			// A Deny buried behind an Allow still has to be found, since the
+			// field the naive implementation trusted is only ever set by the
+			// parse path.
+			name: "allow then deny",
+			statements: []Statement{
+				stmt(Allow, GetObjectAction),
+				stmt(Deny, Action(CreateUserAdminAction)),
+			},
+			want: true,
+		},
+		{
+			// The negative case matters just as much: reporting a Deny that is
+			// not there would send callers down the slow evaluation path for
+			// every policy.
+			name:       "allow only",
+			statements: []Statement{stmt(Allow, GetObjectAction)},
+			want:       false,
+		},
 	}
 
-	// The negative case matters just as much: reporting a Deny that is not
-	// there would send callers down the slow evaluation path for every policy.
-	allowOnly := Policy{
-		Version: DefaultVersion,
-		Statements: []Statement{
-			NewStatement("", Allow, NewActionSet(GetObjectAction),
-				NewResourceSet(NewResource("*")), condition.NewFunctions()),
-		},
-	}
-	if allowOnly.HasDenyStatement() {
-		t.Error("struct literal policy carries no Deny but HasDenyStatement() reports true")
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			p := Policy{Version: DefaultVersion, Statements: tt.statements}
+			if got := p.HasDenyStatement(); got != tt.want {
+				t.Errorf("HasDenyStatement() = %v, want %v", got, tt.want)
+			}
+		})
 	}
 }
 
