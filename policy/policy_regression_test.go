@@ -199,3 +199,59 @@ func TestDecideReachesDenyOnlyAndIsOwnerWithNoStatements(t *testing.T) {
 		}
 	}
 }
+
+// IsAllowedActions reports self-service admin actions the way the server checks
+// them -- implicitly granted, honoring only an explicit Deny -- while every
+// other admin action needs an explicit Allow. The two halves of that split live
+// on one line, so a swap between them stays invisible to policies that merely
+// stopped carrying a Deny statement.
+func TestIsAllowedActionsSelfServiceVsExplicitGrant(t *testing.T) {
+	tests := []struct {
+		name   string
+		doc    string
+		action AdminAction
+		want   bool
+	}{
+		{
+			// Nothing in the policy mentions it, so the DenyOnly path has to
+			// grant it anyway.
+			name:   "self-service action implicit without an allow",
+			doc:    `{"Version":"2012-10-17","Statement":[{"Effect":"Allow","Action":["s3:GetObject"],"Resource":["arn:aws:s3:::b/*"]}]}`,
+			action: ChangeMyPasswordAdminAction,
+			want:   true,
+		},
+		{
+			// The one thing DenyOnly still respects.
+			name:   "self-service action removed by an explicit deny",
+			doc:    `{"Version":"2012-10-17","Statement":[{"Effect":"Deny","Action":["admin:ChangeMyPassword"]}]}`,
+			action: ChangeMyPasswordAdminAction,
+			want:   false,
+		},
+		{
+			// A privileged action must never ride in on the DenyOnly path.
+			name:   "privileged action absent without an allow",
+			doc:    `{"Version":"2012-10-17","Statement":[{"Effect":"Allow","Action":["s3:GetObject"],"Resource":["arn:aws:s3:::b/*"]}]}`,
+			action: CreateUserAdminAction,
+			want:   false,
+		},
+		{
+			name:   "privileged action present with an explicit allow",
+			doc:    `{"Version":"2012-10-17","Statement":[{"Effect":"Allow","Action":["admin:CreateUser"]}]}`,
+			action: CreateUserAdminAction,
+			want:   true,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			p, err := ParseConfig(bytes.NewReader([]byte(tt.doc)))
+			if err != nil {
+				t.Fatal(err)
+			}
+			got := p.IsAllowedActions("", "", map[string][]string{}).Match(Action(tt.action))
+			if got != tt.want {
+				t.Errorf("IsAllowedActions contains %s = %v, want %v", tt.action, got, tt.want)
+			}
+		})
+	}
+}
