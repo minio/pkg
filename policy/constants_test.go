@@ -38,9 +38,8 @@ func TestDefaultPolicyReadOnly(t *testing.T) {
 	}
 
 	allowed := NewActionSet(GetBucketLocationAction, GetObjectAction)
-	denied := NewActionSet(Action(CreateUserAdminAction))
 
-	var sawAllow, sawDeny bool
+	var sawAllow bool
 	for _, s := range p.Statements {
 		switch s.Effect {
 		case Allow:
@@ -49,14 +48,11 @@ func TestDefaultPolicyReadOnly(t *testing.T) {
 				t.Errorf("readonly Allow actions = %v, want %v", s.Actions, allowed)
 			}
 		case Deny:
-			sawDeny = true
-			if !s.Actions.Equals(denied) {
-				t.Errorf("readonly Deny actions = %v, want %v", s.Actions, denied)
-			}
+			t.Errorf("readonly carries an unexpected Deny statement: %v", s.Actions)
 		}
 	}
-	if !sawAllow || !sawDeny {
-		t.Errorf("readonly missing Allow/Deny statement: allow=%v deny=%v", sawAllow, sawDeny)
+	if !sawAllow {
+		t.Error("readonly missing Allow statement")
 	}
 }
 
@@ -70,9 +66,8 @@ func TestDefaultPolicyConsoleReadOnly(t *testing.T) {
 	}
 
 	allowed := NewActionSet(GetBucketLocationAction, GetObjectAction, ListBucketAction)
-	denied := NewActionSet(Action(CreateUserAdminAction))
 
-	var sawAllow, sawDeny bool
+	var sawAllow bool
 	for _, s := range p.Statements {
 		switch s.Effect {
 		case Allow:
@@ -81,14 +76,11 @@ func TestDefaultPolicyConsoleReadOnly(t *testing.T) {
 				t.Errorf("consolereadonly Allow actions = %v, want %v", s.Actions, allowed)
 			}
 		case Deny:
-			sawDeny = true
-			if !s.Actions.Equals(denied) {
-				t.Errorf("consolereadonly Deny actions = %v, want %v", s.Actions, denied)
-			}
+			t.Errorf("consolereadonly carries an unexpected Deny statement: %v", s.Actions)
 		}
 	}
-	if !sawAllow || !sawDeny {
-		t.Errorf("consolereadonly missing Allow/Deny statement: allow=%v deny=%v", sawAllow, sawDeny)
+	if !sawAllow {
+		t.Error("consolereadonly missing Allow statement")
 	}
 }
 

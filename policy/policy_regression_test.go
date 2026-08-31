@@ -68,45 +68,53 @@ func TestDropDuplicateStatementsKeepsNotResources(t *testing.T) {
 
 // Policy.hasDeny is only set by updateActionIndex, which a policy assembled as
 // a struct literal outside this package never reaches, so HasDenyStatement must
-// not trust the field alone.
+// not trust the field alone. Every policy below is built as a literal here, so
+// none of them has been through a parse path at all.
 func TestHasDenyStatementOnStructLiteralPolicy(t *testing.T) {
-	// A literal built here has been through no parse path at all, so it pins
-	// the behavior down regardless of what the canned policies contain.
-	literal := Policy{
-		Version: DefaultVersion,
-		Statements: []Statement{
-			NewStatement("", Deny, NewActionSet(GetObjectAction),
-				NewResourceSet(NewResource("*")), condition.NewFunctions()),
-		},
-	}
-	if !literal.HasDenyStatement() {
-		t.Error("struct literal policy carries a Deny but HasDenyStatement() reports false")
+	stmt := func(effect Effect, action Action) Statement {
+		return NewStatement("", effect, NewActionSet(action),
+			NewResourceSet(NewResource("*")), condition.NewFunctions())
 	}
 
-	checked := 0
-	for _, name := range []string{"readonly", "consolereadonly", "diagnostics"} {
-		for _, dp := range DefaultPolicies {
-			if dp.Name != name {
-				continue
-			}
-			p := dp.Definition
-			hasDenyStmt := false
-			for _, s := range p.Statements {
-				if s.Effect == Deny {
-					hasDenyStmt = true
-				}
-			}
-			t.Logf("%-16s actual Deny statement=%v  HasDenyStatement()=%v", name, hasDenyStmt, p.HasDenyStatement())
-			if hasDenyStmt {
-				checked++
-				if !p.HasDenyStatement() {
-					t.Errorf("%s: carries a Deny but HasDenyStatement() reports false", name)
-				}
-			}
-		}
+	tests := []struct {
+		name       string
+		statements []Statement
+		want       bool
+	}{
+		{
+			// Pins the behavior regardless of what the canned policies contain.
+			name:       "deny only",
+			statements: []Statement{stmt(Deny, GetObjectAction)},
+			want:       true,
+		},
+		{
+			// A Deny buried behind an Allow still has to be found, since the
+			// field the naive implementation trusted is only ever set by the
+			// parse path.
+			name: "allow then deny",
+			statements: []Statement{
+				stmt(Allow, GetObjectAction),
+				stmt(Deny, Action(CreateUserAdminAction)),
+			},
+			want: true,
+		},
+		{
+			// The negative case matters just as much: reporting a Deny that is
+			// not there would send callers down the slow evaluation path for
+			// every policy.
+			name:       "allow only",
+			statements: []Statement{stmt(Allow, GetObjectAction)},
+			want:       false,
+		},
 	}
-	if checked == 0 {
-		t.Error("none of the named canned policies carries a Deny; this test checked nothing")
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			p := Policy{Version: DefaultVersion, Statements: tt.statements}
+			if got := p.HasDenyStatement(); got != tt.want {
+				t.Errorf("HasDenyStatement() = %v, want %v", got, tt.want)
+			}
+		})
 	}
 }
 
@@ -189,5 +197,61 @@ func TestDecideReachesDenyOnlyAndIsOwnerWithNoStatements(t *testing.T) {
 		if got := p.Decide(&tt.args); got != tt.want {
 			t.Errorf("%s: Decide on a statement-less policy = %v, want %v", tt.name, got, tt.want)
 		}
+	}
+}
+
+// IsAllowedActions reports self-service admin actions the way the server checks
+// them -- implicitly granted, honoring only an explicit Deny -- while every
+// other admin action needs an explicit Allow. The two halves of that split live
+// on one line, so a swap between them stays invisible to policies that merely
+// stopped carrying a Deny statement.
+func TestIsAllowedActionsSelfServiceVsExplicitGrant(t *testing.T) {
+	tests := []struct {
+		name   string
+		doc    string
+		action AdminAction
+		want   bool
+	}{
+		{
+			// Nothing in the policy mentions it, so the DenyOnly path has to
+			// grant it anyway.
+			name:   "self-service action implicit without an allow",
+			doc:    `{"Version":"2012-10-17","Statement":[{"Effect":"Allow","Action":["s3:GetObject"],"Resource":["arn:aws:s3:::b/*"]}]}`,
+			action: ChangeMyPasswordAdminAction,
+			want:   true,
+		},
+		{
+			// The one thing DenyOnly still respects.
+			name:   "self-service action removed by an explicit deny",
+			doc:    `{"Version":"2012-10-17","Statement":[{"Effect":"Deny","Action":["admin:ChangeMyPassword"]}]}`,
+			action: ChangeMyPasswordAdminAction,
+			want:   false,
+		},
+		{
+			// A privileged action must never ride in on the DenyOnly path.
+			name:   "privileged action absent without an allow",
+			doc:    `{"Version":"2012-10-17","Statement":[{"Effect":"Allow","Action":["s3:GetObject"],"Resource":["arn:aws:s3:::b/*"]}]}`,
+			action: CreateUserAdminAction,
+			want:   false,
+		},
+		{
+			name:   "privileged action present with an explicit allow",
+			doc:    `{"Version":"2012-10-17","Statement":[{"Effect":"Allow","Action":["admin:CreateUser"]}]}`,
+			action: CreateUserAdminAction,
+			want:   true,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			p, err := ParseConfig(bytes.NewReader([]byte(tt.doc)))
+			if err != nil {
+				t.Fatal(err)
+			}
+			got := p.IsAllowedActions("", "", map[string][]string{}).Match(Action(tt.action))
+			if got != tt.want {
+				t.Errorf("IsAllowedActions contains %s = %v, want %v", tt.action, got, tt.want)
+			}
+		})
 	}
 }
