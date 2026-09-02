@@ -37,6 +37,10 @@ const (
 	// S3TablesDeleteTableAction maps to the AWS `DeleteTable` S3 Tables action.
 	S3TablesDeleteTableAction TableAction = "s3tables:DeleteTable"
 
+	// S3TablesDeleteTableDataAction is an AIStor extension granting deletion of a
+	// table's underlying data objects.
+	S3TablesDeleteTableDataAction TableAction = "s3tables:DeleteTableData"
+
 	// S3TablesDeleteTableEncryptionAction is an AIStor extension for deleting a
 	// table-level encryption configuration override.
 	S3TablesDeleteTableEncryptionAction TableAction = "s3tables:DeleteTableEncryption"
@@ -274,6 +278,7 @@ var SupportedTableActions = map[TableAction]struct{}{
 	S3TablesDeleteTableBucketAction:                      {},
 	S3TablesDeleteTableBucketEncryptionAction:            {},
 	S3TablesDeleteTableBucketPolicyAction:                {},
+	S3TablesDeleteTableDataAction:                        {},
 	S3TablesDeleteTableEncryptionAction:                  {},
 	S3TablesDeleteTablePolicyAction:                      {},
 	S3TablesGetNamespaceAction:                           {},
@@ -423,6 +428,7 @@ func createTableActionConditionKeyMap() map[Action]condition.KeySet {
 	tableActionConditionKeyMap[Action(S3TablesDeleteTableBucketAction)] = withWarehouseCommon()
 	tableActionConditionKeyMap[Action(S3TablesDeleteTableBucketEncryptionAction)] = withWarehouseCommon()
 	tableActionConditionKeyMap[Action(S3TablesDeleteTableBucketPolicyAction)] = withWarehouseCommon()
+	tableActionConditionKeyMap[Action(S3TablesDeleteTableDataAction)] = withTableCommon()
 	tableActionConditionKeyMap[Action(S3TablesDeleteTableEncryptionAction)] = withTableCommon()
 	tableActionConditionKeyMap[Action(S3TablesDeleteTablePolicyAction)] = withTableCommon()
 	tableActionConditionKeyMap[Action(S3TablesGetNamespaceAction)] = withWarehouseCommon(s3TablesNamespaceKey)
