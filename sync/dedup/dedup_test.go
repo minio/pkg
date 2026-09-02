@@ -271,6 +271,62 @@ func TestConcurrentDuplicateSends(t *testing.T) {
 	}
 }
 
+func TestCloseDoesNotStrandValues(t *testing.T) {
+	const (
+		runs    = 200
+		senders = 4
+	)
+	ctx := context.Background()
+
+	for run := 0; run < runs; run++ {
+		c := newTestChan(t, 2)
+
+		var queued, received atomic.Int64
+		var wg sync.WaitGroup
+
+		wg.Add(1)
+		go func() {
+			defer wg.Done()
+			for {
+				if _, ok := c.Recv(ctx); !ok {
+					return
+				}
+				received.Add(1)
+			}
+		}()
+
+		var sent sync.WaitGroup
+		sent.Add(senders)
+		for i := 0; i < senders; i++ {
+			go func(i int) {
+				defer sent.Done()
+				ok, err := c.Send(ctx, event{strconv.Itoa(i), i})
+				if err != nil && !errors.Is(err, ErrClosed) {
+					t.Errorf("send: %v", err)
+					return
+				}
+				if ok {
+					queued.Add(1)
+				}
+			}(i)
+		}
+
+		c.Close()
+		sent.Wait()
+		wg.Wait()
+
+		if got, ok := c.TryRecv(); ok {
+			t.Fatalf("run %d: value %+v was queued after close", run, got)
+		}
+		if queued.Load() != received.Load() {
+			t.Fatalf("run %d: queued %d values but received %d", run, queued.Load(), received.Load())
+		}
+		if got := len(c.slots); got != 2 {
+			t.Fatalf("run %d: expected all slots returned, got %d", run, got)
+		}
+	}
+}
+
 func TestConcurrentSendRecvLosesNothing(t *testing.T) {
 	const (
 		producers = 8

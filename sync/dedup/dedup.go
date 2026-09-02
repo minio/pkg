@@ -99,7 +99,7 @@ func (c *Chan[K, T]) Send(ctx context.Context, v T) (bool, error) {
 	case <-ctx.Done():
 		return false, ctx.Err()
 	}
-	return c.enqueue(k, v), nil
+	return c.enqueue(k, v)
 }
 
 // TrySend queues v without blocking. It reports whether v was queued; a false
@@ -120,7 +120,7 @@ func (c *Chan[K, T]) TrySend(v T) (bool, error) {
 	default:
 		return false, ErrFull
 	}
-	return c.enqueue(k, v), nil
+	return c.enqueue(k, v)
 }
 
 // Recv returns the next queued value, blocking until one arrives. It reports
@@ -160,10 +160,15 @@ func (c *Chan[K, T]) Len() int {
 	return len(c.items)
 }
 
-// Close stops further sends. Already queued values remain available to Recv.
-// Close may be called more than once.
+// Close stops further sends. No value is queued once Close returns, and every
+// value a successful send queued stays available to Recv. Close may be called
+// more than once.
 func (c *Chan[K, T]) Close() {
-	c.once.Do(func() { close(c.closed) })
+	c.once.Do(func() {
+		c.mu.Lock()
+		close(c.closed)
+		c.mu.Unlock()
+	})
 }
 
 func (c *Chan[K, T]) queued(k K) bool {
@@ -174,17 +179,24 @@ func (c *Chan[K, T]) queued(k K) bool {
 }
 
 // enqueue is called holding a slot, so neither the send to items nor the
-// return of the slot can block.
-func (c *Chan[K, T]) enqueue(k K, v T) bool {
+// return of the slot can block. Close takes the same mutex, so an enqueue
+// either completes before the channel is closed or gives up.
+func (c *Chan[K, T]) enqueue(k K, v T) (bool, error) {
 	c.mu.Lock()
 	defer c.mu.Unlock()
+	select {
+	case <-c.closed:
+		c.slots <- struct{}{}
+		return false, ErrClosed
+	default:
+	}
 	if _, ok := c.pending[k]; ok {
 		c.slots <- struct{}{}
-		return false
+		return false, nil
 	}
 	c.pending[k] = struct{}{}
 	c.items <- entry[K, T]{key: k, val: v}
-	return true
+	return true, nil
 }
 
 func (c *Chan[K, T]) release(e entry[K, T]) {
