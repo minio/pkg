@@ -796,7 +796,7 @@ func TestMemoryEnumerationConditionKeys(t *testing.T) {
 	listActions := []string{
 		"memory:ListAgents", "memory:ListSecrets", "memory:ListCortexes", "memory:Search",
 	}
-	pointActions := []string{"memory:GetAgent", "memory:PutAgent", "memory:DeleteAgent", "memory:GetSecret", "memory:GetObjectBio"}
+	pointActions := []string{"memory:GetAgent", "memory:PutAgent", "memory:DeleteAgent", "memory:GetSecret", "memory:GetObjectBio", "memory:UpdateAgent"}
 
 	for _, action := range listActions {
 		keys, ok := MemoryActionConditionKeyMap[Action(action)]

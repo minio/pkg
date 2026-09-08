@@ -35,6 +35,7 @@ func TestMemoryActionIsValid(t *testing.T) {
 		{MemoryDeleteSecretAction, true},
 		{MemoryListSecretsAction, true},
 		{MemoryPutAgentAction, true},
+		{MemoryUpdateAgentAction, true},
 		{MemoryGetAgentAction, true},
 		{MemoryDeleteAgentAction, true},
 		{MemoryListAgentsAction, true},

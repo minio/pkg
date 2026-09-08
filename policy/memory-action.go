@@ -50,8 +50,13 @@ const (
 	// MemoryListSecretsAction - list the secrets in a cortex.
 	MemoryListSecretsAction MemoryAction = "memory:ListSecrets"
 
-	// MemoryPutAgentAction - write an agent record in a cortex.
+	// MemoryPutAgentAction - create an agent record, or write a memory beneath it.
+	// Create-only: it never modifies an existing record.
 	MemoryPutAgentAction MemoryAction = "memory:PutAgent"
+
+	// MemoryUpdateAgentAction - modify an existing agent record. Separate from
+	// MemoryPutAgentAction because an update re-derives the agent's IAM policy.
+	MemoryUpdateAgentAction MemoryAction = "memory:UpdateAgent"
 
 	// MemoryGetAgentAction - read an agent record from a cortex.
 	MemoryGetAgentAction MemoryAction = "memory:GetAgent"
@@ -84,6 +89,7 @@ var SupportedMemoryActions = map[MemoryAction]struct{}{
 	MemoryDeleteSecretAction: {},
 	MemoryListSecretsAction:  {},
 	MemoryPutAgentAction:     {},
+	MemoryUpdateAgentAction:  {},
 	MemoryGetAgentAction:     {},
 	MemoryDeleteAgentAction:  {},
 	MemoryListAgentsAction:   {},
