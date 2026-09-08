@@ -1,6 +1,6 @@
 module github.com/minio/pkg/v3
 
-go 1.25.0
+go 1.26.0
 
 tool (
 	github.com/golangci/golangci-lint/v2/cmd/golangci-lint
@@ -26,7 +26,7 @@ require (
 	github.com/zeebo/xxh3 v1.1.0
 	go.etcd.io/etcd/client/v3 v3.6.12
 	go.yaml.in/yaml/v3 v3.0.4
-	golang.org/x/crypto v0.55.0
+	golang.org/x/crypto v0.56.0
 	golang.org/x/oauth2 v0.36.0
 	golang.org/x/sys v0.47.0
 )
