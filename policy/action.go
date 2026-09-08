@@ -87,11 +87,11 @@ const (
 	ListBucketMultipartUploadsAction Action = "s3:ListBucketMultipartUploads"
 
 	// ListenNotificationAction - ListenNotification Rest API action.
-	// This is MinIO extension.
+	// This is an AIStor extension.
 	ListenNotificationAction Action = "s3:ListenNotification"
 
 	// ListenBucketNotificationAction - ListenBucketNotification Rest API action.
-	// This is MinIO extension.
+	// This is an AIStor extension.
 	ListenBucketNotificationAction Action = "s3:ListenBucketNotification"
 
 	// ListMultipartUploadPartsAction - ListParts Rest API action.
@@ -226,7 +226,7 @@ const (
 
 	// RestoreObjectAction - RestoreObject REST API action
 	RestoreObjectAction Action = "s3:RestoreObject"
-	// ResetBucketReplicationStateAction - MinIO extension API ResetBucketReplicationState to reset replication state
+	// ResetBucketReplicationStateAction - AIStor extension API ResetBucketReplicationState to reset replication state
 	// on a bucket
 	ResetBucketReplicationStateAction Action = "s3:ResetBucketReplicationState"
 

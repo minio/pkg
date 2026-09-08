@@ -27,6 +27,15 @@ const (
 	SessionPolicyName = "sessionPolicy"
 )
 
+// The canned policies are struct literals, so none of them has been through
+// the parse path that classifies statements, indexes actions and records that
+// a policy carries a Deny. Do it once here instead of on every evaluation.
+func init() {
+	for i := range DefaultPolicies {
+		DefaultPolicies[i].Definition.Reindex()
+	}
+}
+
 // DefaultPolicies - list of canned policies available in MinIO.
 var DefaultPolicies = []struct {
 	Name       string
@@ -60,12 +69,6 @@ var DefaultPolicies = []struct {
 					Actions:   NewActionSet(GetBucketLocationAction, GetObjectAction),
 					Resources: NewResourceSet(NewResource("*")),
 				},
-				{
-					SID:       ID(""),
-					Effect:    Deny,
-					Actions:   NewActionSet(Action(CreateUserAdminAction)),
-					Resources: NewResourceSet(NewResource("*")),
-				},
 			},
 		},
 	},
@@ -80,12 +83,6 @@ var DefaultPolicies = []struct {
 					SID:       ID(""),
 					Effect:    Allow,
 					Actions:   NewActionSet(GetBucketLocationAction, GetObjectAction, ListBucketAction),
-					Resources: NewResourceSet(NewResource("*")),
-				},
-				{
-					SID:       ID(""),
-					Effect:    Deny,
-					Actions:   NewActionSet(Action(CreateUserAdminAction)),
 					Resources: NewResourceSet(NewResource("*")),
 				},
 			},
@@ -318,6 +315,11 @@ var DefaultPolicies = []struct {
 						Action(S3TablesRenameFunctionAction),
 						Action(S3TablesDeleteFunctionAction),
 						Action(S3TablesRegisterFunctionAction),
+						// Table annotations
+						Action(S3TablesPutTableAnnotationAction),
+						Action(S3TablesGetTableAnnotationAction),
+						Action(S3TablesListTableAnnotationsAction),
+						Action(S3TablesDeleteTableAnnotationAction),
 						// Catalog config + metrics
 						Action(S3TablesGetConfigAction),
 						Action(S3TablesTableMetricsAction),
@@ -364,6 +366,9 @@ var DefaultPolicies = []struct {
 						// Function read
 						Action(S3TablesGetFunctionAction),
 						Action(S3TablesListFunctionsAction),
+						// Table annotation read
+						Action(S3TablesGetTableAnnotationAction),
+						Action(S3TablesListTableAnnotationsAction),
 						// Catalog config + metrics
 						Action(S3TablesGetConfigAction),
 						Action(S3TablesTableMetricsAction),

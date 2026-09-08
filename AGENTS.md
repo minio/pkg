@@ -11,6 +11,8 @@ Packages are scoped by capability at the repo root (for example `policy`, `ldap`
 Run these commands before opening a pull request; they mirror the CI stack.
 
 ## Coding Style & Naming Conventions
+Call a non-AWS action, API, or behavior an **AIStor extension**, never a "MinIO extension" — the product is MinIO AIStor, and what these comments distinguish is what AWS defines from what AIStor adds.
+
 Always format Go sources with `gofmt`/`goimports`. Follow the CLAUDE guidance from `miniohq/eos`: keep comments minimal, explaining **why** the code exists, never **what**, and do not leave “removed because” notes when deleting code. Use descriptive package names that mirror directory names and exported identifiers with GoDoc-ready sentences. Stick to tab-indented Go style and avoid introducing logging or HTTP helpers that bypass established patterns in sibling MinIO repos without prior discussion.
 
 ## Testing Guidelines
