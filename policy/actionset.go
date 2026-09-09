@@ -53,8 +53,9 @@ var implicitActions = map[Action]ActionSet{
 	GetObjectVersionAction: NewActionSet(GetObjectAction),
 
 	// S3Tables actions implicitly allow their data actions
-	Action(S3TablesGetTableDataAction): NewActionSet(GetObjectAction, ListMultipartUploadPartsAction),
-	Action(S3TablesPutTableDataAction): NewActionSet(PutObjectAction, AbortMultipartUploadAction, ListBucketAction),
+	Action(S3TablesGetTableDataAction):    NewActionSet(GetObjectAction, ListMultipartUploadPartsAction),
+	Action(S3TablesPutTableDataAction):    NewActionSet(PutObjectAction, AbortMultipartUploadAction, ListBucketAction),
+	Action(S3TablesDeleteTableDataAction): NewActionSet(DeleteObjectAction),
 	// Action(S3TablesDeleteTableAction) implicitly allows DeleteObjectAction to support table purging.
 	// This is needed because Spark's DROP TABLE ... PURGE performs client-side deletes rather than
 	// using purgeRequested=true to let the catalog handle deletion. This workaround grants the

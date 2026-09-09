@@ -2257,6 +2257,17 @@ func TestS3TablesActionsWithImplicitMatching(t *testing.T) {
 		]
 	}`
 
+	policy5JSON := `{
+		"Version": "2012-10-17",
+		"Statement": [
+			{
+				"Effect": "Allow",
+				"Action": ["s3tables:DeleteTableData"],
+				"Resource": ["arn:aws:s3tables:::bucket/del-warehouse/table/uuid-789"]
+			}
+		]
+	}`
+
 	testCases := []struct {
 		name           string
 		policyJSON     string
@@ -2384,6 +2395,60 @@ func TestS3TablesActionsWithImplicitMatching(t *testing.T) {
 			description:    "Should match PutObject when both GetTableData and PutTableData are allowed",
 		},
 		{
+			name:       "DeleteTableData direct match",
+			policyJSON: policy5JSON,
+			args: Args{
+				Action:     Action(S3TablesDeleteTableDataAction),
+				BucketName: "bucket/del-warehouse/table/uuid-789",
+			},
+			expectedResult: true,
+			description:    "DeleteTableData action should match S3 Tables resource directly",
+		},
+		{
+			name:       "DeleteTableData implicit DeleteObject match",
+			policyJSON: policy5JSON,
+			args: Args{
+				Action:     DeleteObjectAction,
+				BucketName: "del-warehouse",
+				ObjectName: "uuid-789",
+			},
+			expectedResult: true,
+			description:    "DeleteObject (implicit from DeleteTableData) should match with resource conversion",
+		},
+		{
+			name:       "DeleteTableData implicit DeleteObject with extra path",
+			policyJSON: policy5JSON,
+			args: Args{
+				Action:     DeleteObjectAction,
+				BucketName: "del-warehouse",
+				ObjectName: "uuid-789/data/file.parquet",
+			},
+			expectedResult: true,
+			description:    "DeleteObject should match objects under the table prefix",
+		},
+		{
+			name:       "DeleteTableData wrong table uuid - should not match",
+			policyJSON: policy5JSON,
+			args: Args{
+				Action:     DeleteObjectAction,
+				BucketName: "del-warehouse",
+				ObjectName: "wrong-uuid",
+			},
+			expectedResult: false,
+			description:    "Should not match when table UUID doesn't match",
+		},
+		{
+			name:       "DeleteTableData does not grant PutObject",
+			policyJSON: policy5JSON,
+			args: Args{
+				Action:     PutObjectAction,
+				BucketName: "del-warehouse",
+				ObjectName: "uuid-789",
+			},
+			expectedResult: false,
+			description:    "PutObject is not implicit from DeleteTableData, should not match",
+		},
+		{
 			name:       "Non-implicit action should not match",
 			policyJSON: policy1JSON,
 			args: Args{
@@ -2437,6 +2502,17 @@ func TestS3TablesActionsWithImplicitMatching(t *testing.T) {
 			},
 			expectedResult: true,
 			description:    "s3tables:* should allow AbortMultipartUpload through implicit matching",
+		},
+		{
+			name:       "s3tables:* allows DeleteObject implicitly",
+			policyJSON: policy4JSON,
+			args: Args{
+				Action:     DeleteObjectAction,
+				BucketName: "all-warehouse",
+				ObjectName: "all-uuid",
+			},
+			expectedResult: true,
+			description:    "s3tables:* should allow DeleteObject through implicit matching",
 		},
 		{
 			name:       "s3tables:* with extra path segments",
