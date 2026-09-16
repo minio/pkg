@@ -829,3 +829,71 @@ func TestMatchAsPatternPrefix(t *testing.T) {
 		}
 	}
 }
+
+func TestMatchEscaped(t *testing.T) {
+	testCases := []struct {
+		pattern string
+		name    string
+		want    bool
+	}{
+		{`a\*b`, "a*b", true},
+		{`a\*b`, "axb", false},
+		{`a\*b`, "axxxb", false},
+		{`a\?b`, "a?b", true},
+		{`a\?b`, "axb", false},
+		{`a\$b`, "a$b", true},
+		{`a\\b`, `a\b`, true},
+		{`a\\b`, "ab", false},
+		{`\*`, "*", true},
+		{`\**`, "*anything", true},
+		{`\**`, "anything", false},
+		{`*\*`, "anything*", true},
+		{`*\*`, "anything", false},
+		// A backslash with nothing after it stands for itself.
+		{`ab\`, `ab\`, true},
+		// A '*' or '?' that is not escaped keeps its wildcard meaning.
+		{`a*c\?`, "abbbc?", true},
+		{`a*c\?`, "abbbcd", false},
+		{`?\?`, "a?", true},
+		{`?\?`, "ab", false},
+		// Backtracking still has to skip over an escape.
+		{`*\*z`, "a*b*z", true},
+		{`*\*z`, "a*b*y", false},
+		// Patterns without escapes behave exactly as under Match.
+		{"", "", true},
+		{"", "a", false},
+		{"*", "anything", true},
+		{"a?c", "abc", true},
+		{"a?c", "ac", false},
+	}
+
+	for _, tc := range testCases {
+		t.Run(tc.pattern+"|"+tc.name, func(t *testing.T) {
+			if got := MatchEscaped(tc.pattern, tc.name); got != tc.want {
+				t.Fatalf("MatchEscaped(%q, %q) = %v, want %v", tc.pattern, tc.name, got, tc.want)
+			}
+		})
+	}
+}
+
+func TestUnescape(t *testing.T) {
+	testCases := []struct {
+		pattern string
+		want    string
+	}{
+		{"abc", "abc"},
+		{`a\*b`, "a*b"},
+		{`a\?b\$c`, "a?b$c"},
+		{`a\\b`, `a\b`},
+		{`ab\`, `ab\`},
+		{`\*\*`, "**"},
+	}
+
+	for _, tc := range testCases {
+		t.Run(tc.pattern, func(t *testing.T) {
+			if got := Unescape(tc.pattern); got != tc.want {
+				t.Fatalf("Unescape(%q) = %q, want %q", tc.pattern, got, tc.want)
+			}
+		})
+	}
+}
