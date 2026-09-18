@@ -259,3 +259,97 @@ func TestValueUnmarshalJSON(t *testing.T) {
 		}
 	}
 }
+
+// TestQueryOnlyKeyIgnoresAHeaderValue pins the one asymmetry in
+// getValuesByKey: a header-sourced key resolves through the canonical header
+// spelling, and a query-only key does not resolve that way at all.
+//
+// Without the split, a caller could satisfy a condition on s3:prefix with a
+// Prefix request header while the listing itself ran with no prefix at all --
+// the condition checking one value and the request being served with another.
+func TestQueryOnlyKeyIgnoresAHeaderValue(t *testing.T) {
+	tests := []struct {
+		name string
+		key  KeyName
+		args map[string][]string
+		want []string
+	}{
+		{
+			name: "query-only key resolves from the exact query name",
+			key:  S3Prefix,
+			args: map[string][]string{"prefix": {"alpha/"}},
+			want: []string{"alpha/"},
+		},
+		{
+			name: "query-only key ignores a canonical header value",
+			key:  S3Prefix,
+			args: map[string][]string{"Prefix": {"alpha/"}},
+			want: nil,
+		},
+		{
+			name: "s3:delimiter ignores a header value",
+			key:  S3Delimiter,
+			args: map[string][]string{"Delimiter": {"/"}},
+			want: nil,
+		},
+		{
+			name: "s3:max-keys ignores a header value",
+			key:  S3MaxKeys,
+			args: map[string][]string{"Max-Keys": {"1000"}},
+			want: nil,
+		},
+		{
+			name: "memory:prefix ignores a header value",
+			key:  MemoryPrefix,
+			args: map[string][]string{"Prefix": {"alpha/"}},
+			want: nil,
+		},
+		{
+			name: "memory:max-keys ignores a header value",
+			key:  MemoryMaxKeys,
+			args: map[string][]string{"Max-Keys": {"10"}},
+			want: nil,
+		},
+		{
+			name: "a header-sourced key still resolves canonically",
+			key:  S3XAmzServerSideEncryption,
+			args: map[string][]string{"X-Amz-Server-Side-Encryption": {"aws:kms"}},
+			want: []string{"aws:kms"},
+		},
+		{
+			name: "a header-sourced key still resolves from the exact name",
+			key:  S3XAmzStorageClass,
+			args: map[string][]string{"x-amz-storage-class": {"STANDARD"}},
+			want: []string{"STANDARD"},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got := getValuesByKey(tt.args, tt.key.ToKey())
+			if !reflect.DeepEqual(got, tt.want) {
+				t.Fatalf("getValuesByKey(%v, %q) = %v, want %v", tt.args, tt.key, got, tt.want)
+			}
+		})
+	}
+}
+
+// TestQueryOnlyKeysAreTheDocumentedSet keeps queryOnlyKeys honest against the
+// key list: every key whose documentation says its value comes from a query
+// parameter "only" has to be in the set, or the header fallback silently
+// reopens on it.
+func TestQueryOnlyKeysAreTheDocumentedSet(t *testing.T) {
+	for _, key := range []KeyName{S3Prefix, S3Delimiter, S3MaxKeys, MemoryPrefix, MemoryMaxKeys} {
+		if !key.IsQueryOnly() {
+			t.Errorf("%q is documented as query-only but is not in queryOnlyKeys", key)
+		}
+	}
+	for _, key := range []KeyName{
+		S3XAmzServerSideEncryption, S3XAmzStorageClass, S3XAmzCopySource,
+		S3LocationConstraint, AWSUsername, S3VersionID,
+	} {
+		if key.IsQueryOnly() {
+			t.Errorf("%q is not query-only but is in queryOnlyKeys", key)
+		}
+	}
+}

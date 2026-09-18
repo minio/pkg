@@ -51,6 +51,26 @@ func (key KeyName) Name() string {
 	return string(key[idx+1:])
 }
 
+// queryOnlyKeys are the condition keys whose value a request carries in its
+// query string and nowhere else, as each one's own documentation says.
+//
+// They are listed because getValuesByKey has to treat them differently: see
+// IsQueryOnly.
+var queryOnlyKeys = map[KeyName]struct{}{
+	S3Prefix:      {},
+	S3Delimiter:   {},
+	S3MaxKeys:     {},
+	MemoryPrefix:  {},
+	MemoryMaxKeys: {},
+}
+
+// IsQueryOnly reports whether the key's value comes only from a request's query
+// string, so that it has no request-header form a caller could supply instead.
+func (key KeyName) IsQueryOnly() bool {
+	_, ok := queryOnlyKeys[key]
+	return ok
+}
+
 // VarName - returns variable key name, such as "${aws:username}"
 func (key KeyName) VarName() string {
 	return fmt.Sprintf("${%s}", key)

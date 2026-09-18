@@ -31,6 +31,17 @@ func getValuesByKey(m map[string][]string, key Key) []string {
 	if values, found := m[name]; found {
 		return values
 	}
+	// The canonical-header form is how a header-sourced key is found: Name()
+	// gives the lowercase spelling (s3:x-amz-acl -> x-amz-acl) while a server
+	// records the header it came from canonically (X-Amz-Acl).
+	//
+	// A query-only key has no header form at all, so resolving one this way lets
+	// a caller supply through a header a value the API reads only from the query
+	// string -- satisfying the condition with one value while the request is
+	// served with another. Those keys resolve from the exact name or not at all.
+	if key.name.IsQueryOnly() {
+		return nil
+	}
 	return m[http.CanonicalHeaderKey(name)]
 }
 
