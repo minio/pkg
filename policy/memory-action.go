@@ -50,12 +50,22 @@ const (
 	// MemoryListSecretsAction - list the secrets in a cortex.
 	MemoryListSecretsAction MemoryAction = "memory:ListSecrets"
 
-	// MemoryPutAgentAction - create an agent record, or write a memory beneath it.
-	// Create-only: it never modifies an existing record.
+	// MemoryPutAgentAction - write a memory beneath an agent record. It does not
+	// create or modify the record itself.
 	MemoryPutAgentAction MemoryAction = "memory:PutAgent"
 
+	// MemoryCreateAgentAction - create an agent record. Separate from
+	// MemoryPutAgentAction because creating a record also mints the agent's IAM
+	// identity and its derived policy, and a resource pattern cannot keep the
+	// two apart: the memory form agents/<id>/<memory> and the record form
+	// agents/<id> both match agents/*, so one action over that pattern would
+	// turn a grant to write memories into a grant to mint credentials.
+	MemoryCreateAgentAction MemoryAction = "memory:CreateAgent"
+
 	// MemoryUpdateAgentAction - modify an existing agent record. Separate from
-	// MemoryPutAgentAction because an update re-derives the agent's IAM policy.
+	// MemoryCreateAgentAction because an update re-derives the agent's IAM policy
+	// without minting an identity, so it is grantable to a principal that may
+	// edit agents but not create them.
 	MemoryUpdateAgentAction MemoryAction = "memory:UpdateAgent"
 
 	// MemoryGetAgentAction - read an agent record from a cortex.
@@ -89,6 +99,7 @@ var SupportedMemoryActions = map[MemoryAction]struct{}{
 	MemoryDeleteSecretAction: {},
 	MemoryListSecretsAction:  {},
 	MemoryPutAgentAction:     {},
+	MemoryCreateAgentAction:  {},
 	MemoryUpdateAgentAction:  {},
 	MemoryGetAgentAction:     {},
 	MemoryDeleteAgentAction:  {},
