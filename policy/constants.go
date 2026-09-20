@@ -143,6 +143,25 @@ var DefaultPolicies = []struct {
 		},
 	},
 
+	// MemoryAdmin - provides admin access to the AIStor Memory API. Like
+	// tablesAdmin it carries its own action family only, so a Memory operator
+	// who also browses a cortex's objects combines it with an S3 policy.
+	{
+		Name: "memoryAdmin",
+		Definition: Policy{
+			Version: DefaultVersion,
+			Statements: []Statement{
+				{
+					SID:        ID(""),
+					Effect:     Allow,
+					Actions:    NewActionSet(Action(AllMemoryActions)),
+					Resources:  NewResourceSet(NewMemoryResource("*")),
+					Conditions: condition.NewFunctions(),
+				},
+			},
+		},
+	},
+
 	// IAMAdmin - provides IAM management access (users, groups, policies,
 	// service accounts) but no infrastructure, diagnostics, or S3 data access.
 	{
@@ -531,6 +550,13 @@ var DefaultPolicies = []struct {
 					Effect:     Allow,
 					Actions:    NewActionSet(Action(AllS3TablesActions)),
 					Resources:  NewResourceSet(NewS3TablesResource("*")),
+					Conditions: condition.NewFunctions(),
+				},
+				{
+					SID:        ID(""),
+					Effect:     Allow,
+					Actions:    NewActionSet(Action(AllMemoryActions)),
+					Resources:  NewResourceSet(NewMemoryResource("*")),
 					Conditions: condition.NewFunctions(),
 				},
 			},

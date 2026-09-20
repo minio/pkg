@@ -106,3 +106,61 @@ func TestDefaultPolicyConsoleReadOnlyAllowsListBucket(t *testing.T) {
 		t.Error("readonly should NOT allow s3:ListBucket (sanity check)")
 	}
 }
+
+func TestDefaultPolicyMemoryAdmin(t *testing.T) {
+	p, ok := findDefaultPolicy("memoryAdmin")
+	if !ok {
+		t.Fatal("memoryAdmin default policy not found")
+	}
+	if err := p.Validate(); err != nil {
+		t.Fatalf("memoryAdmin policy invalid: %v", err)
+	}
+
+	args := Args{
+		AccountName: "operator",
+		Action:      Action(MemoryCreateAgentAction),
+		BucketName:  "research",
+		ObjectName:  "agents/research-bot",
+	}
+	if !p.IsAllowed(args) {
+		t.Error("memoryAdmin should allow memory:CreateAgent")
+	}
+
+	// It carries its own action family only, like tablesAdmin: an operator who
+	// also browses a cortex's objects combines it with an S3 policy.
+	if p.IsAllowed(Args{
+		AccountName: "operator",
+		Action:      GetObjectAction,
+		BucketName:  "research",
+		ObjectName:  "agents/research-bot",
+	}) {
+		t.Error("memoryAdmin should NOT carry s3 actions")
+	}
+}
+
+func TestDefaultPolicyConsoleAdminAllowsMemory(t *testing.T) {
+	args := Args{
+		AccountName: "admin",
+		Action:      Action(MemoryListCortexesAction),
+		BucketName:  "research",
+	}
+
+	p, ok := findDefaultPolicy("consoleAdmin")
+	if !ok {
+		t.Fatal("consoleAdmin default policy not found")
+	}
+	// consoleAdmin drives the whole console, so it needs every action family
+	// the console calls. Without this the Memory section is denied outright.
+	if !p.IsAllowed(args) {
+		t.Error("consoleAdmin should allow memory:ListCortexes")
+	}
+
+	// The grant belongs to the console admin, not to every default policy.
+	rw, ok := findDefaultPolicy("readwrite")
+	if !ok {
+		t.Fatal("readwrite default policy not found")
+	}
+	if rw.IsAllowed(args) {
+		t.Error("readwrite should NOT allow memory:ListCortexes (sanity check)")
+	}
+}
