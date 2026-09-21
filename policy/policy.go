@@ -444,8 +444,7 @@ func MergePolicies(inputs ...Policy) (merged Policy) {
 	// Apply a base seed
 	var baseSeed [8]byte
 	rand.Read(baseSeed[:])
-	var seed uint64
-	binary.LittleEndian.PutUint64(baseSeed[:], seed)
+	seed := binary.LittleEndian.Uint64(baseSeed[:])
 
 	for _, p := range inputs {
 		for _, st := range p.Statements {
@@ -470,8 +469,7 @@ func (iamp *Policy) dropDuplicateStatementsMany() {
 	// Apply a base seed
 	var baseSeed [8]byte
 	rand.Read(baseSeed[:])
-	var seed uint64
-	binary.LittleEndian.PutUint64(baseSeed[:], seed)
+	seed := binary.LittleEndian.Uint64(baseSeed[:])
 	writeAt := 0
 	for _, s := range iamp.Statements {
 		h := s.hash(seed)
