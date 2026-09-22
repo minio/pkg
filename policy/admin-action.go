@@ -105,6 +105,8 @@ const (
 	GetUserAdminAction AdminAction = "admin:GetUser"
 	// ChangeMyPasswordAdminAction - allow changing own password
 	ChangeMyPasswordAdminAction AdminAction = "admin:ChangeMyPassword"
+	// SetRootAccessAdminAction - allow enabling or disabling the root credential
+	SetRootAccessAdminAction AdminAction = "admin:SetRootAccess"
 
 	// Cluster Replicate Actions
 
@@ -345,6 +347,7 @@ var SupportedAdminActions = map[AdminAction]struct{}{
 	DisableUserAdminAction:           {},
 	GetUserAdminAction:               {},
 	ChangeMyPasswordAdminAction:      {},
+	SetRootAccessAdminAction:         {},
 	AddUserToGroupAdminAction:        {},
 	RemoveUserFromGroupAdminAction:   {},
 	GetGroupAdminAction:              {},

@@ -199,3 +199,41 @@ func FuzzAdminActionIsValid(f *testing.F) {
 		}
 	})
 }
+
+// TestSetRootAccessAdminAction asserts that disabling the root credential is a
+// recognized admin action, and that the built-in administrator policies which
+// should be able to do it can.
+func TestSetRootAccessAdminAction(t *testing.T) {
+	if !SetRootAccessAdminAction.IsValid() {
+		t.Fatal("SetRootAccessAdminAction.IsValid() = false, want true: the action is missing from SupportedAdminActions")
+	}
+
+	if !AllAdminActions.Match(SetRootAccessAdminAction) {
+		t.Error("admin:* does not match SetRootAccessAdminAction")
+	}
+
+	// Disabling root also needs admin:ConfigUpdate, since the value lives in the
+	// api sub-system config. Only consoleAdmin holds both, so the action is not
+	// advertised in a canned policy that could not act on it.
+	want := map[string]bool{"consoleAdmin": true, "iamAdmin": false, "infraAdmin": false}
+	seen := map[string]bool{}
+	for _, p := range DefaultPolicies {
+		expected, checked := want[p.Name]
+		if !checked {
+			continue
+		}
+		seen[p.Name] = true
+		got := p.Definition.IsAllowed(Args{
+			AccountName: "tester",
+			Action:      Action(SetRootAccessAdminAction),
+		})
+		if got != expected {
+			t.Errorf("policy %q allows admin:SetRootAccess = %v, want %v", p.Name, got, expected)
+		}
+	}
+	for name := range want {
+		if !seen[name] {
+			t.Errorf("built-in policy %q not found in DefaultPolicies", name)
+		}
+	}
+}
