@@ -27,10 +27,13 @@ func BenchmarkResourceMatch(b *testing.B) {
 		{"NoVariable", "test-bucket/home/*", "test-bucket/home/alice/file.txt"},
 		{"Variable", "test-bucket/home/${aws:username}/*", "test-bucket/home/alice/file.txt"},
 		{"VariableLong", "test-bucket/some/deeper/prefix/path/home/${aws:username}/sub/*", "test-bucket/some/deeper/prefix/path/home/alice/sub/dir/file.txt"},
-		{"Escape", "test-bucket/home/${aws:username}/${*}", "test-bucket/home/alice/*"},
+		{"Escape", "test-bucket/home/${aws:username}/${*}/*", "test-bucket/home/alice/*/file.txt"},
 	}
 	for _, bc := range benchCases {
 		r := NewResource(bc.pattern)
+		if !r.Match(bc.resource, conditionValues) {
+			b.Fatalf("%s: want a match", bc.name)
+		}
 		b.Run(bc.name, func(b *testing.B) {
 			b.ReportAllocs()
 			for b.Loop() {

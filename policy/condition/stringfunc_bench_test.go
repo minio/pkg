@@ -20,22 +20,26 @@ package condition
 import "testing"
 
 func BenchmarkStringLikeFuncEvaluate(b *testing.B) {
-	values := map[string][]string{
-		"prefix":   {"home/alice/docs/"},
-		"username": {"alice"},
-	}
 	benchCases := []struct {
 		name     string
+		prefix   string
 		patterns []string
 	}{
-		{"NoVariable", []string{"home/*", "public/*", "shared/*"}},
-		{"Variable", []string{"home/${aws:username}/*", "public/*", "shared/*"}},
-		{"Escape", []string{"home/${aws:username}/${*}", "public/*", "shared/*"}},
+		{"NoVariable", "home/alice/docs/", []string{"home/*", "public/*", "shared/*"}},
+		{"Variable", "home/alice/docs/", []string{"home/${aws:username}/*", "public/*", "shared/*"}},
+		{"Escape", "home/alice/*/docs/", []string{"home/${aws:username}/${*}/*", "public/*", "shared/*"}},
 	}
 	for _, bc := range benchCases {
 		function, err := NewStringLikeFunc("", S3Prefix.ToKey(), bc.patterns...)
 		if err != nil {
 			b.Fatal(err)
+		}
+		values := map[string][]string{
+			"prefix":   {bc.prefix},
+			"username": {"alice"},
+		}
+		if !function.evaluate(values) {
+			b.Fatalf("%s: want a match", bc.name)
 		}
 		b.Run(bc.name, func(b *testing.B) {
 			b.ReportAllocs()
