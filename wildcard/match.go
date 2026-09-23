@@ -167,6 +167,10 @@ func MatchEscaped(pattern, name string) bool {
 	if pattern == "*" {
 		return true
 	}
+	// Most patterns escape nothing, and the plain matcher is cheaper per byte.
+	if strings.IndexByte(pattern, '\\') < 0 {
+		return deepMatchRune(name, pattern)
+	}
 	return deepMatchEscaped(name, pattern)
 }
 

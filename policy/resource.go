@@ -208,8 +208,10 @@ func (r Resource) Match(resource string, conditionValues map[string][]string) bo
 	}
 
 	// A pattern can escape a literal '*', '?' or '$', so expand it and match
-	// the result as an escaped pattern.
-	pattern := condition.Substitute(r.Pattern, conditionValues, true)
+	// the result as an escaped pattern. Not Substitute: its returned string
+	// always escapes to the heap, while this one stays local to Match.
+	var buf [128]byte
+	pattern := string(condition.AppendSubstitute(buf[:0], r.Pattern, conditionValues, true))
 	if cp := path.Clean(resource); cp != "." && cp == wildcard.Unescape(pattern) {
 		return true
 	}
