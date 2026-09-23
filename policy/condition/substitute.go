@@ -87,7 +87,7 @@ func Substitute(pattern string, values map[string][]string, escape bool) string 
 		default:
 			ckey := KeyName(name)
 			// Only replace keys we know, and only when they carry a value.
-			if rvalues, ok := values[ckey.Name()]; CommonKeysMap[ckey] && ok && rvalues[0] != "" {
+			if rvalues, ok := values[ckey.Name()]; CommonKeysMap[ckey] && ok && len(rvalues) > 0 && rvalues[0] != "" {
 				writeText(buf, rvalues[0], escape)
 			} else {
 				writeText(buf, remain[:keyEnds+1], escape)
