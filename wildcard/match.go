@@ -156,3 +156,82 @@ func MatchAsPatternPrefix(pattern, text string) bool {
 	}
 	return len(text) <= len(pattern)
 }
+
+// MatchEscaped is Match with backslash escaping. A '\' in the pattern makes
+// the next byte literal, so `\*` matches a single '*' rather than any run of
+// characters. A '\' at the end of the pattern matches itself.
+func MatchEscaped(pattern, name string) bool {
+	if pattern == "" {
+		return name == pattern
+	}
+	if pattern == "*" {
+		return true
+	}
+	// Most patterns escape nothing, and the plain matcher is cheaper per byte.
+	if strings.IndexByte(pattern, '\\') < 0 {
+		return deepMatchRune(name, pattern)
+	}
+	return deepMatchEscaped(name, pattern)
+}
+
+// Unescape drops the backslashes MatchEscaped reads as escapes.
+func Unescape(pattern string) string {
+	idx := strings.IndexByte(pattern, '\\')
+	if idx < 0 {
+		return pattern
+	}
+	var sb strings.Builder
+	sb.Grow(len(pattern))
+	sb.WriteString(pattern[:idx])
+	for i := idx; i < len(pattern); i++ {
+		if pattern[i] == '\\' && i+1 < len(pattern) {
+			i++
+		}
+		sb.WriteByte(pattern[i])
+	}
+	return sb.String()
+}
+
+// deepMatchEscaped matches str against pattern, treating a byte after a
+// backslash as literal.
+func deepMatchEscaped(str, pattern string) bool {
+	var s, p int
+	// Position of the '*' to resume from, and how much of str it has consumed.
+	star, mark := -1, 0
+	for s < len(str) || p < len(pattern) {
+		if p < len(pattern) {
+			c, width, literal := pattern[p], 1, false
+			if c == '\\' && p+1 < len(pattern) {
+				c, width, literal = pattern[p+1], 2, true
+			}
+			switch {
+			case c == '*' && !literal:
+				star, mark = p, s
+				p++
+				continue
+			case c == '?' && !literal:
+				if s < len(str) {
+					s++
+					p++
+					continue
+				}
+			default:
+				if s < len(str) && c == str[s] {
+					s++
+					p += width
+					continue
+				}
+			}
+		}
+		if star < 0 {
+			return false
+		}
+		// Let the last '*' swallow one more byte and retry from there.
+		mark++
+		if mark > len(str) {
+			return false
+		}
+		s, p = mark, star+1
+	}
+	return true
+}

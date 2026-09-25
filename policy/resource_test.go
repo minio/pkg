@@ -325,3 +325,45 @@ func TestResourceValidateBucket(t *testing.T) {
 		}
 	}
 }
+
+func TestResourceMatchEscapes(t *testing.T) {
+	conditionValues := map[string][]string{"username": {"david"}}
+
+	testCases := []struct {
+		pattern  string
+		resource string
+		want     bool
+	}{
+		// ${*} stands for a literal asterisk, not for the wildcard.
+		{"mybucket/${*}", "mybucket/*", true},
+		{"mybucket/${*}", "mybucket/foo", false},
+		{"mybucket/${*}/*", "mybucket/*/foo", true},
+		{"mybucket/${*}/*", "mybucket/bar/foo", false},
+		// ${?} stands for a literal question mark.
+		{"mybucket/${?}.txt", "mybucket/?.txt", true},
+		{"mybucket/${?}.txt", "mybucket/a.txt", false},
+		// ${$} stands for a literal dollar sign. What follows it is not read
+		// as a variable.
+		{"mybucket/${$}{aws:username}", "mybucket/${aws:username}", true},
+		{"mybucket/${$}{aws:username}", "mybucket/david", false},
+		{"mybucket/${$}100", "mybucket/$100", true},
+		// Escapes and variables in the same pattern.
+		{"mybucket/${aws:username}/${*}", "mybucket/david/*", true},
+		{"mybucket/${aws:username}/${*}", "mybucket/david/x", false},
+		// An unescaped wildcard keeps its meaning alongside an escape.
+		{"mybucket/${*}-*", "mybucket/*-anything", true},
+		{"mybucket/${*}-*", "mybucket/x-anything", false},
+		// A backslash in the pattern is literal, not an escape of its own.
+		{`mybucket/a\b/${*}`, `mybucket/a\b/*`, true},
+		{`mybucket/a\b/${*}`, `mybucket/a\bx`, false},
+	}
+
+	for _, tc := range testCases {
+		t.Run(tc.pattern+"|"+tc.resource, func(t *testing.T) {
+			r := NewResource(tc.pattern)
+			if got := r.Match(tc.resource, conditionValues); got != tc.want {
+				t.Fatalf("Resource(%q).Match(%q) = %v, want %v", tc.pattern, tc.resource, got, tc.want)
+			}
+		})
+	}
+}

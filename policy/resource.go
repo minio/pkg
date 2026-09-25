@@ -18,7 +18,6 @@
 package policy
 
 import (
-	"bytes"
 	"encoding/json"
 	"path"
 	"strings"
@@ -201,56 +200,21 @@ func (r Resource) Match(resource string, conditionValues map[string][]string) bo
 		}
 	}
 	// Happy path, with no replacements
-	idx := strings.IndexByte(r.Pattern, '$')
-	if idx < 0 {
+	if strings.IndexByte(r.Pattern, '$') < 0 {
 		if cp := path.Clean(resource); cp != "." && cp == r.Pattern {
 			return true
 		}
 		return wildcard.Match(r.Pattern, resource)
 	}
 
-	// Use a small buffer
-	pat := smallBufPool.Get().(*bytes.Buffer)
-	defer smallBufPool.Put(pat)
-	pat.Reset()
-
-	// Do replacement of known keys.
-	pat.WriteString(r.Pattern[:idx])
-	remain := r.Pattern[idx:]
-	for len(remain) > 0 {
-		val := remain[0]
-		if val != '$' || len(remain) < 3 {
-			pat.WriteByte(val)
-			remain = remain[1:]
-			continue
-		}
-		keyEnds := strings.IndexByte(remain, '}')
-
-		// If no curly brackets, emit as-is.
-		if remain[1] != '{' || keyEnds < 0 {
-			pat.WriteByte('$')
-			remain = remain[1:]
-			continue
-		}
-
-		ckey := condition.KeyName(remain[2:keyEnds])
-
-		// Only replace keys we know
-		if rvalues, ok := conditionValues[ckey.Name()]; condition.CommonKeysMap[ckey] && ok && rvalues[0] != "" {
-			pat.WriteString(rvalues[0])
-		} else {
-			// Write without replacing...
-			pat.WriteString("${")
-			pat.WriteString(string(ckey))
-			pat.WriteString("}")
-		}
-		remain = remain[keyEnds+1:]
-	}
-	pattern := pat.String()
-	if cp := path.Clean(resource); cp != "." && cp == pattern {
+	// A pattern can escape a literal '*', '?' or '$', so expand it and match
+	// the result as an escaped pattern. Uses AppendSubstitute for performance.
+	var buf [128]byte
+	pattern := string(condition.AppendSubstitute(buf[:0], r.Pattern, conditionValues, true))
+	if cp := path.Clean(resource); cp != "." && cp == wildcard.Unescape(pattern) {
 		return true
 	}
-	return wildcard.Match(pattern, resource)
+	return wildcard.MatchEscaped(pattern, resource)
 }
 
 // MarshalJSON - encodes Resource to JSON data.

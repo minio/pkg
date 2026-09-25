@@ -817,3 +817,45 @@ func TestNewStringFuncError(t *testing.T) {
 		t.Errorf("error expected")
 	}
 }
+
+func TestStringFuncEscapes(t *testing.T) {
+	testCases := []struct {
+		condValue string
+		reqValue  string
+		wantEqual bool
+		wantLike  bool
+	}{
+		// ${*} is a literal asterisk to both operators. Only StringLike reads
+		// an unescaped '*' as a wildcard.
+		{"prefix${*}", "prefix*", true, true},
+		{"prefix${*}", "prefixfoo", false, false},
+		{"prefix*", "prefixfoo", false, true},
+		{"${?}", "?", true, true},
+		{"${?}", "a", false, false},
+		{"${$}{aws:username}", "${aws:username}", true, true},
+		{"${$}{aws:username}", "david", false, false},
+		{"${aws:username}", "david", true, true},
+	}
+
+	for _, tc := range testCases {
+		t.Run(tc.condValue+"|"+tc.reqValue, func(t *testing.T) {
+			reqValues := map[string][]string{"prefix": {tc.reqValue}, "username": {"david"}}
+
+			eqFunc, err := NewStringEqualsFunc("", S3Prefix.ToKey(), tc.condValue)
+			if err != nil {
+				t.Fatalf("NewStringEqualsFunc: %v", err)
+			}
+			if got := eqFunc.evaluate(reqValues); got != tc.wantEqual {
+				t.Fatalf("StringEquals(%q).evaluate(%q) = %v, want %v", tc.condValue, tc.reqValue, got, tc.wantEqual)
+			}
+
+			likeFunc, err := newStringLikeFunc(S3Prefix.ToKey(), NewValueSet(NewStringValue(tc.condValue)), "")
+			if err != nil {
+				t.Fatalf("newStringLikeFunc: %v", err)
+			}
+			if got := likeFunc.evaluate(reqValues); got != tc.wantLike {
+				t.Fatalf("StringLike(%q).evaluate(%q) = %v, want %v", tc.condValue, tc.reqValue, got, tc.wantLike)
+			}
+		})
+	}
+}

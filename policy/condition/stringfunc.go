@@ -28,15 +28,19 @@ import (
 	"github.com/minio/pkg/v3/wildcard"
 )
 
+// substitute expands policy variables in a condition value that is compared as
+// text.
 func substitute(values map[string][]string) func(string) string {
 	return func(v string) string {
-		for _, key := range CommonKeys {
-			// Empty values are not supported for policy variables.
-			if rvalues, ok := values[key.Name()]; ok && rvalues[0] != "" {
-				v = strings.ReplaceAll(v, key.VarName(), rvalues[0])
-			}
-		}
-		return v
+		return Substitute(v, values, false)
+	}
+}
+
+// substitutePattern expands policy variables in a condition value that is
+// wildcard matched. The result is a pattern for wildcard.MatchEscaped.
+func substitutePattern(values map[string][]string) func(string) string {
+	return func(v string) string {
+		return Substitute(v, values, true)
 	}
 }
 
@@ -131,9 +135,9 @@ type stringLikeFunc struct {
 
 func (f stringLikeFunc) eval(values map[string][]string) bool {
 	rvalues := getValuesByKey(values, f.k)
-	fvalues := f.values.ApplyFunc(substitute(values))
+	fvalues := f.values.ApplyFunc(substitutePattern(values))
 	for _, v := range rvalues {
-		matched := !fvalues.FuncMatch(wildcard.Match, v).IsEmpty()
+		matched := !fvalues.FuncMatch(wildcard.MatchEscaped, v).IsEmpty()
 		if f.n.qualifier == forAllValues {
 			if !matched {
 				return false

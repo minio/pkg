@@ -123,6 +123,23 @@ func oldMatchSimple(pattern, name string) bool {
 	return oldDeepMatchRune(name, pattern, true)
 }
 
+// MatchEscaped copies deepMatchRune's loop, so the two can drift apart. On a
+// pattern with no backslash they must agree.
+func TestMatchEscapedEquivalenceExhaustive(t *testing.T) {
+	pats := gen("a:*?", 4)
+	names := gen("a:/", 4)
+	var n int
+	for _, p := range pats {
+		for _, name := range names {
+			if got, want := MatchEscaped(p, name), Match(p, name); got != want {
+				t.Fatalf("MatchEscaped(%q, %q) = %v, Match = %v", p, name, got, want)
+			}
+			n++
+		}
+	}
+	t.Logf("%d backslash-free combinations agree with Match", n)
+}
+
 // A pattern with many stars used to take time exponential in the star count.
 func TestMatchStarsAreLinear(t *testing.T) {
 	name := "admin:ServerInfo"
@@ -191,6 +208,12 @@ func FuzzDeepMatchEquivalence(f *testing.F) {
 		}
 		if got, want := MatchSimple(pattern, name), oldMatchSimple(pattern, name); got != want {
 			t.Fatalf("MatchSimple(%q, %q) = %v, old = %v", pattern, name, got, want)
+		}
+		// The two agree only where the escape has nothing to act on.
+		if !strings.Contains(pattern, `\`) {
+			if got, want := MatchEscaped(pattern, name), Match(pattern, name); got != want {
+				t.Fatalf("MatchEscaped(%q, %q) = %v, Match = %v", pattern, name, got, want)
+			}
 		}
 	})
 }
