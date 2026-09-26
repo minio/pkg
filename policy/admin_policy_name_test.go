@@ -204,10 +204,14 @@ func TestAdminPolicyNameRefusedOutsideAdmin(t *testing.T) {
 func TestAdminPolicyNameNotAction(t *testing.T) {
 	doc := `{"Version": "2012-10-17", "Statement": [{"Effect": "Allow",
   "NotAction": ["admin:CreateUser"],
+  "Resource": ["arn:aws:s3:::*"],
   "Condition": {"StringLike": {"admin:PolicyName": ["app-*"]}}}]}`
 	p, err := ParseConfig(strings.NewReader(doc))
 	if err != nil {
-		return
+		t.Fatal(err)
+	}
+	if !p.IsAllowed(Args{AccountName: "orb", Action: Action(CreatePolicyAdminAction), ConditionValues: map[string][]string{"PolicyName": {"app-1"}}}) {
+		t.Error("NotAction must still allow the granted app-1")
 	}
 	for _, name := range []string{"consoleAdmin", "readwrite"} {
 		if p.IsAllowed(Args{AccountName: "orb", Action: Action(CreatePolicyAdminAction), ConditionValues: map[string][]string{"PolicyName": {name}}}) {
