@@ -103,7 +103,9 @@ func parseKey(s string) (Key, error) {
 		variable: variable,
 	}
 
-	if key.IsValid() {
+	// An admin key names one server-set value. A /variable suffix would read a
+	// value of another name, which the server does not set and a caller might.
+	if key.IsValid() && (name == s || !key.name.IsAdmin()) {
 		return key, nil
 	}
 
