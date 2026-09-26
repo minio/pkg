@@ -69,8 +69,8 @@ func TestTableActionConditionKeys(t *testing.T) {
 	}
 
 	for i, testCase := range testCases {
-		keySet, ok := tableActionConditionKeyMap[Action(testCase.action)]
-		if !ok {
+		keySet := TableActionConditionKeys(testCase.action)
+		if len(keySet) == 0 {
 			t.Fatalf("case %v: action %v: no condition key set registered", i+1, testCase.action)
 		}
 		for _, key := range testCase.expectedKeys {

@@ -21,6 +21,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"reflect"
+	"slices"
 	"testing"
 )
 
@@ -120,6 +121,81 @@ func TestFunctionsKeys(t *testing.T) {
 		if !reflect.DeepEqual(result, testCase.expectedResult) {
 			t.Fatalf("case %v: expected: %v, got: %v\n", i+1, testCase.expectedResult, result)
 		}
+	}
+}
+
+func TestFunctionsValuesByKey(t *testing.T) {
+	equalsFunc, err := newStringEqualsFunc(S3TablesNamespace.ToKey(), NewValueSet(NewStringValue("ns1"), NewStringValue("ns2")), "")
+	if err != nil {
+		t.Fatalf("unexpected error. %v\n", err)
+	}
+
+	likeFunc, err := newStringLikeFunc(S3TablesNamespace.ToKey(), NewValueSet(NewStringValue("ns3*")), "")
+	if err != nil {
+		t.Fatalf("unexpected error. %v\n", err)
+	}
+
+	// A function on another key must not contribute to the queried key.
+	otherKeyFunc, err := newStringEqualsFunc(S3XAmzCopySource.ToKey(), NewValueSet(NewStringValue("mybucket/myobject")), "")
+	if err != nil {
+		t.Fatalf("unexpected error. %v\n", err)
+	}
+
+	// A non-string value names no resource, so it is skipped rather than
+	// reported as a constraint the caller could narrow on.
+	boolFunc, err := newNullFunc(S3TablesNamespace.ToKey(), NewValueSet(NewBoolValue(true)), "")
+	if err != nil {
+		t.Fatalf("unexpected error. %v\n", err)
+	}
+
+	testCases := []struct {
+		name           string
+		functions      Functions
+		key            Key
+		expectedResult map[string][]string
+	}{
+		{
+			name:           "values group under their condition name",
+			functions:      NewFunctions(equalsFunc, likeFunc),
+			key:            S3TablesNamespace.ToKey(),
+			expectedResult: map[string][]string{stringEquals: {"ns1", "ns2"}, stringLike: {"ns3*"}},
+		},
+		{
+			name:           "another key contributes nothing",
+			functions:      NewFunctions(otherKeyFunc),
+			key:            S3TablesNamespace.ToKey(),
+			expectedResult: nil,
+		},
+		{
+			name:           "a key no function names yields nothing",
+			functions:      NewFunctions(equalsFunc),
+			key:            AWSSourceIP.ToKey(),
+			expectedResult: nil,
+		},
+		{
+			name:           "non-string values are skipped",
+			functions:      NewFunctions(boolFunc),
+			key:            S3TablesNamespace.ToKey(),
+			expectedResult: nil,
+		},
+		{
+			name:           "no functions yields nothing",
+			functions:      NewFunctions(),
+			key:            S3TablesNamespace.ToKey(),
+			expectedResult: nil,
+		},
+	}
+
+	for _, testCase := range testCases {
+		t.Run(testCase.name, func(t *testing.T) {
+			result := testCase.functions.ValuesByKey(testCase.key)
+			for _, values := range result {
+				slices.Sort(values)
+			}
+			if !reflect.DeepEqual(result, testCase.expectedResult) {
+				t.Fatalf("expected: %v, got: %v\n", testCase.expectedResult, result)
+			}
+		})
 	}
 }
 
