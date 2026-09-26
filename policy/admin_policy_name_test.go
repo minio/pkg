@@ -106,3 +106,112 @@ func TestAdminPolicyNameRefusedOnS3Actions(t *testing.T) {
 		}
 	}
 }
+
+// scopedPolicyAdmin is an identity allowed to manage the app-* policies only.
+const scopedPolicyAdmin = `{
+  "Version": "2012-10-17",
+  "Statement": [{
+    "Effect": "Allow",
+    "Action": ["admin:CreatePolicy", "admin:DeletePolicy", "admin:GetPolicy"],
+    "Condition": {"StringLike": {"admin:PolicyName": ["app-*"]}}
+  }]
+}`
+
+func allowedPolicyAdmin(t *testing.T, doc string, action AdminAction, values map[string][]string) bool {
+	t.Helper()
+	p, err := ParseConfig(strings.NewReader(doc))
+	if err != nil {
+		t.Fatal(err)
+	}
+	return p.IsAllowed(Args{AccountName: "orb", Action: Action(action), ConditionValues: values})
+}
+
+// Only the server sets admin:PolicyName. A request header reaches condition
+// values under its canonical form, Policyname, which other keys fall back to;
+// an admin key never does, so a header cannot name a policy.
+func TestAdminPolicyNameIgnoresHeaderForm(t *testing.T) {
+	for _, values := range []map[string][]string{
+		{"Policyname": {"app-1"}},
+		{"policyname": {"app-1"}},
+		{"POLICYNAME": {"app-1"}},
+		{"Policy-Name": {"app-1"}},
+	} {
+		if allowedPolicyAdmin(t, scopedPolicyAdmin, CreatePolicyAdminAction, values) {
+			t.Errorf("%v must not satisfy admin:PolicyName", values)
+		}
+	}
+	// The value the server set wins over a header form alongside it.
+	values := map[string][]string{"PolicyName": {"consoleAdmin"}, "Policyname": {"app-1"}}
+	if allowedPolicyAdmin(t, scopedPolicyAdmin, CreatePolicyAdminAction, values) {
+		t.Error("a header form must not override the server's PolicyName")
+	}
+}
+
+// Names that only resemble a granted one do not match it.
+func TestAdminPolicyNameLookalikes(t *testing.T) {
+	for _, name := range []string{
+		"APP-1",        // case differs
+		"App-1",        // case differs
+		"xapp-1",       // prefix before the pattern
+		" app-1",       // leading space
+		"*",            // a wildcard is a name here, not a pattern
+		"app",          // shorter than the pattern's literal part
+		"consoleAdmin", // unrelated
+		"",             // empty
+		"ａｐｐ-1",        // full-width letters
+	} {
+		if allowedPolicyAdmin(t, scopedPolicyAdmin, CreatePolicyAdminAction, map[string][]string{"PolicyName": {name}}) {
+			t.Errorf("PolicyName %q must not match app-*", name)
+		}
+	}
+}
+
+// A condition key spelled any other way is not admin:PolicyName: the policy
+// is refused rather than parsed into a condition nothing satisfies or, worse,
+// one something else satisfies.
+func TestAdminPolicyNameMisspellingsRefused(t *testing.T) {
+	for _, key := range []string{"Admin:PolicyName", "admin:policyname", "admin:Policyname", "ADMIN:POLICYNAME", "admin:PolicyName ", "aws:PolicyName", "s3:PolicyName"} {
+		doc := `{"Version": "2012-10-17", "Statement": [{"Effect": "Allow",
+  "Action": ["admin:CreatePolicy"],
+  "Condition": {"StringLike": {"` + key + `": ["app-*"]}}}]}`
+		if _, err := ParseConfig(strings.NewReader(doc)); err == nil {
+			t.Errorf("condition key %q must be refused", key)
+		}
+	}
+}
+
+// admin:PolicyName is refused on every non-admin action family, and a
+// statement may not mix admin actions with others to carry it along.
+func TestAdminPolicyNameRefusedOutsideAdmin(t *testing.T) {
+	for _, actions := range []string{
+		`"s3tables:*"`,
+		`"s3tables:CreateTable"`,
+		`"sts:AssumeRole"`,
+		`"admin:CreatePolicy", "s3:GetObject"`,
+	} {
+		doc := `{"Version": "2012-10-17", "Statement": [{"Effect": "Allow", "Action": [` + actions + `],
+  "Resource": ["*"],
+  "Condition": {"StringLike": {"admin:PolicyName": ["app-*"]}}}]}`
+		if _, err := ParseConfig(strings.NewReader(doc)); err == nil {
+			t.Errorf("actions %s with admin:PolicyName must be refused", actions)
+		}
+	}
+}
+
+// NotAction cannot widen the scoped grant: a statement allowing every admin
+// action but CreateUser, under the same condition, still leaves other policies
+// out of reach.
+func TestAdminPolicyNameNotAction(t *testing.T) {
+	doc := `{"Version": "2012-10-17", "Statement": [{"Effect": "Allow",
+  "NotAction": ["admin:CreateUser"],
+  "Condition": {"StringLike": {"admin:PolicyName": ["app-*"]}}}]}`
+	p, err := ParseConfig(strings.NewReader(doc))
+	if err != nil {
+		return
+	}
+	for _, name := range []string{"consoleAdmin", "readwrite"} {
+		if p.IsAllowed(Args{AccountName: "orb", Action: Action(CreatePolicyAdminAction), ConditionValues: map[string][]string{"PolicyName": {name}}}) {
+			t.Errorf("NotAction must not allow creating %s", name)
+		}
+	}
+}

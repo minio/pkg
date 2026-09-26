@@ -27,17 +27,23 @@ import (
 // for more information about available condition keys.
 type KeyName string
 
+// adminKeyPrefix is the service prefix of the keys that describe an admin API
+// request, such as admin:PolicyName. The server sets their values itself, so a
+// policy may use them on admin actions only, and no request header supplies
+// them.
+const adminKeyPrefix = "admin"
+
 // Prefixes to trim from key names.
 var toTrim = map[string]bool{
-	"aws":      true,
-	"jwt":      true,
-	"ldap":     true,
-	"sts":      true,
-	"svc":      true,
-	"s3":       true,
-	"s3tables": true,
-	"memory":   true,
-	"admin":    true,
+	"aws":          true,
+	"jwt":          true,
+	"ldap":         true,
+	"sts":          true,
+	"svc":          true,
+	"s3":           true,
+	"s3tables":     true,
+	"memory":       true,
+	adminKeyPrefix: true,
 }
 
 // Name - returns the key name with its service prefix stripped, so a key reads
@@ -50,6 +56,11 @@ func (key KeyName) Name() string {
 		return string(key)
 	}
 	return string(key[idx+1:])
+}
+
+// IsAdmin reports whether key describes an admin API request.
+func (key KeyName) IsAdmin() bool {
+	return strings.HasPrefix(string(key), adminKeyPrefix+":")
 }
 
 // VarName - returns variable key name, such as "${aws:username}"

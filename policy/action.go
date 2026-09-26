@@ -18,8 +18,6 @@
 package policy
 
 import (
-	"strings"
-
 	"github.com/minio/pkg/v3/policy/condition"
 	"github.com/minio/pkg/v3/wildcard"
 )
@@ -420,7 +418,7 @@ func createActionConditionKeyMap() ActionConditionKeyMap {
 	allSupportedKeys := []condition.Key{}
 	for _, keyName := range condition.AllSupportedKeys {
 		// Admin keys describe admin API requests; an S3 request never carries them.
-		if strings.HasPrefix(string(keyName), "admin:") {
+		if keyName.IsAdmin() {
 			continue
 		}
 		allSupportedKeys = append(allSupportedKeys, keyName.ToKey())
