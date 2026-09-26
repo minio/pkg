@@ -21,6 +21,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"sort"
+	"strconv"
 )
 
 type condition int
@@ -128,15 +129,41 @@ func (functions Functions) MarshalJSON() ([]byte, error) {
 	return json.Marshal(nm)
 }
 
+// encodeStringList renders a list so that equal output implies an equal list:
+// each element is written as its byte length, a colon, the element and a comma.
+// A plain join cannot promise that, because a value holding the separator would
+// render the same as two values.
+func encodeStringList(values []string) string {
+	var b []byte
+	for _, v := range values {
+		b = strconv.AppendInt(b, int64(len(v)), 10)
+		b = append(b, ':')
+		b = append(b, v...)
+		b = append(b, ',')
+	}
+	return string(b)
+}
+
+// conditionString renders a condition as a string that is injective in its
+// name, its key and its values. Functions.Equals and Statement.hash compare
+// conditions through this string, and dropDuplicateStatements discards whatever
+// compares equal, so a rendering that merges two conditions silently throws
+// away a statement the caller wrote -- a Deny among them.
+func conditionString(n name, k Key, values []string) string {
+	parts := make([]string, 0, len(values)+2)
+	parts = append(parts, n.String(), k.String())
+	parts = append(parts, values...)
+	return encodeStringList(parts)
+}
+
 func (functions Functions) String() string {
-	funcStrings := []string{}
+	funcStrings := make([]string, 0, len(functions))
 	for _, f := range functions {
-		s := fmt.Sprintf("%v", f)
-		funcStrings = append(funcStrings, s)
+		funcStrings = append(funcStrings, f.String())
 	}
 	sort.Strings(funcStrings)
 
-	return fmt.Sprintf("%v", funcStrings)
+	return encodeStringList(funcStrings)
 }
 
 var conditionFuncMap = map[string]func(Key, ValueSet, string) (Function, error){

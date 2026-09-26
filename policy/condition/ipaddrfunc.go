@@ -81,13 +81,13 @@ func (f ipaddrFunc) name() name {
 }
 
 func (f ipaddrFunc) String() string {
-	valueStrings := []string{}
+	valueStrings := make([]string, 0, len(f.values))
 	for _, value := range f.values {
 		valueStrings = append(valueStrings, value.String())
 	}
 	sort.Strings(valueStrings)
 
-	return fmt.Sprintf("%v:%v:%v", f.n, f.k, valueStrings)
+	return conditionString(f.n, f.k, valueStrings)
 }
 
 // toMap - returns map representation of this function.
