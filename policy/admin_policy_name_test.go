@@ -94,3 +94,15 @@ func TestAdminPolicyNameConditionDeny(t *testing.T) {
 		t.Error("the Allow must still hold for other names")
 	}
 }
+
+// admin:PolicyName describes an admin API request, so no S3 statement may use it.
+func TestAdminPolicyNameRefusedOnS3Actions(t *testing.T) {
+	for _, action := range []string{"s3:*", "s3:GetObject", "s3:PutObject"} {
+		doc := `{"Version": "2012-10-17", "Statement": [{"Effect": "Allow", "Action": ["` + action + `"],
+  "Resource": ["arn:aws:s3:::bucket/*"],
+  "Condition": {"StringLike": {"admin:PolicyName": ["app-*"]}}}]}`
+		if _, err := ParseConfig(strings.NewReader(doc)); err == nil {
+			t.Errorf("%s with admin:PolicyName must be refused", action)
+		}
+	}
+}
