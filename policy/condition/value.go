@@ -28,7 +28,7 @@ import (
 
 func getValuesByKey(m map[string][]string, key Key) []string {
 	name := key.Name()
-	if values, found := m[name]; found {
+	if values, found := m[name]; found || key.name.IsAdmin() {
 		return values
 	}
 	return m[http.CanonicalHeaderKey(name)]

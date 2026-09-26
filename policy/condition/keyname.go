@@ -27,16 +27,23 @@ import (
 // for more information about available condition keys.
 type KeyName string
 
+// adminKeyPrefix is the service prefix of the keys that describe an admin API
+// request, such as admin:PolicyName. The server sets their values itself, so a
+// policy may use them on admin actions only, and no request header supplies
+// them.
+const adminKeyPrefix = "admin"
+
 // Prefixes to trim from key names.
 var toTrim = map[string]bool{
-	"aws":      true,
-	"jwt":      true,
-	"ldap":     true,
-	"sts":      true,
-	"svc":      true,
-	"s3":       true,
-	"s3tables": true,
-	"memory":   true,
+	"aws":          true,
+	"jwt":          true,
+	"ldap":         true,
+	"sts":          true,
+	"svc":          true,
+	"s3":           true,
+	"s3tables":     true,
+	"memory":       true,
+	adminKeyPrefix: true,
 }
 
 // Name - returns the key name with its service prefix stripped, so a key reads
@@ -49,6 +56,11 @@ func (key KeyName) Name() string {
 		return string(key)
 	}
 	return string(key[idx+1:])
+}
+
+// IsAdmin reports whether key describes an admin API request.
+func (key KeyName) IsAdmin() bool {
+	return strings.HasPrefix(string(key), adminKeyPrefix+":")
 }
 
 // VarName - returns variable key name, such as "${aws:username}"
@@ -274,6 +286,12 @@ const (
 
 	// SVCDurationSeconds - Duration seconds condition for Admin policy
 	SVCDurationSeconds KeyName = "svc:DurationSeconds"
+
+	// AdminPolicyName - the name of the policy a policy admin action
+	// (admin:CreatePolicy, admin:DeletePolicy, admin:GetPolicy) works on, so a
+	// statement can grant those actions on a set of policies, for example
+	// StringLike {"admin:PolicyName": ["app-*"]}.
+	AdminPolicyName KeyName = "admin:PolicyName"
 )
 
 // JWTKeys - Supported JWT keys, non-exhaustive list please
@@ -377,6 +395,7 @@ var AllSupportedKeys = []KeyName{
 	JWTClientID,
 	STSDurationSeconds,
 	SVCDurationSeconds,
+	AdminPolicyName,
 }
 
 // CommonKeys - is list of all common condition keys.
@@ -428,6 +447,7 @@ var AllSupportedAdminKeys = append([]KeyName{
 	LDAPUsername,
 	LDAPGroups,
 	SVCDurationSeconds,
+	AdminPolicyName,
 	// Add new supported condition keys.
 }, JWTKeys...)
 

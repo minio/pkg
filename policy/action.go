@@ -417,6 +417,10 @@ func createActionConditionKeyMap() ActionConditionKeyMap {
 
 	allSupportedKeys := []condition.Key{}
 	for _, keyName := range condition.AllSupportedKeys {
+		// Admin keys describe admin API requests; an S3 request never carries them.
+		if keyName.IsAdmin() {
+			continue
+		}
 		allSupportedKeys = append(allSupportedKeys, keyName.ToKey())
 	}
 
