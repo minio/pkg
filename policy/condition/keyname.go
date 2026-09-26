@@ -37,6 +37,7 @@ var toTrim = map[string]bool{
 	"s3":       true,
 	"s3tables": true,
 	"memory":   true,
+	"admin":    true,
 }
 
 // Name - returns the key name with its service prefix stripped, so a key reads
@@ -274,6 +275,12 @@ const (
 
 	// SVCDurationSeconds - Duration seconds condition for Admin policy
 	SVCDurationSeconds KeyName = "svc:DurationSeconds"
+
+	// AdminPolicyName - the name of the policy a policy admin action
+	// (admin:CreatePolicy, admin:DeletePolicy, admin:GetPolicy) works on, so a
+	// statement can grant those actions on a set of policies, for example
+	// StringLike {"admin:PolicyName": ["app-*"]}.
+	AdminPolicyName KeyName = "admin:PolicyName"
 )
 
 // JWTKeys - Supported JWT keys, non-exhaustive list please
@@ -377,6 +384,7 @@ var AllSupportedKeys = []KeyName{
 	JWTClientID,
 	STSDurationSeconds,
 	SVCDurationSeconds,
+	AdminPolicyName,
 }
 
 // CommonKeys - is list of all common condition keys.
@@ -428,6 +436,7 @@ var AllSupportedAdminKeys = append([]KeyName{
 	LDAPUsername,
 	LDAPGroups,
 	SVCDurationSeconds,
+	AdminPolicyName,
 	// Add new supported condition keys.
 }, JWTKeys...)
 
