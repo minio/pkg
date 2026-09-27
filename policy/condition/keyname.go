@@ -455,8 +455,9 @@ func init() {
 	}
 }
 
-// AllSupportedAdminKeys - is list of all admin supported keys.
-var AllSupportedAdminKeys = append([]KeyName{
+// CommonAdminKeys are the condition keys every admin action takes: they
+// describe the request and its principal, not what the action works on.
+var CommonAdminKeys = append([]KeyName{
 	AWSReferer,
 	AWSSourceIP,
 	AWSUserAgent,
@@ -471,9 +472,19 @@ var AllSupportedAdminKeys = append([]KeyName{
 	LDAPUsername,
 	LDAPGroups,
 	SVCDurationSeconds,
-	AdminPolicyName,
-	// Add new supported condition keys.
+	// Add new condition keys that describe any admin request.
 }, JWTKeys...)
+
+// AdminActionKeys are the condition keys that describe what one kind of admin
+// action works on, such as the policy it names. The policy package lists which
+// actions take each of them.
+var AdminActionKeys = []KeyName{
+	AdminPolicyName,
+	// Add new condition keys that only some admin actions carry.
+}
+
+// AllSupportedAdminKeys - is list of all admin supported keys.
+var AllSupportedAdminKeys = append(append([]KeyName{}, CommonAdminKeys...), AdminActionKeys...)
 
 // AllSupportedSTSKeys is the all supported conditions for STS policies
 var AllSupportedSTSKeys = []KeyName{

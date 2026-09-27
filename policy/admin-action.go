@@ -518,15 +518,33 @@ func canMatchPrefix(head, prefix string) bool {
 	return strings.HasPrefix(prefix, head)
 }
 
+// adminActionConditionKeys lists, per admin action, the condition keys only
+// that action's requests carry, on top of condition.CommonAdminKeys, which
+// every admin action takes. A policy naming a key on an action not listed for
+// it is refused, since no request for that action ever sets it. When an API
+// starts setting a new key, add the key to condition.AdminActionKeys and list
+// it here beside the actions that set it.
+var adminActionConditionKeys = map[AdminAction][]condition.KeyName{
+	CreatePolicyAdminAction:       {condition.AdminPolicyName},
+	DeletePolicyAdminAction:       {condition.AdminPolicyName},
+	GetPolicyAdminAction:          {condition.AdminPolicyName},
+	AttachPolicyAdminAction:       {condition.AdminPolicyName},
+	UpdatePolicyAssociationAction: {condition.AdminPolicyName},
+}
+
 func createAdminActionConditionKeyMap() map[Action]condition.KeySet {
-	allSupportedAdminKeys := []condition.Key{}
-	for _, keyName := range condition.AllSupportedAdminKeys {
-		allSupportedAdminKeys = append(allSupportedAdminKeys, keyName.ToKey())
+	commonKeys := []condition.Key{}
+	for _, keyName := range condition.CommonAdminKeys {
+		commonKeys = append(commonKeys, keyName.ToKey())
 	}
 
 	adminActionConditionKeyMap := map[Action]condition.KeySet{}
 	for act := range SupportedAdminActions {
-		adminActionConditionKeyMap[Action(act)] = condition.NewKeySet(allSupportedAdminKeys...)
+		keys := condition.NewKeySet(commonKeys...)
+		for _, keyName := range adminActionConditionKeys[act] {
+			keys.Add(keyName.ToKey())
+		}
+		adminActionConditionKeyMap[Action(act)] = keys
 	}
 	return adminActionConditionKeyMap
 }
