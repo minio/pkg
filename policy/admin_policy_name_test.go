@@ -20,6 +20,8 @@ package policy
 import (
 	"strings"
 	"testing"
+
+	"github.com/minio/pkg/v3/policy/condition"
 )
 
 // A policy admin can be limited to a set of policies by name.
@@ -238,5 +240,85 @@ func TestAdminPolicyNameRefusesVariableSuffix(t *testing.T) {
   "Condition": {"StringEquals": {"s3:ExistingObjectTag/team": ["a"]}}}]}`
 	if _, err := ParseConfig(strings.NewReader(doc)); err != nil {
 		t.Errorf("a key that takes a variable must still parse: %v", err)
+	}
+}
+
+// admin:PolicyName names the policy a policy action works on, so it is valid on
+// those actions only: creating, reading and deleting policies, and attaching or
+// detaching them. On any other admin action no request carries it.
+func TestAdminPolicyNameOnlyOnPolicyActions(t *testing.T) {
+	doc := func(action string) string {
+		return `{"Version": "2012-10-17", "Statement": [{"Effect": "Allow", "Action": ["` + action + `"],
+  "Condition": {"StringLike": {"admin:PolicyName": ["app-*"]}}}]}`
+	}
+	for _, action := range []string{
+		"admin:CreatePolicy", "admin:DeletePolicy", "admin:GetPolicy",
+		"admin:AttachUserOrGroupPolicy", "admin:UpdatePolicyAssociation",
+	} {
+		if _, err := ParseConfig(strings.NewReader(doc(action))); err != nil {
+			t.Errorf("%s must take admin:PolicyName: %v", action, err)
+		}
+	}
+	for _, action := range []string{"admin:ServerInfo", "admin:CreateUser", "admin:ListUserPolicies", "admin:*"} {
+		if _, err := ParseConfig(strings.NewReader(doc(action))); err == nil {
+			t.Errorf("%s must refuse admin:PolicyName", action)
+		}
+	}
+}
+
+// Attaching and detaching are scoped per policy the same way.
+func TestAdminPolicyNameScopesAttach(t *testing.T) {
+	doc := `{"Version": "2012-10-17", "Statement": [{"Effect": "Allow",
+  "Action": ["admin:AttachUserOrGroupPolicy", "admin:UpdatePolicyAssociation"],
+  "Condition": {"StringLike": {"admin:PolicyName": ["app-*"]}}}]}`
+	for _, action := range []AdminAction{AttachPolicyAdminAction, UpdatePolicyAssociationAction} {
+		for name, want := range map[string]bool{"app-1": true, "consoleAdmin": false, "": false} {
+			values := map[string][]string{}
+			if name != "" {
+				values["PolicyName"] = []string{name}
+			}
+			if got := allowedPolicyAdmin(t, doc, action, values); got != want {
+				t.Errorf("%s on %q: allowed=%v, want %v", action, name, got, want)
+			}
+		}
+	}
+}
+
+// The action-specific key table stays consistent with the key lists: every key
+// it names is an action key that parses, every action it names exists, no key
+// is both common and action-specific, and every action key is taken by at
+// least one action, so a new key cannot be valid everywhere or nowhere by
+// accident.
+func TestAdminActionConditionKeysConsistent(t *testing.T) {
+	common := map[condition.KeyName]bool{}
+	for _, k := range condition.CommonAdminKeys {
+		common[k] = true
+	}
+	actionKeys := map[condition.KeyName]bool{}
+	for _, k := range condition.AdminActionKeys {
+		if common[k] {
+			t.Errorf("%s is both a common and an action-specific admin key", k)
+		}
+		if !k.ToKey().IsValid() {
+			t.Errorf("action key %s does not parse", k)
+		}
+		actionKeys[k] = true
+	}
+	taken := map[condition.KeyName]bool{}
+	for action, keys := range adminActionConditionKeys {
+		if _, ok := SupportedAdminActions[action]; !ok {
+			t.Errorf("%s is not a supported admin action", action)
+		}
+		for _, k := range keys {
+			if !actionKeys[k] {
+				t.Errorf("%s lists %s, which is not in condition.AdminActionKeys", action, k)
+			}
+			taken[k] = true
+		}
+	}
+	for k := range actionKeys {
+		if !taken[k] {
+			t.Errorf("action key %s is taken by no admin action", k)
+		}
 	}
 }
