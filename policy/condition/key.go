@@ -103,13 +103,20 @@ func parseKey(s string) (Key, error) {
 		variable: variable,
 	}
 
-	// An admin key names one server-set value. A /variable suffix would read a
-	// value of another name, which the server does not set and a caller might.
-	if key.IsValid() && (name == s || !key.name.IsAdmin()) {
+	// A trailing slash names no variable, so the key is malformed whatever
+	// its name.
+	if key.IsValid() && (name == s || variable != "") {
 		return key, nil
 	}
 
 	return key, fmt.Errorf("invalid condition key '%v'", s)
+}
+
+// VariableAllowed reports whether key's /<variable> suffix, if any, is one
+// its name takes. A policy naming a key with a suffix it does not take is
+// refused, and such a key evaluates with no value.
+func (key Key) VariableAllowed() bool {
+	return key.variable == "" || key.name.TakesVariable()
 }
 
 // NewKey - creates new key

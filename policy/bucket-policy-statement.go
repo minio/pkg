@@ -80,6 +80,10 @@ func (statement BPStatement) isValid() error {
 		return Errorf("invalid Principal %v", statement.Principal)
 	}
 
+	if err := statement.Conditions.CheckVariables(); err != nil {
+		return Errorf("%w", err)
+	}
+
 	if len(statement.Actions) == 0 && len(statement.NotActions) == 0 {
 		return Errorf("Action must not be empty")
 	}

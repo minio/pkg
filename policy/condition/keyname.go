@@ -19,6 +19,7 @@ package condition
 
 import (
 	"fmt"
+	"sort"
 	"strings"
 )
 
@@ -56,6 +57,29 @@ func (key KeyName) Name() string {
 		return string(key)
 	}
 	return string(key[idx+1:])
+}
+
+// variableKeys are the keys that take a /<variable> suffix naming the tag they
+// test, as in s3:ExistingObjectTag/<tag>. Every other key names one value.
+var variableKeys = map[KeyName]bool{
+	ExistingObjectTag:    true,
+	RequestObjectTag:     true,
+	S3TablesWarehouseTag: true,
+	S3TablesTableTag:     true,
+}
+
+func variableKeyNames() []string {
+	names := make([]string, 0, len(variableKeys))
+	for name := range variableKeys {
+		names = append(names, string(name))
+	}
+	sort.Strings(names)
+	return names
+}
+
+// TakesVariable reports whether key may carry a /<variable> suffix.
+func (key KeyName) TakesVariable() bool {
+	return variableKeys[key]
 }
 
 // IsAdmin reports whether key describes an admin API request.

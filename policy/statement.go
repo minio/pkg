@@ -331,6 +331,10 @@ func (statement Statement) isValid() error {
 		return err
 	}
 
+	if err := statement.Conditions.CheckVariables(); err != nil {
+		return Errorf("%w", err)
+	}
+
 	if statement.isAdmin() {
 		return statement.validateAdmin(false)
 	}

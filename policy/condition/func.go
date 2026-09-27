@@ -81,6 +81,18 @@ func (functions Functions) Keys() KeySet {
 	return keySet
 }
 
+// CheckVariables refuses a condition key carrying a /<variable> suffix its
+// name does not take: only the tag keys, such as s3:ExistingObjectTag/<tag>,
+// take one.
+func (functions Functions) CheckVariables() error {
+	for _, f := range functions {
+		if key := f.key(); !key.VariableAllowed() {
+			return fmt.Errorf("condition key '%v' takes no variable; only %v do", key, variableKeyNames())
+		}
+	}
+	return nil
+}
+
 // Clone clones Functions structure
 func (functions Functions) Clone() Functions {
 	funcs := []Function{}
