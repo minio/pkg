@@ -136,3 +136,42 @@ func TestConditionVariableStoredPolicyFailsClosed(t *testing.T) {
 		t.Error("a caller-supplied value must not satisfy a suffix the key does not take")
 	}
 }
+
+// A condition on a suffix its key does not take can be neither checked nor
+// satisfied, whatever the operator: an Allow carrying one never grants, and a
+// Deny carrying one always applies. A negated operator reads an absent value as
+// a match, so treating the key as merely absent would let such an Allow grant.
+func TestConditionVariableStoredPolicyNegatedFailsClosed(t *testing.T) {
+	for _, op := range []string{"StringNotEquals", "StringNotLike", "ForAllValues:StringEquals"} {
+		for _, effect := range []string{"Allow", "Deny"} {
+			doc := `{"Version": "2012-10-17", "Statement": [
+  {"Effect": "` + effect + `", "Action": ["s3:GetObject"], "Resource": ["arn:aws:s3:::bucket/*"],
+   "Condition": {"` + op + `": {"aws:username/x": ["alice"]}}}`
+			if effect == "Deny" {
+				doc += `,
+  {"Effect": "Allow", "Action": ["s3:GetObject"], "Resource": ["arn:aws:s3:::bucket/*"]}`
+			}
+			doc += `]}`
+			var p Policy
+			if err := json.Unmarshal([]byte(doc), &p); err != nil {
+				t.Fatalf("a stored policy must still load: %v", err)
+			}
+			if p.IsAllowed(Args{AccountName: "mallory", Action: GetObjectAction, BucketName: "bucket", ObjectName: "o"}) {
+				t.Errorf("%s %s on aws:username/x must not let the request through", effect, op)
+			}
+		}
+	}
+}
+
+// Strict validation refuses the same suffixes, admin statements included.
+func TestConditionVariableRefusedStrict(t *testing.T) {
+	for _, tc := range []struct{ key, actions, resources string }{
+		{"admin:PolicyName/x", `"admin:CreatePolicy"`, ``},
+		{"aws:SourceIp/x", `"s3:GetObject"`, `"arn:aws:s3:::bucket/*"`},
+	} {
+		doc := `{"Version": "2012-10-17", "Statement": [` + conditionStatement(tc.actions, tc.resources, tc.key) + `]}`
+		if _, err := ParseConfigStrict(strings.NewReader(doc)); err == nil || !strings.Contains(err.Error(), "takes no variable") {
+			t.Errorf("%s must be refused by strict validation, got %v", tc.key, err)
+		}
+	}
+}

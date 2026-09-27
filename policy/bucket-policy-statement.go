@@ -64,7 +64,7 @@ func (statement BPStatement) IsAllowed(args BucketPolicyArgs) bool {
 			return false
 		}
 
-		return statement.Conditions.Evaluate(args.ConditionValues)
+		return evaluateConditions(statement.Effect, statement.Conditions, args.ConditionValues)
 	}
 
 	return statement.Effect.IsAllowed(check())
