@@ -103,11 +103,20 @@ func parseKey(s string) (Key, error) {
 		variable: variable,
 	}
 
-	if key.IsValid() {
+	// A trailing slash names no variable, so the key is malformed whatever
+	// its name.
+	if key.IsValid() && (name == s || variable != "") {
 		return key, nil
 	}
 
 	return key, fmt.Errorf("invalid condition key '%v'", s)
+}
+
+// VariableAllowed reports whether key's /<variable> suffix, if any, is one
+// its name takes. A policy naming a key with a suffix it does not take is
+// refused, and such a key evaluates with no value.
+func (key Key) VariableAllowed() bool {
+	return key.variable == "" || key.name.TakesVariable()
 }
 
 // NewKey - creates new key

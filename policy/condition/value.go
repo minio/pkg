@@ -27,6 +27,11 @@ import (
 )
 
 func getValuesByKey(m map[string][]string, key Key) []string {
+	// A suffix the key does not take reads a value no server sets, so it would
+	// be the caller's to supply.
+	if !key.VariableAllowed() {
+		return nil
+	}
 	name := key.Name()
 	if values, found := m[name]; found || key.name.IsAdmin() {
 		return values

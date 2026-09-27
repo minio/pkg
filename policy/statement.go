@@ -131,7 +131,7 @@ func (statement Statement) isAllowedFor(args *Args, resource string) bool {
 				// When resource is "/", this allows evaluating KMS statements while explicitly excluding Resource,
 				// by passing Args with empty BucketName and ObjectName. This is useful when doing a
 				// two-phase authorization of a request.
-				return statement.Conditions.Evaluate(args.ConditionValues)
+				return evaluateConditions(statement.Effect, statement.Conditions, args.ConditionValues)
 			}
 		}
 
@@ -149,10 +149,21 @@ func (statement Statement) isAllowedFor(args *Args, resource string) bool {
 			return false
 		}
 
-		return statement.Conditions.Evaluate(args.ConditionValues)
+		return evaluateConditions(statement.Effect, statement.Conditions, args.ConditionValues)
 	}
 
 	return statement.Effect.IsAllowed(check())
+}
+
+// evaluateConditions evaluates a statement's conditions. A key carrying a
+// suffix it does not take, which only a policy stored before validation refused
+// it can hold, cannot be checked: the statement fails closed, an Allow never
+// granting and a Deny always applying.
+func evaluateConditions(effect Effect, conditions condition.Functions, values map[string][]string) bool {
+	if !conditions.VariablesAllowed() {
+		return effect == Deny
+	}
+	return conditions.Evaluate(values)
 }
 
 // validateActionTypes rejects statements that mix actions from
@@ -329,6 +340,10 @@ func (statement Statement) isValid() error {
 
 	if err := statement.validateActionTypes(); err != nil {
 		return err
+	}
+
+	if err := statement.Conditions.CheckVariables(); err != nil {
+		return Errorf("%w", err)
 	}
 
 	if statement.isAdmin() {
@@ -544,6 +559,10 @@ func (statement Statement) isValidStrict() error {
 
 	if err := statement.validateActionTypes(); err != nil {
 		return err
+	}
+
+	if err := statement.Conditions.CheckVariables(); err != nil {
+		return Errorf("%w", err)
 	}
 
 	// Applies to every action type: a bare ARN prefix names no resource, so a
