@@ -2301,11 +2301,11 @@ func TestS3TablesActionsWithImplicitMatching(t *testing.T) {
 			policyJSON: policy1JSON,
 			args: Args{
 				Action:     GetObjectAction,
-				BucketName: "bucket",
-				ObjectName: "my-warehouse/table/table-uuid-123",
+				BucketName: "my-warehouse",
+				ObjectName: "table-uuid-123/data/file.parquet",
 			},
-			expectedResult: true,
-			description:    "GetObject should match even with extra path segments on the table resource",
+			expectedResult: false,
+			description:    "a plain object path is not table data until the server presents it in tables form",
 		},
 		{
 			name:       "GetTableData implicit ListMultipartUploadParts match",
@@ -2420,11 +2420,11 @@ func TestS3TablesActionsWithImplicitMatching(t *testing.T) {
 			policyJSON: policy5JSON,
 			args: Args{
 				Action:     DeleteObjectAction,
-				BucketName: "bucket",
-				ObjectName: "del-warehouse/table/uuid-789",
+				BucketName: "del-warehouse",
+				ObjectName: "uuid-789/data/file.parquet",
 			},
-			expectedResult: true,
-			description:    "DeleteObject should match objects under the table prefix",
+			expectedResult: false,
+			description:    "a plain object path is not table data until the server presents it in tables form",
 		},
 		{
 			name:       "DeleteTableData wrong table uuid - should not match",
@@ -2519,11 +2519,11 @@ func TestS3TablesActionsWithImplicitMatching(t *testing.T) {
 			policyJSON: policy4JSON,
 			args: Args{
 				Action:     GetObjectAction,
-				BucketName: "bucket",
-				ObjectName: "all-warehouse/table/all-uuid",
+				BucketName: "all-warehouse",
+				ObjectName: "all-uuid/data/file.parquet",
 			},
-			expectedResult: true,
-			description:    "s3tables:* should match on the table resource",
+			expectedResult: false,
+			description:    "a plain object path is not table data until the server presents it in tables form",
 		},
 		{
 			name:       "s3tables:* wrong warehouse should not match",

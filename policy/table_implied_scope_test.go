@@ -42,6 +42,11 @@ func TestS3TablesImpliedActionsReachTableDataOnly(t *testing.T) {
 	everyWarehouse := doc(`{"Effect":"Allow","Action":["s3tables:*"],"Resource":["arn:aws:s3tables:::bucket/*"]}`)
 	wildcard := doc(`{"Effect":"Allow","Action":["s3tables:GetTableData","s3tables:PutTableData"],"Resource":["arn:aws:s3tables:::*"]}`)
 	oneWarehouse := doc(`{"Effect":"Allow","Action":["s3tables:GetTableData"],"Resource":["arn:aws:s3tables:::bucket/wh/table/*"]}`)
+	legacyMixedDeny := Policy{Version: DefaultVersion, Statements: []Statement{
+		NewStatement("", Allow, NewActionSet(GetObjectAction), NewResourceSet(NewResource("wh/*")), condition.NewFunctions()),
+		NewStatement("", Deny, NewActionSet(GetObjectAction, Action(S3TablesGetTableDataAction)),
+			NewResourceSet(NewS3TablesResource("bucket/wh/table/*")), condition.NewFunctions()),
+	}}
 	deniedTable := doc(
 		`{"Effect":"Allow","Action":["s3:GetObject"],"Resource":["arn:aws:s3:::wh/*"]}`,
 		`{"Effect":"Deny","Action":["s3tables:GetTableData"],"Resource":["arn:aws:s3tables:::bucket/wh/*"]}`,
@@ -77,6 +82,18 @@ func TestS3TablesImpliedActionsReachTableDataOnly(t *testing.T) {
 			}
 		})
 	}
+
+	// A Deny stored before mixing action types was refused, naming both an S3
+	// and a tables action, still denies the table's files over plain S3.
+	t.Run("a legacy mixed Deny still denies the table's files", func(t *testing.T) {
+		if legacyMixedDeny.IsAllowed(plain(GetObjectAction, "wh", "abc/data/f.parquet")) {
+			t.Fatal("the mixed Deny must refuse GetObject on a file of the table it names")
+		}
+		allowOnly := Policy{Version: DefaultVersion, Statements: legacyMixedDeny.Statements[:1]}
+		if !allowOnly.IsAllowed(plain(GetObjectAction, "wh", "abc/data/f.parquet")) {
+			t.Fatal("control: without the Deny, the S3 Allow reaches that file")
+		}
+	})
 
 	// A statement stored before mixing action types was refused keeps the S3
 	// actions it names; only the ones it implies are confined to table data.

@@ -90,26 +90,28 @@ func (statement Statement) isAllowedFor(args *Args, resource string) bool {
 
 		class := statement.classify()
 
-		if class.has(classTable) && !TableAction(args.Action).IsValid() &&
-			!statement.Actions.matchesNamed(args.Action) && !isTableResourceString(resource) {
+		if class.has(classTable) && !TableAction(args.Action).IsValid() && !isTableResourceString(resource) {
 			// A tables action implies the S3 data actions Iceberg uses on table
 			// files (s3tables:GetTableData implies s3:GetObject). The server
-			// presents a warehouse object in tables form, so an implied grant
-			// never reaches an ordinary bucket. A Deny keeps matching the
+			// presents a warehouse object in tables form, so an implied Allow
+			// never reaches an ordinary bucket, while an S3 action the statement
+			// names itself matches the request as it is. A Deny matches the
 			// object's tables form, so denying a table still denies its files.
-			if statement.Effect == Allow {
+			switch {
+			case statement.Effect == Allow && !statement.Actions.matchesNamed(args.Action):
 				return false
-			}
-			if args.BucketName == "" || args.ObjectName == "" {
-				return false
-			}
-			objectName := args.ObjectName
-			if idx := strings.IndexByte(objectName, '/'); idx >= 0 {
-				objectName = objectName[:idx]
-			}
-			resource = "bucket/" + args.BucketName + "/table/" + objectName
-			if !isTableResourceString(resource) {
-				return false
+			case statement.Effect == Deny:
+				if args.BucketName == "" || args.ObjectName == "" {
+					return false
+				}
+				objectName := args.ObjectName
+				if idx := strings.IndexByte(objectName, '/'); idx >= 0 {
+					objectName = objectName[:idx]
+				}
+				resource = "bucket/" + args.BucketName + "/table/" + objectName
+				if !isTableResourceString(resource) {
+					return false
+				}
 			}
 		}
 
