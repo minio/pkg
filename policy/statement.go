@@ -90,36 +90,26 @@ func (statement Statement) isAllowedFor(args *Args, resource string) bool {
 
 		class := statement.classify()
 
-		if class.has(classTable) && !TableAction(args.Action).IsValid() {
-			// When a tables policy statement (for example
-			//   "Action":   ["s3tables:GetTableData"],
-			//   "Resource": ["arn:aws:s3tables:::bucket/wh/table/uuid"]
-			// ) is evaluated for a plain S3 data-path action such as
-			// GetObject on (BucketName "wh", ObjectName "uuid[/...]"), the
-			// action match succeeds via implicitActions. However, the
-			// resource string built from Args ("wh/uuid[/...]") does not
-			// look like a tables ARN suffix ("bucket/wh/table/uuid"), so a
-			// direct string match against the S3 Tables resource
-			// would fail. In this specific case we know:
-			//   - the statement is a tables statement,
-			//   - the incoming action is covered implicitly (not a table API),
-			//   - and the stored policy resource is S3 Tables style.
-			// To allow GetObject/ListMultipartUploadParts/etc. when
-			// s3tables:GetTableData (or similar) is granted, normalize the
-			// S3 data-path resource into the canonical tables form before
-			// running the usual resource match.
+		if class.has(classTable) && !TableAction(args.Action).IsValid() &&
+			!statement.Actions.matchesNamed(args.Action) && !isTableResourceString(resource) {
+			// A tables action implies the S3 data actions Iceberg uses on table
+			// files (s3tables:GetTableData implies s3:GetObject). The server
+			// presents a warehouse object in tables form, so an implied grant
+			// never reaches an ordinary bucket. A Deny keeps matching the
+			// object's tables form, so denying a table still denies its files.
+			if statement.Effect == Allow {
+				return false
+			}
+			if args.BucketName == "" || args.ObjectName == "" {
+				return false
+			}
+			objectName := args.ObjectName
+			if idx := strings.IndexByte(objectName, '/'); idx >= 0 {
+				objectName = objectName[:idx]
+			}
+			resource = "bucket/" + args.BucketName + "/table/" + objectName
 			if !isTableResourceString(resource) {
-				if args.BucketName == "" || args.ObjectName == "" {
-					return false
-				}
-				objectName := args.ObjectName
-				if idx := strings.IndexByte(objectName, '/'); idx >= 0 {
-					objectName = objectName[:idx]
-				}
-				resource = "bucket/" + args.BucketName + "/table/" + objectName
-				if !isTableResourceString(resource) {
-					return false
-				}
+				return false
 			}
 		}
 

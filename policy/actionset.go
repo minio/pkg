@@ -111,6 +111,17 @@ func (actionSet ActionSet) Match(action Action) bool {
 	return false
 }
 
+// matchesNamed reports whether action matches an action the set names, without
+// the actions those imply.
+func (actionSet ActionSet) matchesNamed(action Action) bool {
+	for r := range actionSet {
+		if r.Match(action) {
+			return true
+		}
+	}
+	return false
+}
+
 // Equals - checks whether given action set is equal to current action set or not.
 func (actionSet ActionSet) Equals(sactionSet ActionSet) bool {
 	// If length of set is not equal to length of given set, the
