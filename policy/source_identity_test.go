@@ -22,6 +22,9 @@ import (
 	"testing"
 )
 
+// Policies can grant S3, admin and STS actions on a source identity:
+// aws:SourceIdentity for the signing session's, sts:SourceIdentity for the
+// one an STS call's new session will carry.
 func TestSourceIdentityConditions(t *testing.T) {
 	doc := `{
   "Version": "2012-10-17",
@@ -49,6 +52,55 @@ func TestSourceIdentityConditions(t *testing.T) {
 		{GetObjectAction, nil, false},
 		{Action(ServerInfoAdminAction), []string{"alice"}, true},
 		{Action(ServerInfoAdminAction), []string{"bob"}, false},
+		{Action(AssumeRoleAction), []string{"alice"}, true},
+		{Action(AssumeRoleAction), []string{"bob"}, false},
+		{Action(AssumeRoleAction), nil, false},
+	}
+	for _, tc := range cases {
+		values := map[string][]string{}
+		if tc.sourceIdentity != nil {
+			values["SourceIdentity"] = tc.sourceIdentity
+		}
+		got := p.IsAllowed(Args{
+			AccountName:     "app",
+			Action:          tc.action,
+			BucketName:      "data",
+			ObjectName:      "report.csv",
+			ConditionValues: values,
+		})
+		if got != tc.allowed {
+			t.Errorf("%s with source identity %v: allowed=%v, want %v", tc.action, tc.sourceIdentity, got, tc.allowed)
+		}
+	}
+}
+
+// A Deny keyed on a source identity overrides a broader Allow, and a
+// StringNotEquals Deny refuses a request that carries no source identity.
+func TestSourceIdentityConditionsDeny(t *testing.T) {
+	doc := `{
+  "Version": "2012-10-17",
+  "Statement": [
+    {"Effect": "Allow", "Action": ["s3:GetObject"], "Resource": ["arn:aws:s3:::data/*"]},
+    {"Effect": "Allow", "Action": ["sts:AssumeRole"]},
+    {"Effect": "Deny", "Action": ["s3:GetObject"], "Resource": ["arn:aws:s3:::data/*"],
+     "Condition": {"StringEquals": {"aws:SourceIdentity": ["mallory"]}}},
+    {"Effect": "Deny", "Action": ["sts:AssumeRole"],
+     "Condition": {"StringNotEquals": {"sts:SourceIdentity": ["alice"]}}}
+  ]
+}`
+	p, err := ParseConfig(strings.NewReader(doc))
+	if err != nil {
+		t.Fatalf("a policy denying on the source identity keys must parse: %v", err)
+	}
+
+	cases := []struct {
+		action         Action
+		sourceIdentity []string
+		allowed        bool
+	}{
+		{GetObjectAction, []string{"alice"}, true},
+		{GetObjectAction, []string{"mallory"}, false},
+		{GetObjectAction, nil, true},
 		{Action(AssumeRoleAction), []string{"alice"}, true},
 		{Action(AssumeRoleAction), []string{"bob"}, false},
 		{Action(AssumeRoleAction), nil, false},
