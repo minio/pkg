@@ -22,9 +22,10 @@ import (
 	"testing"
 )
 
-// Policies can grant S3, admin and STS actions on a source identity:
-// aws:SourceIdentity for the signing session's, sts:SourceIdentity for the
-// one an STS call's new session will carry.
+// TestSourceIdentityConditions verifies that policies can grant S3, admin and
+// STS actions on a source identity: aws:SourceIdentity for the signing
+// session's, sts:SourceIdentity for the one an STS call's new session will
+// carry.
 func TestSourceIdentityConditions(t *testing.T) {
 	doc := `{
   "Version": "2012-10-17",
@@ -74,8 +75,9 @@ func TestSourceIdentityConditions(t *testing.T) {
 	}
 }
 
-// A Deny keyed on a source identity overrides a broader Allow, and a
-// StringNotEquals Deny refuses a request that carries no source identity.
+// TestSourceIdentityConditionsDeny verifies that a Deny keyed on a source
+// identity overrides a broader Allow, and that a StringNotEquals Deny refuses a
+// request that carries no source identity.
 func TestSourceIdentityConditionsDeny(t *testing.T) {
 	doc := `{
   "Version": "2012-10-17",
