@@ -240,6 +240,10 @@ const (
 	// AWSGroups - groups for any authenticating Access Key.
 	AWSGroups KeyName = "aws:groups"
 
+	// AWSSourceIdentity - the source identity of the session that signed the
+	// request, set when the session was assumed and fixed for its lifetime.
+	AWSSourceIdentity KeyName = "aws:SourceIdentity"
+
 	// S3SignatureVersion - identifies the version of AWS Signature that you want to support for authenticated requests.
 	S3SignatureVersion KeyName = "s3:signatureversion"
 
@@ -307,6 +311,10 @@ const (
 const (
 	// STSDurationSeconds - Duration seconds condition for STS policy
 	STSDurationSeconds KeyName = "sts:DurationSeconds"
+
+	// STSSourceIdentity - the source identity the session being assumed will
+	// carry: the one requested, or the one inherited from the caller's session.
+	STSSourceIdentity KeyName = "sts:SourceIdentity"
 
 	// SVCDurationSeconds - Duration seconds condition for Admin policy
 	SVCDurationSeconds KeyName = "svc:DurationSeconds"
@@ -389,6 +397,7 @@ var AllSupportedKeys = []KeyName{
 	AWSUserID,
 	AWSUsername,
 	AWSGroups,
+	AWSSourceIdentity,
 	LDAPUser,
 	LDAPUsername,
 	LDAPGroups,
@@ -418,6 +427,7 @@ var AllSupportedKeys = []KeyName{
 	JWTScope,
 	JWTClientID,
 	STSDurationSeconds,
+	STSSourceIdentity,
 	SVCDurationSeconds,
 	AdminPolicyName,
 }
@@ -440,6 +450,7 @@ var CommonKeys = append([]KeyName{
 	AWSUserID,
 	AWSUsername,
 	AWSGroups,
+	AWSSourceIdentity,
 	LDAPUser,
 	LDAPUsername,
 	LDAPGroups,
@@ -468,6 +479,7 @@ var CommonAdminKeys = append([]KeyName{
 	AWSUserID,
 	AWSUsername,
 	AWSGroups,
+	AWSSourceIdentity,
 	LDAPUser,
 	LDAPUsername,
 	LDAPGroups,
@@ -491,6 +503,8 @@ var AllSupportedSTSKeys = []KeyName{
 	AWSPrincipalType,
 	AWSSecureTransport,
 	STSDurationSeconds,
+	STSSourceIdentity,
+	AWSSourceIdentity,
 	LDAPUser,
 	AWSUserID,
 	AWSGroups,
