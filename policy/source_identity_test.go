@@ -20,6 +20,8 @@ package policy
 import (
 	"strings"
 	"testing"
+
+	"github.com/minio/pkg/v3/policy/condition"
 )
 
 // TestSourceIdentityConditions verifies that policies can grant S3, admin and
@@ -60,7 +62,8 @@ func TestSourceIdentityConditions(t *testing.T) {
 	for _, tc := range cases {
 		values := map[string][]string{}
 		if tc.sourceIdentity != nil {
-			values["SourceIdentity"] = tc.sourceIdentity
+			values[condition.AWSSourceIdentity.Name()] = tc.sourceIdentity
+			values[condition.STSSourceIdentity.Name()] = tc.sourceIdentity
 		}
 		got := p.IsAllowed(Args{
 			AccountName:     "app",
@@ -110,7 +113,8 @@ func TestSourceIdentityConditionsDeny(t *testing.T) {
 	for _, tc := range cases {
 		values := map[string][]string{}
 		if tc.sourceIdentity != nil {
-			values["SourceIdentity"] = tc.sourceIdentity
+			values[condition.AWSSourceIdentity.Name()] = tc.sourceIdentity
+			values[condition.STSSourceIdentity.Name()] = tc.sourceIdentity
 		}
 		got := p.IsAllowed(Args{
 			AccountName:     "app",
@@ -122,5 +126,52 @@ func TestSourceIdentityConditionsDeny(t *testing.T) {
 		if got != tc.allowed {
 			t.Errorf("%s with source identity %v: allowed=%v, want %v", tc.action, tc.sourceIdentity, got, tc.allowed)
 		}
+	}
+}
+
+// TestSourceIdentityKeysReadSeparateValues verifies that within one STS call
+// aws:SourceIdentity reads the calling session's source identity and
+// sts:SourceIdentity the one the new session will carry, so a policy can tell a
+// session setting its source identity for the first time from one inheriting
+// it.
+func TestSourceIdentityKeysReadSeparateValues(t *testing.T) {
+	doc := `{
+  "Version": "2012-10-17",
+  "Statement": [
+    {"Effect": "Allow", "Action": ["sts:AssumeRole"],
+     "Condition": {"StringEquals": {"sts:SourceIdentity": ["alice"]}}},
+    {"Effect": "Deny", "Action": ["sts:AssumeRole"],
+     "Condition": {"Null": {"aws:SourceIdentity": ["true"]}}}
+  ]
+}`
+	p, err := ParseConfig(strings.NewReader(doc))
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	cases := []struct {
+		name            string
+		caller, session string
+		allowed         bool
+	}{
+		{name: "caller carries alice, session inherits it", caller: "alice", session: "alice", allowed: true},
+		{name: "caller carries none, session sets alice", session: "alice"},
+		{name: "caller carries bob, session inherits it", caller: "bob", session: "bob"},
+	}
+	for _, tc := range cases {
+		values := map[string][]string{}
+		if tc.caller != "" {
+			values[condition.AWSSourceIdentity.Name()] = []string{tc.caller}
+		}
+		if tc.session != "" {
+			values[condition.STSSourceIdentity.Name()] = []string{tc.session}
+		}
+		got := p.IsAllowed(Args{AccountName: "app", Action: Action(AssumeRoleAction), ConditionValues: values})
+		if got != tc.allowed {
+			t.Errorf("%s: allowed=%v, want %v", tc.name, got, tc.allowed)
+		}
+	}
+	if condition.AWSSourceIdentity.Name() == condition.STSSourceIdentity.Name() {
+		t.Errorf("aws:SourceIdentity and sts:SourceIdentity both read %q", condition.AWSSourceIdentity.Name())
 	}
 }

@@ -47,13 +47,22 @@ var toTrim = map[string]bool{
 	adminKeyPrefix: true,
 }
 
+// untrimmedKeys read the request value named by their whole key, prefix
+// included, because trimming would collide with a key that carries a
+// different value. Within an STS call aws:SourceIdentity is the calling
+// session's source identity and sts:SourceIdentity the one the new session
+// will carry.
+var untrimmedKeys = map[KeyName]bool{
+	STSSourceIdentity: true,
+}
+
 // Name - returns the key name with its service prefix stripped, so a key reads
 // the request value of the same name. The prefixes that are stripped are the
 // keys of toTrim; a service missing from there keeps its whole name and reads a
-// value nothing populates.
+// value nothing populates. A key in untrimmedKeys keeps its whole name too.
 func (key KeyName) Name() string {
 	idx := strings.IndexByte(string(key), ':')
-	if idx == -1 || !toTrim[string(key[:idx])] {
+	if idx == -1 || !toTrim[string(key[:idx])] || untrimmedKeys[key] {
 		return string(key)
 	}
 	return string(key[idx+1:])

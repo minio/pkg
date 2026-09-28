@@ -37,8 +37,8 @@ func TestServicePrefixedKeysResolveToRequestNames(t *testing.T) {
 	for _, key := range AllSupportedKeys {
 		full := string(key)
 		idx := strings.IndexByte(full, ':')
-		if idx < 0 {
-			// Unprefixed keys read their own name.
+		if idx < 0 || untrimmedKeys[key] {
+			// Unprefixed and untrimmed keys read their own name.
 			if got := key.Name(); got != full {
 				t.Errorf("%s.Name() = %q, want %q", key, got, full)
 			}
