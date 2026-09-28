@@ -42,8 +42,8 @@ var conditionVariableCases = []struct {
 }
 
 // Only the tag keys take a /<variable> suffix. A policy putting one on any
-// other key is refused with an error rather than parsed into a condition that
-// reads a value no server sets.
+// other key loads, so a stored one keeps working, but is refused before it is
+// saved rather than saved as a condition that reads a value no server sets.
 func TestConditionVariableRefusedOnKeysThatTakeNone(t *testing.T) {
 	for _, tc := range []struct {
 		key, actions, resources string
@@ -58,9 +58,14 @@ func TestConditionVariableRefusedOnKeysThatTakeNone(t *testing.T) {
 		{"jwt:groups/x", `"s3:GetObject"`, `"arn:aws:s3:::bucket/*"`},
 	} {
 		doc := `{"Version": "2012-10-17", "Statement": [` + conditionStatement(tc.actions, tc.resources, tc.key) + `]}`
-		_, err := ParseConfig(strings.NewReader(doc))
+		p, err := ParseConfig(strings.NewReader(doc))
+		if err != nil {
+			t.Errorf("%s must load: %v", tc.key, err)
+			continue
+		}
+		err = p.CheckVariables()
 		if err == nil {
-			t.Errorf("%s must be refused", tc.key)
+			t.Errorf("%s must be refused before saving", tc.key)
 			continue
 		}
 		if !strings.Contains(err.Error(), "takes no variable") {
@@ -80,19 +85,48 @@ func TestConditionVariableAllowedOnTagKeys(t *testing.T) {
 		{"s3tables:WarehouseTag/team", `"s3tables:GetTable"`, `"arn:aws:s3tables:::bucket/*"`},
 	} {
 		doc := `{"Version": "2012-10-17", "Statement": [` + conditionStatement(tc.actions, tc.resources, tc.key) + `]}`
-		if _, err := ParseConfig(strings.NewReader(doc)); err != nil {
+		p, err := ParseConfig(strings.NewReader(doc))
+		if err != nil {
 			t.Errorf("%s must parse: %v", tc.key, err)
+			continue
+		}
+		if err := p.CheckVariables(); err != nil {
+			t.Errorf("%s must be saved: %v", tc.key, err)
 		}
 	}
 }
 
-// An empty suffix names no variable, so the key is malformed whatever it is.
+// An empty suffix names no variable, so the key is malformed whatever it is:
+// it is refused before saving. A stored one still loads and marshals back with
+// its slash, so a re-save or replication does not rewrite it into a different
+// condition.
 func TestConditionVariableEmptyRefused(t *testing.T) {
 	for _, key := range []string{"s3:ExistingObjectTag/", "aws:SourceIp/", "admin:PolicyName/"} {
 		for _, c := range conditionVariableCases {
 			doc := `{"Version": "2012-10-17", "Statement": [` + conditionStatement(c.actions, c.resources, key) + `]}`
-			if _, err := ParseConfig(strings.NewReader(doc)); err == nil {
-				t.Errorf("%s on %s must be refused", key, c.actions)
+			p, err := ParseConfig(strings.NewReader(doc))
+			bare := `{"Version": "2012-10-17", "Statement": [` + conditionStatement(c.actions, c.resources, strings.TrimSuffix(key, "/")) + `]}`
+			if _, bareErr := ParseConfig(strings.NewReader(bare)); bareErr != nil {
+				// The key does not apply to these actions at all, so the
+				// policy is refused whatever its suffix.
+				if err == nil {
+					t.Errorf("%s on %s must be refused, as %s is", key, c.actions, strings.TrimSuffix(key, "/"))
+				}
+				continue
+			}
+			if err != nil {
+				t.Errorf("%s on %s must load: %v", key, c.actions, err)
+				continue
+			}
+			if err := p.CheckVariables(); err == nil || !strings.Contains(err.Error(), "names no variable") {
+				t.Errorf("%s on %s must be refused before saving, got %v", key, c.actions, err)
+			}
+			buf, err := json.Marshal(p)
+			if err != nil {
+				t.Fatalf("%s on %s must marshal: %v", key, c.actions, err)
+			}
+			if !strings.Contains(string(buf), `"`+key+`"`) {
+				t.Errorf("%s on %s lost its slash on marshal: %s", key, c.actions, buf)
 			}
 		}
 	}
@@ -105,12 +139,43 @@ func TestConditionVariableBucketPolicy(t *testing.T) {
   "Action": ["s3:GetObject"], "Resource": ["arn:aws:s3:::bucket/*"],
   "Condition": {"StringEquals": {"` + key + `": ["v"]}}}]}`
 	}
-	if _, err := ParseBucketPolicyConfig(strings.NewReader(doc("aws:SourceIp/x")), "bucket"); err == nil ||
-		!strings.Contains(err.Error(), "takes no variable") {
-		t.Errorf("aws:SourceIp/x must be refused in a bucket policy, got %v", err)
+	bp, err := ParseBucketPolicyConfig(strings.NewReader(doc("aws:SourceIp/x")), "bucket")
+	if err != nil {
+		t.Fatalf("a stored bucket policy with aws:SourceIp/x must load: %v", err)
 	}
-	if _, err := ParseBucketPolicyConfig(strings.NewReader(doc("s3:ExistingObjectTag/team")), "bucket"); err != nil {
-		t.Errorf("s3:ExistingObjectTag/team must parse in a bucket policy: %v", err)
+	if err := bp.CheckVariables(); err == nil || !strings.Contains(err.Error(), "takes no variable") {
+		t.Errorf("aws:SourceIp/x must be refused before saving a bucket policy, got %v", err)
+	}
+	var decoded BucketPolicy
+	if err := json.Unmarshal([]byte(doc("aws:SourceIp/")), &decoded); err != nil {
+		t.Errorf("a stored bucket policy with aws:SourceIp/ must decode: %v", err)
+	}
+	bp, err = ParseBucketPolicyConfig(strings.NewReader(doc("s3:ExistingObjectTag/team")), "bucket")
+	if err != nil {
+		t.Fatalf("s3:ExistingObjectTag/team must parse in a bucket policy: %v", err)
+	}
+	if err := bp.CheckVariables(); err != nil {
+		t.Errorf("s3:ExistingObjectTag/team must be saved in a bucket policy: %v", err)
+	}
+}
+
+// A stored bucket policy's suffixed condition reads no value, so an anonymous
+// caller who supplies SourceIp/x cannot satisfy it.
+func TestConditionVariableStoredBucketPolicyFailsClosed(t *testing.T) {
+	doc := `{"Version": "2012-10-17", "Statement": [{"Effect": "Allow", "Principal": {"AWS": ["*"]},
+  "Action": ["s3:GetObject"], "Resource": ["arn:aws:s3:::bucket/*"],
+  "Condition": {"StringEquals": {"aws:SourceIp/x": ["v"]}}}]}`
+	bp, err := ParseBucketPolicyConfig(strings.NewReader(doc), "bucket")
+	if err != nil {
+		t.Fatalf("a stored bucket policy must load: %v", err)
+	}
+	if bp.IsAllowed(BucketPolicyArgs{
+		Action:          GetObjectAction,
+		BucketName:      "bucket",
+		ObjectName:      "o",
+		ConditionValues: map[string][]string{"SourceIp/x": {"v"}},
+	}) {
+		t.Error("a caller-supplied value must not satisfy a suffix the key does not take")
 	}
 }
 
@@ -119,21 +184,25 @@ func TestConditionVariableBucketPolicy(t *testing.T) {
 // condition reads no value, so a caller who supplies aws:username/x cannot
 // satisfy it.
 func TestConditionVariableStoredPolicyFailsClosed(t *testing.T) {
-	doc := `{"Version": "2012-10-17", "Statement": [{"Effect": "Allow", "Action": ["s3:GetObject"],
+	for _, key := range []string{"aws:username/x", "aws:username/"} {
+		doc := `{"Version": "2012-10-17", "Statement": [{"Effect": "Allow", "Action": ["s3:GetObject"],
   "Resource": ["arn:aws:s3:::bucket/*"],
-  "Condition": {"StringEquals": {"aws:username/x": ["mallory"]}}}]}`
-	var p Policy
-	if err := json.Unmarshal([]byte(doc), &p); err != nil {
-		t.Fatalf("a stored policy must still load: %v", err)
-	}
-	if p.IsAllowed(Args{
-		AccountName:     "mallory",
-		Action:          GetObjectAction,
-		BucketName:      "bucket",
-		ObjectName:      "o",
-		ConditionValues: map[string][]string{"username/x": {"mallory"}},
-	}) {
-		t.Error("a caller-supplied value must not satisfy a suffix the key does not take")
+  "Condition": {"StringEquals": {"` + key + `": ["mallory"]}}}]}`
+		var p Policy
+		if err := json.Unmarshal([]byte(doc), &p); err != nil {
+			t.Fatalf("a stored policy with %s must still load: %v", key, err)
+		}
+		if p.IsAllowed(Args{
+			AccountName: "mallory",
+			Action:      GetObjectAction,
+			BucketName:  "bucket",
+			ObjectName:  "o",
+			ConditionValues: map[string][]string{
+				"username/x": {"mallory"}, "username/": {"mallory"}, "username": {"mallory"},
+			},
+		}) {
+			t.Errorf("%s: a caller-supplied value must not satisfy a suffix the key does not take", key)
+		}
 	}
 }
 

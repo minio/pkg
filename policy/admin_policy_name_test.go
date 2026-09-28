@@ -223,23 +223,33 @@ func TestAdminPolicyNameNotAction(t *testing.T) {
 }
 
 // An admin key takes no /variable suffix: admin:PolicyName/x would read the
-// value PolicyName/x, which the server never sets and a caller might. Keys that
-// do take a variable keep parsing.
+// value PolicyName/x, which the server never sets and a caller might. Such a
+// policy loads but is refused before saving. Keys that do take a variable keep
+// parsing and saving.
 func TestAdminPolicyNameRefusesVariableSuffix(t *testing.T) {
 	for _, key := range []string{"admin:PolicyName/target", "admin:PolicyName/", "admin:PolicyName/a/b"} {
 		doc := `{"Version": "2012-10-17", "Statement": [{"Effect": "Allow",
   "Action": ["admin:CreatePolicy"],
   "Condition": {"StringLike": {"` + key + `": ["app-*"]}}}]}`
-		if _, err := ParseConfig(strings.NewReader(doc)); err == nil {
-			t.Errorf("condition key %q must be refused", key)
+		p, err := ParseConfig(strings.NewReader(doc))
+		if err != nil {
+			t.Errorf("condition key %q must load: %v", key, err)
+			continue
+		}
+		if err := p.CheckVariables(); err == nil {
+			t.Errorf("condition key %q must be refused before saving", key)
 		}
 	}
 
 	doc := `{"Version": "2012-10-17", "Statement": [{"Effect": "Allow",
   "Action": ["s3:GetObject"], "Resource": ["arn:aws:s3:::bucket/*"],
   "Condition": {"StringEquals": {"s3:ExistingObjectTag/team": ["a"]}}}]}`
-	if _, err := ParseConfig(strings.NewReader(doc)); err != nil {
-		t.Errorf("a key that takes a variable must still parse: %v", err)
+	p, err := ParseConfig(strings.NewReader(doc))
+	if err != nil {
+		t.Fatalf("a key that takes a variable must still parse: %v", err)
+	}
+	if err := p.CheckVariables(); err != nil {
+		t.Errorf("a key that takes a variable must still be saved: %v", err)
 	}
 }
 
