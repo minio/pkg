@@ -165,6 +165,19 @@ func (policy BucketPolicy) Validate(bucketName string) error {
 	return nil
 }
 
+// CheckVariables refuses a condition key carrying a /<variable> suffix its
+// name does not take. Call it before saving a bucket policy: loading does not
+// check, so a policy stored before this rule keeps loading, and its suffixed
+// conditions fail closed.
+func (policy BucketPolicy) CheckVariables() error {
+	for _, statement := range policy.Statements {
+		if err := statement.Conditions.CheckVariables(); err != nil {
+			return Errorf("%w", err)
+		}
+	}
+	return nil
+}
+
 // ParseBucketPolicyConfig - parses data in given reader to Policy.
 func ParseBucketPolicyConfig(reader io.Reader, bucketName string) (*BucketPolicy, error) {
 	var policy BucketPolicy

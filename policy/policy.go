@@ -541,6 +541,19 @@ func (iamp Policy) Validate() error {
 	return iamp.isValid()
 }
 
+// CheckVariables refuses a condition key carrying a /<variable> suffix its
+// name does not take. Call it before saving a policy: loading does not check,
+// so a policy stored before this rule keeps loading, and its suffixed
+// conditions fail closed.
+func (iamp Policy) CheckVariables() error {
+	for _, statement := range iamp.Statements {
+		if err := statement.Conditions.CheckVariables(); err != nil {
+			return Errorf("%w", err)
+		}
+	}
+	return nil
+}
+
 // ValidateStrict applies strict validation rules suitable for new
 // policy creation. It rejects policies that would be accepted by
 // Validate for backward compatibility but are invalid going forward

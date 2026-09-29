@@ -97,7 +97,11 @@ func (functions Functions) VariablesAllowed() bool {
 // take one.
 func (functions Functions) CheckVariables() error {
 	for _, f := range functions {
-		if key := f.key(); !key.VariableAllowed() {
+		key := f.key()
+		if key.emptyVariable {
+			return fmt.Errorf("condition key '%v' ends in a slash that names no variable", key)
+		}
+		if !key.VariableAllowed() {
 			return fmt.Errorf("condition key '%v' takes no variable; only %v do", key, variableKeyNames())
 		}
 	}

@@ -27,6 +27,10 @@ import (
 type Key struct {
 	name     KeyName
 	variable string
+	// emptyVariable marks a key written with a trailing slash, such as
+	// aws:username/. It names no variable, so saving refuses it, but a policy
+	// stored before that check must still load and marshal back unchanged.
+	emptyVariable bool
 }
 
 // IsValid - checks if key is valid or not.
@@ -46,7 +50,7 @@ func (key Key) Is(name KeyName) bool {
 }
 
 func (key Key) String() string {
-	if key.variable != "" {
+	if key.variable != "" || key.emptyVariable {
 		return string(key.name) + "/" + key.variable
 	}
 	return string(key.name)
@@ -69,7 +73,7 @@ func (key Key) VarName() string {
 // Name - returns key name which is stripped value of prefixes "aws:" and "s3:"
 func (key Key) Name() string {
 	name := key.name.Name()
-	if key.variable != "" {
+	if key.variable != "" || key.emptyVariable {
 		return name + "/" + key.variable
 	}
 	return name
@@ -99,13 +103,12 @@ func parseKey(s string) (Key, error) {
 	}
 
 	key := Key{
-		name:     KeyName(name),
-		variable: variable,
+		name:          KeyName(name),
+		variable:      variable,
+		emptyVariable: name != s && variable == "",
 	}
 
-	// A trailing slash names no variable, so the key is malformed whatever
-	// its name.
-	if key.IsValid() && (name == s || variable != "") {
+	if key.IsValid() {
 		return key, nil
 	}
 
@@ -116,6 +119,9 @@ func parseKey(s string) (Key, error) {
 // its name takes. A policy naming a key with a suffix it does not take is
 // refused, and such a key evaluates with no value.
 func (key Key) VariableAllowed() bool {
+	if key.emptyVariable {
+		return false
+	}
 	return key.variable == "" || key.name.TakesVariable()
 }
 
