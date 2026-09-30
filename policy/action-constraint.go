@@ -18,9 +18,10 @@
 package policy
 
 // ActionType constrains the set of policy action types. It lets generic helpers
-// accept any typed action — S3 (Action), admin, STS, KMS, Tables, Vectors, or
-// Memory — without forcing callers to convert to Action at each call site. A
-// bare string is intentionally excluded so only real policy action types match.
+// accept any typed action — S3 (Action), admin, STS, KMS, Tables, Vectors,
+// Memory, or Files — without forcing callers to convert to Action at each call
+// site. A bare string is intentionally excluded so only real policy action types
+// match.
 type ActionType interface {
-	Action | AdminAction | STSAction | KMSAction | TableAction | VectorsAction | MemoryAction
+	Action | AdminAction | STSAction | KMSAction | TableAction | VectorsAction | MemoryAction | FilesAction
 }

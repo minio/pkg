@@ -166,7 +166,7 @@ func (statement Statement) validateActionTypes() error {
 	if len(actions) == 0 {
 		actions = statement.NotActions
 	}
-	var hasS3, hasAdmin, hasSTS, hasKMS, hasTable, hasVectors, hasMemory bool
+	var hasS3, hasAdmin, hasSTS, hasKMS, hasTable, hasVectors, hasMemory, hasFiles bool
 	for action := range actions {
 		switch {
 		case AdminAction(action).IsValid():
@@ -181,12 +181,14 @@ func (statement Statement) validateActionTypes() error {
 			hasVectors = true
 		case MemoryAction(action).IsValid():
 			hasMemory = true
+		case FilesAction(action).IsValid():
+			hasFiles = true
 		default:
 			hasS3 = true
 		}
 	}
 	count := 0
-	for _, b := range []bool{hasS3, hasAdmin, hasSTS, hasKMS, hasTable, hasVectors, hasMemory} {
+	for _, b := range []bool{hasS3, hasAdmin, hasSTS, hasKMS, hasTable, hasVectors, hasMemory, hasFiles} {
 		if b {
 			count++
 		}
@@ -310,6 +312,15 @@ func (statement Statement) isVectors() bool {
 func (statement Statement) isMemory() bool {
 	for action := range statement.Actions {
 		if MemoryAction(action).IsValid() {
+			return true
+		}
+	}
+	return false
+}
+
+func (statement Statement) isFiles() bool {
+	for action := range statement.Actions {
+		if FilesAction(action).IsValid() {
 			return true
 		}
 	}
@@ -480,6 +491,31 @@ func (statement Statement) isValid() error {
 			if len(statement.NotResources) > 0 && !statement.NotResources.ObjectResourceExists() && !statement.NotResources.BucketResourceExists() {
 				return Errorf("unsupported NotResource found %v for action %v", statement.NotResources, action)
 			}
+		}
+
+		return nil
+	}
+
+	if statement.isFiles() {
+		if err := statement.Actions.ValidateFiles(); err != nil {
+			return err
+		}
+		for action := range statement.Actions {
+			keys := statement.Conditions.Keys()
+			keyDiff := keys.Difference(FilesActionConditionKeyMap[action])
+			if !keyDiff.IsEmpty() {
+				return Errorf("unsupported condition keys '%v' used for action '%v'", keyDiff, action)
+			}
+		}
+
+		// Files actions name no resource yet: an export is addressed by the
+		// request, not by an ARN in the policy. Refuse a Resource rather than
+		// ignore it, because an ignored Resource on an Allow would read as a
+		// grant scoped to one export while granting every export. Refusing now
+		// also leaves export-scoped ARNs free to be added later without changing
+		// what an existing policy means.
+		if len(statement.Resources) > 0 || len(statement.NotResources) > 0 {
+			return Errorf("s3files actions do not take a Resource or NotResource")
 		}
 
 		return nil
