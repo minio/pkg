@@ -253,6 +253,19 @@ func (actionSet ActionSet) ToMemorySlice() []MemoryAction {
 	return actions
 }
 
+// ToFilesSlice - returns slice of Files actions from the action set.
+func (actionSet ActionSet) ToFilesSlice() []FilesAction {
+	if len(actionSet) == 0 {
+		return nil
+	}
+	actions := make([]FilesAction, 0, len(actionSet))
+	for action := range actionSet {
+		actions = append(actions, FilesAction(action))
+	}
+
+	return actions
+}
+
 // UnmarshalJSON - decodes JSON data to ActionSet.
 func (actionSet *ActionSet) UnmarshalJSON(data []byte) error {
 	var sset set.StringSet
@@ -323,6 +336,16 @@ func (actionSet ActionSet) ValidateMemory() error {
 	for _, action := range actionSet.ToMemorySlice() {
 		if !action.IsValid() {
 			return Errorf("unsupported memory action '%v'", action)
+		}
+	}
+	return nil
+}
+
+// ValidateFiles checks if all actions are valid Files actions
+func (actionSet ActionSet) ValidateFiles() error {
+	for _, action := range actionSet.ToFilesSlice() {
+		if !action.IsValid() {
+			return Errorf("unsupported files action '%v'", action)
 		}
 	}
 	return nil
