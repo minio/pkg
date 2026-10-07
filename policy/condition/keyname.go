@@ -75,6 +75,7 @@ var variableKeys = map[KeyName]bool{
 	RequestObjectTag:     true,
 	S3TablesWarehouseTag: true,
 	S3TablesTableTag:     true,
+	AWSRequestTag:        true,
 }
 
 func variableKeyNames() []string {
@@ -253,6 +254,13 @@ const (
 	// request, set when the session was assumed and fixed for its lifetime.
 	AWSSourceIdentity KeyName = "aws:SourceIdentity"
 
+	// AWSRequestTag filters a tagging request by the value it sets for one
+	// tag key, as in aws:RequestTag/<key>.
+	AWSRequestTag KeyName = "aws:RequestTag"
+
+	// AWSTagKeys filters a tagging request by the tag keys it sets or removes.
+	AWSTagKeys KeyName = "aws:TagKeys"
+
 	// S3SignatureVersion - identifies the version of AWS Signature that you want to support for authenticated requests.
 	S3SignatureVersion KeyName = "s3:signatureversion"
 
@@ -407,6 +415,8 @@ var AllSupportedKeys = []KeyName{
 	AWSUsername,
 	AWSGroups,
 	AWSSourceIdentity,
+	AWSRequestTag,
+	AWSTagKeys,
 	LDAPUser,
 	LDAPUsername,
 	LDAPGroups,
