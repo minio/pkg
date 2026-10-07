@@ -370,6 +370,8 @@ func createTableActionConditionKeyMap() map[Action]condition.KeySet {
 	s3TablesRegisterLocationKey := condition.S3TablesRegisterLocation.ToKey()
 	s3TablesWarehouseTagKey := condition.S3TablesWarehouseTag.ToKey()
 	s3TablesTableTagKey := condition.S3TablesTableTag.ToKey()
+	awsRequestTagKey := condition.AWSRequestTag.ToKey()
+	awsTagKeysKey := condition.AWSTagKeys.ToKey()
 
 	withCommon := func(keys ...condition.Key) condition.KeySet {
 		merged := append([]condition.Key{}, commonKeys...)
@@ -421,7 +423,7 @@ func createTableActionConditionKeyMap() map[Action]condition.KeySet {
 		s3TablesTableTagKey,
 	)
 	tableActionConditionKeyMap[Action(S3TablesCreateNamespaceAction)] = withWarehouseCommon(s3TablesNamespaceKey)
-	tableActionConditionKeyMap[Action(S3TablesCreateTableAction)] = withWarehouseCommon(s3TablesNamespaceKey, s3TablesTableNameKey, s3TablesKMSKeyKey, s3TablesSSEAlgorithmKey)
+	tableActionConditionKeyMap[Action(S3TablesCreateTableAction)] = withWarehouseCommon(s3TablesNamespaceKey, s3TablesTableNameKey, s3TablesKMSKeyKey, s3TablesSSEAlgorithmKey, awsRequestTagKey, awsTagKeysKey)
 	tableActionConditionKeyMap[Action(S3TablesCreateTableBucketAction)] = withCommon(s3TablesKMSKeyKey, s3TablesSSEAlgorithmKey)
 	tableActionConditionKeyMap[Action(S3TablesDeleteNamespaceAction)] = withWarehouseCommon(s3TablesNamespaceKey)
 	tableActionConditionKeyMap[Action(S3TablesDeleteTableAction)] = withTableCommon()
@@ -486,11 +488,11 @@ func createTableActionConditionKeyMap() map[Action]condition.KeySet {
 	tableActionConditionKeyMap[Action(S3TablesRegisterFunctionAction)] = withFunctionCommon(s3TablesRegisterLocationKey)
 	tableActionConditionKeyMap[Action(S3TablesListFunctionsAction)] = withWarehouseCommon(s3TablesNamespaceKey)
 	tableActionConditionKeyMap[Action(S3TablesUpdateNamespacePropertiesAction)] = withWarehouseCommon(s3TablesNamespaceKey)
-	tableActionConditionKeyMap[Action(S3TablesTagWarehouseAction)] = withWarehouseCommon()
-	tableActionConditionKeyMap[Action(S3TablesUntagWarehouseAction)] = withWarehouseCommon()
+	tableActionConditionKeyMap[Action(S3TablesTagWarehouseAction)] = withWarehouseCommon(awsRequestTagKey, awsTagKeysKey)
+	tableActionConditionKeyMap[Action(S3TablesUntagWarehouseAction)] = withWarehouseCommon(awsTagKeysKey)
 	tableActionConditionKeyMap[Action(S3TablesListTagsForWarehouseAction)] = withWarehouseCommon()
-	tableActionConditionKeyMap[Action(S3TablesTagTableAction)] = withTableCommon()
-	tableActionConditionKeyMap[Action(S3TablesUntagTableAction)] = withTableCommon()
+	tableActionConditionKeyMap[Action(S3TablesTagTableAction)] = withTableCommon(awsRequestTagKey, awsTagKeysKey)
+	tableActionConditionKeyMap[Action(S3TablesUntagTableAction)] = withTableCommon(awsTagKeysKey)
 	tableActionConditionKeyMap[Action(S3TablesListTagsForTableAction)] = withTableCommon()
 	tableActionConditionKeyMap[Action(S3TablesPutTableAnnotationAction)] = withTableCommon()
 	tableActionConditionKeyMap[Action(S3TablesGetTableAnnotationAction)] = withTableCommon()

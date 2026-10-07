@@ -83,6 +83,7 @@ func TestConditionVariableAllowedOnTagKeys(t *testing.T) {
 		{"s3:RequestObjectTag/team", `"s3:PutObject"`, `"arn:aws:s3:::bucket/*"`},
 		{"s3tables:TableTag/team", `"s3tables:GetTable"`, `"arn:aws:s3tables:::bucket/*"`},
 		{"s3tables:WarehouseTag/team", `"s3tables:GetTable"`, `"arn:aws:s3tables:::bucket/*"`},
+		{"aws:RequestTag/team", `"s3tables:TagTable"`, `"arn:aws:s3tables:::bucket/*"`},
 	} {
 		doc := `{"Version": "2012-10-17", "Statement": [` + conditionStatement(tc.actions, tc.resources, tc.key) + `]}`
 		p, err := ParseConfig(strings.NewReader(doc))
