@@ -210,7 +210,7 @@ func TestLookupEnvReferenceScheme(t *testing.T) {
 		{name: "upper case env reference", value: "ENV://minio:minio123@" + host(ts) + path, want: fetched, wantUser: "minio", wantPass: "minio123"},
 		{name: "env+tls reference", value: "env+tls://minio:minio123@" + host(tlsTS) + path, want: fetched, wantUser: "minio", wantPass: "minio123"},
 		{name: "mixed case env+tls reference", value: "env+TLS://minio:minio123@" + host(tlsTS) + path, want: fetched, wantUser: "minio", wantPass: "minio123"},
-		{name: "unparsable reference", value: "env://minio:minio123@127.0.0.1:1/%zz", wantErr: true},
+		{name: "unparsable reference", value: "env://minio:minio123@" + host(ts) + "/%zz", wantErr: true},
 		{name: "unreachable reference uses cache", value: "env://minio:minio123@127.0.0.1:1" + path, cached: "cached", want: "cached"},
 	}
 	for _, tc := range testCases {
