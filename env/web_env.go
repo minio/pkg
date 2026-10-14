@@ -167,19 +167,20 @@ func Environ() []string {
 
 // LookupEnv retrieves the value of the environment variable named by `key`.
 //
-// If the value of the variable starts with "env://" or "env+tls://" it is
-// fetched from the referenced remote server. The fetched value is cached in a
-// separate environment variable prefixed with an underscore for subsequent
-// lookups should the remote server be unreachable. When fetching from a remote
-// server the username and password used are also returned.
+// If the value of the variable starts with "env://" or "env+tls://", in any
+// letter case, it is fetched from the referenced remote server. The fetched
+// value is cached in a separate environment variable prefixed with an
+// underscore for subsequent lookups should the remote server be unreachable.
+// When fetching from a remote server the username and password used are also
+// returned.
 //
 // For regular environment variables the value is returned as-is with empty
 // credentials.
 func LookupEnv(key string) (string, string, string, error) {
 	v, ok := os.LookupEnv(key)
-	if ok && strings.HasPrefix(v, webEnvScheme) {
-		// If env value starts with `env*://`
-		// continue to parse and fetch from remote
+	if scheme, _, found := strings.Cut(v, "://"); ok && found && (strings.ToLower(scheme) == webEnvScheme || strings.ToLower(scheme) == webEnvSchemeSecure) {
+		// Not strings.EqualFold: it also folds U+017F to "s", and
+		// url.Parse rejects such a scheme.
 		var err error
 		v, user, pwd, err := getEnvValueFromHTTP(strings.TrimSpace(v), key)
 		if err != nil {

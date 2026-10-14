@@ -18,10 +18,13 @@
 package env
 
 import (
+	"crypto/x509"
 	"fmt"
 	"net/http"
 	"net/http/httptest"
 	"net/url"
+	"os"
+	"strings"
 	"testing"
 	"time"
 
@@ -163,5 +166,89 @@ func TestGetEnv(t *testing.T) {
 	t.Setenv("_TEST_ENV", "value-new")
 	if v := Get("_TEST_ENV", "value"); v != "value-new" {
 		t.Fatalf("Expected 'value-new', but got %s", v)
+	}
+}
+
+func TestLookupEnvReferenceScheme(t *testing.T) {
+	ts := startTestServer(t)
+	tlsTS := httptest.NewTLSServer(ts.Config.Handler)
+	t.Cleanup(tlsTS.Close)
+	pool := x509.NewCertPool()
+	pool.AddCert(tlsTS.Certificate())
+	prevCAs := globalRootCAs
+	RegisterGlobalCAs(pool)
+	t.Cleanup(func() { RegisterGlobalCAs(prevCAs) })
+
+	host := func(s *httptest.Server) string {
+		u, err := url.Parse(s.URL)
+		if err != nil {
+			t.Fatal(err)
+		}
+		return u.Host
+	}
+	const path = "/webhook/v1/getenv/default/minio"
+	const fetched = "http://127.0.0.{1..4}:9000/data{1...4}"
+
+	testCases := []struct {
+		name, value, cached      string
+		want, wantUser, wantPass string
+		wantErr                  bool
+	}{
+		{name: "plain envroot", value: "envroot", want: "envroot"},
+		{name: "plain value with stale cache", value: "envroot", cached: "stale", want: "envroot"},
+		{name: "plain env", value: "env", want: "env"},
+		{name: "plain environment", value: "environment", want: "environment"},
+		{name: "plain env+tlsx", value: "env+tlsx", want: "env+tlsx"},
+		{name: "opaque env colon", value: "env:foo", want: "env:foo"},
+		{name: "single slash", value: "env:/x", want: "env:/x"},
+		{name: "other scheme envs", value: "envs://h/x", want: "envs://h/x"},
+		{name: "other scheme env-tls", value: "env-tls://h/x", want: "env-tls://h/x"},
+		{name: "other scheme env+tlsx", value: "env+tlsx://h/x", want: "env+tlsx://h/x"},
+		{name: "leading space", value: " env://x", want: " env://x"},
+		{name: "unicode fold of tls", value: "ENV+TL\u017f://x", want: "ENV+TL\u017f://x"},
+		{name: "env reference", value: "env://minio:minio123@" + host(ts) + path, want: fetched, wantUser: "minio", wantPass: "minio123"},
+		{name: "upper case env reference", value: "ENV://minio:minio123@" + host(ts) + path, want: fetched, wantUser: "minio", wantPass: "minio123"},
+		{name: "env+tls reference", value: "env+tls://minio:minio123@" + host(tlsTS) + path, want: fetched, wantUser: "minio", wantPass: "minio123"},
+		{name: "mixed case env+tls reference", value: "env+TLS://minio:minio123@" + host(tlsTS) + path, want: fetched, wantUser: "minio", wantPass: "minio123"},
+		{name: "unparsable reference", value: "env://minio:minio123@127.0.0.1:1/%zz", wantErr: true},
+		{name: "unreachable reference uses cache", value: "env://minio:minio123@127.0.0.1:1" + path, cached: "cached", want: "cached"},
+	}
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			t.Setenv("MINIO_ARGS", tc.value)
+			t.Setenv("_MINIO_ARGS", tc.cached)
+			if tc.cached == "" {
+				if err := os.Unsetenv("_MINIO_ARGS"); err != nil {
+					t.Fatal(err)
+				}
+			}
+			got, user, pass, err := LookupEnv("MINIO_ARGS")
+			if (err != nil) != tc.wantErr {
+				t.Fatalf("got error %v, want error %v", err, tc.wantErr)
+			}
+			if got != tc.want || user != tc.wantUser || pass != tc.wantPass {
+				t.Fatalf("got (%q, %q, %q), want (%q, %q, %q)", got, user, pass, tc.want, tc.wantUser, tc.wantPass)
+			}
+			cache, cached := os.LookupEnv("_MINIO_ARGS")
+			switch {
+			case tc.wantUser != "":
+				if cache != tc.want {
+					t.Fatalf("cache holds %q, want %q", cache, tc.want)
+				}
+			case tc.cached == "":
+				if cached {
+					t.Fatalf("cache set to %q, want unset", cache)
+				}
+			case cache != tc.cached:
+				t.Fatalf("cache holds %q, want %q", cache, tc.cached)
+			}
+			want := strings.TrimSpace(tc.want)
+			if tc.wantErr {
+				want = "default"
+			}
+			if v := Get("MINIO_ARGS", "default"); v != want {
+				t.Fatalf("Get returned %q, want %q", v, want)
+			}
+		})
 	}
 }
