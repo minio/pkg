@@ -19,12 +19,15 @@ package env
 
 import (
 	"crypto/x509"
+	"errors"
 	"fmt"
+	"net"
 	"net/http"
 	"net/http/httptest"
 	"net/url"
 	"os"
 	"strings"
+	"sync/atomic"
 	"testing"
 	"time"
 
@@ -178,6 +181,22 @@ func TestLookupEnvReferenceScheme(t *testing.T) {
 	prevCAs := globalRootCAs
 	RegisterGlobalCAs(pool)
 	t.Cleanup(func() { RegisterGlobalCAs(prevCAs) })
+	unparsableLn, err := net.Listen("tcp", "127.0.0.1:0")
+	if err != nil {
+		t.Fatal(err)
+	}
+	t.Cleanup(func() { unparsableLn.Close() })
+	var unparsableConns atomic.Int32
+	go func() {
+		for {
+			c, err := unparsableLn.Accept()
+			if err != nil {
+				return
+			}
+			unparsableConns.Add(1)
+			c.Close()
+		}
+	}()
 
 	host := func(s *httptest.Server) string {
 		u, err := url.Parse(s.URL)
@@ -192,7 +211,7 @@ func TestLookupEnvReferenceScheme(t *testing.T) {
 	testCases := []struct {
 		name, value, cached      string
 		want, wantUser, wantPass string
-		wantErr                  bool
+		wantParseErr             bool
 	}{
 		{name: "plain envroot", value: "envroot", want: "envroot"},
 		{name: "plain value with stale cache", value: "envroot", cached: "stale", want: "envroot"},
@@ -210,7 +229,7 @@ func TestLookupEnvReferenceScheme(t *testing.T) {
 		{name: "upper case env reference", value: "ENV://minio:minio123@" + host(ts) + path, want: fetched, wantUser: "minio", wantPass: "minio123"},
 		{name: "env+tls reference", value: "env+tls://minio:minio123@" + host(tlsTS) + path, want: fetched, wantUser: "minio", wantPass: "minio123"},
 		{name: "mixed case env+tls reference", value: "env+TLS://minio:minio123@" + host(tlsTS) + path, want: fetched, wantUser: "minio", wantPass: "minio123"},
-		{name: "unparsable reference", value: "env://minio:minio123@" + host(ts) + "/%zz", wantErr: true},
+		{name: "unparsable reference", value: "env://minio:minio123@" + unparsableLn.Addr().String() + "/%zz", wantParseErr: true},
 		{name: "unreachable reference uses cache", value: "env://minio:minio123@127.0.0.1:1" + path, cached: "cached", want: "cached"},
 	}
 	for _, tc := range testCases {
@@ -223,8 +242,12 @@ func TestLookupEnvReferenceScheme(t *testing.T) {
 				}
 			}
 			got, user, pass, err := LookupEnv("MINIO_ARGS")
-			if (err != nil) != tc.wantErr {
-				t.Fatalf("got error %v, want error %v", err, tc.wantErr)
+			if (err != nil) != tc.wantParseErr {
+				t.Fatalf("got error %v, want error %v", err, tc.wantParseErr)
+			}
+			var escapeErr url.EscapeError
+			if tc.wantParseErr && !errors.As(err, &escapeErr) {
+				t.Fatalf("got error %v, want a url.Parse escape error", err)
 			}
 			if got != tc.want || user != tc.wantUser || pass != tc.wantPass {
 				t.Fatalf("got (%q, %q, %q), want (%q, %q, %q)", got, user, pass, tc.want, tc.wantUser, tc.wantPass)
@@ -243,11 +266,14 @@ func TestLookupEnvReferenceScheme(t *testing.T) {
 				t.Fatalf("cache holds %q, want %q", cache, tc.cached)
 			}
 			want := strings.TrimSpace(tc.want)
-			if tc.wantErr {
+			if tc.wantParseErr {
 				want = "default"
 			}
 			if v := Get("MINIO_ARGS", "default"); v != want {
 				t.Fatalf("Get returned %q, want %q", v, want)
+			}
+			if n := unparsableConns.Load(); tc.wantParseErr && n != 0 {
+				t.Fatalf("unparsable reference opened %d connection(s), want 0", n)
 			}
 		})
 	}
