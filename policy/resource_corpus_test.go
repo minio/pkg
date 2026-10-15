@@ -32,9 +32,8 @@ import (
 var acceptedResourceCorpus = []string{
 	// Wildcards. Anything longer than "*" keeps what follows as its pattern.
 	//
-	// "**" is not exotic: String() renders the wildcard type as its prefix plus
-	// its pattern, so a policy written as "*" is re-serialized as "**". Any
-	// stored policy MinIO has read and written back carries that form.
+	// "**" is not exotic: older releases re-serialized "*" as "**", so any
+	// stored policy MinIO read and wrote back carries that form.
 	"*",
 	"**",
 	"*foo",
@@ -85,9 +84,8 @@ func TestAcceptedResourceCorpusStillParses(t *testing.T) {
 			if !r.IsValid() {
 				t.Fatalf("parsed but no longer valid: %#v", r)
 			}
-			// Assert the round trip is stable rather than byte-identical: "*"
-			// serializes to "**" and settles there, which is how the doubled
-			// form reaches stored policies in the first place.
+			// Assert the round trip is stable rather than byte-identical: "**"
+			// serializes to "*".
 			again, err := ParseResource(r.String())
 			if err != nil {
 				t.Fatalf("re-parsing %q failed: %v", r.String(), err)
