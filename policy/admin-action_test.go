@@ -20,6 +20,8 @@ package policy
 import (
 	"strings"
 	"testing"
+
+	"github.com/minio/pkg/v3/policy/condition"
 )
 
 // isValidScan is the linear scan AdminAction.IsValid replaced. The fast path
@@ -234,6 +236,24 @@ func TestSetRootAccessAdminAction(t *testing.T) {
 	for name := range want {
 		if !seen[name] {
 			t.Errorf("built-in policy %q not found in DefaultPolicies", name)
+		}
+	}
+}
+
+func TestDeltaSharingUseActions(t *testing.T) {
+	wildcard := Policy{
+		Version:    DefaultVersion,
+		Statements: []Statement{NewStatement("", Allow, NewActionSet(Action("admin:DeltaSharing*")), NewResourceSet(), condition.NewFunctions())},
+	}
+	for _, action := range []AdminAction{DeltaSharingUseShareAction, DeltaSharingUseRecipientAction} {
+		if !action.IsValid() {
+			t.Errorf("%s.IsValid() = false, want true", action)
+		}
+		if !AllAdminActions.Match(action) {
+			t.Errorf("admin:* does not match %s", action)
+		}
+		if !wildcard.IsAllowed(Args{AccountName: "tester", Action: Action(action)}) {
+			t.Errorf("admin:DeltaSharing* does not allow %s", action)
 		}
 	}
 }
