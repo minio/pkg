@@ -67,6 +67,10 @@ const (
 	KMSEnableAction KMSAction = "kms:Enable"
 	// KMSKeyRotateAction - allows rotating KMS keys
 	KMSKeyRotateAction KMSAction = "kms:KeyRotate"
+	// KMSMigrateKeysAction - allows importing the builtin KMS keys into MinKMS. It is an AIStor extension.
+	KMSMigrateKeysAction KMSAction = "kms:MigrateKeys"
+	// KMSCleanupLocalKeysAction - allows deleting the builtin KMS keys after their import into MinKMS. It is an AIStor extension.
+	KMSCleanupLocalKeysAction KMSAction = "kms:CleanupLocalKeys"
 	// AllKMSActions - provides all admin permissions
 	AllKMSActions KMSAction = "kms:*"
 )
@@ -96,6 +100,8 @@ var supportedKMSActions = map[KMSAction]struct{}{
 	KMSErrorLogAction:             {},
 	KMSEnableAction:               {},
 	KMSKeyRotateAction:            {},
+	KMSMigrateKeysAction:          {},
+	KMSCleanupLocalKeysAction:     {},
 	AllKMSActions:                 {},
 }
 

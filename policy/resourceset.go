@@ -158,6 +158,9 @@ func (resourceSet ResourceSet) ValidateStrict() error {
 			return Errorf("invalid resource '%v' - an ARN prefix with no resource after it matches nothing; use '%v*' to mean every resource",
 				resource, resource.Type)
 		}
+		if resource.isStarPrefixed() {
+			return Errorf("invalid resource '%v' - a resource must be an ARN or exactly '*'", resource)
+		}
 	}
 
 	return nil

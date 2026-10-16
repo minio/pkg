@@ -367,3 +367,101 @@ func TestResourceMatchEscapes(t *testing.T) {
 		})
 	}
 }
+
+// TestResourceStarRoundTrip pins how "*" and "*"-prefixed strings parse and
+// serialize. "*" used to come back as "**", which broke clients that match the
+// policy JSON itself. A "*" followed by more text is not an ARN; it still loads
+// so stored policies keep working, but ValidateStrict refuses it.
+func TestResourceStarRoundTrip(t *testing.T) {
+	testCases := []struct {
+		value       string
+		wantType    ResourceARNType
+		wantPattern string
+		wantString  string
+		strictErr   bool
+	}{
+		{"*", ResourceARNAll, "*", "*", false},
+		{"**", ResourceARNAll, "*", "*", false},
+		{"***", ResourceARNAll, "**", "***", true},
+		{"*-bucket", ResourceARNAll, "-bucket", "*-bucket", true},
+		{"*bucket*", ResourceARNAll, "bucket*", "*bucket*", true},
+		{"arn:aws:s3:::*", ResourceARNS3, "*", "arn:aws:s3:::*", false},
+		{"arn:aws:s3:::mybucket/*", ResourceARNS3, "mybucket/*", "arn:aws:s3:::mybucket/*", false},
+		{"arn:minio:kms:::*", ResourceARNKMS, "*", "arn:minio:kms:::*", false},
+		{"arn:minio:kms:::my-key", ResourceARNKMS, "my-key", "arn:minio:kms:::my-key", false},
+		{"arn:minio:memory:::*", ResourceARNMemory, "*", "arn:minio:memory:::*", false},
+		{"arn:minio:memory:::cortex/agents/alpha", ResourceARNMemory, "cortex/agents/alpha", "arn:minio:memory:::cortex/agents/alpha", false},
+		{"arn:aws:s3tables:::*", ResourceARNS3Tables, "*", "arn:aws:s3tables:::*", false},
+		{"arn:aws:s3tables:::bucket/demo/table/*", ResourceARNS3Tables, "bucket/demo/table/*", "arn:aws:s3tables:::bucket/demo/table/*", false},
+	}
+
+	for _, tc := range testCases {
+		t.Run(tc.value, func(t *testing.T) {
+			r, err := ParseResource(tc.value)
+			if err != nil {
+				t.Fatalf("ParseResource: unexpected error %v", err)
+			}
+			if r.Type != tc.wantType || r.Pattern != tc.wantPattern {
+				t.Fatalf("ParseResource = {%v %q}, want {%v %q}", r.Type, r.Pattern, tc.wantType, tc.wantPattern)
+			}
+			if !r.IsValid() {
+				t.Fatalf("parsed but not valid: %#v", r)
+			}
+			if got := r.String(); got != tc.wantString {
+				t.Errorf("String() = %q, want %q", got, tc.wantString)
+			}
+
+			data, err := json.Marshal(r)
+			if err != nil {
+				t.Fatalf("Marshal: %v", err)
+			}
+			wantJSON, _ := json.Marshal(tc.wantString)
+			if string(data) != string(wantJSON) {
+				t.Errorf("Marshal = %s, want %s", data, wantJSON)
+			}
+			var again Resource
+			if err := json.Unmarshal(data, &again); err != nil {
+				t.Fatalf("Unmarshal(%s): %v", data, err)
+			}
+			if again != r {
+				t.Errorf("JSON round trip changed the resource: %#v -> %s -> %#v", r, data, again)
+			}
+
+			err = NewResourceSet(r).ValidateStrict()
+			if tc.strictErr && err == nil {
+				t.Error("ValidateStrict accepted it")
+			}
+			if !tc.strictErr && err != nil {
+				t.Errorf("ValidateStrict: unexpected error %v", err)
+			}
+		})
+	}
+}
+
+// TestResourceStarMatch guards matching for the wildcard forms, which the
+// String fix must leave unchanged.
+func TestResourceStarMatch(t *testing.T) {
+	testCases := []struct {
+		value    string
+		resource string
+		want     bool
+	}{
+		{"*", "mybucket", true},
+		{"*", "mybucket/myobject", true},
+		{"**", "mybucket/myobject", true},
+		{"*-bucket", "-bucket", true},
+		{"*-bucket", "my-bucket", false},
+		{"*bucket*", "bucket-a", true},
+		{"*bucket*", "mybucket", false},
+	}
+
+	for _, tc := range testCases {
+		r, err := ParseResource(tc.value)
+		if err != nil {
+			t.Fatalf("ParseResource(%q): %v", tc.value, err)
+		}
+		if got := r.MatchResource(tc.resource); got != tc.want {
+			t.Errorf("%q matching %q = %v, want %v", tc.value, tc.resource, got, tc.want)
+		}
+	}
+}
