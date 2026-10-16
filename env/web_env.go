@@ -177,8 +177,12 @@ func Environ() []string {
 // For regular environment variables the value is returned as-is with empty
 // credentials.
 func LookupEnv(key string) (string, string, string, error) {
-	v, ok := os.LookupEnv(key)
-	if scheme, _, found := strings.Cut(v, "://"); ok && found && (strings.ToLower(scheme) == webEnvScheme || strings.ToLower(scheme) == webEnvSchemeSecure) {
+	v := os.Getenv(key)
+	scheme, _, found := strings.Cut(v, "://")
+	if found {
+		scheme = strings.ToLower(scheme)
+	}
+	if found && (scheme == webEnvScheme || scheme == webEnvSchemeSecure) {
 		// Not strings.EqualFold: it also folds U+017F to "s", and
 		// url.Parse rejects such a scheme.
 		var err error
