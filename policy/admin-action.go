@@ -302,6 +302,10 @@ const (
 	DeltaSharingDeleteTokenAction AdminAction = "admin:DeltaSharingDeleteToken"
 	// DeltaSharingListTokensAction - allow listing Delta Sharing tokens
 	DeltaSharingListTokensAction AdminAction = "admin:DeltaSharingListTokens"
+	// DeltaSharingUseShareAction - allow reading Delta Sharing shares owned by other users
+	DeltaSharingUseShareAction AdminAction = "admin:DeltaSharingUseShare"
+	// DeltaSharingUseRecipientAction - allow reading Delta Sharing recipients owned by other users
+	DeltaSharingUseRecipientAction AdminAction = "admin:DeltaSharingUseRecipient"
 	// ReadAlertsAction - allow reading stored alerts
 	ReadAlertsAction AdminAction = "admin:ReadAlerts"
 
@@ -417,15 +421,17 @@ var SupportedAdminActions = map[AdminAction]struct{}{
 
 	ServiceCordonAdminAction: {},
 
-	DeltaSharingAdminAction:       {},
-	DeltaSharingCreateShareAction: {},
-	DeltaSharingDeleteShareAction: {},
-	DeltaSharingListSharesAction:  {},
-	DeltaSharingGetShareAction:    {},
-	DeltaSharingUpdateShareAction: {},
-	DeltaSharingCreateTokenAction: {},
-	DeltaSharingDeleteTokenAction: {},
-	DeltaSharingListTokensAction:  {},
+	DeltaSharingAdminAction:        {},
+	DeltaSharingCreateShareAction:  {},
+	DeltaSharingDeleteShareAction:  {},
+	DeltaSharingListSharesAction:   {},
+	DeltaSharingGetShareAction:     {},
+	DeltaSharingUpdateShareAction:  {},
+	DeltaSharingCreateTokenAction:  {},
+	DeltaSharingDeleteTokenAction:  {},
+	DeltaSharingListTokensAction:   {},
+	DeltaSharingUseShareAction:     {},
+	DeltaSharingUseRecipientAction: {},
 
 	ReadAPILogsAction:   {},
 	ReadErrorLogsAction: {},
