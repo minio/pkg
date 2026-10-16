@@ -105,6 +105,12 @@ type Resource struct {
 // Such a resource is inert: it matches nothing.
 func (r Resource) IsBareARN() bool { return r.bareARN }
 
+// isStarPrefixed reports whether r is an all-types resource whose pattern is
+// not "*", such as one parsed from "*-bucket".
+func (r Resource) isStarPrefixed() bool {
+	return r.Type == ResourceARNAll && r.Pattern != "*"
+}
+
 func (r Resource) isKMS() bool {
 	return r.Type == ResourceARNKMS || r.Type == ResourceARNAll
 }
@@ -227,6 +233,9 @@ func (r Resource) MarshalJSON() ([]byte, error) {
 }
 
 func (r Resource) String() string {
+	if r.Type == ResourceARNAll && r.Pattern == "*" {
+		return "*"
+	}
 	return r.Type.String() + r.Pattern
 }
 
