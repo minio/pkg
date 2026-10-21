@@ -162,6 +162,25 @@ var DefaultPolicies = []struct {
 		},
 	},
 
+	// FilesAdmin - provides admin access to the AIStor Files export API. Like
+	// memoryAdmin it carries its own action family only, so an operator who
+	// also manages the exported buckets combines it with an S3 policy.
+	{
+		Name: "filesAdmin",
+		Definition: Policy{
+			Version: DefaultVersion,
+			Statements: []Statement{
+				{
+					SID:        ID(""),
+					Effect:     Allow,
+					Actions:    NewActionSet(Action(AllFilesActions)),
+					Resources:  NewResourceSet(),
+					Conditions: condition.NewFunctions(),
+				},
+			},
+		},
+	},
+
 	// IAMAdmin - provides IAM management access (users, groups, policies,
 	// service accounts) but no infrastructure, diagnostics, or S3 data access.
 	{
@@ -557,6 +576,13 @@ var DefaultPolicies = []struct {
 					Effect:     Allow,
 					Actions:    NewActionSet(Action(AllMemoryActions)),
 					Resources:  NewResourceSet(NewMemoryResource("*")),
+					Conditions: condition.NewFunctions(),
+				},
+				{
+					SID:        ID(""),
+					Effect:     Allow,
+					Actions:    NewActionSet(Action(AllFilesActions)),
+					Resources:  NewResourceSet(),
 					Conditions: condition.NewFunctions(),
 				},
 			},
