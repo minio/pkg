@@ -278,3 +278,52 @@ func TestLookupEnvReferenceScheme(t *testing.T) {
 		})
 	}
 }
+
+func TestLookupEnvRejectsErrorStatus(t *testing.T) {
+	var status atomic.Int32
+	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+		code := int(status.Load())
+		w.WriteHeader(code)
+		if code == http.StatusOK {
+			w.Write([]byte("fetched-value"))
+			return
+		}
+		w.Write([]byte(http.StatusText(code)))
+	}))
+	t.Cleanup(ts.Close)
+	const key = "_TEST_ENV_STATUS"
+	t.Setenv(key, "env://minio:minio123@"+strings.TrimPrefix(ts.URL, "http://"))
+
+	for _, code := range []int{
+		http.StatusUnauthorized,
+		http.StatusForbidden,
+		http.StatusNotFound,
+		http.StatusInternalServerError,
+		http.StatusServiceUnavailable,
+	} {
+		t.Setenv("_"+key, "")
+		os.Unsetenv("_" + key)
+		status.Store(int32(code))
+		v, _, _, err := LookupEnv(key)
+		if err == nil || v != "" {
+			t.Errorf("HTTP %d: LookupEnv = %q, %v; want an error", code, v, err)
+		}
+		if c, ok := os.LookupEnv("_" + key); ok {
+			t.Errorf("HTTP %d: cached %q, want no cache", code, c)
+		}
+	}
+
+	t.Setenv("_"+key, "")
+	os.Unsetenv("_" + key)
+	status.Store(http.StatusOK)
+	if v, _, _, err := LookupEnv(key); err != nil || v != "fetched-value" {
+		t.Fatalf("HTTP 200: LookupEnv = %q, %v; want fetched-value", v, err)
+	}
+	status.Store(http.StatusServiceUnavailable)
+	if v, _, _, err := LookupEnv(key); err != nil || v != "fetched-value" {
+		t.Errorf("HTTP 503 after a fetch: LookupEnv = %q, %v; want the cached fetched-value", v, err)
+	}
+	if c := os.Getenv("_" + key); c != "fetched-value" {
+		t.Errorf("HTTP 503 after a fetch: cache = %q, want fetched-value", c)
+	}
+}
