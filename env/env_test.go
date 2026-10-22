@@ -284,7 +284,7 @@ func TestLookupEnvRejectsErrorStatus(t *testing.T) {
 	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
 		code := int(status.Load())
 		w.WriteHeader(code)
-		if code == http.StatusOK {
+		if code >= 200 && code <= 299 {
 			w.Write([]byte("fetched-value"))
 			return
 		}
@@ -294,7 +294,20 @@ func TestLookupEnvRejectsErrorStatus(t *testing.T) {
 	const key = "_TEST_ENV_STATUS"
 	t.Setenv(key, "env://minio:minio123@"+strings.TrimPrefix(ts.URL, "http://"))
 
+	for _, code := range []int{http.StatusOK, http.StatusCreated, 299} {
+		t.Setenv("_"+key, "")
+		os.Unsetenv("_" + key)
+		status.Store(int32(code))
+		if v, _, _, err := LookupEnv(key); err != nil || v != "fetched-value" {
+			t.Errorf("HTTP %d: LookupEnv = %q, %v; want fetched-value", code, v, err)
+		}
+		if c := os.Getenv("_" + key); c != "fetched-value" {
+			t.Errorf("HTTP %d: cache = %q, want fetched-value", code, c)
+		}
+	}
+
 	for _, code := range []int{
+		http.StatusMultipleChoices,
 		http.StatusUnauthorized,
 		http.StatusForbidden,
 		http.StatusNotFound,
