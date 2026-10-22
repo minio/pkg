@@ -398,12 +398,28 @@ func (a ActionConditionKeyMap) Lookup(action Action) condition.KeySet {
 	}
 
 	ckeysMerged := condition.NewKeySet(commonKeys...)
+	if !bucketlessActions[action] {
+		ckeysMerged.Merge(bucketTagKeys)
+	}
 	for act, ckey := range a {
 		if action.Match(act) {
 			ckeysMerged.Merge(ckey)
 		}
 	}
 	return ckeysMerged
+}
+
+// bucketTagKeys are the keys every S3 action that acts on an existing bucket
+// takes, read from that bucket's tags.
+var bucketTagKeys = condition.NewKeySet(
+	condition.AWSResourceTag.ToKey(),
+	condition.S3BucketTag.ToKey(),
+)
+
+// bucketlessActions act on no existing bucket, so no bucket tags reach them.
+var bucketlessActions = map[Action]bool{
+	ListAllMyBucketsAction: true,
+	CreateBucketAction:     true,
 }
 
 // IAMActionConditionKeyMap - holds mapping of supported condition key for an action.
@@ -553,6 +569,8 @@ func createActionConditionKeyMap() ActionConditionKeyMap {
 			append([]condition.Key{
 				condition.RequestObjectTagKeys.ToKey(),
 				condition.RequestObjectTag.ToKey(),
+				condition.AWSRequestTag.ToKey(),
+				condition.AWSTagKeys.ToKey(),
 			}, commonKeys...)...),
 		PutObjectTaggingAction: condition.NewKeySet(
 			append([]condition.Key{
