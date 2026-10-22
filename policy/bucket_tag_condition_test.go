@@ -103,6 +103,8 @@ func TestBucketTagConditions(t *testing.T) {
 		`{"Version":"2012-10-17","Statement":[{"Effect":"Allow","Action":["s3:GetObject"],"Resource":["arn:aws:s3:::bucket/*"],"Condition":{"ForAnyValue:StringEquals":{"aws:TagKeys":["x"]}}}]}`,
 		`{"Version":"2012-10-17","Statement":[{"Effect":"Allow","Action":["s3:GetObject"],"Resource":["arn:aws:s3:::bucket/*"],"Condition":{"StringEquals":{"aws:RequestTag/x":["y"]}}}]}`,
 		`{"Version":"2012-10-17","Statement":[{"Effect":"Allow","Action":["s3tables:GetTable"],"Resource":["arn:aws:s3tables:::bucket/*"],"Condition":{"StringEquals":{"aws:ResourceTag/x":["y"]}}}]}`,
+		`{"Version":"2012-10-17","Statement":[{"Effect":"Allow","Action":["s3:ListAllMyBuckets"],"Resource":["arn:aws:s3:::*"],"Condition":{"StringEquals":{"aws:ResourceTag/x":["y"]}}}]}`,
+		`{"Version":"2012-10-17","Statement":[{"Effect":"Allow","Action":["s3:CreateBucket"],"Resource":["arn:aws:s3:::bucket"],"Condition":{"StringEquals":{"s3:BucketTag/x":["y"]}}}]}`,
 	} {
 		if _, err := ParseConfig(strings.NewReader(refused)); err == nil {
 			t.Errorf("must be refused: %s", refused)
