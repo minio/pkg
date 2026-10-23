@@ -151,6 +151,12 @@ func getEnvValueFromHTTP(urlStr, envKey string) (string, string, string, error) 
 	}
 	defer resp.Body.Close()
 
+	// The body of an error response is not the value: returning it would
+	// also replace the cached value that LookupEnv falls back to.
+	if resp.StatusCode < 200 || resp.StatusCode > 299 {
+		return "", "", "", fmt.Errorf("env webhook returned %s", resp.Status)
+	}
+
 	envValueBytes, err := io.ReadAll(resp.Body)
 	if err != nil {
 		return "", "", "", err
