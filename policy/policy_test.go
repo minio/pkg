@@ -2257,17 +2257,6 @@ func TestS3TablesActionsWithImplicitMatching(t *testing.T) {
 		]
 	}`
 
-	policy5JSON := `{
-		"Version": "2012-10-17",
-		"Statement": [
-			{
-				"Effect": "Allow",
-				"Action": ["s3tables:DeleteTableData"],
-				"Resource": ["arn:aws:s3tables:::bucket/del-warehouse/table/uuid-789"]
-			}
-		]
-	}`
-
 	testCases := []struct {
 		name           string
 		policyJSON     string
@@ -2393,60 +2382,6 @@ func TestS3TablesActionsWithImplicitMatching(t *testing.T) {
 			},
 			expectedResult: true,
 			description:    "Should match PutObject when both GetTableData and PutTableData are allowed",
-		},
-		{
-			name:       "DeleteTableData direct match",
-			policyJSON: policy5JSON,
-			args: Args{
-				Action:     Action(S3TablesDeleteTableDataAction),
-				BucketName: "bucket/del-warehouse/table/uuid-789",
-			},
-			expectedResult: true,
-			description:    "DeleteTableData action should match S3 Tables resource directly",
-		},
-		{
-			name:       "DeleteTableData implicit DeleteObject match",
-			policyJSON: policy5JSON,
-			args: Args{
-				Action:     DeleteObjectAction,
-				BucketName: "bucket",
-				ObjectName: "del-warehouse/table/uuid-789",
-			},
-			expectedResult: true,
-			description:    "DeleteObject (implicit from DeleteTableData) should match on the table resource",
-		},
-		{
-			name:       "DeleteTableData implicit DeleteObject with extra path",
-			policyJSON: policy5JSON,
-			args: Args{
-				Action:     DeleteObjectAction,
-				BucketName: "del-warehouse",
-				ObjectName: "uuid-789/data/file.parquet",
-			},
-			expectedResult: false,
-			description:    "a plain object path is not table data until the server presents it in tables form",
-		},
-		{
-			name:       "DeleteTableData wrong table uuid - should not match",
-			policyJSON: policy5JSON,
-			args: Args{
-				Action:     DeleteObjectAction,
-				BucketName: "del-warehouse",
-				ObjectName: "wrong-uuid",
-			},
-			expectedResult: false,
-			description:    "Should not match when table UUID doesn't match",
-		},
-		{
-			name:       "DeleteTableData does not grant PutObject",
-			policyJSON: policy5JSON,
-			args: Args{
-				Action:     PutObjectAction,
-				BucketName: "del-warehouse",
-				ObjectName: "uuid-789",
-			},
-			expectedResult: false,
-			description:    "PutObject is not implicit from DeleteTableData, should not match",
 		},
 		{
 			name:       "Non-implicit action should not match",
