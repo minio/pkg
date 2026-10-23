@@ -138,6 +138,29 @@ func TestDefaultPolicyMemoryAdmin(t *testing.T) {
 	}
 }
 
+func TestDefaultPolicyFilesAdmin(t *testing.T) {
+	p, ok := findDefaultPolicy("filesAdmin")
+	if !ok {
+		t.Fatal("filesAdmin default policy not found")
+	}
+	if err := p.Validate(); err != nil {
+		t.Fatalf("filesAdmin policy invalid: %v", err)
+	}
+
+	for action := range SupportedFilesActions {
+		if !p.IsAllowed(Args{AccountName: "operator", Action: Action(action)}) {
+			t.Errorf("filesAdmin should allow %v", action)
+		}
+	}
+
+	// It carries its own action family only, like memoryAdmin.
+	for _, action := range []Action{GetObjectAction, Action(ServerInfoAdminAction)} {
+		if p.IsAllowed(Args{AccountName: "operator", Action: action, BucketName: "exports"}) {
+			t.Errorf("filesAdmin should NOT allow %v", action)
+		}
+	}
+}
+
 func TestDefaultPolicyConsoleAdminAllowsMemory(t *testing.T) {
 	args := Args{
 		AccountName: "admin",
@@ -162,5 +185,21 @@ func TestDefaultPolicyConsoleAdminAllowsMemory(t *testing.T) {
 	}
 	if rw.IsAllowed(args) {
 		t.Error("readwrite should NOT allow memory:ListCortexes (sanity check)")
+	}
+}
+
+func TestDefaultPolicyConsoleAdminAllowsFiles(t *testing.T) {
+	p, ok := findDefaultPolicy("consoleAdmin")
+	if !ok {
+		t.Fatal("consoleAdmin default policy not found")
+	}
+	// Files actions take no Resource, so the statement must still validate.
+	if err := p.Validate(); err != nil {
+		t.Fatalf("consoleAdmin policy invalid: %v", err)
+	}
+	for _, action := range []FilesAction{FilesGetExportStatusAction, FilesGetExportStatsAction} {
+		if !p.IsAllowed(Args{AccountName: "admin", Action: Action(action)}) {
+			t.Errorf("consoleAdmin should allow %v", action)
+		}
 	}
 }

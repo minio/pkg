@@ -244,16 +244,17 @@ func TestFilesPolicyIsAllowed(t *testing.T) {
 	})
 }
 
-func TestFilesActionNotGrantedByDefaultPolicies(t *testing.T) {
-	// No canned policy grants the Files namespace yet, consoleAdmin included:
-	// it is granted on its own, as the issue that introduced it asks.
+func TestFilesActionGrantedOnlyByFilesAndConsoleAdmin(t *testing.T) {
+	// consoleAdmin drives the whole console, Files exports included, and
+	// filesAdmin grants the namespace on its own; no other canned policy may.
 	for _, dp := range DefaultPolicies {
+		want := dp.Name == "consoleAdmin" || dp.Name == "filesAdmin"
 		for action := range SupportedFilesActions {
 			if action == AllFilesActions {
 				continue
 			}
-			if dp.Definition.IsAllowed(filesArgs(action)) {
-				t.Errorf("default policy %q allows %v", dp.Name, action)
+			if got := dp.Definition.IsAllowed(filesArgs(action)); got != want {
+				t.Errorf("default policy %q allows %v = %v, want %v", dp.Name, action, got, want)
 			}
 		}
 	}
