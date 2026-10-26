@@ -203,3 +203,19 @@ func TestDefaultPolicyConsoleAdminAllowsFiles(t *testing.T) {
 		}
 	}
 }
+
+func TestDefaultPolicyReplicationAdminAllowsBucketTargets(t *testing.T) {
+	p, ok := findDefaultPolicy("replicationAdmin")
+	if !ok {
+		t.Fatal("replicationAdmin default policy not found")
+	}
+	if err := p.Validate(); err != nil {
+		t.Fatalf("replicationAdmin policy invalid: %v", err)
+	}
+	// mc replicate add sets the remote target before the replication config.
+	for _, action := range []AdminAction{SetBucketTargetAction, GetBucketTargetAction} {
+		if !p.IsAllowed(Args{AccountName: "repl", Action: Action(action), BucketName: "photos"}) {
+			t.Errorf("replicationAdmin should allow %v", action)
+		}
+	}
+}

@@ -442,6 +442,9 @@ var DefaultPolicies = []struct {
 						Action(TablesReplicationInfoAction),
 						Action(TablesReplicationStartFailoverAction),
 						Action(TablesReplicationCatalogAdminAction),
+						// Bucket replication targets
+						Action(SetBucketTargetAction),
+						Action(GetBucketTargetAction),
 						// Replication diagnostics
 						Action(ReplicationDiff),
 					),
