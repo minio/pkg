@@ -544,6 +544,22 @@ func TestMatchSimple(t *testing.T) {
 			text:    "a",
 			matched: true,
 		},
+		{pattern: "?alice", text: "", matched: false},
+		{pattern: "?alice", text: "xalice", matched: true},
+		{pattern: "*?alice", text: "", matched: false},
+		{pattern: "a?b", text: "a", matched: false},
+		{pattern: "a?b", text: "ab", matched: false},
+		{pattern: "a?b", text: "axb", matched: true},
+		{pattern: "a?*b", text: "a", matched: false},
+		{pattern: "a*?b", text: "a", matched: false},
+		{pattern: "?", text: "", matched: true},
+		{pattern: "*?", text: "", matched: true},
+		{pattern: "?*", text: "", matched: true},
+		{pattern: "a??", text: "a", matched: true},
+		{pattern: "a??", text: "ab", matched: true},
+		{pattern: "a??", text: "abcd", matched: false},
+		{pattern: "a?*?", text: "a", matched: true},
+		{pattern: "a*b?", text: "axb", matched: true},
 	}
 	// Iterating over the test cases, call the function under test and assert the output.
 	for i, testCase := range testCases {

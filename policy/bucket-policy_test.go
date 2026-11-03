@@ -216,6 +216,32 @@ func TestBucketPolicyIsAllowed(t *testing.T) {
 	}
 }
 
+func TestBucketPolicyIsAllowedAnonymousPrincipalPattern(t *testing.T) {
+	args := BucketPolicyArgs{
+		Action:          GetObjectAction,
+		BucketName:      "mybucket",
+		ObjectName:      "myobject",
+		ConditionValues: map[string][]string{},
+	}
+	for _, principal := range []string{"?alice", "*?alice", "?arn:aws:iam::123456789012:user/alice"} {
+		p := BucketPolicy{
+			Version: DefaultVersion,
+			Statements: []BPStatement{
+				NewBPStatement("",
+					Allow,
+					NewPrincipal(principal),
+					NewActionSet(GetObjectAction),
+					NewResourceSet(NewResource("mybucket/*")),
+					condition.NewFunctions(),
+				),
+			},
+		}
+		if p.IsAllowed(args) {
+			t.Errorf("principal %q: anonymous GetObject allowed, want denied", principal)
+		}
+	}
+}
+
 func TestBucketPolicyIsEmpty(t *testing.T) {
 	case1Policy := BucketPolicy{
 		Version: DefaultVersion,

@@ -34,7 +34,7 @@ func oldDeepMatchRune(str, pattern string, simple bool) bool {
 			}
 		case '?':
 			if len(str) == 0 {
-				return simple
+				return simple && strings.Trim(pattern, "*?") == ""
 			}
 		case '*':
 			return len(pattern) == 1 ||

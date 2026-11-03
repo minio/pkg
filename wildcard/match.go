@@ -23,8 +23,9 @@ import (
 
 // MatchSimple - finds whether the text matches/satisfies the pattern string.
 // supports '*' wildcard in the pattern and ? for single characters.
-// Only difference to Match is that `?` at the end is optional,
-// meaning `a?` pattern will match name `a`.
+// Only difference to Match is that a `?` at the end is optional,
+// meaning `a?` pattern will match name `a`. A `?` followed by anything
+// other than `?` or `*` still matches exactly one character.
 func MatchSimple(pattern, name string) bool {
 	if pattern == "" {
 		return name == pattern
@@ -35,10 +36,11 @@ func MatchSimple(pattern, name string) bool {
 	if deepMatchRune(name, pattern) {
 		return true
 	}
-	// Reaching a '?' with name already exhausted succeeds, and succeeds for
-	// the whole pattern, so the pattern also matches whenever any prefix of it
-	// ending at a '?' consumes name exactly.
-	if !strings.ContainsRune(pattern, '?') {
+	// An optional '?' is one that only '?' and '*' follow, so the pattern also
+	// matches whenever a prefix of it ending at one of those consumes name
+	// exactly.
+	tail := len(strings.TrimRight(pattern, "*?"))
+	if strings.IndexByte(pattern[tail:], '?') < 0 {
 		return false
 	}
 	// A prefix holding no '*' consumes exactly one byte of name per byte of
@@ -53,7 +55,7 @@ func MatchSimple(pattern, name string) bool {
 	// too long to consume name exactly and the walk can stop.
 	lits := 0
 	for i := range len(pattern) {
-		if pattern[i] == '?' && (i > firstStar || i == len(name)) &&
+		if pattern[i] == '?' && i >= tail && (i > firstStar || i == len(name)) &&
 			deepMatchRune(name, pattern[:i]) {
 			return true
 		}
