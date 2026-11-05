@@ -100,6 +100,10 @@ func TestPrincipalMatch(t *testing.T) {
 		{NewPrincipal("*"), "AccountNumber", true},
 		{NewPrincipal("arn:aws:iam::*"), "arn:aws:iam::AccountNumber:root", true},
 		{NewPrincipal("arn:aws:iam::AccountNumber:*"), "arn:aws:iam::TestAccountNumber:root", false},
+		{NewPrincipal("*"), "", true},
+		{NewPrincipal("?alice"), "", false},
+		{NewPrincipal("*?alice"), "", false},
+		{NewPrincipal("?alice"), "xalice", true},
 	}
 
 	for i, testCase := range testCases {
