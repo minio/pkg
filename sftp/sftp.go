@@ -207,9 +207,15 @@ func (s *Server) Listen() (err error) {
 func (s *Server) handleConnection(conn net.Conn) {
 	// Before use, a handshake must be performed on the incoming net.Conn.
 	conn.SetDeadline(time.Now().Add(s.sshHandshakeDeadline))
-	sconn, chans, reqs, err := ssh.NewServerConn(conn, &s.sshConfig)
+	cfg, auth := s.connConfig()
+	sconn, chans, reqs, err := ssh.NewServerConn(conn, cfg)
 	if err != nil {
-		s.logger.Error(SSHKeyExchangeError, err)
+		s.logger.Error(SSHKeyExchangeError, &HandshakeError{
+			Addr:    conn.RemoteAddr(),
+			User:    auth.user,
+			Refused: auth.refused,
+			Err:     err,
+		})
 		return
 	}
 
@@ -262,4 +268,68 @@ func (s *Server) handleConnection(conn net.Conn) {
 			}
 		}(requests)
 	}
+}
+
+// HandshakeError is the error passed to Logger.Error with SSHKeyExchangeError.
+type HandshakeError struct {
+	// Addr is the remote address of the client.
+	Addr net.Addr
+	// User is the name under which the client offered its last credential.
+	// The client chooses it and it is not sanitized.
+	User string
+	// Refused is true when an authentication callback rejected the last
+	// credential the client offered.
+	Refused bool
+	// Err is the error returned by the SSH handshake.
+	Err error
+}
+
+// Error returns the text of the underlying handshake error.
+func (e *HandshakeError) Error() string {
+	if e.Err == nil {
+		return "ssh handshake failed"
+	}
+	return e.Err.Error()
+}
+
+// Unwrap returns the underlying handshake error.
+func (e *HandshakeError) Unwrap() error { return e.Err }
+
+type authState struct {
+	user    string
+	refused bool
+}
+
+// connConfig returns a copy of the SSH config whose authentication callbacks
+// record, for one connection only, whether the last credential was refused.
+// The callbacks of a connection run one after another on its handshake
+// goroutine, so the state needs no lock.
+func (s *Server) connConfig() (*ssh.ServerConfig, *authState) {
+	st := new(authState)
+	cfg := s.sshConfig
+	note := func(user string, err error) {
+		st.user, st.refused = user, err != nil
+	}
+	if cb := cfg.PasswordCallback; cb != nil {
+		cfg.PasswordCallback = func(c ssh.ConnMetadata, pass []byte) (*ssh.Permissions, error) {
+			perms, err := cb(c, pass)
+			note(c.User(), err)
+			return perms, err
+		}
+	}
+	if cb := cfg.PublicKeyCallback; cb != nil {
+		cfg.PublicKeyCallback = func(c ssh.ConnMetadata, key ssh.PublicKey) (*ssh.Permissions, error) {
+			perms, err := cb(c, key)
+			note(c.User(), err)
+			return perms, err
+		}
+	}
+	if cb := cfg.KeyboardInteractiveCallback; cb != nil {
+		cfg.KeyboardInteractiveCallback = func(c ssh.ConnMetadata, client ssh.KeyboardInteractiveChallenge) (*ssh.Permissions, error) {
+			perms, err := cb(c, client)
+			note(c.User(), err)
+			return perms, err
+		}
+	}
+	return &cfg, st
 }
