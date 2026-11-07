@@ -18,9 +18,13 @@
 package sftp
 
 import (
+	"crypto/ecdsa"
 	"crypto/ed25519"
+	"crypto/elliptic"
 	"crypto/rand"
 	"errors"
+	"fmt"
+	"io"
 	"net"
 	"strconv"
 	"strings"
@@ -67,6 +71,18 @@ func newSigner(t *testing.T) ssh.Signer {
 	return signer
 }
 
+// forgedSigner offers pub but signs with another key.
+type forgedSigner struct {
+	pub   ssh.PublicKey
+	other ssh.Signer
+}
+
+func (f forgedSigner) PublicKey() ssh.PublicKey { return f.pub }
+
+func (f forgedSigner) Sign(r io.Reader, data []byte) (*ssh.Signature, error) {
+	return f.other.Sign(r, data)
+}
+
 // startHandshakeServer serves cfg on a loopback port and returns its address.
 func startHandshakeServer(t *testing.T, cfg *ssh.ServerConfig) (string, *handshakeLogger) {
 	t.Helper()
@@ -107,10 +123,25 @@ func dial(addr, user string, methods ...ssh.AuthMethod) (*ssh.Client, error) {
 func TestHandshakeError(t *testing.T) {
 	const goodPass = "good-pass"
 	goodKey := newSigner(t)
+	ecdsaPriv, err := ecdsa.GenerateKey(elliptic.P256(), rand.Reader)
+	if err != nil {
+		t.Fatal(err)
+	}
+	ecdsaKey, err := ssh.NewSignerFromKey(ecdsaPriv)
+	if err != nil {
+		t.Fatal(err)
+	}
+	authLogs := make(chan string, 8)
 	cfg := &ssh.ServerConfig{
-		PasswordCallback: func(_ ssh.ConnMetadata, pass []byte) (*ssh.Permissions, error) {
+		PasswordCallback: func(c ssh.ConnMetadata, pass []byte) (*ssh.Permissions, error) {
 			if string(pass) != goodPass {
 				return nil, errors.New("bad password")
+			}
+			if c.User() == "wrapped-partial" {
+				return nil, fmt.Errorf("wrapped: %w", &ssh.PartialSuccessError{})
+			}
+			if c.User() == "source-address" {
+				return &ssh.Permissions{CriticalOptions: map[string]string{"source-address": "192.0.2.1/32"}}, nil
 			}
 			return nil, nil
 		},
@@ -120,9 +151,28 @@ func TestHandshakeError(t *testing.T) {
 			}
 			return nil, nil
 		},
-		KeyboardInteractiveCallback: func(ssh.ConnMetadata, ssh.KeyboardInteractiveChallenge) (*ssh.Permissions, error) {
+		VerifiedPublicKeyCallback: func(c ssh.ConnMetadata, _ ssh.PublicKey, _ *ssh.Permissions, _ string) (*ssh.Permissions, error) {
+			if c.User() == "verified-refused" {
+				return nil, errors.New("verified key refused")
+			}
+			return nil, &ssh.PartialSuccessError{Next: ssh.ServerAuthCallbacks{
+				PasswordCallback: func(ssh.ConnMetadata, []byte) (*ssh.Permissions, error) {
+					return nil, errors.New("second factor refused")
+				},
+			}}
+		},
+		KeyboardInteractiveCallback: func(_ ssh.ConnMetadata, client ssh.KeyboardInteractiveChallenge) (*ssh.Permissions, error) {
+			if _, err := client("", "", []string{"code: "}, []bool{false}); err != nil {
+				return nil, err
+			}
 			return nil, errors.New("keyboard-interactive refused")
 		},
+		AuthLogCallback: func(c ssh.ConnMetadata, method string, err error) {
+			if c.User() == "auth-log" {
+				authLogs <- fmt.Sprintf("%s:%v", method, err)
+			}
+		},
+		PublicKeyAuthAlgorithms: []string{ssh.KeyAlgoED25519},
 	}
 	addr, logger := startHandshakeServer(t, cfg)
 
@@ -153,7 +203,7 @@ func TestHandshakeError(t *testing.T) {
 
 	t.Run("refused-keyboard-interactive", func(t *testing.T) {
 		answer := ssh.KeyboardInteractive(func(string, string, []string, []bool) ([]string, error) {
-			return nil, nil
+			return []string{"123456"}, nil
 		})
 		if _, err := dial(addr, "carol", answer); err == nil {
 			t.Fatal("login unexpectedly succeeded")
@@ -203,14 +253,91 @@ func TestHandshakeError(t *testing.T) {
 		}
 	})
 
+	for _, tc := range []struct {
+		name, user string
+		refused    bool
+		methods    []ssh.AuthMethod
+	}{
+		{"refused-after-the-callback", "source-address", true, []ssh.AuthMethod{ssh.Password(goodPass)}},
+		{"refused-by-verified-key-callback", "verified-refused", true, []ssh.AuthMethod{ssh.PublicKeys(goodKey)}},
+		{"refused-second-factor", "mfa", true, []ssh.AuthMethod{ssh.PublicKeys(goodKey), ssh.Password("wrong")}},
+		{"partial-success-is-not-refused", "mfa-abandoned", false, []ssh.AuthMethod{ssh.Password("wrong"), ssh.PublicKeys(goodKey)}},
+		{"key-algorithm-refused", "ecdsa", true, []ssh.AuthMethod{ssh.PublicKeys(ecdsaKey)}},
+		{"wrapped-partial-success-is-refused", "wrapped-partial", true, []ssh.AuthMethod{ssh.Password(goodPass)}},
+		{"hang-up-at-a-prompt-is-refused", "hangup", true, []ssh.AuthMethod{ssh.KeyboardInteractive(func(string, string, []string, []bool) ([]string, error) {
+			return nil, errors.New("client gives up")
+		})}},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			if _, err := dial(addr, tc.user, tc.methods...); err == nil {
+				t.Fatal("login unexpectedly succeeded")
+			}
+			if he := logger.next(t); he.Refused != tc.refused || he.User != tc.user {
+				t.Fatalf("got Refused=%v User=%q, want %v and %s", he.Refused, he.User, tc.refused, tc.user)
+			}
+		})
+	}
+
+	t.Run("forged-signature-keeps-the-previous-verdict", func(t *testing.T) {
+		if _, err := dial(addr, "victim", ssh.Password("wrong"), ssh.PublicKeys(forgedSigner{goodKey.PublicKey(), newSigner(t)})); err == nil {
+			t.Fatal("login unexpectedly succeeded")
+		}
+		if he := logger.next(t); !he.Refused || he.User != "victim" || !strings.Contains(he.Error(), "signature") {
+			t.Fatalf("got Refused=%v User=%q Err=%v, want true, victim and a signature error", he.Refused, he.User, he.Err)
+		}
+	})
+
+	t.Run("no-credential-is-not-refused", func(t *testing.T) {
+		if _, err := dial(addr, "nobody"); err == nil {
+			t.Fatal("login unexpectedly succeeded")
+		}
+		if he := logger.next(t); he.Refused || he.User != "" {
+			t.Fatalf("got Refused=%v User=%q, want false and empty", he.Refused, he.User)
+		}
+	})
+
+	t.Run("caller-auth-log-sees-every-attempt", func(t *testing.T) {
+		if _, err := dial(addr, "auth-log", ssh.Password("wrong")); err == nil {
+			t.Fatal("login unexpectedly succeeded")
+		}
+		logger.next(t)
+		var got []string
+		for len(authLogs) > 0 {
+			got = append(got, <-authLogs)
+		}
+		want := []string{"none:" + ssh.ErrNoAuth.Error(), "password:bad password"}
+		if strings.Join(got, "|") != strings.Join(want, "|") {
+			t.Fatalf("the caller's AuthLogCallback got %q, want %q", got, want)
+		}
+	})
+
+	t.Run("refused-none-attempt", func(t *testing.T) {
+		anonAddr, anonLogger := startHandshakeServer(t, &ssh.ServerConfig{
+			NoClientAuth: true,
+			NoClientAuthCallback: func(ssh.ConnMetadata) (*ssh.Permissions, error) {
+				return nil, errors.New("anonymous login refused")
+			},
+		})
+		if _, err := dial(anonAddr, "anon"); err == nil {
+			t.Fatal("login unexpectedly succeeded")
+		}
+		if he := anonLogger.next(t); !he.Refused || he.User != "anon" {
+			t.Fatalf("got Refused=%v User=%q, want true and anon", he.Refused, he.User)
+		}
+	})
+
 	t.Run("connect-and-close", func(t *testing.T) {
 		conn, err := net.Dial("tcp", addr)
 		if err != nil {
 			t.Fatal(err)
 		}
 		conn.Close()
-		if he := logger.next(t); he.Refused || he.User != "" {
+		he := logger.next(t)
+		if he.Refused || he.User != "" {
 			t.Fatalf("got Refused=%v User=%q, want false and empty", he.Refused, he.User)
+		}
+		if he.Addr == nil || he.Addr.String() != conn.LocalAddr().String() {
+			t.Fatalf("got Addr=%v, want the client address %v", he.Addr, conn.LocalAddr())
 		}
 	})
 

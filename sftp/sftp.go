@@ -272,13 +272,21 @@ func (s *Server) handleConnection(conn net.Conn) {
 
 // HandshakeError is the error passed to Logger.Error with SSHKeyExchangeError.
 type HandshakeError struct {
-	// Addr is the remote address of the client.
+	// Addr is the remote address of the TCP connection. Behind a TCP proxy
+	// it is the proxy's address.
 	Addr net.Addr
-	// User is the name under which the client offered its last credential.
-	// The client chooses it and it is not sanitized.
+	// User is the name the client sent with the last authentication attempt
+	// the server decided. A "none" attempt that fails with ssh.ErrNoAuth
+	// offers no credential and does not count. The client chooses the name
+	// and it is not sanitized.
 	User string
-	// Refused is true when an authentication callback rejected the last
-	// credential the client offered.
+	// Refused is true when the server refused that attempt, including when
+	// its callback failed for another reason, such as an unreachable
+	// backend or a client that hung up at a prompt. A partial success is
+	// not a refusal. A public key signature that fails verification ends
+	// the handshake before the server decides, so User and Refused then
+	// describe the last attempt the server decided before it, and Err holds
+	// the verification error.
 	Refused bool
 	// Err is the error returned by the SSH handshake.
 	Err error
@@ -300,35 +308,25 @@ type authState struct {
 	refused bool
 }
 
-// connConfig returns a copy of the SSH config whose authentication callbacks
-// record, for one connection only, whether the last credential was refused.
-// The callbacks of a connection run one after another on its handshake
-// goroutine, so the state needs no lock.
+// connConfig returns a copy of the SSH config whose AuthLogCallback records,
+// for one connection only, the server's verdict on the last attempt. The
+// credential callbacks are not wrapped for that because checks run after them
+// and a partial success replaces them. The callbacks of a connection run one
+// after another on its handshake goroutine, so the state needs no lock.
 func (s *Server) connConfig() (*ssh.ServerConfig, *authState) {
 	st := new(authState)
 	cfg := s.sshConfig
-	note := func(user string, err error) {
-		st.user, st.refused = user, err != nil
-	}
-	if cb := cfg.PasswordCallback; cb != nil {
-		cfg.PasswordCallback = func(c ssh.ConnMetadata, pass []byte) (*ssh.Permissions, error) {
-			perms, err := cb(c, pass)
-			note(c.User(), err)
-			return perms, err
+	logAuth := cfg.AuthLogCallback
+	cfg.AuthLogCallback = func(c ssh.ConnMetadata, method string, err error) {
+		// A "none" attempt that fails with ErrNoAuth offers no credential.
+		if method != "none" || !errors.Is(err, ssh.ErrNoAuth) {
+			// x/crypto treats only an unwrapped PartialSuccessError as a
+			// partial success.
+			_, partial := err.(*ssh.PartialSuccessError)
+			st.user, st.refused = c.User(), err != nil && !partial
 		}
-	}
-	if cb := cfg.PublicKeyCallback; cb != nil {
-		cfg.PublicKeyCallback = func(c ssh.ConnMetadata, key ssh.PublicKey) (*ssh.Permissions, error) {
-			perms, err := cb(c, key)
-			note(c.User(), err)
-			return perms, err
-		}
-	}
-	if cb := cfg.KeyboardInteractiveCallback; cb != nil {
-		cfg.KeyboardInteractiveCallback = func(c ssh.ConnMetadata, client ssh.KeyboardInteractiveChallenge) (*ssh.Permissions, error) {
-			perms, err := cb(c, client)
-			note(c.User(), err)
-			return perms, err
+		if logAuth != nil {
+			logAuth(c, method, err)
 		}
 	}
 	return &cfg, st
