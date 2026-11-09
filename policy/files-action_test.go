@@ -31,6 +31,7 @@ func TestFilesActionIsValid(t *testing.T) {
 		{FilesDeleteExportAction, true},
 		{FilesUpdateExportAction, true},
 		{FilesSetExportAccessAction, true},
+		{FilesRecoverExportAction, true},
 		{FilesGetExportStatusAction, true},
 		{FilesGetExportStatsAction, true},
 		{AllFilesActions, true},
@@ -68,7 +69,7 @@ func TestFilesStatementValidate(t *testing.T) {
 		{
 			name: "every action",
 			doc: `{"Effect":"Allow","Action":["s3files:CreateExport","s3files:DeleteExport",
-				"s3files:UpdateExport","s3files:SetExportAccess","s3files:GetExportStatus",
+				"s3files:UpdateExport","s3files:SetExportAccess","s3files:RecoverExport","s3files:GetExportStatus",
 				"s3files:GetExportStats"]}`,
 		},
 		{
@@ -174,6 +175,7 @@ func TestFilesPolicyIsAllowed(t *testing.T) {
 		FilesDeleteExportAction,
 		FilesUpdateExportAction,
 		FilesSetExportAccessAction,
+		FilesRecoverExportAction,
 		FilesGetExportStatusAction,
 		FilesGetExportStatsAction,
 	}

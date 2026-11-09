@@ -44,6 +44,12 @@ const (
 	// not also be a grant to open it to more hosts.
 	FilesSetExportAccessAction FilesAction = "s3files:SetExportAccess"
 
+	// FilesRecoverExportAction - rebuild an export's metadata from the AIStor
+	// tier, after the drive that held it is replaced. Separate from
+	// FilesUpdateExportAction because a rebuild replaces the export's namespace
+	// on its node rather than changing a setting.
+	FilesRecoverExportAction FilesAction = "s3files:RecoverExport"
+
 	// FilesGetExportStatusAction - list exports and read an export's
 	// configuration and status.
 	FilesGetExportStatusAction FilesAction = "s3files:GetExportStatus"
@@ -61,6 +67,7 @@ var SupportedFilesActions = map[FilesAction]struct{}{
 	FilesDeleteExportAction:    {},
 	FilesUpdateExportAction:    {},
 	FilesSetExportAccessAction: {},
+	FilesRecoverExportAction:   {},
 	FilesGetExportStatusAction: {},
 	FilesGetExportStatsAction:  {},
 	AllFilesActions:            {},
