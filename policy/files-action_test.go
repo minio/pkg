@@ -229,6 +229,29 @@ func TestFilesPolicyIsAllowed(t *testing.T) {
 		}
 	})
 
+	t.Run("recover export grants only itself", func(t *testing.T) {
+		p := mustParse(t, `{"Version":"2012-10-17","Statement":[
+			{"Effect":"Allow","Action":["s3files:RecoverExport"]}]}`)
+		for _, action := range allFiles {
+			want := action == FilesRecoverExportAction
+			if got := p.IsAllowed(filesArgs(action)); got != want {
+				t.Errorf("%v: allowed=%v, want %v", action, got, want)
+			}
+		}
+	})
+
+	t.Run("recover export deny overrides wildcard", func(t *testing.T) {
+		p := mustParse(t, `{"Version":"2012-10-17","Statement":[
+			{"Effect":"Allow","Action":["s3files:*"]},
+			{"Effect":"Deny","Action":["s3files:RecoverExport"]}]}`)
+		for _, action := range allFiles {
+			want := action != FilesRecoverExportAction
+			if got := p.IsAllowed(filesArgs(action)); got != want {
+				t.Errorf("%v: allowed=%v, want %v", action, got, want)
+			}
+		}
+	})
+
 	t.Run("condition applies", func(t *testing.T) {
 		p := mustParse(t, `{"Version":"2012-10-17","Statement":[
 			{"Effect":"Allow","Action":["s3files:GetExportStatus"],
