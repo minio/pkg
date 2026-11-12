@@ -82,10 +82,19 @@ func (d *Duration) UnmarshalYAML(value *yaml.Node) error {
 
 // UnmarshalJSON implements json.Unmarshaler
 func (d *Duration) UnmarshalJSON(bs []byte) error {
-	if len(bs) <= 2 {
+	// A null leaves the value alone, as it does for a type that has no
+	// Unmarshaler, and as UnmarshalYAML already does.
+	if string(bs) == "null" {
 		return nil
 	}
-	dur, err := ParseDuration(string(bs[1 : len(bs)-1]))
+	var s string
+	if err := json.Unmarshal(bs, &s); err != nil {
+		return err
+	}
+	if s == "" {
+		return nil
+	}
+	dur, err := ParseDuration(s)
 	if err != nil {
 		return err
 	}
