@@ -39,12 +39,12 @@ func rpDoc(statements ...string) string {
 func TestTableActionScopeCoversEveryAction(t *testing.T) {
 	for action := range SupportedTableActions {
 		if action == AllS3TablesActions {
-			if action.Scope() != 0 {
-				t.Errorf("%v: got scope %v, want none", action, action.Scope())
+			if action.scope() != 0 {
+				t.Errorf("%v: got scope %v, want none", action, action.scope())
 			}
 			continue
 		}
-		if action.Scope() == 0 {
+		if action.scope() == 0 {
 			t.Errorf("%v has no scope", action)
 		}
 	}
@@ -55,18 +55,37 @@ func TestTableActionScopeCoversEveryAction(t *testing.T) {
 	}
 }
 
+func TestTableActionIsGlobal(t *testing.T) {
+	for _, action := range []TableAction{
+		S3TablesCreateWarehouseAction, S3TablesCreateTableBucketAction,
+		S3TablesListWarehousesAction, S3TablesListTableBucketsAction, S3TablesTableMetricsAction,
+	} {
+		if !action.IsGlobal() {
+			t.Errorf("%v must be global", action)
+		}
+	}
+	for _, action := range []TableAction{
+		S3TablesGetWarehouseAction, S3TablesCreateTableAction, S3TablesGetTableAction,
+		AllS3TablesActions, TableAction(GetObjectAction),
+	} {
+		if action.IsGlobal() {
+			t.Errorf("%v must not be global", action)
+		}
+	}
+}
+
 func TestTableActionScopeMatchesAliases(t *testing.T) {
 	for warehouseAction, aliases := range implicitActions {
 		w := TableAction(warehouseAction)
-		if w.Scope() == 0 {
+		if w.scope() == 0 {
 			continue
 		}
 		for alias := range aliases {
 			if !TableAction(alias).IsValid() {
 				continue
 			}
-			if got := TableAction(alias).Scope(); got != w.Scope() {
-				t.Errorf("%v has scope %v, its alias %v has %v", w, w.Scope(), alias, got)
+			if got := TableAction(alias).scope(); got != w.scope() {
+				t.Errorf("%v has scope %v, its alias %v has %v", w, w.scope(), alias, got)
 			}
 		}
 	}

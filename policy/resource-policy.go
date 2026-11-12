@@ -211,10 +211,10 @@ func checkResourcePolicyAction(action TableAction, target ResourcePolicyTarget) 
 	if !action.IsValid() {
 		return Errorf("unsupported action '%v' - a resource policy grants s3tables actions only", action)
 	}
-	switch action.Scope() {
-	case TableScopeTable:
+	switch action.scope() {
+	case tableScopeTable:
 		return nil
-	case TableScopeWarehouse:
+	case tableScopeWarehouse:
 		if target.isTable() {
 			return Errorf("action '%v' applies to a warehouse and cannot be granted by a table policy", action)
 		}
@@ -249,7 +249,7 @@ func (p *ResourcePolicy) index() {
 
 // decide is Decide, or HasCapability when capability is set.
 func (p *ResourcePolicy) decide(args *Args, capability bool) Decision {
-	if TableAction(args.Action).Scope() == TableScopeGlobal {
+	if TableAction(args.Action).scope() == tableScopeGlobal {
 		return NoDecision
 	}
 	resource := buildRequestResource(args)

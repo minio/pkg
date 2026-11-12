@@ -499,110 +499,117 @@ func createTableActionConditionKeyMap() map[Action]condition.KeySet {
 // tableActionConditionKeyMap - holds mapping of supported condition key for a table action.
 var tableActionConditionKeyMap = createTableActionConditionKeyMap()
 
-// TableActionScope is the kind of resource a table action is authorized
+// tableActionScope is the kind of resource a table action is authorized
 // against, and so which resource policies can grant it.
-type TableActionScope uint8
+type tableActionScope uint8
 
 const (
-	// TableScopeGlobal is an action that names no existing warehouse. No
+	// tableScopeGlobal is an action that names no existing warehouse. No
 	// resource policy can grant it.
-	TableScopeGlobal TableActionScope = iota + 1
-	// TableScopeWarehouse is an action authorized on a warehouse, or on a
+	tableScopeGlobal tableActionScope = iota + 1
+	// tableScopeWarehouse is an action authorized on a warehouse, or on a
 	// namespace, view, function or not-yet-created table in it. A warehouse
 	// policy can grant it.
-	TableScopeWarehouse
-	// TableScopeTable is an action authorized on an existing table. A
+	tableScopeWarehouse
+	// tableScopeTable is an action authorized on an existing table. A
 	// warehouse or table policy can grant it.
-	TableScopeTable
+	tableScopeTable
 )
 
-var tableActionScopes = map[TableAction]TableActionScope{
-	S3TablesCreateWarehouseAction:      TableScopeGlobal,
-	S3TablesCreateTableBucketAction:    TableScopeGlobal,
-	S3TablesListWarehousesAction:       TableScopeGlobal,
-	S3TablesListTableBucketsAction:     TableScopeGlobal,
-	S3TablesTableMetricsAction:         TableScopeGlobal,
-	S3TablesDeleteWarehouseAction:      TableScopeWarehouse,
-	S3TablesDeleteTableBucketAction:    TableScopeWarehouse,
-	S3TablesGetWarehouseAction:         TableScopeWarehouse,
-	S3TablesGetTableBucketAction:       TableScopeWarehouse,
-	S3TablesGetConfigAction:            TableScopeWarehouse,
-	S3TablesListTagsForWarehouseAction: TableScopeWarehouse,
-	S3TablesTagWarehouseAction:         TableScopeWarehouse,
-	S3TablesUntagWarehouseAction:       TableScopeWarehouse,
+var tableActionScopes = map[TableAction]tableActionScope{
+	S3TablesCreateWarehouseAction:      tableScopeGlobal,
+	S3TablesCreateTableBucketAction:    tableScopeGlobal,
+	S3TablesListWarehousesAction:       tableScopeGlobal,
+	S3TablesListTableBucketsAction:     tableScopeGlobal,
+	S3TablesTableMetricsAction:         tableScopeGlobal,
+	S3TablesDeleteWarehouseAction:      tableScopeWarehouse,
+	S3TablesDeleteTableBucketAction:    tableScopeWarehouse,
+	S3TablesGetWarehouseAction:         tableScopeWarehouse,
+	S3TablesGetTableBucketAction:       tableScopeWarehouse,
+	S3TablesGetConfigAction:            tableScopeWarehouse,
+	S3TablesListTagsForWarehouseAction: tableScopeWarehouse,
+	S3TablesTagWarehouseAction:         tableScopeWarehouse,
+	S3TablesUntagWarehouseAction:       tableScopeWarehouse,
 
-	S3TablesPutWarehouseEncryptionAction:      TableScopeWarehouse,
-	S3TablesGetWarehouseEncryptionAction:      TableScopeWarehouse,
-	S3TablesDeleteWarehouseEncryptionAction:   TableScopeWarehouse,
-	S3TablesPutTableBucketEncryptionAction:    TableScopeWarehouse,
-	S3TablesGetTableBucketEncryptionAction:    TableScopeWarehouse,
-	S3TablesDeleteTableBucketEncryptionAction: TableScopeWarehouse,
+	S3TablesPutWarehouseEncryptionAction:      tableScopeWarehouse,
+	S3TablesGetWarehouseEncryptionAction:      tableScopeWarehouse,
+	S3TablesDeleteWarehouseEncryptionAction:   tableScopeWarehouse,
+	S3TablesPutTableBucketEncryptionAction:    tableScopeWarehouse,
+	S3TablesGetTableBucketEncryptionAction:    tableScopeWarehouse,
+	S3TablesDeleteTableBucketEncryptionAction: tableScopeWarehouse,
 
-	S3TablesPutWarehouseMaintenanceConfigurationAction:   TableScopeWarehouse,
-	S3TablesGetWarehouseMaintenanceConfigurationAction:   TableScopeWarehouse,
-	S3TablesPutTableBucketMaintenanceConfigurationAction: TableScopeWarehouse,
-	S3TablesGetTableBucketMaintenanceConfigurationAction: TableScopeWarehouse,
+	S3TablesPutWarehouseMaintenanceConfigurationAction:   tableScopeWarehouse,
+	S3TablesGetWarehouseMaintenanceConfigurationAction:   tableScopeWarehouse,
+	S3TablesPutTableBucketMaintenanceConfigurationAction: tableScopeWarehouse,
+	S3TablesGetTableBucketMaintenanceConfigurationAction: tableScopeWarehouse,
 
-	S3TablesPutWarehousePolicyAction:      TableScopeWarehouse,
-	S3TablesGetWarehousePolicyAction:      TableScopeWarehouse,
-	S3TablesDeleteWarehousePolicyAction:   TableScopeWarehouse,
-	S3TablesPutTableBucketPolicyAction:    TableScopeWarehouse,
-	S3TablesGetTableBucketPolicyAction:    TableScopeWarehouse,
-	S3TablesDeleteTableBucketPolicyAction: TableScopeWarehouse,
+	S3TablesPutWarehousePolicyAction:      tableScopeWarehouse,
+	S3TablesGetWarehousePolicyAction:      tableScopeWarehouse,
+	S3TablesDeleteWarehousePolicyAction:   tableScopeWarehouse,
+	S3TablesPutTableBucketPolicyAction:    tableScopeWarehouse,
+	S3TablesGetTableBucketPolicyAction:    tableScopeWarehouse,
+	S3TablesDeleteTableBucketPolicyAction: tableScopeWarehouse,
 
-	S3TablesCreateNamespaceAction:           TableScopeWarehouse,
-	S3TablesDeleteNamespaceAction:           TableScopeWarehouse,
-	S3TablesGetNamespaceAction:              TableScopeWarehouse,
-	S3TablesListNamespacesAction:            TableScopeWarehouse,
-	S3TablesUpdateNamespacePropertiesAction: TableScopeWarehouse,
-	S3TablesListTablesAction:                TableScopeWarehouse,
-	S3TablesCreateTableAction:               TableScopeWarehouse,
-	S3TablesRegisterTableAction:             TableScopeWarehouse,
+	S3TablesCreateNamespaceAction:           tableScopeWarehouse,
+	S3TablesDeleteNamespaceAction:           tableScopeWarehouse,
+	S3TablesGetNamespaceAction:              tableScopeWarehouse,
+	S3TablesListNamespacesAction:            tableScopeWarehouse,
+	S3TablesUpdateNamespacePropertiesAction: tableScopeWarehouse,
+	S3TablesListTablesAction:                tableScopeWarehouse,
+	S3TablesCreateTableAction:               tableScopeWarehouse,
+	S3TablesRegisterTableAction:             tableScopeWarehouse,
 
-	S3TablesCreateViewAction:   TableScopeWarehouse,
-	S3TablesDeleteViewAction:   TableScopeWarehouse,
-	S3TablesGetViewAction:      TableScopeWarehouse,
-	S3TablesRenameViewAction:   TableScopeWarehouse,
-	S3TablesUpdateViewAction:   TableScopeWarehouse,
-	S3TablesListViewsAction:    TableScopeWarehouse,
-	S3TablesRegisterViewAction: TableScopeWarehouse,
+	S3TablesCreateViewAction:   tableScopeWarehouse,
+	S3TablesDeleteViewAction:   tableScopeWarehouse,
+	S3TablesGetViewAction:      tableScopeWarehouse,
+	S3TablesRenameViewAction:   tableScopeWarehouse,
+	S3TablesUpdateViewAction:   tableScopeWarehouse,
+	S3TablesListViewsAction:    tableScopeWarehouse,
+	S3TablesRegisterViewAction: tableScopeWarehouse,
 
-	S3TablesCreateFunctionAction:   TableScopeWarehouse,
-	S3TablesDeleteFunctionAction:   TableScopeWarehouse,
-	S3TablesGetFunctionAction:      TableScopeWarehouse,
-	S3TablesRenameFunctionAction:   TableScopeWarehouse,
-	S3TablesUpdateFunctionAction:   TableScopeWarehouse,
-	S3TablesListFunctionsAction:    TableScopeWarehouse,
-	S3TablesRegisterFunctionAction: TableScopeWarehouse,
+	S3TablesCreateFunctionAction:   tableScopeWarehouse,
+	S3TablesDeleteFunctionAction:   tableScopeWarehouse,
+	S3TablesGetFunctionAction:      tableScopeWarehouse,
+	S3TablesRenameFunctionAction:   tableScopeWarehouse,
+	S3TablesUpdateFunctionAction:   tableScopeWarehouse,
+	S3TablesListFunctionsAction:    tableScopeWarehouse,
+	S3TablesRegisterFunctionAction: tableScopeWarehouse,
 
-	S3TablesDeleteTableAction:                      TableScopeTable,
-	S3TablesGetTableAction:                         TableScopeTable,
-	S3TablesRenameTableAction:                      TableScopeTable,
-	S3TablesUpdateTableAction:                      TableScopeTable,
-	S3TablesGetTableDataAction:                     TableScopeTable,
-	S3TablesPutTableDataAction:                     TableScopeTable,
-	S3TablesGetTableMetadataLocationAction:         TableScopeTable,
-	S3TablesUpdateTableMetadataLocationAction:      TableScopeTable,
-	S3TablesPutTableEncryptionAction:               TableScopeTable,
-	S3TablesGetTableEncryptionAction:               TableScopeTable,
-	S3TablesDeleteTableEncryptionAction:            TableScopeTable,
-	S3TablesPutTableMaintenanceConfigurationAction: TableScopeTable,
-	S3TablesGetTableMaintenanceConfigurationAction: TableScopeTable,
-	S3TablesGetTableMaintenanceJobStatusAction:     TableScopeTable,
-	S3TablesPutTablePolicyAction:                   TableScopeTable,
-	S3TablesGetTablePolicyAction:                   TableScopeTable,
-	S3TablesDeleteTablePolicyAction:                TableScopeTable,
-	S3TablesTagTableAction:                         TableScopeTable,
-	S3TablesUntagTableAction:                       TableScopeTable,
-	S3TablesListTagsForTableAction:                 TableScopeTable,
-	S3TablesPutTableAnnotationAction:               TableScopeTable,
-	S3TablesGetTableAnnotationAction:               TableScopeTable,
-	S3TablesListTableAnnotationsAction:             TableScopeTable,
-	S3TablesDeleteTableAnnotationAction:            TableScopeTable,
+	S3TablesDeleteTableAction:                      tableScopeTable,
+	S3TablesGetTableAction:                         tableScopeTable,
+	S3TablesRenameTableAction:                      tableScopeTable,
+	S3TablesUpdateTableAction:                      tableScopeTable,
+	S3TablesGetTableDataAction:                     tableScopeTable,
+	S3TablesPutTableDataAction:                     tableScopeTable,
+	S3TablesGetTableMetadataLocationAction:         tableScopeTable,
+	S3TablesUpdateTableMetadataLocationAction:      tableScopeTable,
+	S3TablesPutTableEncryptionAction:               tableScopeTable,
+	S3TablesGetTableEncryptionAction:               tableScopeTable,
+	S3TablesDeleteTableEncryptionAction:            tableScopeTable,
+	S3TablesPutTableMaintenanceConfigurationAction: tableScopeTable,
+	S3TablesGetTableMaintenanceConfigurationAction: tableScopeTable,
+	S3TablesGetTableMaintenanceJobStatusAction:     tableScopeTable,
+	S3TablesPutTablePolicyAction:                   tableScopeTable,
+	S3TablesGetTablePolicyAction:                   tableScopeTable,
+	S3TablesDeleteTablePolicyAction:                tableScopeTable,
+	S3TablesTagTableAction:                         tableScopeTable,
+	S3TablesUntagTableAction:                       tableScopeTable,
+	S3TablesListTagsForTableAction:                 tableScopeTable,
+	S3TablesPutTableAnnotationAction:               tableScopeTable,
+	S3TablesGetTableAnnotationAction:               tableScopeTable,
+	S3TablesListTableAnnotationsAction:             tableScopeTable,
+	S3TablesDeleteTableAnnotationAction:            tableScopeTable,
 }
 
-// Scope returns the kind of resource action is authorized against, or zero
+// scope returns the kind of resource action is authorized against, or zero
 // for an action that is not a single supported table action.
-func (action TableAction) Scope() TableActionScope {
+func (action TableAction) scope() tableActionScope {
 	return tableActionScopes[action]
+}
+
+// IsGlobal reports whether action names no existing warehouse, such as
+// CreateWarehouse or ListWarehouses. No warehouse or table policy can allow or
+// deny it.
+func (action TableAction) IsGlobal() bool {
+	return action.scope() == tableScopeGlobal
 }
