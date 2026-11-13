@@ -115,7 +115,7 @@ func (statement Statement) isAllowedFor(args *Args, resource string) bool {
 			}
 		}
 
-		if class.has(classKMS) {
+		if class.has(classKMS) || class.has(classAdminKMSKey) {
 			if resource == "/" || len(statement.Resources) == 0 {
 				// In previous MinIO versions, KMS statements ignored Resources, so if len(statement.Resources) == 0,
 				// allow backward compatibility by not trying to Match.
@@ -131,7 +131,8 @@ func (statement Statement) isAllowedFor(args *Args, resource string) bool {
 		// skip resource matching entirely. For the small set of
 		// bucket-scoped admin actions (e.g. SetBucketQuota),
 		// resource matching is enforced when Resources are present.
-		ignoreResourceMatch := class.has(classSTS) || (class.has(classAdmin) && !class.has(classAdminResource))
+		ignoreResourceMatch := class.has(classSTS) ||
+			(class.has(classAdmin) && !class.has(classAdminResource) && !class.has(classAdminKMSKey))
 
 		if !ignoreResourceMatch && len(statement.Resources) > 0 && !statement.Resources.Match(resource, args.ConditionValues) {
 			return false
@@ -212,6 +213,10 @@ const (
 	classTable
 	// classAdminResource marks an admin action that is scoped to a bucket.
 	classAdminResource
+	// classAdminKMSKey marks an admin action on one KMS key in a statement
+	// that names KMS key resources, which it is then matched against as a
+	// kms: action is.
+	classAdminKMSKey
 	// classKnown distinguishes a computed classification from the zero value.
 	// A plain S3 statement belongs to none of the namespaces above, so without
 	// it "no namespace" and "not computed" would be the same value.
@@ -240,6 +245,9 @@ func (statement Statement) computeClass() statementClass {
 		if AdminAction(action).HasResource() {
 			c |= classAdminResource
 		}
+		if _, ok := adminKMSKeyActions[AdminAction(action)]; ok && statement.hasKMSResource() {
+			c |= classAdminKMSKey
+		}
 		if STSAction(action).IsValid() {
 			c |= classSTS
 		}
@@ -251,6 +259,26 @@ func (statement Statement) computeClass() statementClass {
 		}
 	}
 	return c
+}
+
+// adminKMSKeyActions are the admin actions on one KMS key, which a request
+// names as a kms: action names its key.
+var adminKMSKeyActions = map[AdminAction]struct{}{
+	KMSCreateKeyAdminAction: {},
+	KMSKeyStatusAdminAction: {},
+}
+
+// hasKMSResource reports whether the statement's Resource or NotResource names
+// a KMS key (arn:minio:kms:::).
+func (statement Statement) hasKMSResource() bool {
+	for _, set := range []ResourceSet{statement.Resources, statement.NotResources} {
+		for r := range set {
+			if r.Type == ResourceARNKMS {
+				return true
+			}
+		}
+	}
+	return false
 }
 
 func (statement Statement) isAdmin() bool {
