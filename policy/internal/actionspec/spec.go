@@ -37,6 +37,72 @@ const (
 	ResourceBucketOrObject
 )
 
+// Category classifies what an action does, so a tool can grant a level of
+// access, such as writing a bucket's objects, without its configuration.
+type Category string
+
+const (
+	// CategoryList enumerates resources without reading them.
+	CategoryList Category = "List"
+	// CategoryRead reads data, or looks up a resource by name.
+	CategoryRead Category = "Read"
+	// CategoryWrite creates, changes or deletes data, including object and
+	// table tags.
+	CategoryWrite Category = "Write"
+	// CategoryManage creates, renames or deletes what lives inside a
+	// container, such as namespaces, tables, views and indexes.
+	CategoryManage Category = "Manage"
+	// CategoryCreateDelete creates or deletes a container itself, such as a
+	// bucket, warehouse or key.
+	CategoryCreateDelete Category = "CreateDelete"
+	// CategoryViewSettings reads a container's configuration or policy.
+	CategoryViewSettings Category = "ViewSettings"
+	// CategoryConfigure changes a container's configuration.
+	CategoryConfigure Category = "Configure"
+	// CategoryProtection locks data against deletion, or overrides a lock.
+	CategoryProtection Category = "Protection"
+	// CategoryPermissions grants or revokes access.
+	CategoryPermissions Category = "Permissions"
+	// CategoryIdentity manages users, groups and service accounts.
+	CategoryIdentity Category = "Identity"
+	// CategoryCredentials obtains temporary credentials.
+	CategoryCredentials Category = "Credentials"
+	// CategoryMonitor reads cluster health, usage and status.
+	CategoryMonitor Category = "Monitor"
+	// CategoryDiagnostics runs tools that can expose request details or data.
+	CategoryDiagnostics Category = "Diagnostics"
+	// CategoryOperate runs or changes the cluster.
+	CategoryOperate Category = "Operate"
+	// CategoryReplication is performed by the replication service, not people.
+	CategoryReplication Category = "Replication"
+)
+
+// CategoryInfo names and describes a category for display.
+type CategoryInfo struct {
+	Category Category
+	Title    string
+	Desc     string
+}
+
+// Categories lists every category in display order.
+var Categories = []CategoryInfo{
+	{CategoryList, "List", "Find resources by listing them, without reading them."},
+	{CategoryRead, "Read", "Read data, or look up a resource by name."},
+	{CategoryWrite, "Write", "Create, change or delete data, including object and table tags."},
+	{CategoryManage, "Manage", "Create, rename or delete what lives inside a container, such as namespaces, tables, views and indexes."},
+	{CategoryCreateDelete, "Create & Delete", "Create or delete a container itself, such as a bucket or warehouse."},
+	{CategoryViewSettings, "View Settings", "Read a container's configuration or policy."},
+	{CategoryConfigure, "Configure", "Change a container's configuration, such as versioning, lifecycle or bucket tags."},
+	{CategoryProtection, "Protection", "Lock data against deletion, or override a lock."},
+	{CategoryPermissions, "Permissions", "Grant or revoke access."},
+	{CategoryIdentity, "Identity", "Manage users, groups and service accounts."},
+	{CategoryCredentials, "Credentials", "Obtain temporary credentials."},
+	{CategoryMonitor, "Monitor", "Read cluster health, usage and status."},
+	{CategoryDiagnostics, "Diagnostics", "Run tools that can expose request details or data."},
+	{CategoryOperate, "Operate", "Run or change the cluster."},
+	{CategoryReplication, "Replication", "Actions the replication service performs, not people."},
+}
+
 // Key is a condition key.
 type Key struct {
 	// Name is the key as a policy writes it, such as "s3:prefix".
@@ -59,6 +125,8 @@ type Key struct {
 type Namespace struct {
 	// Prefix is the part of every action name before the colon.
 	Prefix string
+	// Title is the namespace's display name.
+	Title string
 	// Desc describes the namespace.
 	Desc string
 	// GoNameFormat derives an action's Go constant name from its Name, as a
@@ -81,6 +149,8 @@ type Action struct {
 	GoName string
 	// Desc describes the action.
 	Desc string
+	// Category classifies the action. Every action but "*" sets it.
+	Category Category
 	// Aliases are other names of the same action in the same namespace. A
 	// statement naming any of them grants or denies all of them.
 	Aliases []string

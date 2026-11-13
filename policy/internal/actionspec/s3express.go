@@ -20,13 +20,16 @@ package actionspec
 // S3Express is the s3express action namespace.
 var S3Express = &Namespace{
 	Prefix:       "s3express",
+	Title:        "S3 Express",
+	Desc:         "S3 Express sessions.",
 	GoNameFormat: "%sAction",
 	BaseKeys:     CommonKeys,
 	Resource:     ResourceBucket,
 	Actions: []Action{
 		{
-			Name: "CreateSession",
-			Desc: "S3Express REST API action",
+			Name:     "CreateSession",
+			Category: CategoryCredentials,
+			Desc:     "S3Express REST API action",
 		},
 	},
 }

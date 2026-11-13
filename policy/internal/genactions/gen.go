@@ -19,6 +19,8 @@ package main
 
 import (
 	"bytes"
+	"crypto/sha256"
+	"encoding/hex"
 	"fmt"
 	"go/format"
 	"sort"
@@ -526,6 +528,135 @@ func renderConditionFile() ([]byte, error) {
 	return format.Source(w.Bytes())
 }
 
+var categoryConsts = map[spec.Category]string{
+	spec.CategoryList:         "CategoryList",
+	spec.CategoryRead:         "CategoryRead",
+	spec.CategoryWrite:        "CategoryWrite",
+	spec.CategoryManage:       "CategoryManage",
+	spec.CategoryCreateDelete: "CategoryCreateDelete",
+	spec.CategoryViewSettings: "CategoryViewSettings",
+	spec.CategoryConfigure:    "CategoryConfigure",
+	spec.CategoryProtection:   "CategoryProtection",
+	spec.CategoryPermissions:  "CategoryPermissions",
+	spec.CategoryIdentity:     "CategoryIdentity",
+	spec.CategoryCredentials:  "CategoryCredentials",
+	spec.CategoryMonitor:      "CategoryMonitor",
+	spec.CategoryDiagnostics:  "CategoryDiagnostics",
+	spec.CategoryOperate:      "CategoryOperate",
+	spec.CategoryReplication:  "CategoryReplication",
+}
+
+// keyNames lists the keys a policy can write; the condition package refuses
+// unlisted keys when it parses one.
+func keyNames(keys []*spec.Key) []string {
+	var names []string
+	for _, k := range keys {
+		if k.Unlisted {
+			continue
+		}
+		name := k.Name
+		if k.Variable {
+			name += "/"
+		}
+		names = append(names, name)
+	}
+	return names
+}
+
+func quoteList(ss []string) string {
+	q := make([]string, len(ss))
+	for i, s := range ss {
+		q[i] = strconv.Quote(s)
+	}
+	return strings.Join(q, ", ")
+}
+
+// prose joins the wrapped lines of a doc comment into paragraphs.
+func prose(desc string) string {
+	paras := strings.Split(strings.TrimSpace(desc), "\n\n")
+	for i, p := range paras {
+		paras[i] = strings.Join(strings.Fields(p), " ")
+	}
+	return strings.Join(paras, "\n\n")
+}
+
+// renderCatalogFile renders the catalog package's data. Version is a hash of
+// the rest of the rendered data, so it changes exactly when the data does.
+func renderCatalogFile(r *registry) ([]byte, error) {
+	var cats bytes.Buffer
+	cats.WriteString("\tCategories: []CategoryInfo{\n")
+	for _, c := range spec.Categories {
+		id, ok := categoryConsts[c.Category]
+		if !ok {
+			return nil, fmt.Errorf("category %q has no constant", c.Category)
+		}
+		fmt.Fprintf(&cats, "\t\t{ID: %s, Title: %q, Desc: %q},\n", id, c.Title, c.Desc)
+	}
+	cats.WriteString("\t},\n")
+
+	var body bytes.Buffer
+	for _, ns := range spec.Namespaces {
+		if ns.Title == "" {
+			return nil, fmt.Errorf("namespace %s has no Title", ns.Prefix)
+		}
+		fmt.Fprintf(&body, "\t\t{\n\t\t\tPrefix: %q,\n\t\t\tTitle: %q,\n", ns.Prefix, ns.Title)
+		if ns.Desc != "" {
+			fmt.Fprintf(&body, "\t\t\tDesc: %s,\n", strconv.Quote(prose(ns.Desc)))
+		}
+		if keys := keyNames(ns.BaseKeys); len(keys) > 0 {
+			fmt.Fprintf(&body, "\t\t\tConditionKeys: []string{%s},\n", quoteList(keys))
+		}
+		body.WriteString("\t\t\tActions: []Action{\n")
+		for i := range ns.Actions {
+			a := &ns.Actions[i]
+			if a.Name == "*" {
+				continue
+			}
+			category, ok := categoryConsts[a.Category]
+			if !ok {
+				return nil, fmt.Errorf("%s:%s has no valid Category", ns.Prefix, a.Name)
+			}
+			if a.Unsupported {
+				continue
+			}
+			fmt.Fprintf(&body, "\t\t\t\t{\n\t\t\t\t\tName: %q,\n", ns.Prefix+":"+a.Name)
+			if a.Desc != "" {
+				fmt.Fprintf(&body, "\t\t\t\t\tDesc: %s,\n", strconv.Quote(prose(a.Desc)))
+			}
+			fmt.Fprintf(&body, "\t\t\t\t\tCategory: %s,\n", category)
+			if keys := keyNames(a.Keys); len(keys) > 0 {
+				fmt.Fprintf(&body, "\t\t\t\t\tConditionKeys: []string{%s},\n", quoteList(keys))
+			}
+			if len(a.Aliases) > 0 {
+				full := make([]string, len(a.Aliases))
+				for j, alias := range a.Aliases {
+					full[j] = ns.Prefix + ":" + alias
+				}
+				fmt.Fprintf(&body, "\t\t\t\t\tAliases: []string{%s},\n", quoteList(full))
+			}
+			if len(a.Implies) > 0 {
+				fmt.Fprintf(&body, "\t\t\t\t\tImplies: []string{%s},\n", quoteList(a.Implies))
+			}
+			body.WriteString("\t\t\t\t},\n")
+		}
+		body.WriteString("\t\t\t},\n\t\t},\n")
+	}
+	h := sha256.New()
+	h.Write(cats.Bytes())
+	h.Write(body.Bytes())
+	sum := h.Sum(nil)
+
+	var w bytes.Buffer
+	w.WriteString(header)
+	w.WriteString("package catalog\n\n")
+	fmt.Fprintf(&w, "var catalog = Catalog{\n\tVersion: %q,\n", hex.EncodeToString(sum[:8]))
+	w.Write(cats.Bytes())
+	w.WriteString("\tNamespaces: []Namespace{\n")
+	w.Write(body.Bytes())
+	w.WriteString("\t},\n}\n")
+	return format.Source(w.Bytes())
+}
+
 // render returns every generated file, keyed by its path relative to the
 // policy package directory.
 func render() (map[string][]byte, error) {
@@ -551,6 +682,11 @@ func render() (map[string][]byte, error) {
 		return nil, fmt.Errorf("condition/keyname_gen.go: %w", err)
 	}
 	files["condition/keyname_gen.go"] = src
+	src, err = renderCatalogFile(r)
+	if err != nil {
+		return nil, fmt.Errorf("catalog/catalog_gen.go: %w", err)
+	}
+	files["catalog/catalog_gen.go"] = src
 	return files, nil
 }
 

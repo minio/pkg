@@ -20,33 +20,41 @@ package actionspec
 // S3Files is the s3files action namespace.
 var S3Files = &Namespace{
 	Prefix:       "s3files",
+	Title:        "AIStor Files",
+	Desc:         "File exports of buckets.",
 	GoNameFormat: "Files%sAction",
 	BaseKeys:     CommonKeys,
 	Resource:     ResourceNone,
 	Actions: []Action{
 		{
-			Name: "CreateExport",
-			Desc: "Add an export.",
+			Name:     "CreateExport",
+			Category: CategoryCreateDelete,
+			Desc:     "Add an export.",
 		},
 		{
-			Name: "DeleteExport",
-			Desc: "Remove an export.",
+			Name:     "DeleteExport",
+			Category: CategoryCreateDelete,
+			Desc:     "Remove an export.",
 		},
 		{
-			Name: "UpdateExport",
-			Desc: "Change an existing export's settings, such as\nits quota.",
+			Name:     "UpdateExport",
+			Category: CategoryConfigure,
+			Desc:     "Change an existing export's settings, such as\nits quota.",
 		},
 		{
-			Name: "SetExportAccess",
-			Desc: "Set or clear an export's access rules.\nSeparate from FilesUpdateExportAction because the access rules decide\nwhich clients may mount the export, so a grant to resize an export must\nnot also be a grant to open it to more hosts.",
+			Name:     "SetExportAccess",
+			Category: CategoryPermissions,
+			Desc:     "Set or clear an export's access rules.\nSeparate from FilesUpdateExportAction because the access rules decide\nwhich clients may mount the export, so a grant to resize an export must\nnot also be a grant to open it to more hosts.",
 		},
 		{
-			Name: "GetExportStatus",
-			Desc: "List exports and read an export's\nconfiguration and status.",
+			Name:     "GetExportStatus",
+			Category: CategoryViewSettings,
+			Desc:     "List exports and read an export's\nconfiguration and status.",
 		},
 		{
-			Name: "GetExportStats",
-			Desc: "Read per-export and fleet statistics.",
+			Name:     "GetExportStats",
+			Category: CategoryViewSettings,
+			Desc:     "Read per-export and fleet statistics.",
 		},
 		{
 			Name:   "*",

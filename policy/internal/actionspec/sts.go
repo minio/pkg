@@ -20,33 +20,41 @@ package actionspec
 // STS is the sts action namespace.
 var STS = &Namespace{
 	Prefix:       "sts",
+	Title:        "STS",
+	Desc:         "Temporary credentials from the Security Token Service.",
 	GoNameFormat: "%sAction",
 	BaseKeys:     AllSupportedSTSKeys,
 	Resource:     ResourceNone,
 	Actions: []Action{
 		{
-			Name: "AssumeRole",
-			Desc: "Use to deny or allow sts:AssumeRole action under specific conditions.",
+			Name:     "AssumeRole",
+			Category: CategoryCredentials,
+			Desc:     "Use to deny or allow sts:AssumeRole action under specific conditions.",
 		},
 		{
-			Name: "AssumeRoleLDAPIdentity",
-			Desc: "Use to deny or allow sts:AssumeRoleLDAPIdentity action under specific conditions.",
+			Name:     "AssumeRoleLDAPIdentity",
+			Category: CategoryCredentials,
+			Desc:     "Use to deny or allow sts:AssumeRoleLDAPIdentity action under specific conditions.",
 		},
 		{
-			Name: "AssumeRoleWithCustomToken",
-			Desc: "Use to deny or allow sts:AssumeRoleWithCustomToken action under specific conditions.",
+			Name:     "AssumeRoleWithCustomToken",
+			Category: CategoryCredentials,
+			Desc:     "Use to deny or allow sts:AssumeRoleWithCustomToken action under specific conditions.",
 		},
 		{
-			Name: "AssumeRoleWithWebIdentity",
-			Desc: "Use to deny or allow sts:AssumeRoleWithWebIdentity action under specific conditions.",
+			Name:     "AssumeRoleWithWebIdentity",
+			Category: CategoryCredentials,
+			Desc:     "Use to deny or allow sts:AssumeRoleWithWebIdentity action under specific conditions.",
 		},
 		{
-			Name: "AssumeRoleWithClientGrants",
-			Desc: "Use to deny or allow sts:AssumeRoleWithClientGrants action under specific conditions.",
+			Name:     "AssumeRoleWithClientGrants",
+			Category: CategoryCredentials,
+			Desc:     "Use to deny or allow sts:AssumeRoleWithClientGrants action under specific conditions.",
 		},
 		{
-			Name: "AssumeRoleWithClientCertificate",
-			Desc: "Use to deny or allow sts:AssumeRoleWithClientCertificate action under specific conditions.",
+			Name:     "AssumeRoleWithClientCertificate",
+			Category: CategoryCredentials,
+			Desc:     "Use to deny or allow sts:AssumeRoleWithClientCertificate action under specific conditions.",
 		},
 		{
 			Name:   "*",
