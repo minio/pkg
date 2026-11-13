@@ -17,69 +17,11 @@
 
 package policy
 
-import (
-	"github.com/minio/pkg/v3/policy/condition"
-)
-
 // STSAction - STS policy action.
 type STSAction string
-
-const (
-	// AssumeRoleAction - use to deny or allow sts:AssumeRole action under specific conditions.
-	AssumeRoleAction STSAction = "sts:AssumeRole"
-
-	// AssumeRoleLDAPIdentityAction - use to deny or allow sts:AssumeRoleLDAPIdentity action under specific conditions.
-	AssumeRoleLDAPIdentityAction STSAction = "sts:AssumeRoleLDAPIdentity"
-
-	// AssumeRoleWithCustomTokenAction - use to deny or allow sts:AssumeRoleWithCustomToken action under specific conditions.
-	AssumeRoleWithCustomTokenAction STSAction = "sts:AssumeRoleWithCustomToken"
-
-	// AssumeRoleWithWebIdentityAction - use to deny or allow sts:AssumeRoleWithWebIdentity action under specific conditions.
-	AssumeRoleWithWebIdentityAction STSAction = "sts:AssumeRoleWithWebIdentity"
-
-	// AssumeRoleWithClientGrantsAction - use to deny or allow sts:AssumeRoleWithClientGrants action under specific conditions.
-	AssumeRoleWithClientGrantsAction STSAction = "sts:AssumeRoleWithClientGrants"
-
-	// AssumeRoleWithClientCertificateAction - use to deny or allow sts:AssumeRoleWithClientCertificate action under specific conditions.
-	AssumeRoleWithClientCertificateAction STSAction = "sts:AssumeRoleWithClientCertificate"
-
-	// AllSTSActions - select all STS actions
-	AllSTSActions STSAction = "sts:*"
-)
-
-// List of all supported sts actions.
-var supportedSTSActions = map[STSAction]struct{}{
-	AllSTSActions:                         {},
-	AssumeRoleAction:                      {},
-	AssumeRoleLDAPIdentityAction:          {},
-	AssumeRoleWithWebIdentityAction:       {},
-	AssumeRoleWithCustomTokenAction:       {},
-	AssumeRoleWithClientGrantsAction:      {},
-	AssumeRoleWithClientCertificateAction: {},
-}
 
 // IsValid - checks if action is valid or not.
 func (action STSAction) IsValid() bool {
 	_, ok := supportedSTSActions[action]
 	return ok
 }
-
-func createSTSActionConditionKeyMap() map[Action]condition.KeySet {
-	allSupportedSTSKeys := []condition.Key{}
-	for _, keyName := range condition.AllSupportedSTSKeys {
-		allSupportedSTSKeys = append(allSupportedSTSKeys, keyName.ToKey())
-	}
-
-	return ActionConditionKeyMap{
-		Action(AllSTSActions):                         condition.NewKeySet(allSupportedSTSKeys...),
-		Action(AssumeRoleAction):                      condition.NewKeySet(allSupportedSTSKeys...),
-		Action(AssumeRoleLDAPIdentityAction):          condition.NewKeySet(allSupportedSTSKeys...),
-		Action(AssumeRoleWithWebIdentityAction):       condition.NewKeySet(allSupportedSTSKeys...),
-		Action(AssumeRoleWithCustomTokenAction):       condition.NewKeySet(allSupportedSTSKeys...),
-		Action(AssumeRoleWithClientGrantsAction):      condition.NewKeySet(allSupportedSTSKeys...),
-		Action(AssumeRoleWithClientCertificateAction): condition.NewKeySet(allSupportedSTSKeys...),
-	}
-}
-
-// stsActionConditionKeyMap - holds mapping of supported condition key for an action.
-var stsActionConditionKeyMap = createSTSActionConditionKeyMap()
