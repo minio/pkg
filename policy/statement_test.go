@@ -611,6 +611,10 @@ func TestStatementAdminKMSKeyResource(t *testing.T) {
 		{"no resource", `{"Effect":"Allow","Action":["admin:KMSCreateKey"]}`, KMSCreateKeyAdminAction, "other", true},
 		{"S3 resource is ignored as before", `{"Effect":"Allow","Action":["admin:KMSCreateKey"],"Resource":["arn:aws:s3:::*"]}`, KMSCreateKeyAdminAction, "other", true},
 		{"scoped deny, other key", `{"Effect":"Allow","Action":["admin:KMSCreateKey"]},{"Effect":"Deny","Action":["admin:KMSCreateKey"],"Resource":["arn:minio:kms:::secret-*"]}`, KMSCreateKeyAdminAction, "other", true},
+		{"not-resource allow, excluded key", `{"Effect":"Allow","Action":["admin:KMSCreateKey"],"NotResource":["arn:minio:kms:::secret-*"]}`, KMSCreateKeyAdminAction, "secret-1", false},
+		{"not-resource allow, other key", `{"Effect":"Allow","Action":["admin:KMSCreateKey"],"NotResource":["arn:minio:kms:::secret-*"]}`, KMSCreateKeyAdminAction, "fabric-1", true},
+		{"not-resource deny, excluded key", `{"Effect":"Allow","Action":["admin:KMSCreateKey"]},{"Effect":"Deny","Action":["admin:KMSCreateKey"],"NotResource":["arn:minio:kms:::fabric-*"]}`, KMSCreateKeyAdminAction, "fabric-1", true},
+		{"not-resource deny, other key", `{"Effect":"Allow","Action":["admin:KMSCreateKey"]},{"Effect":"Deny","Action":["admin:KMSCreateKey"],"NotResource":["arn:minio:kms:::fabric-*"]}`, KMSCreateKeyAdminAction, "other", false},
 		{"scoped deny, matching key", `{"Effect":"Allow","Action":["admin:KMSCreateKey"]},{"Effect":"Deny","Action":["admin:KMSCreateKey"],"Resource":["arn:minio:kms:::secret-*"]}`, KMSCreateKeyAdminAction, "secret-1", false},
 	} {
 		p, err := ParseConfig(strings.NewReader(`{"Version":"2012-10-17","Statement":[` + tc.policy + `]}`))
