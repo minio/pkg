@@ -123,6 +123,11 @@ func (statement Statement) isAllowedFor(args *Args, resource string) bool {
 			// An admin KMS key statement scoped by NotResource alone still
 			// matches it below.
 			noResources := len(statement.Resources) == 0 && (class.has(classKMS) || len(statement.NotResources) == 0)
+			if resource == "/" && statement.Effect == Deny && (len(statement.Resources) > 0 || len(statement.NotResources) > 0) {
+				// A Deny scoped to keys refuses the request that names one of
+				// them, not the check of the action alone.
+				return false
+			}
 			if resource == "/" || noResources {
 				// In previous MinIO versions, KMS statements ignored Resources, so if len(statement.Resources) == 0,
 				// allow backward compatibility by not trying to Match.
