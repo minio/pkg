@@ -18,13 +18,13 @@
 package subnet
 
 import (
-	"context"
 	"crypto/tls"
 	"fmt"
 	"net"
 	"net/http"
 	"os"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/lestrrat-go/jwx/v3/jwt"
@@ -56,6 +56,11 @@ type LicenseValidator struct {
 	offlinePubKey     []byte
 	LicenseToken      string
 	ExpiryGracePeriod time.Duration
+
+	// scheduleOnce ensures at most one background license check is started
+	// for this validator, even if ValidateEnterpriseLicense is called more
+	// than once.
+	scheduleOnce sync.Once
 }
 
 // LicenseValidatorParams holds parameters for creating a new LicenseValidator.
@@ -171,24 +176,25 @@ func getDurationForNextLicenseCheck(li *licverifier.LicenseInfo) time.Duration {
 	return time.Until(li.ExpiresAt.Add(time.Second))
 }
 
+// scheduleNextLicenseCheck periodically re-validates the license until it
+// fails or the process exits. It calls ValidateEnterpriseLicense again, but
+// scheduleOnce guarantees that no additional background check is started.
 func (lv *LicenseValidator) scheduleNextLicenseCheck(li *licverifier.LicenseInfo, acceptedPlans []string, licExpiredChan chan<- string) {
-	duration := getDurationForNextLicenseCheck(li)
-	timer := time.NewTimer(duration)
+	timer := time.NewTimer(getDurationForNextLicenseCheck(li))
 	defer timer.Stop()
 
-	ctxt := context.Background()
-	for {
-		select {
-		case <-timer.C:
-			li, err := lv.ValidateEnterpriseLicense(acceptedPlans, licExpiredChan)
-			if err != nil {
-				licExpiredChan <- err.Error()
-				return
+	for range timer.C {
+		li, err := lv.ValidateEnterpriseLicense(acceptedPlans, licExpiredChan)
+		if err != nil {
+			// The consumer may have gone away; do not block the goroutine
+			// forever waiting for someone to receive the notification.
+			select {
+			case licExpiredChan <- err.Error():
+			default:
 			}
-			timer.Reset(getDurationForNextLicenseCheck(li))
-		case <-ctxt.Done():
 			return
 		}
+		timer.Reset(getDurationForNextLicenseCheck(li))
 	}
 }
 
@@ -226,7 +232,9 @@ func (lv *LicenseValidator) ValidateEnterpriseLicense(acceptedPlans []string, li
 	if licExpiredChan != nil {
 		// if the expiry channel is nil, it means client doesn't want to be notified
 		// when license expires. In that case we don't schedule the background check.
-		go lv.scheduleNextLicenseCheck(li, acceptedPlans, licExpiredChan)
+		lv.scheduleOnce.Do(func() {
+			go lv.scheduleNextLicenseCheck(li, acceptedPlans, licExpiredChan)
+		})
 	}
 
 	return li, nil
