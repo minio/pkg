@@ -616,6 +616,13 @@ func TestStatementAdminKMSKeyResource(t *testing.T) {
 		{"not-resource deny, excluded key", `{"Effect":"Allow","Action":["admin:KMSCreateKey"]},{"Effect":"Deny","Action":["admin:KMSCreateKey"],"NotResource":["arn:minio:kms:::fabric-*"]}`, KMSCreateKeyAdminAction, "fabric-1", true},
 		{"not-resource deny, other key", `{"Effect":"Allow","Action":["admin:KMSCreateKey"]},{"Effect":"Deny","Action":["admin:KMSCreateKey"],"NotResource":["arn:minio:kms:::fabric-*"]}`, KMSCreateKeyAdminAction, "other", false},
 		{"scoped deny, matching key", `{"Effect":"Allow","Action":["admin:KMSCreateKey"]},{"Effect":"Deny","Action":["admin:KMSCreateKey"],"Resource":["arn:minio:kms:::secret-*"]}`, KMSCreateKeyAdminAction, "secret-1", false},
+		{"wildcard action, matching key", `{"Effect":"Allow","Action":["admin:KMSCreate*"],"Resource":["arn:minio:kms:::fabric-*"]}`, KMSCreateKeyAdminAction, "fabric-a", true},
+		{"wildcard action, other key", `{"Effect":"Allow","Action":["admin:KMSCreate*"],"Resource":["arn:minio:kms:::fabric-*"]}`, KMSCreateKeyAdminAction, "other-key", false},
+		{"admin:*, other key", `{"Effect":"Allow","Action":["admin:*"],"Resource":["arn:minio:kms:::fabric-*"]}`, KMSKeyStatusAdminAction, "other-key", false},
+		{"admin:*, other admin action", `{"Effect":"Allow","Action":["admin:*"],"Resource":["arn:minio:kms:::fabric-*"]}`, ServerInfoAdminAction, "", false},
+		{"wildcard and literal, other admin action", `{"Effect":"Allow","Action":["admin:KMSCreate*","admin:ServerInfo"],"Resource":["arn:minio:kms:::fabric-*"]}`, ServerInfoAdminAction, "", true},
+		{"wildcard deny, matching key", `{"Effect":"Allow","Action":["admin:KMSCreateKey"]},{"Effect":"Deny","Action":["admin:KMS*"],"Resource":["arn:minio:kms:::secret-*"]}`, KMSCreateKeyAdminAction, "secret-1", false},
+		{"wildcard deny, other key", `{"Effect":"Allow","Action":["admin:KMSCreateKey"]},{"Effect":"Deny","Action":["admin:KMS*"],"Resource":["arn:minio:kms:::secret-*"]}`, KMSCreateKeyAdminAction, "other", true},
 	} {
 		p, err := ParseConfig(strings.NewReader(`{"Version":"2012-10-17","Statement":[` + tc.policy + `]}`))
 		if err != nil {
