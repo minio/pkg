@@ -21,6 +21,7 @@ import (
 	"encoding/json"
 	"net"
 	"reflect"
+	"strings"
 	"testing"
 
 	"github.com/minio/pkg/v3/policy/condition"
@@ -588,6 +589,41 @@ func TestStatementValidate(t *testing.T) {
 
 		if expectErr != testCase.expectErr {
 			t.Fatalf("case %v: error: expected: %v, got: %v", i+1, testCase.expectErr, expectErr)
+		}
+	}
+}
+
+// TestStatementAdminKMSKeyResource checks that the admin actions on one KMS
+// key honor the KMS key resources a statement names, as the kms: actions do,
+// and keep ignoring a Resource of any other kind.
+func TestStatementAdminKMSKeyResource(t *testing.T) {
+	for _, tc := range []struct {
+		name   string
+		policy string
+		action AdminAction
+		key    string
+		want   bool
+	}{
+		{"scoped, action-only check", `{"Effect":"Allow","Action":["admin:KMSCreateKey"],"Resource":["arn:minio:kms:::fabric-*"]}`, KMSCreateKeyAdminAction, "", true},
+		{"scoped, matching key", `{"Effect":"Allow","Action":["admin:KMSCreateKey"],"Resource":["arn:minio:kms:::fabric-*"]}`, KMSCreateKeyAdminAction, "fabric-a", true},
+		{"scoped, other key", `{"Effect":"Allow","Action":["admin:KMSCreateKey"],"Resource":["arn:minio:kms:::fabric-*"]}`, KMSCreateKeyAdminAction, "other", false},
+		{"scoped status, matching key", `{"Effect":"Allow","Action":["admin:KMSKeyStatus"],"Resource":["arn:minio:kms:::fabric-*"]}`, KMSKeyStatusAdminAction, "fabric-1", true},
+		{"no resource", `{"Effect":"Allow","Action":["admin:KMSCreateKey"]}`, KMSCreateKeyAdminAction, "other", true},
+		{"S3 resource is ignored as before", `{"Effect":"Allow","Action":["admin:KMSCreateKey"],"Resource":["arn:aws:s3:::*"]}`, KMSCreateKeyAdminAction, "other", true},
+		{"scoped deny, other key", `{"Effect":"Allow","Action":["admin:KMSCreateKey"]},{"Effect":"Deny","Action":["admin:KMSCreateKey"],"Resource":["arn:minio:kms:::secret-*"]}`, KMSCreateKeyAdminAction, "other", true},
+		{"not-resource allow, excluded key", `{"Effect":"Allow","Action":["admin:KMSCreateKey"],"NotResource":["arn:minio:kms:::secret-*"]}`, KMSCreateKeyAdminAction, "secret-1", false},
+		{"not-resource allow, other key", `{"Effect":"Allow","Action":["admin:KMSCreateKey"],"NotResource":["arn:minio:kms:::secret-*"]}`, KMSCreateKeyAdminAction, "fabric-1", true},
+		{"not-resource deny, excluded key", `{"Effect":"Allow","Action":["admin:KMSCreateKey"]},{"Effect":"Deny","Action":["admin:KMSCreateKey"],"NotResource":["arn:minio:kms:::fabric-*"]}`, KMSCreateKeyAdminAction, "fabric-1", true},
+		{"not-resource deny, other key", `{"Effect":"Allow","Action":["admin:KMSCreateKey"]},{"Effect":"Deny","Action":["admin:KMSCreateKey"],"NotResource":["arn:minio:kms:::fabric-*"]}`, KMSCreateKeyAdminAction, "other", false},
+		{"scoped deny, matching key", `{"Effect":"Allow","Action":["admin:KMSCreateKey"]},{"Effect":"Deny","Action":["admin:KMSCreateKey"],"Resource":["arn:minio:kms:::secret-*"]}`, KMSCreateKeyAdminAction, "secret-1", false},
+	} {
+		p, err := ParseConfig(strings.NewReader(`{"Version":"2012-10-17","Statement":[` + tc.policy + `]}`))
+		if err != nil {
+			t.Fatalf("%s: %v", tc.name, err)
+		}
+		args := Args{AccountName: "user", Action: Action(tc.action), BucketName: tc.key, ConditionValues: map[string][]string{}}
+		if got := p.IsAllowed(args); got != tc.want {
+			t.Errorf("%s: %s on key %q allowed %v, want %v", tc.name, tc.action, tc.key, got, tc.want)
 		}
 	}
 }
