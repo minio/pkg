@@ -315,11 +315,15 @@ func TestAdminActionConditionKeysConsistent(t *testing.T) {
 		actionKeys[k] = true
 	}
 	taken := map[condition.KeyName]bool{}
-	for action, keys := range adminActionConditionKeys {
-		if _, ok := SupportedAdminActions[action]; !ok {
+	for action, keys := range adminActionConditionKeyMap {
+		if _, ok := SupportedAdminActions[AdminAction(action)]; !ok {
 			t.Errorf("%s is not a supported admin action", action)
 		}
-		for _, k := range keys {
+		for key := range keys {
+			k := condition.KeyName(key.String())
+			if common[k] {
+				continue
+			}
 			if !actionKeys[k] {
 				t.Errorf("%s lists %s, which is not in condition.AdminActionKeys", action, k)
 			}

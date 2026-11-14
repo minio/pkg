@@ -1,0 +1,1816 @@
+# Supported sets
+
+## SupportedActions (72)
+s3:*
+s3:AbortMultipartUpload
+s3:BypassGovernanceRetention
+s3:CreateBucket
+s3:DeleteBucket
+s3:DeleteBucketCors
+s3:DeleteBucketPolicy
+s3:DeleteObject
+s3:DeleteObjectAnnotation
+s3:DeleteObjectTagging
+s3:DeleteObjectVersion
+s3:DeleteObjectVersionTagging
+s3:ForceDeleteBucket
+s3:GetBucketCors
+s3:GetBucketLocation
+s3:GetBucketNotification
+s3:GetBucketObjectLockConfiguration
+s3:GetBucketPolicy
+s3:GetBucketPolicyStatus
+s3:GetBucketQOS
+s3:GetBucketTagging
+s3:GetBucketVersioning
+s3:GetEncryptionConfiguration
+s3:GetInventoryConfiguration
+s3:GetLifecycleConfiguration
+s3:GetObject
+s3:GetObjectAnnotation
+s3:GetObjectAttributes
+s3:GetObjectLegalHold
+s3:GetObjectRetention
+s3:GetObjectTagging
+s3:GetObjectVersion
+s3:GetObjectVersionAnnotationForReplication
+s3:GetObjectVersionAttributes
+s3:GetObjectVersionForReplication
+s3:GetObjectVersionTagging
+s3:GetReplicationConfiguration
+s3:HeadBucket
+s3:ListAllMyBuckets
+s3:ListBucket
+s3:ListBucketMultipartUploads
+s3:ListBucketVersions
+s3:ListMultipartUploadParts
+s3:ListObjectAnnotations
+s3:ListenBucketNotification
+s3:ListenNotification
+s3:PutBucketCors
+s3:PutBucketNotification
+s3:PutBucketObjectLockConfiguration
+s3:PutBucketPolicy
+s3:PutBucketQOS
+s3:PutBucketTagging
+s3:PutBucketVersioning
+s3:PutEncryptionConfiguration
+s3:PutInventoryConfiguration
+s3:PutLifecycleConfiguration
+s3:PutObject
+s3:PutObjectAnnotation
+s3:PutObjectFanOut
+s3:PutObjectLegalHold
+s3:PutObjectRetention
+s3:PutObjectTagging
+s3:PutObjectVersionTagging
+s3:PutReplicationConfiguration
+s3:ReplicateDelete
+s3:ReplicateObject
+s3:ReplicateObjectAnnotation
+s3:ReplicateTags
+s3:ResetBucketReplicationState
+s3:RestoreObject
+s3:UpdateObjectEncryption
+s3express:CreateSession
+
+## SupportedObjectActions (35)
+s3:*
+s3:AbortMultipartUpload
+s3:BypassGovernanceRetention
+s3:DeleteObject
+s3:DeleteObjectAnnotation
+s3:DeleteObjectTagging
+s3:DeleteObjectVersion
+s3:DeleteObjectVersionTagging
+s3:GetObject
+s3:GetObjectAnnotation
+s3:GetObjectAttributes
+s3:GetObjectLegalHold
+s3:GetObjectRetention
+s3:GetObjectTagging
+s3:GetObjectVersion
+s3:GetObjectVersionAnnotationForReplication
+s3:GetObjectVersionAttributes
+s3:GetObjectVersionForReplication
+s3:GetObjectVersionTagging
+s3:ListMultipartUploadParts
+s3:ListObjectAnnotations
+s3:PutObject
+s3:PutObjectAnnotation
+s3:PutObjectFanOut
+s3:PutObjectLegalHold
+s3:PutObjectRetention
+s3:PutObjectTagging
+s3:PutObjectVersionTagging
+s3:ReplicateDelete
+s3:ReplicateObject
+s3:ReplicateObjectAnnotation
+s3:ReplicateTags
+s3:ResetBucketReplicationState
+s3:RestoreObject
+s3:UpdateObjectEncryption
+
+## SupportedAdminActions (104)
+admin:*
+admin:AddUserToGroup
+admin:AttachUserOrGroupPolicy
+admin:BandwidthMonitor
+admin:CancelBatchJob
+admin:ChangeMyPassword
+admin:ClusterInfo
+admin:ConfigUpdate
+admin:ConsoleLog
+admin:CreatePolicy
+admin:CreateServiceAccount
+admin:CreateUser
+admin:DataUsageInfo
+admin:Decommission
+admin:DeletePolicy
+admin:DeleteUser
+admin:DeltaSharing
+admin:DeltaSharingCreateShare
+admin:DeltaSharingCreateToken
+admin:DeltaSharingDeleteShare
+admin:DeltaSharingDeleteToken
+admin:DeltaSharingGetShare
+admin:DeltaSharingListShares
+admin:DeltaSharingListTokens
+admin:DeltaSharingUpdateShare
+admin:DeltaSharingUseRecipient
+admin:DeltaSharingUseShare
+admin:DescribeBatchJob
+admin:DisableGroup
+admin:DisableUser
+admin:DistJobStatus
+admin:DriveInfo
+admin:DriveList
+admin:EnableGroup
+admin:EnableUser
+admin:ExportBucketMetadata
+admin:ExportIAM
+admin:ForceUnlock
+admin:GenerateBatchJob
+admin:GetBucketCompression
+admin:GetBucketQuota
+admin:GetBucketTarget
+admin:GetGroup
+admin:GetPolicy
+admin:GetUser
+admin:Heal
+admin:ImportBucketMetadata
+admin:ImportIAM
+admin:InspectData
+admin:InventoryControl
+admin:KMSCreateKey
+admin:KMSKeyStatus
+admin:LicenseInfo
+admin:ListBatchJobs
+admin:ListGroups
+admin:ListServiceAccounts
+admin:ListTemporaryAccounts
+admin:ListTier
+admin:ListUserPolicies
+admin:ListUsers
+admin:NodeInfo
+admin:NodeList
+admin:OBDInfo
+admin:PoolInfo
+admin:PoolList
+admin:Profiling
+admin:Prometheus
+admin:ReadAPILogs
+admin:ReadAlerts
+admin:ReadAuditLogs
+admin:ReadErrorLogs
+admin:Rebalance
+admin:RemoveServiceAccount
+admin:RemoveUserFromGroup
+admin:ReplicationDiff
+admin:ServerInfo
+admin:ServerTrace
+admin:ServerUpdate
+admin:ServiceCordon
+admin:ServiceFreeze
+admin:ServiceRestart
+admin:ServiceStop
+admin:SetBucketCompression
+admin:SetBucketQuota
+admin:SetBucketTarget
+admin:SetInfo
+admin:SetRootAccess
+admin:SetTier
+admin:SiteReplicationAdd
+admin:SiteReplicationDisable
+admin:SiteReplicationInfo
+admin:SiteReplicationOperation
+admin:SiteReplicationRemove
+admin:SiteReplicationResync
+admin:StartBatchJob
+admin:StorageInfo
+admin:TablesReplicationAdd
+admin:TablesReplicationCatalogAdmin
+admin:TablesReplicationInfo
+admin:TablesReplicationRemove
+admin:TablesReplicationStartFailover
+admin:TopLocksInfo
+admin:UpdatePolicyAssociation
+admin:UpdateServiceAccount
+
+## AdminActionsWithResource (11)
+admin:ExportBucketMetadata
+admin:GetBucketCompression
+admin:GetBucketQuota
+admin:GetBucketTarget
+admin:Heal
+admin:ImportBucketMetadata
+admin:InventoryControl
+admin:ReplicationDiff
+admin:SetBucketCompression
+admin:SetBucketQuota
+admin:SetBucketTarget
+
+## supportedSTSActions (7)
+sts:*
+sts:AssumeRole
+sts:AssumeRoleLDAPIdentity
+sts:AssumeRoleWithClientCertificate
+sts:AssumeRoleWithClientGrants
+sts:AssumeRoleWithCustomToken
+sts:AssumeRoleWithWebIdentity
+
+## supportedKMSActions (26)
+kms:*
+kms:API
+kms:AssignPolicy
+kms:AuditLog
+kms:CleanupLocalKeys
+kms:CreateKey
+kms:DeleteIdentity
+kms:DeleteKey
+kms:DeletePolicy
+kms:DescribeIdentity
+kms:DescribePolicy
+kms:DescribeSelfIdentity
+kms:Enable
+kms:ErrorLog
+kms:GetPolicy
+kms:ImportKey
+kms:KeyRotate
+kms:KeyStatus
+kms:ListIdentities
+kms:ListKeys
+kms:ListPolicies
+kms:Metrics
+kms:MigrateKeys
+kms:SetPolicy
+kms:Status
+kms:Version
+
+## SupportedTableActions (76)
+s3tables:*
+s3tables:CreateFunction
+s3tables:CreateNamespace
+s3tables:CreateTable
+s3tables:CreateTableBucket
+s3tables:CreateView
+s3tables:CreateWarehouse
+s3tables:DeleteFunction
+s3tables:DeleteNamespace
+s3tables:DeleteTable
+s3tables:DeleteTableAnnotation
+s3tables:DeleteTableBucket
+s3tables:DeleteTableBucketEncryption
+s3tables:DeleteTableBucketPolicy
+s3tables:DeleteTableEncryption
+s3tables:DeleteTablePolicy
+s3tables:DeleteView
+s3tables:DeleteWarehouse
+s3tables:DeleteWarehouseEncryption
+s3tables:DeleteWarehousePolicy
+s3tables:GetConfig
+s3tables:GetFunction
+s3tables:GetNamespace
+s3tables:GetTable
+s3tables:GetTableAnnotation
+s3tables:GetTableBucket
+s3tables:GetTableBucketEncryption
+s3tables:GetTableBucketMaintenanceConfiguration
+s3tables:GetTableBucketPolicy
+s3tables:GetTableData
+s3tables:GetTableEncryption
+s3tables:GetTableMaintenanceConfiguration
+s3tables:GetTableMaintenanceJobStatus
+s3tables:GetTableMetadataLocation
+s3tables:GetTablePolicy
+s3tables:GetView
+s3tables:GetWarehouse
+s3tables:GetWarehouseEncryption
+s3tables:GetWarehouseMaintenanceConfiguration
+s3tables:GetWarehousePolicy
+s3tables:ListFunctions
+s3tables:ListNamespaces
+s3tables:ListTableAnnotations
+s3tables:ListTableBuckets
+s3tables:ListTables
+s3tables:ListTagsForTable
+s3tables:ListTagsForWarehouse
+s3tables:ListViews
+s3tables:ListWarehouses
+s3tables:PutTableAnnotation
+s3tables:PutTableBucketEncryption
+s3tables:PutTableBucketMaintenanceConfiguration
+s3tables:PutTableBucketPolicy
+s3tables:PutTableData
+s3tables:PutTableEncryption
+s3tables:PutTableMaintenanceConfiguration
+s3tables:PutTablePolicy
+s3tables:PutWarehouseEncryption
+s3tables:PutWarehouseMaintenanceConfiguration
+s3tables:PutWarehousePolicy
+s3tables:RegisterFunction
+s3tables:RegisterTable
+s3tables:RegisterView
+s3tables:RenameFunction
+s3tables:RenameTable
+s3tables:RenameView
+s3tables:TableMetrics
+s3tables:TagTable
+s3tables:TagWarehouse
+s3tables:UntagTable
+s3tables:UntagWarehouse
+s3tables:UpdateFunction
+s3tables:UpdateNamespaceProperties
+s3tables:UpdateTable
+s3tables:UpdateTableMetadataLocation
+s3tables:UpdateView
+
+## SupportedVectorsActions (14)
+s3vectors:*
+s3vectors:CreateIndex
+s3vectors:CreateVectorBucket
+s3vectors:DeleteIndex
+s3vectors:DeleteVectorBucket
+s3vectors:DeleteVectors
+s3vectors:GetIndex
+s3vectors:GetVectorBucket
+s3vectors:GetVectors
+s3vectors:ListIndexes
+s3vectors:ListVectorBuckets
+s3vectors:ListVectors
+s3vectors:PutVectors
+s3vectors:QueryVectors
+
+## SupportedMemoryActions (17)
+memory:*
+memory:CreateAgent
+memory:CreateCortex
+memory:DeleteAgent
+memory:DeleteCortex
+memory:DeleteSecret
+memory:GetAgent
+memory:GetCortex
+memory:GetObjectBio
+memory:GetSecret
+memory:ListAgents
+memory:ListCortexes
+memory:ListSecrets
+memory:PutAgent
+memory:PutSecret
+memory:Search
+memory:UpdateAgent
+
+## SupportedFilesActions (7)
+s3files:*
+s3files:CreateExport
+s3files:DeleteExport
+s3files:GetExportStats
+s3files:GetExportStatus
+s3files:SetExportAccess
+s3files:UpdateExport
+
+# Condition keys
+
+## adminActionConditionKeyMap
+admin:*: common=36 svc:DurationSeconds
+admin:AddUserToGroup: common=36 svc:DurationSeconds
+admin:AttachUserOrGroupPolicy: common=36 admin:PolicyName,svc:DurationSeconds
+admin:BandwidthMonitor: common=36 svc:DurationSeconds
+admin:CancelBatchJob: common=36 svc:DurationSeconds
+admin:ChangeMyPassword: common=36 svc:DurationSeconds
+admin:ClusterInfo: common=36 svc:DurationSeconds
+admin:ConfigUpdate: common=36 svc:DurationSeconds
+admin:ConsoleLog: common=36 svc:DurationSeconds
+admin:CreatePolicy: common=36 admin:PolicyName,svc:DurationSeconds
+admin:CreateServiceAccount: common=36 svc:DurationSeconds
+admin:CreateUser: common=36 svc:DurationSeconds
+admin:DataUsageInfo: common=36 svc:DurationSeconds
+admin:Decommission: common=36 svc:DurationSeconds
+admin:DeletePolicy: common=36 admin:PolicyName,svc:DurationSeconds
+admin:DeleteUser: common=36 svc:DurationSeconds
+admin:DeltaSharing: common=36 svc:DurationSeconds
+admin:DeltaSharingCreateShare: common=36 svc:DurationSeconds
+admin:DeltaSharingCreateToken: common=36 svc:DurationSeconds
+admin:DeltaSharingDeleteShare: common=36 svc:DurationSeconds
+admin:DeltaSharingDeleteToken: common=36 svc:DurationSeconds
+admin:DeltaSharingGetShare: common=36 svc:DurationSeconds
+admin:DeltaSharingListShares: common=36 svc:DurationSeconds
+admin:DeltaSharingListTokens: common=36 svc:DurationSeconds
+admin:DeltaSharingUpdateShare: common=36 svc:DurationSeconds
+admin:DeltaSharingUseRecipient: common=36 svc:DurationSeconds
+admin:DeltaSharingUseShare: common=36 svc:DurationSeconds
+admin:DescribeBatchJob: common=36 svc:DurationSeconds
+admin:DisableGroup: common=36 svc:DurationSeconds
+admin:DisableUser: common=36 svc:DurationSeconds
+admin:DistJobStatus: common=36 svc:DurationSeconds
+admin:DriveInfo: common=36 svc:DurationSeconds
+admin:DriveList: common=36 svc:DurationSeconds
+admin:EnableGroup: common=36 svc:DurationSeconds
+admin:EnableUser: common=36 svc:DurationSeconds
+admin:ExportBucketMetadata: common=36 svc:DurationSeconds
+admin:ExportIAM: common=36 svc:DurationSeconds
+admin:ForceUnlock: common=36 svc:DurationSeconds
+admin:GenerateBatchJob: common=36 svc:DurationSeconds
+admin:GetBucketCompression: common=36 svc:DurationSeconds
+admin:GetBucketQuota: common=36 svc:DurationSeconds
+admin:GetBucketTarget: common=36 svc:DurationSeconds
+admin:GetGroup: common=36 svc:DurationSeconds
+admin:GetPolicy: common=36 admin:PolicyName,svc:DurationSeconds
+admin:GetUser: common=36 svc:DurationSeconds
+admin:Heal: common=36 svc:DurationSeconds
+admin:ImportBucketMetadata: common=36 svc:DurationSeconds
+admin:ImportIAM: common=36 svc:DurationSeconds
+admin:InspectData: common=36 svc:DurationSeconds
+admin:InventoryControl: common=36 svc:DurationSeconds
+admin:KMSCreateKey: common=36 svc:DurationSeconds
+admin:KMSKeyStatus: common=36 svc:DurationSeconds
+admin:LicenseInfo: common=36 svc:DurationSeconds
+admin:ListBatchJobs: common=36 svc:DurationSeconds
+admin:ListGroups: common=36 svc:DurationSeconds
+admin:ListServiceAccounts: common=36 svc:DurationSeconds
+admin:ListTemporaryAccounts: common=36 svc:DurationSeconds
+admin:ListTier: common=36 svc:DurationSeconds
+admin:ListUserPolicies: common=36 svc:DurationSeconds
+admin:ListUsers: common=36 svc:DurationSeconds
+admin:NodeInfo: common=36 svc:DurationSeconds
+admin:NodeList: common=36 svc:DurationSeconds
+admin:OBDInfo: common=36 svc:DurationSeconds
+admin:PoolInfo: common=36 svc:DurationSeconds
+admin:PoolList: common=36 svc:DurationSeconds
+admin:Profiling: common=36 svc:DurationSeconds
+admin:Prometheus: common=36 svc:DurationSeconds
+admin:ReadAPILogs: common=36 svc:DurationSeconds
+admin:ReadAlerts: common=36 svc:DurationSeconds
+admin:ReadAuditLogs: common=36 svc:DurationSeconds
+admin:ReadErrorLogs: common=36 svc:DurationSeconds
+admin:Rebalance: common=36 svc:DurationSeconds
+admin:RemoveServiceAccount: common=36 svc:DurationSeconds
+admin:RemoveUserFromGroup: common=36 svc:DurationSeconds
+admin:ReplicationDiff: common=36 svc:DurationSeconds
+admin:ServerInfo: common=36 svc:DurationSeconds
+admin:ServerTrace: common=36 svc:DurationSeconds
+admin:ServerUpdate: common=36 svc:DurationSeconds
+admin:ServiceCordon: common=36 svc:DurationSeconds
+admin:ServiceFreeze: common=36 svc:DurationSeconds
+admin:ServiceRestart: common=36 svc:DurationSeconds
+admin:ServiceStop: common=36 svc:DurationSeconds
+admin:SetBucketCompression: common=36 svc:DurationSeconds
+admin:SetBucketQuota: common=36 svc:DurationSeconds
+admin:SetBucketTarget: common=36 svc:DurationSeconds
+admin:SetInfo: common=36 svc:DurationSeconds
+admin:SetRootAccess: common=36 svc:DurationSeconds
+admin:SetTier: common=36 svc:DurationSeconds
+admin:SiteReplicationAdd: common=36 svc:DurationSeconds
+admin:SiteReplicationDisable: common=36 svc:DurationSeconds
+admin:SiteReplicationInfo: common=36 svc:DurationSeconds
+admin:SiteReplicationOperation: common=36 svc:DurationSeconds
+admin:SiteReplicationRemove: common=36 svc:DurationSeconds
+admin:SiteReplicationResync: common=36 svc:DurationSeconds
+admin:StartBatchJob: common=36 svc:DurationSeconds
+admin:StorageInfo: common=36 svc:DurationSeconds
+admin:TablesReplicationAdd: common=36 svc:DurationSeconds
+admin:TablesReplicationCatalogAdmin: common=36 svc:DurationSeconds
+admin:TablesReplicationInfo: common=36 svc:DurationSeconds
+admin:TablesReplicationRemove: common=36 svc:DurationSeconds
+admin:TablesReplicationStartFailover: common=36 svc:DurationSeconds
+admin:TopLocksInfo: common=36 svc:DurationSeconds
+admin:UpdatePolicyAssociation: common=36 admin:PolicyName,svc:DurationSeconds
+admin:UpdateServiceAccount: common=36 svc:DurationSeconds
+
+## stsActionConditionKeyMap
+sts:*: common=9 sts:DurationSeconds,sts:SourceIdentity
+sts:AssumeRole: common=9 sts:DurationSeconds,sts:SourceIdentity
+sts:AssumeRoleLDAPIdentity: common=9 sts:DurationSeconds,sts:SourceIdentity
+sts:AssumeRoleWithClientCertificate: common=9 sts:DurationSeconds,sts:SourceIdentity
+sts:AssumeRoleWithClientGrants: common=9 sts:DurationSeconds,sts:SourceIdentity
+sts:AssumeRoleWithCustomToken: common=9 sts:DurationSeconds,sts:SourceIdentity
+sts:AssumeRoleWithWebIdentity: common=9 sts:DurationSeconds,sts:SourceIdentity
+
+## tableActionConditionKeyMap
+s3tables:*: common=all s3tables:KMSKeyArn,s3tables:SSEAlgorithm,s3tables:TableTag,s3tables:WarehouseTag,s3tables:functionName,s3tables:namespace,s3tables:registerLocation,s3tables:tableName,s3tables:viewName
+s3tables:CreateFunction: common=all s3tables:WarehouseTag,s3tables:functionName,s3tables:namespace
+s3tables:CreateNamespace: common=all s3tables:WarehouseTag,s3tables:namespace
+s3tables:CreateTable: common=all aws:RequestTag,aws:TagKeys,s3tables:KMSKeyArn,s3tables:SSEAlgorithm,s3tables:WarehouseTag,s3tables:namespace,s3tables:tableName
+s3tables:CreateTableBucket: common=all s3tables:KMSKeyArn,s3tables:SSEAlgorithm
+s3tables:CreateView: common=all s3tables:WarehouseTag,s3tables:namespace,s3tables:viewName
+s3tables:CreateWarehouse: common=all s3tables:KMSKeyArn,s3tables:SSEAlgorithm
+s3tables:DeleteFunction: common=all s3tables:WarehouseTag,s3tables:functionName,s3tables:namespace
+s3tables:DeleteNamespace: common=all s3tables:WarehouseTag,s3tables:namespace
+s3tables:DeleteTable: common=all s3tables:TableTag,s3tables:WarehouseTag,s3tables:namespace,s3tables:tableName
+s3tables:DeleteTableAnnotation: common=all s3tables:TableTag,s3tables:WarehouseTag,s3tables:namespace,s3tables:tableName
+s3tables:DeleteTableBucket: common=all s3tables:WarehouseTag
+s3tables:DeleteTableBucketEncryption: common=all s3tables:WarehouseTag
+s3tables:DeleteTableBucketPolicy: common=all s3tables:WarehouseTag
+s3tables:DeleteTableEncryption: common=all s3tables:TableTag,s3tables:WarehouseTag,s3tables:namespace,s3tables:tableName
+s3tables:DeleteTablePolicy: common=all s3tables:TableTag,s3tables:WarehouseTag,s3tables:namespace,s3tables:tableName
+s3tables:DeleteView: common=all s3tables:WarehouseTag,s3tables:namespace,s3tables:viewName
+s3tables:DeleteWarehouse: common=all s3tables:WarehouseTag
+s3tables:DeleteWarehouseEncryption: common=all s3tables:WarehouseTag
+s3tables:DeleteWarehousePolicy: common=all s3tables:WarehouseTag
+s3tables:GetConfig: common=all s3tables:WarehouseTag
+s3tables:GetFunction: common=all s3tables:WarehouseTag,s3tables:functionName,s3tables:namespace
+s3tables:GetNamespace: common=all s3tables:WarehouseTag,s3tables:namespace
+s3tables:GetTable: common=all s3tables:TableTag,s3tables:WarehouseTag,s3tables:namespace,s3tables:tableName
+s3tables:GetTableAnnotation: common=all s3tables:TableTag,s3tables:WarehouseTag,s3tables:namespace,s3tables:tableName
+s3tables:GetTableBucket: common=all s3tables:WarehouseTag
+s3tables:GetTableBucketEncryption: common=all s3tables:WarehouseTag
+s3tables:GetTableBucketMaintenanceConfiguration: common=all s3tables:WarehouseTag
+s3tables:GetTableBucketPolicy: common=all s3tables:WarehouseTag
+s3tables:GetTableData: common=all s3tables:TableTag,s3tables:WarehouseTag,s3tables:namespace,s3tables:tableName
+s3tables:GetTableEncryption: common=all s3tables:TableTag,s3tables:WarehouseTag,s3tables:namespace,s3tables:tableName
+s3tables:GetTableMaintenanceConfiguration: common=all s3tables:TableTag,s3tables:WarehouseTag,s3tables:namespace,s3tables:tableName
+s3tables:GetTableMaintenanceJobStatus: common=all s3tables:TableTag,s3tables:WarehouseTag,s3tables:namespace,s3tables:tableName
+s3tables:GetTableMetadataLocation: common=all s3tables:TableTag,s3tables:WarehouseTag,s3tables:namespace,s3tables:tableName
+s3tables:GetTablePolicy: common=all s3tables:TableTag,s3tables:WarehouseTag,s3tables:namespace,s3tables:tableName
+s3tables:GetView: common=all s3tables:WarehouseTag,s3tables:namespace,s3tables:viewName
+s3tables:GetWarehouse: common=all s3tables:WarehouseTag
+s3tables:GetWarehouseEncryption: common=all s3tables:WarehouseTag
+s3tables:GetWarehouseMaintenanceConfiguration: common=all s3tables:WarehouseTag
+s3tables:GetWarehousePolicy: common=all s3tables:WarehouseTag
+s3tables:ListFunctions: common=all s3tables:WarehouseTag,s3tables:namespace
+s3tables:ListNamespaces: common=all s3tables:WarehouseTag,s3tables:namespace
+s3tables:ListTableAnnotations: common=all s3tables:TableTag,s3tables:WarehouseTag,s3tables:namespace,s3tables:tableName
+s3tables:ListTableBuckets: common=all 
+s3tables:ListTables: common=all s3tables:WarehouseTag,s3tables:namespace
+s3tables:ListTagsForTable: common=all s3tables:TableTag,s3tables:WarehouseTag,s3tables:namespace,s3tables:tableName
+s3tables:ListTagsForWarehouse: common=all s3tables:WarehouseTag
+s3tables:ListViews: common=all s3tables:WarehouseTag,s3tables:namespace
+s3tables:ListWarehouses: common=all 
+s3tables:PutTableAnnotation: common=all s3tables:TableTag,s3tables:WarehouseTag,s3tables:namespace,s3tables:tableName
+s3tables:PutTableBucketEncryption: common=all s3tables:KMSKeyArn,s3tables:SSEAlgorithm,s3tables:WarehouseTag
+s3tables:PutTableBucketMaintenanceConfiguration: common=all s3tables:WarehouseTag
+s3tables:PutTableBucketPolicy: common=all s3tables:WarehouseTag
+s3tables:PutTableData: common=all s3tables:TableTag,s3tables:WarehouseTag,s3tables:namespace,s3tables:tableName
+s3tables:PutTableEncryption: common=all s3tables:KMSKeyArn,s3tables:SSEAlgorithm,s3tables:TableTag,s3tables:WarehouseTag,s3tables:namespace,s3tables:tableName
+s3tables:PutTableMaintenanceConfiguration: common=all s3tables:TableTag,s3tables:WarehouseTag,s3tables:namespace,s3tables:tableName
+s3tables:PutTablePolicy: common=all s3tables:TableTag,s3tables:WarehouseTag,s3tables:namespace,s3tables:tableName
+s3tables:PutWarehouseEncryption: common=all s3tables:KMSKeyArn,s3tables:SSEAlgorithm,s3tables:WarehouseTag
+s3tables:PutWarehouseMaintenanceConfiguration: common=all s3tables:WarehouseTag
+s3tables:PutWarehousePolicy: common=all s3tables:WarehouseTag
+s3tables:RegisterFunction: common=all s3tables:WarehouseTag,s3tables:functionName,s3tables:namespace,s3tables:registerLocation
+s3tables:RegisterTable: common=all s3tables:TableTag,s3tables:WarehouseTag,s3tables:namespace,s3tables:registerLocation,s3tables:tableName
+s3tables:RegisterView: common=all s3tables:WarehouseTag,s3tables:namespace,s3tables:registerLocation,s3tables:viewName
+s3tables:RenameFunction: common=all s3tables:WarehouseTag,s3tables:functionName,s3tables:namespace
+s3tables:RenameTable: common=all s3tables:TableTag,s3tables:WarehouseTag,s3tables:namespace,s3tables:tableName
+s3tables:RenameView: common=all s3tables:WarehouseTag,s3tables:namespace,s3tables:viewName
+s3tables:TableMetrics: common=all s3tables:TableTag,s3tables:WarehouseTag,s3tables:namespace,s3tables:tableName
+s3tables:TagTable: common=all aws:RequestTag,aws:TagKeys,s3tables:TableTag,s3tables:WarehouseTag,s3tables:namespace,s3tables:tableName
+s3tables:TagWarehouse: common=all aws:RequestTag,aws:TagKeys,s3tables:WarehouseTag
+s3tables:UntagTable: common=all aws:TagKeys,s3tables:TableTag,s3tables:WarehouseTag,s3tables:namespace,s3tables:tableName
+s3tables:UntagWarehouse: common=all aws:TagKeys,s3tables:WarehouseTag
+s3tables:UpdateFunction: common=all s3tables:WarehouseTag,s3tables:functionName,s3tables:namespace
+s3tables:UpdateNamespaceProperties: common=all s3tables:WarehouseTag,s3tables:namespace
+s3tables:UpdateTable: common=all s3tables:TableTag,s3tables:WarehouseTag,s3tables:namespace,s3tables:tableName
+s3tables:UpdateTableMetadataLocation: common=all s3tables:TableTag,s3tables:WarehouseTag,s3tables:namespace,s3tables:tableName
+s3tables:UpdateView: common=all s3tables:WarehouseTag,s3tables:namespace,s3tables:viewName
+
+## VectorsActionConditionKeyMap
+s3vectors:*: common=all 
+s3vectors:CreateIndex: common=all 
+s3vectors:CreateVectorBucket: common=all 
+s3vectors:DeleteIndex: common=all 
+s3vectors:DeleteVectorBucket: common=all 
+s3vectors:DeleteVectors: common=all 
+s3vectors:GetIndex: common=all 
+s3vectors:GetVectorBucket: common=all 
+s3vectors:GetVectors: common=all 
+s3vectors:ListIndexes: common=all 
+s3vectors:ListVectorBuckets: common=all 
+s3vectors:ListVectors: common=all 
+s3vectors:PutVectors: common=all 
+s3vectors:QueryVectors: common=all 
+
+## MemoryActionConditionKeyMap
+memory:*: common=all memory:max-keys,memory:prefix
+memory:CreateAgent: common=all 
+memory:CreateCortex: common=all 
+memory:DeleteAgent: common=all 
+memory:DeleteCortex: common=all 
+memory:DeleteSecret: common=all 
+memory:GetAgent: common=all 
+memory:GetCortex: common=all 
+memory:GetObjectBio: common=all 
+memory:GetSecret: common=all 
+memory:ListAgents: common=all memory:max-keys,memory:prefix
+memory:ListCortexes: common=all memory:max-keys,memory:prefix
+memory:ListSecrets: common=all memory:max-keys,memory:prefix
+memory:PutAgent: common=all 
+memory:PutSecret: common=all 
+memory:Search: common=all memory:max-keys,memory:prefix
+memory:UpdateAgent: common=all 
+
+## FilesActionConditionKeyMap
+s3files:*: common=all 
+s3files:CreateExport: common=all 
+s3files:DeleteExport: common=all 
+s3files:GetExportStats: common=all 
+s3files:GetExportStatus: common=all 
+s3files:SetExportAccess: common=all 
+s3files:UpdateExport: common=all 
+
+## IAMActionConditionKeyMap.Lookup
+: common=all aws:ResourceTag,s3:BucketTag
+*: common=all aws:RequestTag,aws:ResourceTag,aws:TagKeys,memory:max-keys,memory:prefix,s3:BucketTag,s3:ExistingObjectTag,s3:RequestObjectTag,s3:RequestObjectTagKeys,s3:delimiter,s3:max-keys,s3:object-lock-legal-hold,s3:object-lock-mode,s3:object-lock-remaining-retention-days,s3:object-lock-retain-until-date,s3:prefix,s3:versionid,s3:x-amz-annotation-directive,s3:x-amz-copy-source,s3:x-amz-metadata-directive,s3:x-amz-object-if-match,s3:x-amz-server-side-encryption,s3:x-amz-server-side-encryption-aws-kms-key-id,s3:x-amz-server-side-encryption-customer-algorithm,s3:x-amz-storage-class,s3tables:KMSKeyArn,s3tables:SSEAlgorithm,s3tables:TableTag,s3tables:WarehouseTag,s3tables:functionName,s3tables:namespace,s3tables:registerLocation,s3tables:tableName,s3tables:viewName,sts:DurationSeconds,sts:SourceIdentity,svc:DurationSeconds
+a*: common=all aws:ResourceTag,s3:BucketTag
+admin:*: common=all aws:ResourceTag,s3:BucketTag
+admin:?ealth: common=all aws:ResourceTag,s3:BucketTag
+admin:AddUserToGroup: common=all aws:ResourceTag,s3:BucketTag
+admin:AttachUserOrGroupPolicy: common=all aws:ResourceTag,s3:BucketTag
+admin:BandwidthMonitor: common=all aws:ResourceTag,s3:BucketTag
+admin:CancelBatchJob: common=all aws:ResourceTag,s3:BucketTag
+admin:ChangeMyPassword: common=all aws:ResourceTag,s3:BucketTag
+admin:ClusterInfo: common=all aws:ResourceTag,s3:BucketTag
+admin:ConfigUpdate: common=all aws:ResourceTag,s3:BucketTag
+admin:ConsoleLog: common=all aws:ResourceTag,s3:BucketTag
+admin:CreatePolicy: common=all aws:ResourceTag,s3:BucketTag
+admin:CreateServiceAccount: common=all aws:ResourceTag,s3:BucketTag
+admin:CreateUser: common=all aws:ResourceTag,s3:BucketTag
+admin:DataUsageInfo: common=all aws:ResourceTag,s3:BucketTag
+admin:Decommission: common=all aws:ResourceTag,s3:BucketTag
+admin:DeletePolicy: common=all aws:ResourceTag,s3:BucketTag
+admin:DeleteUser: common=all aws:ResourceTag,s3:BucketTag
+admin:DeltaSharing: common=all aws:ResourceTag,s3:BucketTag
+admin:DeltaSharingCreateShare: common=all aws:ResourceTag,s3:BucketTag
+admin:DeltaSharingCreateToken: common=all aws:ResourceTag,s3:BucketTag
+admin:DeltaSharingDeleteShare: common=all aws:ResourceTag,s3:BucketTag
+admin:DeltaSharingDeleteToken: common=all aws:ResourceTag,s3:BucketTag
+admin:DeltaSharingGetShare: common=all aws:ResourceTag,s3:BucketTag
+admin:DeltaSharingListShares: common=all aws:ResourceTag,s3:BucketTag
+admin:DeltaSharingListTokens: common=all aws:ResourceTag,s3:BucketTag
+admin:DeltaSharingUpdateShare: common=all aws:ResourceTag,s3:BucketTag
+admin:DeltaSharingUseRecipient: common=all aws:ResourceTag,s3:BucketTag
+admin:DeltaSharingUseShare: common=all aws:ResourceTag,s3:BucketTag
+admin:DescribeBatchJob: common=all aws:ResourceTag,s3:BucketTag
+admin:DisableGroup: common=all aws:ResourceTag,s3:BucketTag
+admin:DisableUser: common=all aws:ResourceTag,s3:BucketTag
+admin:DistJobStatus: common=all aws:ResourceTag,s3:BucketTag
+admin:DriveInfo: common=all aws:ResourceTag,s3:BucketTag
+admin:DriveList: common=all aws:ResourceTag,s3:BucketTag
+admin:EnableGroup: common=all aws:ResourceTag,s3:BucketTag
+admin:EnableUser: common=all aws:ResourceTag,s3:BucketTag
+admin:ExportBucketMetadata: common=all aws:ResourceTag,s3:BucketTag
+admin:ExportIAM: common=all aws:ResourceTag,s3:BucketTag
+admin:ForceUnlock: common=all aws:ResourceTag,s3:BucketTag
+admin:GenerateBatchJob: common=all aws:ResourceTag,s3:BucketTag
+admin:Get*: common=all aws:ResourceTag,s3:BucketTag
+admin:GetBucketCompression: common=all aws:ResourceTag,s3:BucketTag
+admin:GetBucketQuota: common=all aws:ResourceTag,s3:BucketTag
+admin:GetBucketTarget: common=all aws:ResourceTag,s3:BucketTag
+admin:GetGroup: common=all aws:ResourceTag,s3:BucketTag
+admin:GetPolicy: common=all aws:ResourceTag,s3:BucketTag
+admin:GetUser: common=all aws:ResourceTag,s3:BucketTag
+admin:Heal: common=all aws:ResourceTag,s3:BucketTag
+admin:ImportBucketMetadata: common=all aws:ResourceTag,s3:BucketTag
+admin:ImportIAM: common=all aws:ResourceTag,s3:BucketTag
+admin:InspectData: common=all aws:ResourceTag,s3:BucketTag
+admin:InventoryControl: common=all aws:ResourceTag,s3:BucketTag
+admin:KMS*: common=all aws:ResourceTag,s3:BucketTag
+admin:KMSBackup: common=all aws:ResourceTag,s3:BucketTag
+admin:KMSCreateKey: common=all aws:ResourceTag,s3:BucketTag
+admin:KMSEnable: common=all aws:ResourceTag,s3:BucketTag
+admin:KMSKeyRotate: common=all aws:ResourceTag,s3:BucketTag
+admin:KMSKeyStatus: common=all aws:ResourceTag,s3:BucketTag
+admin:KMSRestore: common=all aws:ResourceTag,s3:BucketTag
+admin:LicenseInfo: common=all aws:ResourceTag,s3:BucketTag
+admin:ListBatchJobs: common=all aws:ResourceTag,s3:BucketTag
+admin:ListGroups: common=all aws:ResourceTag,s3:BucketTag
+admin:ListServiceAccounts: common=all aws:ResourceTag,s3:BucketTag
+admin:ListTemporaryAccounts: common=all aws:ResourceTag,s3:BucketTag
+admin:ListTier: common=all aws:ResourceTag,s3:BucketTag
+admin:ListUserPolicies: common=all aws:ResourceTag,s3:BucketTag
+admin:ListUsers: common=all aws:ResourceTag,s3:BucketTag
+admin:NodeInfo: common=all aws:ResourceTag,s3:BucketTag
+admin:NodeList: common=all aws:ResourceTag,s3:BucketTag
+admin:OBDInfo: common=all aws:ResourceTag,s3:BucketTag
+admin:PoolInfo: common=all aws:ResourceTag,s3:BucketTag
+admin:PoolList: common=all aws:ResourceTag,s3:BucketTag
+admin:Profiling: common=all aws:ResourceTag,s3:BucketTag
+admin:Prometheus: common=all aws:ResourceTag,s3:BucketTag
+admin:ReadAPILogs: common=all aws:ResourceTag,s3:BucketTag
+admin:ReadAlerts: common=all aws:ResourceTag,s3:BucketTag
+admin:ReadAuditLogs: common=all aws:ResourceTag,s3:BucketTag
+admin:ReadErrorLogs: common=all aws:ResourceTag,s3:BucketTag
+admin:Rebalance: common=all aws:ResourceTag,s3:BucketTag
+admin:RemoveServiceAccount: common=all aws:ResourceTag,s3:BucketTag
+admin:RemoveUserFromGroup: common=all aws:ResourceTag,s3:BucketTag
+admin:ReplicationDiff: common=all aws:ResourceTag,s3:BucketTag
+admin:ServerInfo: common=all aws:ResourceTag,s3:BucketTag
+admin:ServerTrace: common=all aws:ResourceTag,s3:BucketTag
+admin:ServerUpdate: common=all aws:ResourceTag,s3:BucketTag
+admin:ServiceCordon: common=all aws:ResourceTag,s3:BucketTag
+admin:ServiceFreeze: common=all aws:ResourceTag,s3:BucketTag
+admin:ServiceRestart: common=all aws:ResourceTag,s3:BucketTag
+admin:ServiceStop: common=all aws:ResourceTag,s3:BucketTag
+admin:SetBucketCompression: common=all aws:ResourceTag,s3:BucketTag
+admin:SetBucketQuota: common=all aws:ResourceTag,s3:BucketTag
+admin:SetBucketTarget: common=all aws:ResourceTag,s3:BucketTag
+admin:SetInfo: common=all aws:ResourceTag,s3:BucketTag
+admin:SetRootAccess: common=all aws:ResourceTag,s3:BucketTag
+admin:SetTier: common=all aws:ResourceTag,s3:BucketTag
+admin:SiteReplicationAdd: common=all aws:ResourceTag,s3:BucketTag
+admin:SiteReplicationDisable: common=all aws:ResourceTag,s3:BucketTag
+admin:SiteReplicationInfo: common=all aws:ResourceTag,s3:BucketTag
+admin:SiteReplicationOperation: common=all aws:ResourceTag,s3:BucketTag
+admin:SiteReplicationRemove: common=all aws:ResourceTag,s3:BucketTag
+admin:SiteReplicationResync: common=all aws:ResourceTag,s3:BucketTag
+admin:StartBatchJob: common=all aws:ResourceTag,s3:BucketTag
+admin:StorageInfo: common=all aws:ResourceTag,s3:BucketTag
+admin:TablesReplicationAdd: common=all aws:ResourceTag,s3:BucketTag
+admin:TablesReplicationCatalogAdmin: common=all aws:ResourceTag,s3:BucketTag
+admin:TablesReplicationInfo: common=all aws:ResourceTag,s3:BucketTag
+admin:TablesReplicationRemove: common=all aws:ResourceTag,s3:BucketTag
+admin:TablesReplicationStartFailover: common=all aws:ResourceTag,s3:BucketTag
+admin:TopLocksInfo: common=all aws:ResourceTag,s3:BucketTag
+admin:UpdatePolicyAssociation: common=all aws:ResourceTag,s3:BucketTag
+admin:UpdateServiceAccount: common=all aws:ResourceTag,s3:BucketTag
+bogus:Action: common=all aws:ResourceTag,s3:BucketTag
+kms:*: common=all aws:ResourceTag,s3:BucketTag
+kms:API: common=all aws:ResourceTag,s3:BucketTag
+kms:AssignPolicy: common=all aws:ResourceTag,s3:BucketTag
+kms:AuditLog: common=all aws:ResourceTag,s3:BucketTag
+kms:CleanupLocalKeys: common=all aws:ResourceTag,s3:BucketTag
+kms:Create*: common=all aws:ResourceTag,s3:BucketTag
+kms:CreateKey: common=all aws:ResourceTag,s3:BucketTag
+kms:DeleteIdentity: common=all aws:ResourceTag,s3:BucketTag
+kms:DeleteKey: common=all aws:ResourceTag,s3:BucketTag
+kms:DeletePolicy: common=all aws:ResourceTag,s3:BucketTag
+kms:DescribeIdentity: common=all aws:ResourceTag,s3:BucketTag
+kms:DescribePolicy: common=all aws:ResourceTag,s3:BucketTag
+kms:DescribeSelfIdentity: common=all aws:ResourceTag,s3:BucketTag
+kms:Enable: common=all aws:ResourceTag,s3:BucketTag
+kms:ErrorLog: common=all aws:ResourceTag,s3:BucketTag
+kms:GetPolicy: common=all aws:ResourceTag,s3:BucketTag
+kms:ImportKey: common=all aws:ResourceTag,s3:BucketTag
+kms:KeyRotate: common=all aws:ResourceTag,s3:BucketTag
+kms:KeyStatus: common=all aws:ResourceTag,s3:BucketTag
+kms:ListIdentities: common=all aws:ResourceTag,s3:BucketTag
+kms:ListKeys: common=all aws:ResourceTag,s3:BucketTag
+kms:ListPolicies: common=all aws:ResourceTag,s3:BucketTag
+kms:Metrics: common=all aws:ResourceTag,s3:BucketTag
+kms:MigrateKeys: common=all aws:ResourceTag,s3:BucketTag
+kms:SetPolicy: common=all aws:ResourceTag,s3:BucketTag
+kms:Status: common=all aws:ResourceTag,s3:BucketTag
+kms:Version: common=all aws:ResourceTag,s3:BucketTag
+memory:*: common=all aws:ResourceTag,s3:BucketTag
+memory:CreateAgent: common=all aws:ResourceTag,s3:BucketTag
+memory:CreateCortex: common=all aws:ResourceTag,s3:BucketTag
+memory:DeleteAgent: common=all aws:ResourceTag,s3:BucketTag
+memory:DeleteCortex: common=all aws:ResourceTag,s3:BucketTag
+memory:DeleteSecret: common=all aws:ResourceTag,s3:BucketTag
+memory:GetAgent: common=all aws:ResourceTag,s3:BucketTag
+memory:GetCortex: common=all aws:ResourceTag,s3:BucketTag
+memory:GetObjectBio: common=all aws:ResourceTag,s3:BucketTag
+memory:GetSecret: common=all aws:ResourceTag,s3:BucketTag
+memory:List*: common=all aws:ResourceTag,s3:BucketTag
+memory:ListAgents: common=all aws:ResourceTag,s3:BucketTag
+memory:ListCortexes: common=all aws:ResourceTag,s3:BucketTag
+memory:ListSecrets: common=all aws:ResourceTag,s3:BucketTag
+memory:PutAgent: common=all aws:ResourceTag,s3:BucketTag
+memory:PutSecret: common=all aws:ResourceTag,s3:BucketTag
+memory:Search: common=all aws:ResourceTag,s3:BucketTag
+memory:UpdateAgent: common=all aws:ResourceTag,s3:BucketTag
+s3:*: common=all aws:RequestTag,aws:ResourceTag,aws:TagKeys,memory:max-keys,memory:prefix,s3:BucketTag,s3:ExistingObjectTag,s3:RequestObjectTag,s3:RequestObjectTagKeys,s3:delimiter,s3:max-keys,s3:object-lock-legal-hold,s3:object-lock-mode,s3:object-lock-remaining-retention-days,s3:object-lock-retain-until-date,s3:prefix,s3:versionid,s3:x-amz-annotation-directive,s3:x-amz-copy-source,s3:x-amz-metadata-directive,s3:x-amz-object-if-match,s3:x-amz-server-side-encryption,s3:x-amz-server-side-encryption-aws-kms-key-id,s3:x-amz-server-side-encryption-customer-algorithm,s3:x-amz-storage-class,s3tables:KMSKeyArn,s3tables:SSEAlgorithm,s3tables:TableTag,s3tables:WarehouseTag,s3tables:functionName,s3tables:namespace,s3tables:registerLocation,s3tables:tableName,s3tables:viewName,sts:DurationSeconds,sts:SourceIdentity,svc:DurationSeconds
+s3:*Object*: common=all aws:ResourceTag,s3:BucketTag,s3:ExistingObjectTag,s3:RequestObjectTag,s3:RequestObjectTagKeys,s3:object-lock-legal-hold,s3:object-lock-mode,s3:object-lock-remaining-retention-days,s3:object-lock-retain-until-date,s3:versionid,s3:x-amz-annotation-directive,s3:x-amz-copy-source,s3:x-amz-metadata-directive,s3:x-amz-object-if-match,s3:x-amz-server-side-encryption,s3:x-amz-server-side-encryption-aws-kms-key-id,s3:x-amz-server-side-encryption-customer-algorithm,s3:x-amz-storage-class
+s3:AbortMultipartUpload: common=all aws:ResourceTag,s3:BucketTag
+s3:BypassGovernanceRetention: common=all aws:ResourceTag,s3:BucketTag,s3:RequestObjectTag,s3:RequestObjectTagKeys,s3:object-lock-legal-hold,s3:object-lock-mode,s3:object-lock-remaining-retention-days,s3:object-lock-retain-until-date,s3:versionid
+s3:CreateBucket: common=all 
+s3:DeleteBucket: common=all aws:ResourceTag,s3:BucketTag
+s3:DeleteBucketCors: common=all aws:ResourceTag,s3:BucketTag
+s3:DeleteBucketPolicy: common=all aws:ResourceTag,s3:BucketTag
+s3:DeleteObject: common=all aws:ResourceTag,s3:BucketTag,s3:versionid
+s3:DeleteObjectAnnotation: common=all aws:ResourceTag,s3:BucketTag,s3:ExistingObjectTag,s3:versionid,s3:x-amz-object-if-match
+s3:DeleteObjectTagging: common=all aws:ResourceTag,s3:BucketTag,s3:ExistingObjectTag,s3:versionid
+s3:DeleteObjectVersion: common=all aws:ResourceTag,s3:BucketTag,s3:versionid
+s3:DeleteObjectVersionTagging: common=all aws:ResourceTag,s3:BucketTag,s3:ExistingObjectTag,s3:versionid
+s3:ForceDeleteBucket: common=all aws:ResourceTag,s3:BucketTag
+s3:Get*: common=all aws:ResourceTag,s3:BucketTag,s3:ExistingObjectTag,s3:versionid,s3:x-amz-server-side-encryption,s3:x-amz-server-side-encryption-aws-kms-key-id,s3:x-amz-server-side-encryption-customer-algorithm
+s3:GetBucketCors: common=all aws:ResourceTag,s3:BucketTag
+s3:GetBucketLocation: common=all aws:ResourceTag,s3:BucketTag
+s3:GetBucketNotification: common=all aws:ResourceTag,s3:BucketTag
+s3:GetBucketObjectLockConfiguration: common=all aws:ResourceTag,s3:BucketTag
+s3:GetBucketPolicy: common=all aws:ResourceTag,s3:BucketTag
+s3:GetBucketPolicyStatus: common=all aws:ResourceTag,s3:BucketTag
+s3:GetBucketQOS: common=all aws:ResourceTag,s3:BucketTag
+s3:GetBucketTagging: common=all aws:ResourceTag,s3:BucketTag
+s3:GetBucketVersioning: common=all aws:ResourceTag,s3:BucketTag
+s3:GetEncryptionConfiguration: common=all aws:ResourceTag,s3:BucketTag
+s3:GetInventoryConfiguration: common=all aws:ResourceTag,s3:BucketTag
+s3:GetLifecycleConfiguration: common=all aws:ResourceTag,s3:BucketTag
+s3:GetObject: common=all aws:ResourceTag,s3:BucketTag,s3:ExistingObjectTag,s3:versionid,s3:x-amz-server-side-encryption,s3:x-amz-server-side-encryption-aws-kms-key-id,s3:x-amz-server-side-encryption-customer-algorithm
+s3:GetObjectAnnotation: common=all aws:ResourceTag,s3:BucketTag,s3:ExistingObjectTag,s3:versionid
+s3:GetObjectAttributes: common=all aws:ResourceTag,s3:BucketTag,s3:ExistingObjectTag
+s3:GetObjectLegalHold: common=all aws:ResourceTag,s3:BucketTag
+s3:GetObjectRetention: common=all aws:ResourceTag,s3:BucketTag,s3:versionid,s3:x-amz-server-side-encryption,s3:x-amz-server-side-encryption-aws-kms-key-id,s3:x-amz-server-side-encryption-customer-algorithm
+s3:GetObjectTagging: common=all aws:ResourceTag,s3:BucketTag,s3:ExistingObjectTag,s3:versionid
+s3:GetObjectVersion: common=all aws:ResourceTag,s3:BucketTag,s3:ExistingObjectTag,s3:versionid
+s3:GetObjectVersionAnnotationForReplication: common=all aws:ResourceTag,s3:BucketTag,s3:ExistingObjectTag,s3:versionid
+s3:GetObjectVersionAttributes: common=all aws:ResourceTag,s3:BucketTag,s3:ExistingObjectTag,s3:versionid
+s3:GetObjectVersionForReplication: common=all aws:ResourceTag,s3:BucketTag,s3:ExistingObjectTag,s3:versionid
+s3:GetObjectVersionTagging: common=all aws:ResourceTag,s3:BucketTag,s3:ExistingObjectTag,s3:versionid
+s3:GetReplicationConfiguration: common=all aws:ResourceTag,s3:BucketTag
+s3:HeadBucket: common=all aws:ResourceTag,s3:BucketTag
+s3:ListAllMyBuckets: common=all 
+s3:ListBucket: common=all aws:ResourceTag,s3:BucketTag,s3:delimiter,s3:max-keys,s3:prefix
+s3:ListBucketMultipartUploads: common=all aws:ResourceTag,s3:BucketTag
+s3:ListBucketVersions: common=all aws:ResourceTag,s3:BucketTag,s3:delimiter,s3:max-keys,s3:prefix
+s3:ListMultipartUploadParts: common=all aws:ResourceTag,s3:BucketTag
+s3:ListObjectAnnotations: common=all aws:ResourceTag,s3:BucketTag,s3:versionid
+s3:ListenBucketNotification: common=all aws:ResourceTag,s3:BucketTag
+s3:ListenNotification: common=all aws:ResourceTag,s3:BucketTag
+s3:Put?bject: common=all aws:ResourceTag,s3:BucketTag,s3:RequestObjectTag,s3:RequestObjectTagKeys,s3:object-lock-legal-hold,s3:object-lock-mode,s3:object-lock-retain-until-date,s3:versionid,s3:x-amz-annotation-directive,s3:x-amz-copy-source,s3:x-amz-metadata-directive,s3:x-amz-server-side-encryption,s3:x-amz-server-side-encryption-aws-kms-key-id,s3:x-amz-server-side-encryption-customer-algorithm,s3:x-amz-storage-class
+s3:PutBucketCors: common=all aws:ResourceTag,s3:BucketTag
+s3:PutBucketNotification: common=all aws:ResourceTag,s3:BucketTag
+s3:PutBucketObjectLockConfiguration: common=all aws:ResourceTag,s3:BucketTag
+s3:PutBucketPolicy: common=all aws:ResourceTag,s3:BucketTag
+s3:PutBucketQOS: common=all aws:ResourceTag,s3:BucketTag
+s3:PutBucketTagging: common=all aws:RequestTag,aws:ResourceTag,aws:TagKeys,s3:BucketTag,s3:RequestObjectTag,s3:RequestObjectTagKeys
+s3:PutBucketVersioning: common=all aws:ResourceTag,s3:BucketTag
+s3:PutEncryptionConfiguration: common=all aws:ResourceTag,s3:BucketTag
+s3:PutInventoryConfiguration: common=all aws:ResourceTag,s3:BucketTag
+s3:PutLifecycleConfiguration: common=all aws:ResourceTag,s3:BucketTag
+s3:PutObject: common=all aws:ResourceTag,s3:BucketTag,s3:RequestObjectTag,s3:RequestObjectTagKeys,s3:object-lock-legal-hold,s3:object-lock-mode,s3:object-lock-retain-until-date,s3:versionid,s3:x-amz-annotation-directive,s3:x-amz-copy-source,s3:x-amz-metadata-directive,s3:x-amz-server-side-encryption,s3:x-amz-server-side-encryption-aws-kms-key-id,s3:x-amz-server-side-encryption-customer-algorithm,s3:x-amz-storage-class
+s3:PutObjectAnnotation: common=all aws:ResourceTag,s3:BucketTag,s3:ExistingObjectTag,s3:versionid,s3:x-amz-object-if-match
+s3:PutObjectFanOut: common=all aws:ResourceTag,s3:BucketTag
+s3:PutObjectLegalHold: common=all aws:ResourceTag,s3:BucketTag,s3:object-lock-legal-hold,s3:versionid,s3:x-amz-server-side-encryption,s3:x-amz-server-side-encryption-aws-kms-key-id,s3:x-amz-server-side-encryption-customer-algorithm
+s3:PutObjectRetention: common=all aws:ResourceTag,s3:BucketTag,s3:object-lock-mode,s3:object-lock-remaining-retention-days,s3:object-lock-retain-until-date,s3:versionid,s3:x-amz-server-side-encryption,s3:x-amz-server-side-encryption-aws-kms-key-id,s3:x-amz-server-side-encryption-customer-algorithm
+s3:PutObjectTagging: common=all aws:ResourceTag,s3:BucketTag,s3:ExistingObjectTag,s3:RequestObjectTag,s3:RequestObjectTagKeys,s3:versionid
+s3:PutObjectVersionTagging: common=all aws:ResourceTag,s3:BucketTag,s3:ExistingObjectTag,s3:RequestObjectTag,s3:RequestObjectTagKeys,s3:versionid
+s3:PutReplicationConfiguration: common=all aws:ResourceTag,s3:BucketTag
+s3:ReplicateDelete: common=all aws:ResourceTag,s3:BucketTag,s3:ExistingObjectTag,s3:versionid
+s3:ReplicateObject: common=all aws:ResourceTag,s3:BucketTag,s3:ExistingObjectTag,s3:versionid
+s3:ReplicateObjectAnnotation: common=all aws:ResourceTag,s3:BucketTag,s3:ExistingObjectTag,s3:versionid
+s3:ReplicateTags: common=all aws:ResourceTag,s3:BucketTag,s3:ExistingObjectTag,s3:versionid
+s3:ResetBucketReplicationState: common=all aws:ResourceTag,s3:BucketTag
+s3:RestoreObject: common=all aws:ResourceTag,s3:BucketTag
+s3:UpdateObjectEncryption: common=all aws:ResourceTag,s3:BucketTag,s3:versionid,s3:x-amz-server-side-encryption,s3:x-amz-server-side-encryption-aws-kms-key-id,s3:x-amz-server-side-encryption-customer-algorithm
+s3express:*: common=all aws:ResourceTag,s3:BucketTag
+s3express:CreateSession: common=all aws:ResourceTag,s3:BucketTag
+s3files:*: common=all aws:ResourceTag,s3:BucketTag
+s3files:CreateExport: common=all aws:ResourceTag,s3:BucketTag
+s3files:DeleteExport: common=all aws:ResourceTag,s3:BucketTag
+s3files:Get*: common=all aws:ResourceTag,s3:BucketTag
+s3files:GetExportStats: common=all aws:ResourceTag,s3:BucketTag
+s3files:GetExportStatus: common=all aws:ResourceTag,s3:BucketTag
+s3files:SetExportAccess: common=all aws:ResourceTag,s3:BucketTag
+s3files:UpdateExport: common=all aws:ResourceTag,s3:BucketTag
+s3tables:*: common=all aws:ResourceTag,s3:BucketTag
+s3tables:*TableBucket*: common=all aws:ResourceTag,s3:BucketTag
+s3tables:*Warehouse*: common=all aws:ResourceTag,s3:BucketTag
+s3tables:CreateFunction: common=all aws:ResourceTag,s3:BucketTag
+s3tables:CreateNamespace: common=all aws:ResourceTag,s3:BucketTag
+s3tables:CreateTable: common=all aws:ResourceTag,s3:BucketTag
+s3tables:CreateTableBucket: common=all aws:ResourceTag,s3:BucketTag
+s3tables:CreateView: common=all aws:ResourceTag,s3:BucketTag
+s3tables:CreateWarehouse: common=all aws:ResourceTag,s3:BucketTag
+s3tables:DeleteFunction: common=all aws:ResourceTag,s3:BucketTag
+s3tables:DeleteNamespace: common=all aws:ResourceTag,s3:BucketTag
+s3tables:DeleteTable: common=all aws:ResourceTag,s3:BucketTag
+s3tables:DeleteTableAnnotation: common=all aws:ResourceTag,s3:BucketTag
+s3tables:DeleteTableBucket: common=all aws:ResourceTag,s3:BucketTag
+s3tables:DeleteTableBucketEncryption: common=all aws:ResourceTag,s3:BucketTag
+s3tables:DeleteTableBucketPolicy: common=all aws:ResourceTag,s3:BucketTag
+s3tables:DeleteTableEncryption: common=all aws:ResourceTag,s3:BucketTag
+s3tables:DeleteTablePolicy: common=all aws:ResourceTag,s3:BucketTag
+s3tables:DeleteView: common=all aws:ResourceTag,s3:BucketTag
+s3tables:DeleteWarehouse: common=all aws:ResourceTag,s3:BucketTag
+s3tables:DeleteWarehouseEncryption: common=all aws:ResourceTag,s3:BucketTag
+s3tables:DeleteWarehousePolicy: common=all aws:ResourceTag,s3:BucketTag
+s3tables:Get*: common=all aws:ResourceTag,s3:BucketTag
+s3tables:GetConfig: common=all aws:ResourceTag,s3:BucketTag
+s3tables:GetFunction: common=all aws:ResourceTag,s3:BucketTag
+s3tables:GetNamespace: common=all aws:ResourceTag,s3:BucketTag
+s3tables:GetTable: common=all aws:ResourceTag,s3:BucketTag
+s3tables:GetTableAnnotation: common=all aws:ResourceTag,s3:BucketTag
+s3tables:GetTableBucket: common=all aws:ResourceTag,s3:BucketTag
+s3tables:GetTableBucketEncryption: common=all aws:ResourceTag,s3:BucketTag
+s3tables:GetTableBucketMaintenanceConfiguration: common=all aws:ResourceTag,s3:BucketTag
+s3tables:GetTableBucketPolicy: common=all aws:ResourceTag,s3:BucketTag
+s3tables:GetTableData: common=all aws:ResourceTag,s3:BucketTag
+s3tables:GetTableEncryption: common=all aws:ResourceTag,s3:BucketTag
+s3tables:GetTableMaintenanceConfiguration: common=all aws:ResourceTag,s3:BucketTag
+s3tables:GetTableMaintenanceJobStatus: common=all aws:ResourceTag,s3:BucketTag
+s3tables:GetTableMetadataLocation: common=all aws:ResourceTag,s3:BucketTag
+s3tables:GetTablePolicy: common=all aws:ResourceTag,s3:BucketTag
+s3tables:GetView: common=all aws:ResourceTag,s3:BucketTag
+s3tables:GetWarehouse: common=all aws:ResourceTag,s3:BucketTag
+s3tables:GetWarehouseEncryption: common=all aws:ResourceTag,s3:BucketTag
+s3tables:GetWarehouseMaintenanceConfiguration: common=all aws:ResourceTag,s3:BucketTag
+s3tables:GetWarehousePolicy: common=all aws:ResourceTag,s3:BucketTag
+s3tables:ListFunctions: common=all aws:ResourceTag,s3:BucketTag
+s3tables:ListNamespaces: common=all aws:ResourceTag,s3:BucketTag
+s3tables:ListTableAnnotations: common=all aws:ResourceTag,s3:BucketTag
+s3tables:ListTableBuckets: common=all aws:ResourceTag,s3:BucketTag
+s3tables:ListTables: common=all aws:ResourceTag,s3:BucketTag
+s3tables:ListTagsForTable: common=all aws:ResourceTag,s3:BucketTag
+s3tables:ListTagsForWarehouse: common=all aws:ResourceTag,s3:BucketTag
+s3tables:ListViews: common=all aws:ResourceTag,s3:BucketTag
+s3tables:ListWarehouses: common=all aws:ResourceTag,s3:BucketTag
+s3tables:PutTableAnnotation: common=all aws:ResourceTag,s3:BucketTag
+s3tables:PutTableBucketEncryption: common=all aws:ResourceTag,s3:BucketTag
+s3tables:PutTableBucketMaintenanceConfiguration: common=all aws:ResourceTag,s3:BucketTag
+s3tables:PutTableBucketPolicy: common=all aws:ResourceTag,s3:BucketTag
+s3tables:PutTableData: common=all aws:ResourceTag,s3:BucketTag
+s3tables:PutTableEncryption: common=all aws:ResourceTag,s3:BucketTag
+s3tables:PutTableMaintenanceConfiguration: common=all aws:ResourceTag,s3:BucketTag
+s3tables:PutTablePolicy: common=all aws:ResourceTag,s3:BucketTag
+s3tables:PutWarehouseEncryption: common=all aws:ResourceTag,s3:BucketTag
+s3tables:PutWarehouseMaintenanceConfiguration: common=all aws:ResourceTag,s3:BucketTag
+s3tables:PutWarehousePolicy: common=all aws:ResourceTag,s3:BucketTag
+s3tables:RegisterFunction: common=all aws:ResourceTag,s3:BucketTag
+s3tables:RegisterTable: common=all aws:ResourceTag,s3:BucketTag
+s3tables:RegisterView: common=all aws:ResourceTag,s3:BucketTag
+s3tables:RenameFunction: common=all aws:ResourceTag,s3:BucketTag
+s3tables:RenameTable: common=all aws:ResourceTag,s3:BucketTag
+s3tables:RenameView: common=all aws:ResourceTag,s3:BucketTag
+s3tables:TableMetrics: common=all aws:ResourceTag,s3:BucketTag
+s3tables:TagTable: common=all aws:ResourceTag,s3:BucketTag
+s3tables:TagWarehouse: common=all aws:ResourceTag,s3:BucketTag
+s3tables:UntagTable: common=all aws:ResourceTag,s3:BucketTag
+s3tables:UntagWarehouse: common=all aws:ResourceTag,s3:BucketTag
+s3tables:UpdateFunction: common=all aws:ResourceTag,s3:BucketTag
+s3tables:UpdateNamespaceProperties: common=all aws:ResourceTag,s3:BucketTag
+s3tables:UpdateTable: common=all aws:ResourceTag,s3:BucketTag
+s3tables:UpdateTableMetadataLocation: common=all aws:ResourceTag,s3:BucketTag
+s3tables:UpdateView: common=all aws:ResourceTag,s3:BucketTag
+s3vectors:*: common=all aws:ResourceTag,s3:BucketTag
+s3vectors:CreateIndex: common=all aws:ResourceTag,s3:BucketTag
+s3vectors:CreateVectorBucket: common=all aws:ResourceTag,s3:BucketTag
+s3vectors:DeleteIndex: common=all aws:ResourceTag,s3:BucketTag
+s3vectors:DeleteVectorBucket: common=all aws:ResourceTag,s3:BucketTag
+s3vectors:DeleteVectors: common=all aws:ResourceTag,s3:BucketTag
+s3vectors:Get*: common=all aws:ResourceTag,s3:BucketTag
+s3vectors:GetIndex: common=all aws:ResourceTag,s3:BucketTag
+s3vectors:GetVectorBucket: common=all aws:ResourceTag,s3:BucketTag
+s3vectors:GetVectors: common=all aws:ResourceTag,s3:BucketTag
+s3vectors:ListIndexes: common=all aws:ResourceTag,s3:BucketTag
+s3vectors:ListVectorBuckets: common=all aws:ResourceTag,s3:BucketTag
+s3vectors:ListVectors: common=all aws:ResourceTag,s3:BucketTag
+s3vectors:PutVectors: common=all aws:ResourceTag,s3:BucketTag
+s3vectors:QueryVectors: common=all aws:ResourceTag,s3:BucketTag
+sts:*: common=all aws:ResourceTag,s3:BucketTag
+sts:Assume*: common=all aws:ResourceTag,s3:BucketTag
+sts:AssumeRole: common=all aws:ResourceTag,s3:BucketTag
+sts:AssumeRoleLDAPIdentity: common=all aws:ResourceTag,s3:BucketTag
+sts:AssumeRoleWithClientCertificate: common=all aws:ResourceTag,s3:BucketTag
+sts:AssumeRoleWithClientGrants: common=all aws:ResourceTag,s3:BucketTag
+sts:AssumeRoleWithCustomToken: common=all aws:ResourceTag,s3:BucketTag
+sts:AssumeRoleWithWebIdentity: common=all aws:ResourceTag,s3:BucketTag
+
+# Key names
+AllSupportedKeys: s3:signatureversion s3:authType s3:signatureAge s3:x-amz-copy-source s3:x-amz-server-side-encryption s3:x-amz-server-side-encryption-customer-algorithm s3:x-amz-metadata-directive s3:x-amz-storage-class s3:x-amz-server-side-encryption-aws-kms-key-id s3:x-amz-object-if-match s3:x-amz-annotation-directive s3:x-amz-content-sha256 s3:LocationConstraint s3:prefix s3:delimiter s3:max-keys memory:prefix memory:max-keys s3:versionid s3:object-lock-remaining-retention-days s3:object-lock-mode s3:object-lock-legal-hold s3:object-lock-retain-until-date s3tables:KMSKeyArn s3tables:SSEAlgorithm s3tables:namespace s3tables:tableName s3tables:viewName s3tables:functionName s3tables:registerLocation s3tables:WarehouseTag s3tables:TableTag aws:Referer aws:SourceIp aws:UserAgent aws:SecureTransport aws:CurrentTime aws:EpochTime aws:principaltype aws:userid aws:username aws:groups aws:SourceIdentity aws:RequestTag aws:TagKeys aws:ResourceTag s3:BucketTag ldap:user ldap:username ldap:groups s3:RequestObjectTag s3:ExistingObjectTag s3:RequestObjectTagKeys jwt:sub jwt:iss jwt:aud jwt:jti jwt:name jwt:upn jwt:groups jwt:given_name jwt:family_name jwt:middle_name jwt:nickname jwt:preferred_username jwt:profile jwt:picture jwt:website jwt:email jwt:gender jwt:birthdate jwt:phone_number jwt:address jwt:scope jwt:client_id sts:DurationSeconds sts:SourceIdentity svc:DurationSeconds admin:PolicyName
+CommonKeys: s3:signatureversion s3:authType s3:signatureAge s3:x-amz-content-sha256 s3:LocationConstraint s3express:SessionMode aws:Referer aws:SourceIp aws:UserAgent aws:SecureTransport aws:CurrentTime aws:EpochTime aws:principaltype aws:userid aws:username aws:groups aws:SourceIdentity ldap:user ldap:username ldap:groups jwt:sub jwt:iss jwt:aud jwt:jti jwt:name jwt:upn jwt:groups jwt:given_name jwt:family_name jwt:middle_name jwt:nickname jwt:preferred_username jwt:profile jwt:picture jwt:website jwt:email jwt:gender jwt:birthdate jwt:phone_number jwt:address jwt:scope jwt:client_id
+CommonAdminKeys: aws:Referer aws:SourceIp aws:UserAgent aws:SecureTransport aws:CurrentTime aws:EpochTime aws:principaltype aws:userid aws:username aws:groups aws:SourceIdentity ldap:user ldap:username ldap:groups svc:DurationSeconds jwt:sub jwt:iss jwt:aud jwt:jti jwt:name jwt:upn jwt:groups jwt:given_name jwt:family_name jwt:middle_name jwt:nickname jwt:preferred_username jwt:profile jwt:picture jwt:website jwt:email jwt:gender jwt:birthdate jwt:phone_number jwt:address jwt:scope jwt:client_id
+AdminActionKeys: admin:PolicyName
+AllSupportedAdminKeys: aws:Referer aws:SourceIp aws:UserAgent aws:SecureTransport aws:CurrentTime aws:EpochTime aws:principaltype aws:userid aws:username aws:groups aws:SourceIdentity ldap:user ldap:username ldap:groups svc:DurationSeconds jwt:sub jwt:iss jwt:aud jwt:jti jwt:name jwt:upn jwt:groups jwt:given_name jwt:family_name jwt:middle_name jwt:nickname jwt:preferred_username jwt:profile jwt:picture jwt:website jwt:email jwt:gender jwt:birthdate jwt:phone_number jwt:address jwt:scope jwt:client_id admin:PolicyName
+AllSupportedSTSKeys: aws:principaltype aws:SecureTransport sts:DurationSeconds sts:SourceIdentity aws:SourceIdentity ldap:user aws:userid aws:groups ldap:groups ldap:username aws:username
+JWTKeys: jwt:sub jwt:iss jwt:aud jwt:jti jwt:name jwt:upn jwt:groups jwt:given_name jwt:family_name jwt:middle_name jwt:nickname jwt:preferred_username jwt:profile jwt:picture jwt:website jwt:email jwt:gender jwt:birthdate jwt:phone_number jwt:address jwt:scope jwt:client_id
+admin:PolicyName: name=PolicyName variable=false admin=true
+aws:CurrentTime: name=CurrentTime variable=false admin=false
+aws:EpochTime: name=EpochTime variable=false admin=false
+aws:Referer: name=Referer variable=false admin=false
+aws:RequestTag: name=RequestTag variable=true admin=false
+aws:ResourceTag: name=ResourceTag variable=true admin=false
+aws:SecureTransport: name=SecureTransport variable=false admin=false
+aws:SourceIdentity: name=SourceIdentity variable=false admin=false
+aws:SourceIp: name=SourceIp variable=false admin=false
+aws:TagKeys: name=TagKeys variable=false admin=false
+aws:UserAgent: name=UserAgent variable=false admin=false
+aws:groups: name=groups variable=false admin=false
+aws:principaltype: name=principaltype variable=false admin=false
+aws:userid: name=userid variable=false admin=false
+aws:username: name=username variable=false admin=false
+jwt:address: name=address variable=false admin=false
+jwt:aud: name=aud variable=false admin=false
+jwt:birthdate: name=birthdate variable=false admin=false
+jwt:client_id: name=client_id variable=false admin=false
+jwt:email: name=email variable=false admin=false
+jwt:family_name: name=family_name variable=false admin=false
+jwt:gender: name=gender variable=false admin=false
+jwt:given_name: name=given_name variable=false admin=false
+jwt:groups: name=groups variable=false admin=false
+jwt:iss: name=iss variable=false admin=false
+jwt:jti: name=jti variable=false admin=false
+jwt:middle_name: name=middle_name variable=false admin=false
+jwt:name: name=name variable=false admin=false
+jwt:nickname: name=nickname variable=false admin=false
+jwt:phone_number: name=phone_number variable=false admin=false
+jwt:picture: name=picture variable=false admin=false
+jwt:preferred_username: name=preferred_username variable=false admin=false
+jwt:profile: name=profile variable=false admin=false
+jwt:scope: name=scope variable=false admin=false
+jwt:sub: name=sub variable=false admin=false
+jwt:upn: name=upn variable=false admin=false
+jwt:website: name=website variable=false admin=false
+ldap:groups: name=groups variable=false admin=false
+ldap:user: name=user variable=false admin=false
+ldap:username: name=username variable=false admin=false
+memory:max-keys: name=max-keys variable=false admin=false
+memory:prefix: name=prefix variable=false admin=false
+s3:BucketTag: name=BucketTag variable=true admin=false
+s3:ExistingObjectTag: name=ExistingObjectTag variable=true admin=false
+s3:LocationConstraint: name=LocationConstraint variable=false admin=false
+s3:RequestObjectTag: name=RequestObjectTag variable=true admin=false
+s3:RequestObjectTagKeys: name=RequestObjectTagKeys variable=false admin=false
+s3:authType: name=authType variable=false admin=false
+s3:delimiter: name=delimiter variable=false admin=false
+s3:max-keys: name=max-keys variable=false admin=false
+s3:object-lock-legal-hold: name=object-lock-legal-hold variable=false admin=false
+s3:object-lock-mode: name=object-lock-mode variable=false admin=false
+s3:object-lock-remaining-retention-days: name=object-lock-remaining-retention-days variable=false admin=false
+s3:object-lock-retain-until-date: name=object-lock-retain-until-date variable=false admin=false
+s3:prefix: name=prefix variable=false admin=false
+s3:signatureAge: name=signatureAge variable=false admin=false
+s3:signatureversion: name=signatureversion variable=false admin=false
+s3:versionid: name=versionid variable=false admin=false
+s3:x-amz-annotation-directive: name=x-amz-annotation-directive variable=false admin=false
+s3:x-amz-content-sha256: name=x-amz-content-sha256 variable=false admin=false
+s3:x-amz-copy-source: name=x-amz-copy-source variable=false admin=false
+s3:x-amz-metadata-directive: name=x-amz-metadata-directive variable=false admin=false
+s3:x-amz-object-if-match: name=x-amz-object-if-match variable=false admin=false
+s3:x-amz-server-side-encryption: name=x-amz-server-side-encryption variable=false admin=false
+s3:x-amz-server-side-encryption-aws-kms-key-id: name=x-amz-server-side-encryption-aws-kms-key-id variable=false admin=false
+s3:x-amz-server-side-encryption-customer-algorithm: name=x-amz-server-side-encryption-customer-algorithm variable=false admin=false
+s3:x-amz-storage-class: name=x-amz-storage-class variable=false admin=false
+s3express:SessionMode: name=s3express:SessionMode variable=false admin=false
+s3tables:KMSKeyArn: name=KMSKeyArn variable=false admin=false
+s3tables:SSEAlgorithm: name=SSEAlgorithm variable=false admin=false
+s3tables:TableTag: name=TableTag variable=true admin=false
+s3tables:WarehouseTag: name=WarehouseTag variable=true admin=false
+s3tables:functionName: name=functionName variable=false admin=false
+s3tables:namespace: name=namespace variable=false admin=false
+s3tables:registerLocation: name=registerLocation variable=false admin=false
+s3tables:tableName: name=tableName variable=false admin=false
+s3tables:viewName: name=viewName variable=false admin=false
+sts:DurationSeconds: name=DurationSeconds variable=false admin=false
+sts:SourceIdentity: name=sts:SourceIdentity variable=false admin=false
+svc:DurationSeconds: name=DurationSeconds variable=false admin=false
+
+# Classification
+"": s3=false obj=false admin=false adminres=false sts=false kms=false table=false vectors=false memory=false files=false
+"*": s3=true obj=true admin=true adminres=true sts=false kms=false table=false vectors=false memory=false files=false
+"a*": s3=false obj=false admin=true adminres=true sts=false kms=false table=false vectors=false memory=false files=false
+"admin:*": s3=false obj=false admin=true adminres=true sts=false kms=false table=false vectors=false memory=false files=false
+"admin:?ealth": s3=false obj=false admin=false adminres=false sts=false kms=false table=false vectors=false memory=false files=false
+"admin:AddUserToGroup": s3=false obj=false admin=true adminres=false sts=false kms=false table=false vectors=false memory=false files=false
+"admin:AttachUserOrGroupPolicy": s3=false obj=false admin=true adminres=false sts=false kms=false table=false vectors=false memory=false files=false
+"admin:BandwidthMonitor": s3=false obj=false admin=true adminres=false sts=false kms=false table=false vectors=false memory=false files=false
+"admin:CancelBatchJob": s3=false obj=false admin=true adminres=false sts=false kms=false table=false vectors=false memory=false files=false
+"admin:ChangeMyPassword": s3=false obj=false admin=true adminres=false sts=false kms=false table=false vectors=false memory=false files=false
+"admin:ClusterInfo": s3=false obj=false admin=true adminres=false sts=false kms=false table=false vectors=false memory=false files=false
+"admin:ConfigUpdate": s3=false obj=false admin=true adminres=false sts=false kms=false table=false vectors=false memory=false files=false
+"admin:ConsoleLog": s3=false obj=false admin=true adminres=false sts=false kms=false table=false vectors=false memory=false files=false
+"admin:CreatePolicy": s3=false obj=false admin=true adminres=false sts=false kms=false table=false vectors=false memory=false files=false
+"admin:CreateServiceAccount": s3=false obj=false admin=true adminres=false sts=false kms=false table=false vectors=false memory=false files=false
+"admin:CreateUser": s3=false obj=false admin=true adminres=false sts=false kms=false table=false vectors=false memory=false files=false
+"admin:DataUsageInfo": s3=false obj=false admin=true adminres=false sts=false kms=false table=false vectors=false memory=false files=false
+"admin:Decommission": s3=false obj=false admin=true adminres=false sts=false kms=false table=false vectors=false memory=false files=false
+"admin:DeletePolicy": s3=false obj=false admin=true adminres=false sts=false kms=false table=false vectors=false memory=false files=false
+"admin:DeleteUser": s3=false obj=false admin=true adminres=false sts=false kms=false table=false vectors=false memory=false files=false
+"admin:DeltaSharing": s3=false obj=false admin=true adminres=false sts=false kms=false table=false vectors=false memory=false files=false
+"admin:DeltaSharingCreateShare": s3=false obj=false admin=true adminres=false sts=false kms=false table=false vectors=false memory=false files=false
+"admin:DeltaSharingCreateToken": s3=false obj=false admin=true adminres=false sts=false kms=false table=false vectors=false memory=false files=false
+"admin:DeltaSharingDeleteShare": s3=false obj=false admin=true adminres=false sts=false kms=false table=false vectors=false memory=false files=false
+"admin:DeltaSharingDeleteToken": s3=false obj=false admin=true adminres=false sts=false kms=false table=false vectors=false memory=false files=false
+"admin:DeltaSharingGetShare": s3=false obj=false admin=true adminres=false sts=false kms=false table=false vectors=false memory=false files=false
+"admin:DeltaSharingListShares": s3=false obj=false admin=true adminres=false sts=false kms=false table=false vectors=false memory=false files=false
+"admin:DeltaSharingListTokens": s3=false obj=false admin=true adminres=false sts=false kms=false table=false vectors=false memory=false files=false
+"admin:DeltaSharingUpdateShare": s3=false obj=false admin=true adminres=false sts=false kms=false table=false vectors=false memory=false files=false
+"admin:DeltaSharingUseRecipient": s3=false obj=false admin=true adminres=false sts=false kms=false table=false vectors=false memory=false files=false
+"admin:DeltaSharingUseShare": s3=false obj=false admin=true adminres=false sts=false kms=false table=false vectors=false memory=false files=false
+"admin:DescribeBatchJob": s3=false obj=false admin=true adminres=false sts=false kms=false table=false vectors=false memory=false files=false
+"admin:DisableGroup": s3=false obj=false admin=true adminres=false sts=false kms=false table=false vectors=false memory=false files=false
+"admin:DisableUser": s3=false obj=false admin=true adminres=false sts=false kms=false table=false vectors=false memory=false files=false
+"admin:DistJobStatus": s3=false obj=false admin=true adminres=false sts=false kms=false table=false vectors=false memory=false files=false
+"admin:DriveInfo": s3=false obj=false admin=true adminres=false sts=false kms=false table=false vectors=false memory=false files=false
+"admin:DriveList": s3=false obj=false admin=true adminres=false sts=false kms=false table=false vectors=false memory=false files=false
+"admin:EnableGroup": s3=false obj=false admin=true adminres=false sts=false kms=false table=false vectors=false memory=false files=false
+"admin:EnableUser": s3=false obj=false admin=true adminres=false sts=false kms=false table=false vectors=false memory=false files=false
+"admin:ExportBucketMetadata": s3=false obj=false admin=true adminres=true sts=false kms=false table=false vectors=false memory=false files=false
+"admin:ExportIAM": s3=false obj=false admin=true adminres=false sts=false kms=false table=false vectors=false memory=false files=false
+"admin:ForceUnlock": s3=false obj=false admin=true adminres=false sts=false kms=false table=false vectors=false memory=false files=false
+"admin:GenerateBatchJob": s3=false obj=false admin=true adminres=false sts=false kms=false table=false vectors=false memory=false files=false
+"admin:Get*": s3=false obj=false admin=true adminres=true sts=false kms=false table=false vectors=false memory=false files=false
+"admin:GetBucketCompression": s3=false obj=false admin=true adminres=true sts=false kms=false table=false vectors=false memory=false files=false
+"admin:GetBucketQuota": s3=false obj=false admin=true adminres=true sts=false kms=false table=false vectors=false memory=false files=false
+"admin:GetBucketTarget": s3=false obj=false admin=true adminres=true sts=false kms=false table=false vectors=false memory=false files=false
+"admin:GetGroup": s3=false obj=false admin=true adminres=false sts=false kms=false table=false vectors=false memory=false files=false
+"admin:GetPolicy": s3=false obj=false admin=true adminres=false sts=false kms=false table=false vectors=false memory=false files=false
+"admin:GetUser": s3=false obj=false admin=true adminres=false sts=false kms=false table=false vectors=false memory=false files=false
+"admin:Heal": s3=false obj=false admin=true adminres=true sts=false kms=false table=false vectors=false memory=false files=false
+"admin:ImportBucketMetadata": s3=false obj=false admin=true adminres=true sts=false kms=false table=false vectors=false memory=false files=false
+"admin:ImportIAM": s3=false obj=false admin=true adminres=false sts=false kms=false table=false vectors=false memory=false files=false
+"admin:InspectData": s3=false obj=false admin=true adminres=false sts=false kms=false table=false vectors=false memory=false files=false
+"admin:InventoryControl": s3=false obj=false admin=true adminres=true sts=false kms=false table=false vectors=false memory=false files=false
+"admin:KMS*": s3=false obj=false admin=true adminres=false sts=false kms=false table=false vectors=false memory=false files=false
+"admin:KMSBackup": s3=false obj=false admin=false adminres=false sts=false kms=false table=false vectors=false memory=false files=false
+"admin:KMSCreateKey": s3=false obj=false admin=true adminres=false sts=false kms=false table=false vectors=false memory=false files=false
+"admin:KMSEnable": s3=false obj=false admin=false adminres=false sts=false kms=false table=false vectors=false memory=false files=false
+"admin:KMSKeyRotate": s3=false obj=false admin=false adminres=false sts=false kms=false table=false vectors=false memory=false files=false
+"admin:KMSKeyStatus": s3=false obj=false admin=true adminres=false sts=false kms=false table=false vectors=false memory=false files=false
+"admin:KMSRestore": s3=false obj=false admin=false adminres=false sts=false kms=false table=false vectors=false memory=false files=false
+"admin:LicenseInfo": s3=false obj=false admin=true adminres=false sts=false kms=false table=false vectors=false memory=false files=false
+"admin:ListBatchJobs": s3=false obj=false admin=true adminres=false sts=false kms=false table=false vectors=false memory=false files=false
+"admin:ListGroups": s3=false obj=false admin=true adminres=false sts=false kms=false table=false vectors=false memory=false files=false
+"admin:ListServiceAccounts": s3=false obj=false admin=true adminres=false sts=false kms=false table=false vectors=false memory=false files=false
+"admin:ListTemporaryAccounts": s3=false obj=false admin=true adminres=false sts=false kms=false table=false vectors=false memory=false files=false
+"admin:ListTier": s3=false obj=false admin=true adminres=false sts=false kms=false table=false vectors=false memory=false files=false
+"admin:ListUserPolicies": s3=false obj=false admin=true adminres=false sts=false kms=false table=false vectors=false memory=false files=false
+"admin:ListUsers": s3=false obj=false admin=true adminres=false sts=false kms=false table=false vectors=false memory=false files=false
+"admin:NodeInfo": s3=false obj=false admin=true adminres=false sts=false kms=false table=false vectors=false memory=false files=false
+"admin:NodeList": s3=false obj=false admin=true adminres=false sts=false kms=false table=false vectors=false memory=false files=false
+"admin:OBDInfo": s3=false obj=false admin=true adminres=false sts=false kms=false table=false vectors=false memory=false files=false
+"admin:PoolInfo": s3=false obj=false admin=true adminres=false sts=false kms=false table=false vectors=false memory=false files=false
+"admin:PoolList": s3=false obj=false admin=true adminres=false sts=false kms=false table=false vectors=false memory=false files=false
+"admin:Profiling": s3=false obj=false admin=true adminres=false sts=false kms=false table=false vectors=false memory=false files=false
+"admin:Prometheus": s3=false obj=false admin=true adminres=false sts=false kms=false table=false vectors=false memory=false files=false
+"admin:ReadAPILogs": s3=false obj=false admin=true adminres=false sts=false kms=false table=false vectors=false memory=false files=false
+"admin:ReadAlerts": s3=false obj=false admin=true adminres=false sts=false kms=false table=false vectors=false memory=false files=false
+"admin:ReadAuditLogs": s3=false obj=false admin=true adminres=false sts=false kms=false table=false vectors=false memory=false files=false
+"admin:ReadErrorLogs": s3=false obj=false admin=true adminres=false sts=false kms=false table=false vectors=false memory=false files=false
+"admin:Rebalance": s3=false obj=false admin=true adminres=false sts=false kms=false table=false vectors=false memory=false files=false
+"admin:RemoveServiceAccount": s3=false obj=false admin=true adminres=false sts=false kms=false table=false vectors=false memory=false files=false
+"admin:RemoveUserFromGroup": s3=false obj=false admin=true adminres=false sts=false kms=false table=false vectors=false memory=false files=false
+"admin:ReplicationDiff": s3=false obj=false admin=true adminres=true sts=false kms=false table=false vectors=false memory=false files=false
+"admin:ServerInfo": s3=false obj=false admin=true adminres=false sts=false kms=false table=false vectors=false memory=false files=false
+"admin:ServerTrace": s3=false obj=false admin=true adminres=false sts=false kms=false table=false vectors=false memory=false files=false
+"admin:ServerUpdate": s3=false obj=false admin=true adminres=false sts=false kms=false table=false vectors=false memory=false files=false
+"admin:ServiceCordon": s3=false obj=false admin=true adminres=false sts=false kms=false table=false vectors=false memory=false files=false
+"admin:ServiceFreeze": s3=false obj=false admin=true adminres=false sts=false kms=false table=false vectors=false memory=false files=false
+"admin:ServiceRestart": s3=false obj=false admin=true adminres=false sts=false kms=false table=false vectors=false memory=false files=false
+"admin:ServiceStop": s3=false obj=false admin=true adminres=false sts=false kms=false table=false vectors=false memory=false files=false
+"admin:SetBucketCompression": s3=false obj=false admin=true adminres=true sts=false kms=false table=false vectors=false memory=false files=false
+"admin:SetBucketQuota": s3=false obj=false admin=true adminres=true sts=false kms=false table=false vectors=false memory=false files=false
+"admin:SetBucketTarget": s3=false obj=false admin=true adminres=true sts=false kms=false table=false vectors=false memory=false files=false
+"admin:SetInfo": s3=false obj=false admin=true adminres=false sts=false kms=false table=false vectors=false memory=false files=false
+"admin:SetRootAccess": s3=false obj=false admin=true adminres=false sts=false kms=false table=false vectors=false memory=false files=false
+"admin:SetTier": s3=false obj=false admin=true adminres=false sts=false kms=false table=false vectors=false memory=false files=false
+"admin:SiteReplicationAdd": s3=false obj=false admin=true adminres=false sts=false kms=false table=false vectors=false memory=false files=false
+"admin:SiteReplicationDisable": s3=false obj=false admin=true adminres=false sts=false kms=false table=false vectors=false memory=false files=false
+"admin:SiteReplicationInfo": s3=false obj=false admin=true adminres=false sts=false kms=false table=false vectors=false memory=false files=false
+"admin:SiteReplicationOperation": s3=false obj=false admin=true adminres=false sts=false kms=false table=false vectors=false memory=false files=false
+"admin:SiteReplicationRemove": s3=false obj=false admin=true adminres=false sts=false kms=false table=false vectors=false memory=false files=false
+"admin:SiteReplicationResync": s3=false obj=false admin=true adminres=false sts=false kms=false table=false vectors=false memory=false files=false
+"admin:StartBatchJob": s3=false obj=false admin=true adminres=false sts=false kms=false table=false vectors=false memory=false files=false
+"admin:StorageInfo": s3=false obj=false admin=true adminres=false sts=false kms=false table=false vectors=false memory=false files=false
+"admin:TablesReplicationAdd": s3=false obj=false admin=true adminres=false sts=false kms=false table=false vectors=false memory=false files=false
+"admin:TablesReplicationCatalogAdmin": s3=false obj=false admin=true adminres=false sts=false kms=false table=false vectors=false memory=false files=false
+"admin:TablesReplicationInfo": s3=false obj=false admin=true adminres=false sts=false kms=false table=false vectors=false memory=false files=false
+"admin:TablesReplicationRemove": s3=false obj=false admin=true adminres=false sts=false kms=false table=false vectors=false memory=false files=false
+"admin:TablesReplicationStartFailover": s3=false obj=false admin=true adminres=false sts=false kms=false table=false vectors=false memory=false files=false
+"admin:TopLocksInfo": s3=false obj=false admin=true adminres=false sts=false kms=false table=false vectors=false memory=false files=false
+"admin:UpdatePolicyAssociation": s3=false obj=false admin=true adminres=false sts=false kms=false table=false vectors=false memory=false files=false
+"admin:UpdateServiceAccount": s3=false obj=false admin=true adminres=false sts=false kms=false table=false vectors=false memory=false files=false
+"bogus:Action": s3=false obj=false admin=false adminres=false sts=false kms=false table=false vectors=false memory=false files=false
+"kms:*": s3=false obj=false admin=false adminres=false sts=false kms=true table=false vectors=false memory=false files=false
+"kms:API": s3=false obj=false admin=false adminres=false sts=false kms=true table=false vectors=false memory=false files=false
+"kms:AssignPolicy": s3=false obj=false admin=false adminres=false sts=false kms=true table=false vectors=false memory=false files=false
+"kms:AuditLog": s3=false obj=false admin=false adminres=false sts=false kms=true table=false vectors=false memory=false files=false
+"kms:CleanupLocalKeys": s3=false obj=false admin=false adminres=false sts=false kms=true table=false vectors=false memory=false files=false
+"kms:Create*": s3=false obj=false admin=false adminres=false sts=false kms=false table=false vectors=false memory=false files=false
+"kms:CreateKey": s3=false obj=false admin=false adminres=false sts=false kms=true table=false vectors=false memory=false files=false
+"kms:DeleteIdentity": s3=false obj=false admin=false adminres=false sts=false kms=true table=false vectors=false memory=false files=false
+"kms:DeleteKey": s3=false obj=false admin=false adminres=false sts=false kms=true table=false vectors=false memory=false files=false
+"kms:DeletePolicy": s3=false obj=false admin=false adminres=false sts=false kms=true table=false vectors=false memory=false files=false
+"kms:DescribeIdentity": s3=false obj=false admin=false adminres=false sts=false kms=true table=false vectors=false memory=false files=false
+"kms:DescribePolicy": s3=false obj=false admin=false adminres=false sts=false kms=true table=false vectors=false memory=false files=false
+"kms:DescribeSelfIdentity": s3=false obj=false admin=false adminres=false sts=false kms=true table=false vectors=false memory=false files=false
+"kms:Enable": s3=false obj=false admin=false adminres=false sts=false kms=true table=false vectors=false memory=false files=false
+"kms:ErrorLog": s3=false obj=false admin=false adminres=false sts=false kms=true table=false vectors=false memory=false files=false
+"kms:GetPolicy": s3=false obj=false admin=false adminres=false sts=false kms=true table=false vectors=false memory=false files=false
+"kms:ImportKey": s3=false obj=false admin=false adminres=false sts=false kms=true table=false vectors=false memory=false files=false
+"kms:KeyRotate": s3=false obj=false admin=false adminres=false sts=false kms=true table=false vectors=false memory=false files=false
+"kms:KeyStatus": s3=false obj=false admin=false adminres=false sts=false kms=true table=false vectors=false memory=false files=false
+"kms:ListIdentities": s3=false obj=false admin=false adminres=false sts=false kms=true table=false vectors=false memory=false files=false
+"kms:ListKeys": s3=false obj=false admin=false adminres=false sts=false kms=true table=false vectors=false memory=false files=false
+"kms:ListPolicies": s3=false obj=false admin=false adminres=false sts=false kms=true table=false vectors=false memory=false files=false
+"kms:Metrics": s3=false obj=false admin=false adminres=false sts=false kms=true table=false vectors=false memory=false files=false
+"kms:MigrateKeys": s3=false obj=false admin=false adminres=false sts=false kms=true table=false vectors=false memory=false files=false
+"kms:SetPolicy": s3=false obj=false admin=false adminres=false sts=false kms=true table=false vectors=false memory=false files=false
+"kms:Status": s3=false obj=false admin=false adminres=false sts=false kms=true table=false vectors=false memory=false files=false
+"kms:Version": s3=false obj=false admin=false adminres=false sts=false kms=true table=false vectors=false memory=false files=false
+"memory:*": s3=false obj=false admin=false adminres=false sts=false kms=false table=false vectors=false memory=true files=false
+"memory:CreateAgent": s3=false obj=false admin=false adminres=false sts=false kms=false table=false vectors=false memory=true files=false
+"memory:CreateCortex": s3=false obj=false admin=false adminres=false sts=false kms=false table=false vectors=false memory=true files=false
+"memory:DeleteAgent": s3=false obj=false admin=false adminres=false sts=false kms=false table=false vectors=false memory=true files=false
+"memory:DeleteCortex": s3=false obj=false admin=false adminres=false sts=false kms=false table=false vectors=false memory=true files=false
+"memory:DeleteSecret": s3=false obj=false admin=false adminres=false sts=false kms=false table=false vectors=false memory=true files=false
+"memory:GetAgent": s3=false obj=false admin=false adminres=false sts=false kms=false table=false vectors=false memory=true files=false
+"memory:GetCortex": s3=false obj=false admin=false adminres=false sts=false kms=false table=false vectors=false memory=true files=false
+"memory:GetObjectBio": s3=false obj=false admin=false adminres=false sts=false kms=false table=false vectors=false memory=true files=false
+"memory:GetSecret": s3=false obj=false admin=false adminres=false sts=false kms=false table=false vectors=false memory=true files=false
+"memory:List*": s3=false obj=false admin=false adminres=false sts=false kms=false table=false vectors=false memory=false files=false
+"memory:ListAgents": s3=false obj=false admin=false adminres=false sts=false kms=false table=false vectors=false memory=true files=false
+"memory:ListCortexes": s3=false obj=false admin=false adminres=false sts=false kms=false table=false vectors=false memory=true files=false
+"memory:ListSecrets": s3=false obj=false admin=false adminres=false sts=false kms=false table=false vectors=false memory=true files=false
+"memory:PutAgent": s3=false obj=false admin=false adminres=false sts=false kms=false table=false vectors=false memory=true files=false
+"memory:PutSecret": s3=false obj=false admin=false adminres=false sts=false kms=false table=false vectors=false memory=true files=false
+"memory:Search": s3=false obj=false admin=false adminres=false sts=false kms=false table=false vectors=false memory=true files=false
+"memory:UpdateAgent": s3=false obj=false admin=false adminres=false sts=false kms=false table=false vectors=false memory=true files=false
+"s3:*": s3=true obj=true admin=false adminres=false sts=false kms=false table=false vectors=false memory=false files=false
+"s3:*Object*": s3=true obj=true admin=false adminres=false sts=false kms=false table=false vectors=false memory=false files=false
+"s3:AbortMultipartUpload": s3=true obj=true admin=false adminres=false sts=false kms=false table=false vectors=false memory=false files=false
+"s3:BypassGovernanceRetention": s3=true obj=true admin=false adminres=false sts=false kms=false table=false vectors=false memory=false files=false
+"s3:CreateBucket": s3=true obj=false admin=false adminres=false sts=false kms=false table=false vectors=false memory=false files=false
+"s3:DeleteBucket": s3=true obj=false admin=false adminres=false sts=false kms=false table=false vectors=false memory=false files=false
+"s3:DeleteBucketCors": s3=true obj=false admin=false adminres=false sts=false kms=false table=false vectors=false memory=false files=false
+"s3:DeleteBucketPolicy": s3=true obj=false admin=false adminres=false sts=false kms=false table=false vectors=false memory=false files=false
+"s3:DeleteObject": s3=true obj=true admin=false adminres=false sts=false kms=false table=false vectors=false memory=false files=false
+"s3:DeleteObjectAnnotation": s3=true obj=true admin=false adminres=false sts=false kms=false table=false vectors=false memory=false files=false
+"s3:DeleteObjectTagging": s3=true obj=true admin=false adminres=false sts=false kms=false table=false vectors=false memory=false files=false
+"s3:DeleteObjectVersion": s3=true obj=true admin=false adminres=false sts=false kms=false table=false vectors=false memory=false files=false
+"s3:DeleteObjectVersionTagging": s3=true obj=true admin=false adminres=false sts=false kms=false table=false vectors=false memory=false files=false
+"s3:ForceDeleteBucket": s3=true obj=false admin=false adminres=false sts=false kms=false table=false vectors=false memory=false files=false
+"s3:Get*": s3=true obj=true admin=false adminres=false sts=false kms=false table=false vectors=false memory=false files=false
+"s3:GetBucketCors": s3=true obj=false admin=false adminres=false sts=false kms=false table=false vectors=false memory=false files=false
+"s3:GetBucketLocation": s3=true obj=false admin=false adminres=false sts=false kms=false table=false vectors=false memory=false files=false
+"s3:GetBucketNotification": s3=true obj=false admin=false adminres=false sts=false kms=false table=false vectors=false memory=false files=false
+"s3:GetBucketObjectLockConfiguration": s3=true obj=false admin=false adminres=false sts=false kms=false table=false vectors=false memory=false files=false
+"s3:GetBucketPolicy": s3=true obj=false admin=false adminres=false sts=false kms=false table=false vectors=false memory=false files=false
+"s3:GetBucketPolicyStatus": s3=true obj=false admin=false adminres=false sts=false kms=false table=false vectors=false memory=false files=false
+"s3:GetBucketQOS": s3=true obj=false admin=false adminres=false sts=false kms=false table=false vectors=false memory=false files=false
+"s3:GetBucketTagging": s3=true obj=false admin=false adminres=false sts=false kms=false table=false vectors=false memory=false files=false
+"s3:GetBucketVersioning": s3=true obj=false admin=false adminres=false sts=false kms=false table=false vectors=false memory=false files=false
+"s3:GetEncryptionConfiguration": s3=true obj=false admin=false adminres=false sts=false kms=false table=false vectors=false memory=false files=false
+"s3:GetInventoryConfiguration": s3=true obj=false admin=false adminres=false sts=false kms=false table=false vectors=false memory=false files=false
+"s3:GetLifecycleConfiguration": s3=true obj=false admin=false adminres=false sts=false kms=false table=false vectors=false memory=false files=false
+"s3:GetObject": s3=true obj=true admin=false adminres=false sts=false kms=false table=false vectors=false memory=false files=false
+"s3:GetObjectAnnotation": s3=true obj=true admin=false adminres=false sts=false kms=false table=false vectors=false memory=false files=false
+"s3:GetObjectAttributes": s3=true obj=true admin=false adminres=false sts=false kms=false table=false vectors=false memory=false files=false
+"s3:GetObjectLegalHold": s3=true obj=true admin=false adminres=false sts=false kms=false table=false vectors=false memory=false files=false
+"s3:GetObjectRetention": s3=true obj=true admin=false adminres=false sts=false kms=false table=false vectors=false memory=false files=false
+"s3:GetObjectTagging": s3=true obj=true admin=false adminres=false sts=false kms=false table=false vectors=false memory=false files=false
+"s3:GetObjectVersion": s3=true obj=true admin=false adminres=false sts=false kms=false table=false vectors=false memory=false files=false
+"s3:GetObjectVersionAnnotationForReplication": s3=true obj=true admin=false adminres=false sts=false kms=false table=false vectors=false memory=false files=false
+"s3:GetObjectVersionAttributes": s3=true obj=true admin=false adminres=false sts=false kms=false table=false vectors=false memory=false files=false
+"s3:GetObjectVersionForReplication": s3=true obj=true admin=false adminres=false sts=false kms=false table=false vectors=false memory=false files=false
+"s3:GetObjectVersionTagging": s3=true obj=true admin=false adminres=false sts=false kms=false table=false vectors=false memory=false files=false
+"s3:GetReplicationConfiguration": s3=true obj=false admin=false adminres=false sts=false kms=false table=false vectors=false memory=false files=false
+"s3:HeadBucket": s3=true obj=false admin=false adminres=false sts=false kms=false table=false vectors=false memory=false files=false
+"s3:ListAllMyBuckets": s3=true obj=false admin=false adminres=false sts=false kms=false table=false vectors=false memory=false files=false
+"s3:ListBucket": s3=true obj=false admin=false adminres=false sts=false kms=false table=false vectors=false memory=false files=false
+"s3:ListBucketMultipartUploads": s3=true obj=false admin=false adminres=false sts=false kms=false table=false vectors=false memory=false files=false
+"s3:ListBucketVersions": s3=true obj=false admin=false adminres=false sts=false kms=false table=false vectors=false memory=false files=false
+"s3:ListMultipartUploadParts": s3=true obj=true admin=false adminres=false sts=false kms=false table=false vectors=false memory=false files=false
+"s3:ListObjectAnnotations": s3=true obj=true admin=false adminres=false sts=false kms=false table=false vectors=false memory=false files=false
+"s3:ListenBucketNotification": s3=true obj=false admin=false adminres=false sts=false kms=false table=false vectors=false memory=false files=false
+"s3:ListenNotification": s3=true obj=false admin=false adminres=false sts=false kms=false table=false vectors=false memory=false files=false
+"s3:Put?bject": s3=true obj=true admin=false adminres=false sts=false kms=false table=false vectors=false memory=false files=false
+"s3:PutBucketCors": s3=true obj=false admin=false adminres=false sts=false kms=false table=false vectors=false memory=false files=false
+"s3:PutBucketNotification": s3=true obj=false admin=false adminres=false sts=false kms=false table=false vectors=false memory=false files=false
+"s3:PutBucketObjectLockConfiguration": s3=true obj=false admin=false adminres=false sts=false kms=false table=false vectors=false memory=false files=false
+"s3:PutBucketPolicy": s3=true obj=false admin=false adminres=false sts=false kms=false table=false vectors=false memory=false files=false
+"s3:PutBucketQOS": s3=true obj=false admin=false adminres=false sts=false kms=false table=false vectors=false memory=false files=false
+"s3:PutBucketTagging": s3=true obj=false admin=false adminres=false sts=false kms=false table=false vectors=false memory=false files=false
+"s3:PutBucketVersioning": s3=true obj=false admin=false adminres=false sts=false kms=false table=false vectors=false memory=false files=false
+"s3:PutEncryptionConfiguration": s3=true obj=false admin=false adminres=false sts=false kms=false table=false vectors=false memory=false files=false
+"s3:PutInventoryConfiguration": s3=true obj=false admin=false adminres=false sts=false kms=false table=false vectors=false memory=false files=false
+"s3:PutLifecycleConfiguration": s3=true obj=false admin=false adminres=false sts=false kms=false table=false vectors=false memory=false files=false
+"s3:PutObject": s3=true obj=true admin=false adminres=false sts=false kms=false table=false vectors=false memory=false files=false
+"s3:PutObjectAnnotation": s3=true obj=true admin=false adminres=false sts=false kms=false table=false vectors=false memory=false files=false
+"s3:PutObjectFanOut": s3=true obj=true admin=false adminres=false sts=false kms=false table=false vectors=false memory=false files=false
+"s3:PutObjectLegalHold": s3=true obj=true admin=false adminres=false sts=false kms=false table=false vectors=false memory=false files=false
+"s3:PutObjectRetention": s3=true obj=true admin=false adminres=false sts=false kms=false table=false vectors=false memory=false files=false
+"s3:PutObjectTagging": s3=true obj=true admin=false adminres=false sts=false kms=false table=false vectors=false memory=false files=false
+"s3:PutObjectVersionTagging": s3=true obj=true admin=false adminres=false sts=false kms=false table=false vectors=false memory=false files=false
+"s3:PutReplicationConfiguration": s3=true obj=false admin=false adminres=false sts=false kms=false table=false vectors=false memory=false files=false
+"s3:ReplicateDelete": s3=true obj=true admin=false adminres=false sts=false kms=false table=false vectors=false memory=false files=false
+"s3:ReplicateObject": s3=true obj=true admin=false adminres=false sts=false kms=false table=false vectors=false memory=false files=false
+"s3:ReplicateObjectAnnotation": s3=true obj=true admin=false adminres=false sts=false kms=false table=false vectors=false memory=false files=false
+"s3:ReplicateTags": s3=true obj=true admin=false adminres=false sts=false kms=false table=false vectors=false memory=false files=false
+"s3:ResetBucketReplicationState": s3=true obj=true admin=false adminres=false sts=false kms=false table=false vectors=false memory=false files=false
+"s3:RestoreObject": s3=true obj=true admin=false adminres=false sts=false kms=false table=false vectors=false memory=false files=false
+"s3:UpdateObjectEncryption": s3=true obj=true admin=false adminres=false sts=false kms=false table=false vectors=false memory=false files=false
+"s3express:*": s3=true obj=false admin=false adminres=false sts=false kms=false table=false vectors=false memory=false files=false
+"s3express:CreateSession": s3=true obj=false admin=false adminres=false sts=false kms=false table=false vectors=false memory=false files=false
+"s3files:*": s3=false obj=false admin=false adminres=false sts=false kms=false table=false vectors=false memory=false files=true
+"s3files:CreateExport": s3=false obj=false admin=false adminres=false sts=false kms=false table=false vectors=false memory=false files=true
+"s3files:DeleteExport": s3=false obj=false admin=false adminres=false sts=false kms=false table=false vectors=false memory=false files=true
+"s3files:Get*": s3=false obj=false admin=false adminres=false sts=false kms=false table=false vectors=false memory=false files=false
+"s3files:GetExportStats": s3=false obj=false admin=false adminres=false sts=false kms=false table=false vectors=false memory=false files=true
+"s3files:GetExportStatus": s3=false obj=false admin=false adminres=false sts=false kms=false table=false vectors=false memory=false files=true
+"s3files:SetExportAccess": s3=false obj=false admin=false adminres=false sts=false kms=false table=false vectors=false memory=false files=true
+"s3files:UpdateExport": s3=false obj=false admin=false adminres=false sts=false kms=false table=false vectors=false memory=false files=true
+"s3tables:*": s3=false obj=false admin=false adminres=false sts=false kms=false table=true vectors=false memory=false files=false
+"s3tables:*TableBucket*": s3=false obj=false admin=false adminres=false sts=false kms=false table=false vectors=false memory=false files=false
+"s3tables:*Warehouse*": s3=false obj=false admin=false adminres=false sts=false kms=false table=false vectors=false memory=false files=false
+"s3tables:CreateFunction": s3=false obj=false admin=false adminres=false sts=false kms=false table=true vectors=false memory=false files=false
+"s3tables:CreateNamespace": s3=false obj=false admin=false adminres=false sts=false kms=false table=true vectors=false memory=false files=false
+"s3tables:CreateTable": s3=false obj=false admin=false adminres=false sts=false kms=false table=true vectors=false memory=false files=false
+"s3tables:CreateTableBucket": s3=false obj=false admin=false adminres=false sts=false kms=false table=true vectors=false memory=false files=false
+"s3tables:CreateView": s3=false obj=false admin=false adminres=false sts=false kms=false table=true vectors=false memory=false files=false
+"s3tables:CreateWarehouse": s3=false obj=false admin=false adminres=false sts=false kms=false table=true vectors=false memory=false files=false
+"s3tables:DeleteFunction": s3=false obj=false admin=false adminres=false sts=false kms=false table=true vectors=false memory=false files=false
+"s3tables:DeleteNamespace": s3=false obj=false admin=false adminres=false sts=false kms=false table=true vectors=false memory=false files=false
+"s3tables:DeleteTable": s3=false obj=false admin=false adminres=false sts=false kms=false table=true vectors=false memory=false files=false
+"s3tables:DeleteTableAnnotation": s3=false obj=false admin=false adminres=false sts=false kms=false table=true vectors=false memory=false files=false
+"s3tables:DeleteTableBucket": s3=false obj=false admin=false adminres=false sts=false kms=false table=true vectors=false memory=false files=false
+"s3tables:DeleteTableBucketEncryption": s3=false obj=false admin=false adminres=false sts=false kms=false table=true vectors=false memory=false files=false
+"s3tables:DeleteTableBucketPolicy": s3=false obj=false admin=false adminres=false sts=false kms=false table=true vectors=false memory=false files=false
+"s3tables:DeleteTableEncryption": s3=false obj=false admin=false adminres=false sts=false kms=false table=true vectors=false memory=false files=false
+"s3tables:DeleteTablePolicy": s3=false obj=false admin=false adminres=false sts=false kms=false table=true vectors=false memory=false files=false
+"s3tables:DeleteView": s3=false obj=false admin=false adminres=false sts=false kms=false table=true vectors=false memory=false files=false
+"s3tables:DeleteWarehouse": s3=false obj=false admin=false adminres=false sts=false kms=false table=true vectors=false memory=false files=false
+"s3tables:DeleteWarehouseEncryption": s3=false obj=false admin=false adminres=false sts=false kms=false table=true vectors=false memory=false files=false
+"s3tables:DeleteWarehousePolicy": s3=false obj=false admin=false adminres=false sts=false kms=false table=true vectors=false memory=false files=false
+"s3tables:Get*": s3=false obj=false admin=false adminres=false sts=false kms=false table=false vectors=false memory=false files=false
+"s3tables:GetConfig": s3=false obj=false admin=false adminres=false sts=false kms=false table=true vectors=false memory=false files=false
+"s3tables:GetFunction": s3=false obj=false admin=false adminres=false sts=false kms=false table=true vectors=false memory=false files=false
+"s3tables:GetNamespace": s3=false obj=false admin=false adminres=false sts=false kms=false table=true vectors=false memory=false files=false
+"s3tables:GetTable": s3=false obj=false admin=false adminres=false sts=false kms=false table=true vectors=false memory=false files=false
+"s3tables:GetTableAnnotation": s3=false obj=false admin=false adminres=false sts=false kms=false table=true vectors=false memory=false files=false
+"s3tables:GetTableBucket": s3=false obj=false admin=false adminres=false sts=false kms=false table=true vectors=false memory=false files=false
+"s3tables:GetTableBucketEncryption": s3=false obj=false admin=false adminres=false sts=false kms=false table=true vectors=false memory=false files=false
+"s3tables:GetTableBucketMaintenanceConfiguration": s3=false obj=false admin=false adminres=false sts=false kms=false table=true vectors=false memory=false files=false
+"s3tables:GetTableBucketPolicy": s3=false obj=false admin=false adminres=false sts=false kms=false table=true vectors=false memory=false files=false
+"s3tables:GetTableData": s3=false obj=false admin=false adminres=false sts=false kms=false table=true vectors=false memory=false files=false
+"s3tables:GetTableEncryption": s3=false obj=false admin=false adminres=false sts=false kms=false table=true vectors=false memory=false files=false
+"s3tables:GetTableMaintenanceConfiguration": s3=false obj=false admin=false adminres=false sts=false kms=false table=true vectors=false memory=false files=false
+"s3tables:GetTableMaintenanceJobStatus": s3=false obj=false admin=false adminres=false sts=false kms=false table=true vectors=false memory=false files=false
+"s3tables:GetTableMetadataLocation": s3=false obj=false admin=false adminres=false sts=false kms=false table=true vectors=false memory=false files=false
+"s3tables:GetTablePolicy": s3=false obj=false admin=false adminres=false sts=false kms=false table=true vectors=false memory=false files=false
+"s3tables:GetView": s3=false obj=false admin=false adminres=false sts=false kms=false table=true vectors=false memory=false files=false
+"s3tables:GetWarehouse": s3=false obj=false admin=false adminres=false sts=false kms=false table=true vectors=false memory=false files=false
+"s3tables:GetWarehouseEncryption": s3=false obj=false admin=false adminres=false sts=false kms=false table=true vectors=false memory=false files=false
+"s3tables:GetWarehouseMaintenanceConfiguration": s3=false obj=false admin=false adminres=false sts=false kms=false table=true vectors=false memory=false files=false
+"s3tables:GetWarehousePolicy": s3=false obj=false admin=false adminres=false sts=false kms=false table=true vectors=false memory=false files=false
+"s3tables:ListFunctions": s3=false obj=false admin=false adminres=false sts=false kms=false table=true vectors=false memory=false files=false
+"s3tables:ListNamespaces": s3=false obj=false admin=false adminres=false sts=false kms=false table=true vectors=false memory=false files=false
+"s3tables:ListTableAnnotations": s3=false obj=false admin=false adminres=false sts=false kms=false table=true vectors=false memory=false files=false
+"s3tables:ListTableBuckets": s3=false obj=false admin=false adminres=false sts=false kms=false table=true vectors=false memory=false files=false
+"s3tables:ListTables": s3=false obj=false admin=false adminres=false sts=false kms=false table=true vectors=false memory=false files=false
+"s3tables:ListTagsForTable": s3=false obj=false admin=false adminres=false sts=false kms=false table=true vectors=false memory=false files=false
+"s3tables:ListTagsForWarehouse": s3=false obj=false admin=false adminres=false sts=false kms=false table=true vectors=false memory=false files=false
+"s3tables:ListViews": s3=false obj=false admin=false adminres=false sts=false kms=false table=true vectors=false memory=false files=false
+"s3tables:ListWarehouses": s3=false obj=false admin=false adminres=false sts=false kms=false table=true vectors=false memory=false files=false
+"s3tables:PutTableAnnotation": s3=false obj=false admin=false adminres=false sts=false kms=false table=true vectors=false memory=false files=false
+"s3tables:PutTableBucketEncryption": s3=false obj=false admin=false adminres=false sts=false kms=false table=true vectors=false memory=false files=false
+"s3tables:PutTableBucketMaintenanceConfiguration": s3=false obj=false admin=false adminres=false sts=false kms=false table=true vectors=false memory=false files=false
+"s3tables:PutTableBucketPolicy": s3=false obj=false admin=false adminres=false sts=false kms=false table=true vectors=false memory=false files=false
+"s3tables:PutTableData": s3=false obj=false admin=false adminres=false sts=false kms=false table=true vectors=false memory=false files=false
+"s3tables:PutTableEncryption": s3=false obj=false admin=false adminres=false sts=false kms=false table=true vectors=false memory=false files=false
+"s3tables:PutTableMaintenanceConfiguration": s3=false obj=false admin=false adminres=false sts=false kms=false table=true vectors=false memory=false files=false
+"s3tables:PutTablePolicy": s3=false obj=false admin=false adminres=false sts=false kms=false table=true vectors=false memory=false files=false
+"s3tables:PutWarehouseEncryption": s3=false obj=false admin=false adminres=false sts=false kms=false table=true vectors=false memory=false files=false
+"s3tables:PutWarehouseMaintenanceConfiguration": s3=false obj=false admin=false adminres=false sts=false kms=false table=true vectors=false memory=false files=false
+"s3tables:PutWarehousePolicy": s3=false obj=false admin=false adminres=false sts=false kms=false table=true vectors=false memory=false files=false
+"s3tables:RegisterFunction": s3=false obj=false admin=false adminres=false sts=false kms=false table=true vectors=false memory=false files=false
+"s3tables:RegisterTable": s3=false obj=false admin=false adminres=false sts=false kms=false table=true vectors=false memory=false files=false
+"s3tables:RegisterView": s3=false obj=false admin=false adminres=false sts=false kms=false table=true vectors=false memory=false files=false
+"s3tables:RenameFunction": s3=false obj=false admin=false adminres=false sts=false kms=false table=true vectors=false memory=false files=false
+"s3tables:RenameTable": s3=false obj=false admin=false adminres=false sts=false kms=false table=true vectors=false memory=false files=false
+"s3tables:RenameView": s3=false obj=false admin=false adminres=false sts=false kms=false table=true vectors=false memory=false files=false
+"s3tables:TableMetrics": s3=false obj=false admin=false adminres=false sts=false kms=false table=true vectors=false memory=false files=false
+"s3tables:TagTable": s3=false obj=false admin=false adminres=false sts=false kms=false table=true vectors=false memory=false files=false
+"s3tables:TagWarehouse": s3=false obj=false admin=false adminres=false sts=false kms=false table=true vectors=false memory=false files=false
+"s3tables:UntagTable": s3=false obj=false admin=false adminres=false sts=false kms=false table=true vectors=false memory=false files=false
+"s3tables:UntagWarehouse": s3=false obj=false admin=false adminres=false sts=false kms=false table=true vectors=false memory=false files=false
+"s3tables:UpdateFunction": s3=false obj=false admin=false adminres=false sts=false kms=false table=true vectors=false memory=false files=false
+"s3tables:UpdateNamespaceProperties": s3=false obj=false admin=false adminres=false sts=false kms=false table=true vectors=false memory=false files=false
+"s3tables:UpdateTable": s3=false obj=false admin=false adminres=false sts=false kms=false table=true vectors=false memory=false files=false
+"s3tables:UpdateTableMetadataLocation": s3=false obj=false admin=false adminres=false sts=false kms=false table=true vectors=false memory=false files=false
+"s3tables:UpdateView": s3=false obj=false admin=false adminres=false sts=false kms=false table=true vectors=false memory=false files=false
+"s3vectors:*": s3=false obj=false admin=false adminres=false sts=false kms=false table=false vectors=true memory=false files=false
+"s3vectors:CreateIndex": s3=false obj=false admin=false adminres=false sts=false kms=false table=false vectors=true memory=false files=false
+"s3vectors:CreateVectorBucket": s3=false obj=false admin=false adminres=false sts=false kms=false table=false vectors=true memory=false files=false
+"s3vectors:DeleteIndex": s3=false obj=false admin=false adminres=false sts=false kms=false table=false vectors=true memory=false files=false
+"s3vectors:DeleteVectorBucket": s3=false obj=false admin=false adminres=false sts=false kms=false table=false vectors=true memory=false files=false
+"s3vectors:DeleteVectors": s3=false obj=false admin=false adminres=false sts=false kms=false table=false vectors=true memory=false files=false
+"s3vectors:Get*": s3=false obj=false admin=false adminres=false sts=false kms=false table=false vectors=false memory=false files=false
+"s3vectors:GetIndex": s3=false obj=false admin=false adminres=false sts=false kms=false table=false vectors=true memory=false files=false
+"s3vectors:GetVectorBucket": s3=false obj=false admin=false adminres=false sts=false kms=false table=false vectors=true memory=false files=false
+"s3vectors:GetVectors": s3=false obj=false admin=false adminres=false sts=false kms=false table=false vectors=true memory=false files=false
+"s3vectors:ListIndexes": s3=false obj=false admin=false adminres=false sts=false kms=false table=false vectors=true memory=false files=false
+"s3vectors:ListVectorBuckets": s3=false obj=false admin=false adminres=false sts=false kms=false table=false vectors=true memory=false files=false
+"s3vectors:ListVectors": s3=false obj=false admin=false adminres=false sts=false kms=false table=false vectors=true memory=false files=false
+"s3vectors:PutVectors": s3=false obj=false admin=false adminres=false sts=false kms=false table=false vectors=true memory=false files=false
+"s3vectors:QueryVectors": s3=false obj=false admin=false adminres=false sts=false kms=false table=false vectors=true memory=false files=false
+"sts:*": s3=false obj=false admin=false adminres=false sts=true kms=false table=false vectors=false memory=false files=false
+"sts:Assume*": s3=false obj=false admin=false adminres=false sts=false kms=false table=false vectors=false memory=false files=false
+"sts:AssumeRole": s3=false obj=false admin=false adminres=false sts=true kms=false table=false vectors=false memory=false files=false
+"sts:AssumeRoleLDAPIdentity": s3=false obj=false admin=false adminres=false sts=true kms=false table=false vectors=false memory=false files=false
+"sts:AssumeRoleWithClientCertificate": s3=false obj=false admin=false adminres=false sts=true kms=false table=false vectors=false memory=false files=false
+"sts:AssumeRoleWithClientGrants": s3=false obj=false admin=false adminres=false sts=true kms=false table=false vectors=false memory=false files=false
+"sts:AssumeRoleWithCustomToken": s3=false obj=false admin=false adminres=false sts=true kms=false table=false vectors=false memory=false files=false
+"sts:AssumeRoleWithWebIdentity": s3=false obj=false admin=false adminres=false sts=true kms=false table=false vectors=false memory=false files=false
+
+# ActionSet matches beyond the pattern itself
+"*": match=[admin:* admin:AddUserToGroup admin:AttachUserOrGroupPolicy admin:BandwidthMonitor admin:CancelBatchJob admin:ChangeMyPassword admin:ClusterInfo admin:ConfigUpdate admin:ConsoleLog admin:CreatePolicy admin:CreateServiceAccount admin:CreateUser admin:DataUsageInfo admin:Decommission admin:DeletePolicy admin:DeleteUser admin:DeltaSharing admin:DeltaSharingCreateShare admin:DeltaSharingCreateToken admin:DeltaSharingDeleteShare admin:DeltaSharingDeleteToken admin:DeltaSharingGetShare admin:DeltaSharingListShares admin:DeltaSharingListTokens admin:DeltaSharingUpdateShare admin:DeltaSharingUseRecipient admin:DeltaSharingUseShare admin:DescribeBatchJob admin:DisableGroup admin:DisableUser admin:DistJobStatus admin:DriveInfo admin:DriveList admin:EnableGroup admin:EnableUser admin:ExportBucketMetadata admin:ExportIAM admin:ForceUnlock admin:GenerateBatchJob admin:GetBucketCompression admin:GetBucketQuota admin:GetBucketTarget admin:GetGroup admin:GetPolicy admin:GetUser admin:Heal admin:ImportBucketMetadata admin:ImportIAM admin:InspectData admin:InventoryControl admin:KMSCreateKey admin:KMSKeyStatus admin:LicenseInfo admin:ListBatchJobs admin:ListGroups admin:ListServiceAccounts admin:ListTemporaryAccounts admin:ListTier admin:ListUserPolicies admin:ListUsers admin:NodeInfo admin:NodeList admin:OBDInfo admin:PoolInfo admin:PoolList admin:Profiling admin:Prometheus admin:ReadAPILogs admin:ReadAlerts admin:ReadAuditLogs admin:ReadErrorLogs admin:Rebalance admin:RemoveServiceAccount admin:RemoveUserFromGroup admin:ReplicationDiff admin:ServerInfo admin:ServerTrace admin:ServerUpdate admin:ServiceCordon admin:ServiceFreeze admin:ServiceRestart admin:ServiceStop admin:SetBucketCompression admin:SetBucketQuota admin:SetBucketTarget admin:SetInfo admin:SetRootAccess admin:SetTier admin:SiteReplicationAdd admin:SiteReplicationDisable admin:SiteReplicationInfo admin:SiteReplicationOperation admin:SiteReplicationRemove admin:SiteReplicationResync admin:StartBatchJob admin:StorageInfo admin:TablesReplicationAdd admin:TablesReplicationCatalogAdmin admin:TablesReplicationInfo admin:TablesReplicationRemove admin:TablesReplicationStartFailover admin:TopLocksInfo admin:UpdatePolicyAssociation admin:UpdateServiceAccount kms:* kms:API kms:AssignPolicy kms:AuditLog kms:CleanupLocalKeys kms:CreateKey kms:DeleteIdentity kms:DeleteKey kms:DeletePolicy kms:DescribeIdentity kms:DescribePolicy kms:DescribeSelfIdentity kms:Enable kms:ErrorLog kms:GetPolicy kms:ImportKey kms:KeyRotate kms:KeyStatus kms:ListIdentities kms:ListKeys kms:ListPolicies kms:Metrics kms:MigrateKeys kms:SetPolicy kms:Status kms:Version memory:* memory:CreateAgent memory:CreateCortex memory:DeleteAgent memory:DeleteCortex memory:DeleteSecret memory:GetAgent memory:GetCortex memory:GetObjectBio memory:GetSecret memory:ListAgents memory:ListCortexes memory:ListSecrets memory:PutAgent memory:PutSecret memory:Search memory:UpdateAgent s3:* s3:AbortMultipartUpload s3:BypassGovernanceRetention s3:CreateBucket s3:DeleteBucket s3:DeleteBucketCors s3:DeleteBucketPolicy s3:DeleteObject s3:DeleteObjectAnnotation s3:DeleteObjectTagging s3:DeleteObjectVersion s3:DeleteObjectVersionTagging s3:ForceDeleteBucket s3:GetBucketCors s3:GetBucketLocation s3:GetBucketNotification s3:GetBucketObjectLockConfiguration s3:GetBucketPolicy s3:GetBucketPolicyStatus s3:GetBucketQOS s3:GetBucketTagging s3:GetBucketVersioning s3:GetEncryptionConfiguration s3:GetInventoryConfiguration s3:GetLifecycleConfiguration s3:GetObject s3:GetObjectAnnotation s3:GetObjectAttributes s3:GetObjectLegalHold s3:GetObjectRetention s3:GetObjectTagging s3:GetObjectVersion s3:GetObjectVersionAnnotationForReplication s3:GetObjectVersionAttributes s3:GetObjectVersionForReplication s3:GetObjectVersionTagging s3:GetReplicationConfiguration s3:HeadBucket s3:ListAllMyBuckets s3:ListBucket s3:ListBucketMultipartUploads s3:ListBucketVersions s3:ListMultipartUploadParts s3:ListObjectAnnotations s3:ListenBucketNotification s3:ListenNotification s3:PutBucketCors s3:PutBucketNotification s3:PutBucketObjectLockConfiguration s3:PutBucketPolicy s3:PutBucketQOS s3:PutBucketTagging s3:PutBucketVersioning s3:PutEncryptionConfiguration s3:PutInventoryConfiguration s3:PutLifecycleConfiguration s3:PutObject s3:PutObjectAnnotation s3:PutObjectFanOut s3:PutObjectLegalHold s3:PutObjectRetention s3:PutObjectTagging s3:PutObjectVersionTagging s3:PutReplicationConfiguration s3:ReplicateDelete s3:ReplicateObject s3:ReplicateObjectAnnotation s3:ReplicateTags s3:ResetBucketReplicationState s3:RestoreObject s3:UpdateObjectEncryption s3express:CreateSession s3files:* s3files:CreateExport s3files:DeleteExport s3files:GetExportStats s3files:GetExportStatus s3files:SetExportAccess s3files:UpdateExport s3tables:* s3tables:CreateFunction s3tables:CreateNamespace s3tables:CreateTable s3tables:CreateTableBucket s3tables:CreateView s3tables:CreateWarehouse s3tables:DeleteFunction s3tables:DeleteNamespace s3tables:DeleteTable s3tables:DeleteTableAnnotation s3tables:DeleteTableBucket s3tables:DeleteTableBucketEncryption s3tables:DeleteTableBucketPolicy s3tables:DeleteTableEncryption s3tables:DeleteTablePolicy s3tables:DeleteView s3tables:DeleteWarehouse s3tables:DeleteWarehouseEncryption s3tables:DeleteWarehousePolicy s3tables:GetConfig s3tables:GetFunction s3tables:GetNamespace s3tables:GetTable s3tables:GetTableAnnotation s3tables:GetTableBucket s3tables:GetTableBucketEncryption s3tables:GetTableBucketMaintenanceConfiguration s3tables:GetTableBucketPolicy s3tables:GetTableData s3tables:GetTableEncryption s3tables:GetTableMaintenanceConfiguration s3tables:GetTableMaintenanceJobStatus s3tables:GetTableMetadataLocation s3tables:GetTablePolicy s3tables:GetView s3tables:GetWarehouse s3tables:GetWarehouseEncryption s3tables:GetWarehouseMaintenanceConfiguration s3tables:GetWarehousePolicy s3tables:ListFunctions s3tables:ListNamespaces s3tables:ListTableAnnotations s3tables:ListTableBuckets s3tables:ListTables s3tables:ListTagsForTable s3tables:ListTagsForWarehouse s3tables:ListViews s3tables:ListWarehouses s3tables:PutTableAnnotation s3tables:PutTableBucketEncryption s3tables:PutTableBucketMaintenanceConfiguration s3tables:PutTableBucketPolicy s3tables:PutTableData s3tables:PutTableEncryption s3tables:PutTableMaintenanceConfiguration s3tables:PutTablePolicy s3tables:PutWarehouseEncryption s3tables:PutWarehouseMaintenanceConfiguration s3tables:PutWarehousePolicy s3tables:RegisterFunction s3tables:RegisterTable s3tables:RegisterView s3tables:RenameFunction s3tables:RenameTable s3tables:RenameView s3tables:TableMetrics s3tables:TagTable s3tables:TagWarehouse s3tables:UntagTable s3tables:UntagWarehouse s3tables:UpdateFunction s3tables:UpdateNamespaceProperties s3tables:UpdateTable s3tables:UpdateTableMetadataLocation s3tables:UpdateView s3vectors:* s3vectors:CreateIndex s3vectors:CreateVectorBucket s3vectors:DeleteIndex s3vectors:DeleteVectorBucket s3vectors:DeleteVectors s3vectors:GetIndex s3vectors:GetVectorBucket s3vectors:GetVectors s3vectors:ListIndexes s3vectors:ListVectorBuckets s3vectors:ListVectors s3vectors:PutVectors s3vectors:QueryVectors sts:* sts:AssumeRole sts:AssumeRoleLDAPIdentity sts:AssumeRoleWithClientCertificate sts:AssumeRoleWithClientGrants sts:AssumeRoleWithCustomToken sts:AssumeRoleWithWebIdentity admin:KMSEnable admin:KMSBackup admin:KMSRestore admin:KMSKeyRotate] named=[admin:* admin:AddUserToGroup admin:AttachUserOrGroupPolicy admin:BandwidthMonitor admin:CancelBatchJob admin:ChangeMyPassword admin:ClusterInfo admin:ConfigUpdate admin:ConsoleLog admin:CreatePolicy admin:CreateServiceAccount admin:CreateUser admin:DataUsageInfo admin:Decommission admin:DeletePolicy admin:DeleteUser admin:DeltaSharing admin:DeltaSharingCreateShare admin:DeltaSharingCreateToken admin:DeltaSharingDeleteShare admin:DeltaSharingDeleteToken admin:DeltaSharingGetShare admin:DeltaSharingListShares admin:DeltaSharingListTokens admin:DeltaSharingUpdateShare admin:DeltaSharingUseRecipient admin:DeltaSharingUseShare admin:DescribeBatchJob admin:DisableGroup admin:DisableUser admin:DistJobStatus admin:DriveInfo admin:DriveList admin:EnableGroup admin:EnableUser admin:ExportBucketMetadata admin:ExportIAM admin:ForceUnlock admin:GenerateBatchJob admin:GetBucketCompression admin:GetBucketQuota admin:GetBucketTarget admin:GetGroup admin:GetPolicy admin:GetUser admin:Heal admin:ImportBucketMetadata admin:ImportIAM admin:InspectData admin:InventoryControl admin:KMSCreateKey admin:KMSKeyStatus admin:LicenseInfo admin:ListBatchJobs admin:ListGroups admin:ListServiceAccounts admin:ListTemporaryAccounts admin:ListTier admin:ListUserPolicies admin:ListUsers admin:NodeInfo admin:NodeList admin:OBDInfo admin:PoolInfo admin:PoolList admin:Profiling admin:Prometheus admin:ReadAPILogs admin:ReadAlerts admin:ReadAuditLogs admin:ReadErrorLogs admin:Rebalance admin:RemoveServiceAccount admin:RemoveUserFromGroup admin:ReplicationDiff admin:ServerInfo admin:ServerTrace admin:ServerUpdate admin:ServiceCordon admin:ServiceFreeze admin:ServiceRestart admin:ServiceStop admin:SetBucketCompression admin:SetBucketQuota admin:SetBucketTarget admin:SetInfo admin:SetRootAccess admin:SetTier admin:SiteReplicationAdd admin:SiteReplicationDisable admin:SiteReplicationInfo admin:SiteReplicationOperation admin:SiteReplicationRemove admin:SiteReplicationResync admin:StartBatchJob admin:StorageInfo admin:TablesReplicationAdd admin:TablesReplicationCatalogAdmin admin:TablesReplicationInfo admin:TablesReplicationRemove admin:TablesReplicationStartFailover admin:TopLocksInfo admin:UpdatePolicyAssociation admin:UpdateServiceAccount kms:* kms:API kms:AssignPolicy kms:AuditLog kms:CleanupLocalKeys kms:CreateKey kms:DeleteIdentity kms:DeleteKey kms:DeletePolicy kms:DescribeIdentity kms:DescribePolicy kms:DescribeSelfIdentity kms:Enable kms:ErrorLog kms:GetPolicy kms:ImportKey kms:KeyRotate kms:KeyStatus kms:ListIdentities kms:ListKeys kms:ListPolicies kms:Metrics kms:MigrateKeys kms:SetPolicy kms:Status kms:Version memory:* memory:CreateAgent memory:CreateCortex memory:DeleteAgent memory:DeleteCortex memory:DeleteSecret memory:GetAgent memory:GetCortex memory:GetObjectBio memory:GetSecret memory:ListAgents memory:ListCortexes memory:ListSecrets memory:PutAgent memory:PutSecret memory:Search memory:UpdateAgent s3:* s3:AbortMultipartUpload s3:BypassGovernanceRetention s3:CreateBucket s3:DeleteBucket s3:DeleteBucketCors s3:DeleteBucketPolicy s3:DeleteObject s3:DeleteObjectAnnotation s3:DeleteObjectTagging s3:DeleteObjectVersion s3:DeleteObjectVersionTagging s3:ForceDeleteBucket s3:GetBucketCors s3:GetBucketLocation s3:GetBucketNotification s3:GetBucketObjectLockConfiguration s3:GetBucketPolicy s3:GetBucketPolicyStatus s3:GetBucketQOS s3:GetBucketTagging s3:GetBucketVersioning s3:GetEncryptionConfiguration s3:GetInventoryConfiguration s3:GetLifecycleConfiguration s3:GetObject s3:GetObjectAnnotation s3:GetObjectAttributes s3:GetObjectLegalHold s3:GetObjectRetention s3:GetObjectTagging s3:GetObjectVersion s3:GetObjectVersionAnnotationForReplication s3:GetObjectVersionAttributes s3:GetObjectVersionForReplication s3:GetObjectVersionTagging s3:GetReplicationConfiguration s3:HeadBucket s3:ListAllMyBuckets s3:ListBucket s3:ListBucketMultipartUploads s3:ListBucketVersions s3:ListMultipartUploadParts s3:ListObjectAnnotations s3:ListenBucketNotification s3:ListenNotification s3:PutBucketCors s3:PutBucketNotification s3:PutBucketObjectLockConfiguration s3:PutBucketPolicy s3:PutBucketQOS s3:PutBucketTagging s3:PutBucketVersioning s3:PutEncryptionConfiguration s3:PutInventoryConfiguration s3:PutLifecycleConfiguration s3:PutObject s3:PutObjectAnnotation s3:PutObjectFanOut s3:PutObjectLegalHold s3:PutObjectRetention s3:PutObjectTagging s3:PutObjectVersionTagging s3:PutReplicationConfiguration s3:ReplicateDelete s3:ReplicateObject s3:ReplicateObjectAnnotation s3:ReplicateTags s3:ResetBucketReplicationState s3:RestoreObject s3:UpdateObjectEncryption s3express:CreateSession s3files:* s3files:CreateExport s3files:DeleteExport s3files:GetExportStats s3files:GetExportStatus s3files:SetExportAccess s3files:UpdateExport s3tables:* s3tables:CreateFunction s3tables:CreateNamespace s3tables:CreateTable s3tables:CreateTableBucket s3tables:CreateView s3tables:CreateWarehouse s3tables:DeleteFunction s3tables:DeleteNamespace s3tables:DeleteTable s3tables:DeleteTableAnnotation s3tables:DeleteTableBucket s3tables:DeleteTableBucketEncryption s3tables:DeleteTableBucketPolicy s3tables:DeleteTableEncryption s3tables:DeleteTablePolicy s3tables:DeleteView s3tables:DeleteWarehouse s3tables:DeleteWarehouseEncryption s3tables:DeleteWarehousePolicy s3tables:GetConfig s3tables:GetFunction s3tables:GetNamespace s3tables:GetTable s3tables:GetTableAnnotation s3tables:GetTableBucket s3tables:GetTableBucketEncryption s3tables:GetTableBucketMaintenanceConfiguration s3tables:GetTableBucketPolicy s3tables:GetTableData s3tables:GetTableEncryption s3tables:GetTableMaintenanceConfiguration s3tables:GetTableMaintenanceJobStatus s3tables:GetTableMetadataLocation s3tables:GetTablePolicy s3tables:GetView s3tables:GetWarehouse s3tables:GetWarehouseEncryption s3tables:GetWarehouseMaintenanceConfiguration s3tables:GetWarehousePolicy s3tables:ListFunctions s3tables:ListNamespaces s3tables:ListTableAnnotations s3tables:ListTableBuckets s3tables:ListTables s3tables:ListTagsForTable s3tables:ListTagsForWarehouse s3tables:ListViews s3tables:ListWarehouses s3tables:PutTableAnnotation s3tables:PutTableBucketEncryption s3tables:PutTableBucketMaintenanceConfiguration s3tables:PutTableBucketPolicy s3tables:PutTableData s3tables:PutTableEncryption s3tables:PutTableMaintenanceConfiguration s3tables:PutTablePolicy s3tables:PutWarehouseEncryption s3tables:PutWarehouseMaintenanceConfiguration s3tables:PutWarehousePolicy s3tables:RegisterFunction s3tables:RegisterTable s3tables:RegisterView s3tables:RenameFunction s3tables:RenameTable s3tables:RenameView s3tables:TableMetrics s3tables:TagTable s3tables:TagWarehouse s3tables:UntagTable s3tables:UntagWarehouse s3tables:UpdateFunction s3tables:UpdateNamespaceProperties s3tables:UpdateTable s3tables:UpdateTableMetadataLocation s3tables:UpdateView s3vectors:* s3vectors:CreateIndex s3vectors:CreateVectorBucket s3vectors:DeleteIndex s3vectors:DeleteVectorBucket s3vectors:DeleteVectors s3vectors:GetIndex s3vectors:GetVectorBucket s3vectors:GetVectors s3vectors:ListIndexes s3vectors:ListVectorBuckets s3vectors:ListVectors s3vectors:PutVectors s3vectors:QueryVectors sts:* sts:AssumeRole sts:AssumeRoleLDAPIdentity sts:AssumeRoleWithClientCertificate sts:AssumeRoleWithClientGrants sts:AssumeRoleWithCustomToken sts:AssumeRoleWithWebIdentity admin:KMSEnable admin:KMSBackup admin:KMSRestore admin:KMSKeyRotate]
+"a*": match=[admin:* admin:AddUserToGroup admin:AttachUserOrGroupPolicy admin:BandwidthMonitor admin:CancelBatchJob admin:ChangeMyPassword admin:ClusterInfo admin:ConfigUpdate admin:ConsoleLog admin:CreatePolicy admin:CreateServiceAccount admin:CreateUser admin:DataUsageInfo admin:Decommission admin:DeletePolicy admin:DeleteUser admin:DeltaSharing admin:DeltaSharingCreateShare admin:DeltaSharingCreateToken admin:DeltaSharingDeleteShare admin:DeltaSharingDeleteToken admin:DeltaSharingGetShare admin:DeltaSharingListShares admin:DeltaSharingListTokens admin:DeltaSharingUpdateShare admin:DeltaSharingUseRecipient admin:DeltaSharingUseShare admin:DescribeBatchJob admin:DisableGroup admin:DisableUser admin:DistJobStatus admin:DriveInfo admin:DriveList admin:EnableGroup admin:EnableUser admin:ExportBucketMetadata admin:ExportIAM admin:ForceUnlock admin:GenerateBatchJob admin:GetBucketCompression admin:GetBucketQuota admin:GetBucketTarget admin:GetGroup admin:GetPolicy admin:GetUser admin:Heal admin:ImportBucketMetadata admin:ImportIAM admin:InspectData admin:InventoryControl admin:KMSCreateKey admin:KMSKeyStatus admin:LicenseInfo admin:ListBatchJobs admin:ListGroups admin:ListServiceAccounts admin:ListTemporaryAccounts admin:ListTier admin:ListUserPolicies admin:ListUsers admin:NodeInfo admin:NodeList admin:OBDInfo admin:PoolInfo admin:PoolList admin:Profiling admin:Prometheus admin:ReadAPILogs admin:ReadAlerts admin:ReadAuditLogs admin:ReadErrorLogs admin:Rebalance admin:RemoveServiceAccount admin:RemoveUserFromGroup admin:ReplicationDiff admin:ServerInfo admin:ServerTrace admin:ServerUpdate admin:ServiceCordon admin:ServiceFreeze admin:ServiceRestart admin:ServiceStop admin:SetBucketCompression admin:SetBucketQuota admin:SetBucketTarget admin:SetInfo admin:SetRootAccess admin:SetTier admin:SiteReplicationAdd admin:SiteReplicationDisable admin:SiteReplicationInfo admin:SiteReplicationOperation admin:SiteReplicationRemove admin:SiteReplicationResync admin:StartBatchJob admin:StorageInfo admin:TablesReplicationAdd admin:TablesReplicationCatalogAdmin admin:TablesReplicationInfo admin:TablesReplicationRemove admin:TablesReplicationStartFailover admin:TopLocksInfo admin:UpdatePolicyAssociation admin:UpdateServiceAccount admin:KMSEnable admin:KMSBackup admin:KMSRestore admin:KMSKeyRotate] named=[admin:* admin:AddUserToGroup admin:AttachUserOrGroupPolicy admin:BandwidthMonitor admin:CancelBatchJob admin:ChangeMyPassword admin:ClusterInfo admin:ConfigUpdate admin:ConsoleLog admin:CreatePolicy admin:CreateServiceAccount admin:CreateUser admin:DataUsageInfo admin:Decommission admin:DeletePolicy admin:DeleteUser admin:DeltaSharing admin:DeltaSharingCreateShare admin:DeltaSharingCreateToken admin:DeltaSharingDeleteShare admin:DeltaSharingDeleteToken admin:DeltaSharingGetShare admin:DeltaSharingListShares admin:DeltaSharingListTokens admin:DeltaSharingUpdateShare admin:DeltaSharingUseRecipient admin:DeltaSharingUseShare admin:DescribeBatchJob admin:DisableGroup admin:DisableUser admin:DistJobStatus admin:DriveInfo admin:DriveList admin:EnableGroup admin:EnableUser admin:ExportBucketMetadata admin:ExportIAM admin:ForceUnlock admin:GenerateBatchJob admin:GetBucketCompression admin:GetBucketQuota admin:GetBucketTarget admin:GetGroup admin:GetPolicy admin:GetUser admin:Heal admin:ImportBucketMetadata admin:ImportIAM admin:InspectData admin:InventoryControl admin:KMSCreateKey admin:KMSKeyStatus admin:LicenseInfo admin:ListBatchJobs admin:ListGroups admin:ListServiceAccounts admin:ListTemporaryAccounts admin:ListTier admin:ListUserPolicies admin:ListUsers admin:NodeInfo admin:NodeList admin:OBDInfo admin:PoolInfo admin:PoolList admin:Profiling admin:Prometheus admin:ReadAPILogs admin:ReadAlerts admin:ReadAuditLogs admin:ReadErrorLogs admin:Rebalance admin:RemoveServiceAccount admin:RemoveUserFromGroup admin:ReplicationDiff admin:ServerInfo admin:ServerTrace admin:ServerUpdate admin:ServiceCordon admin:ServiceFreeze admin:ServiceRestart admin:ServiceStop admin:SetBucketCompression admin:SetBucketQuota admin:SetBucketTarget admin:SetInfo admin:SetRootAccess admin:SetTier admin:SiteReplicationAdd admin:SiteReplicationDisable admin:SiteReplicationInfo admin:SiteReplicationOperation admin:SiteReplicationRemove admin:SiteReplicationResync admin:StartBatchJob admin:StorageInfo admin:TablesReplicationAdd admin:TablesReplicationCatalogAdmin admin:TablesReplicationInfo admin:TablesReplicationRemove admin:TablesReplicationStartFailover admin:TopLocksInfo admin:UpdatePolicyAssociation admin:UpdateServiceAccount admin:KMSEnable admin:KMSBackup admin:KMSRestore admin:KMSKeyRotate]
+"admin:*": match=[admin:AddUserToGroup admin:AttachUserOrGroupPolicy admin:BandwidthMonitor admin:CancelBatchJob admin:ChangeMyPassword admin:ClusterInfo admin:ConfigUpdate admin:ConsoleLog admin:CreatePolicy admin:CreateServiceAccount admin:CreateUser admin:DataUsageInfo admin:Decommission admin:DeletePolicy admin:DeleteUser admin:DeltaSharing admin:DeltaSharingCreateShare admin:DeltaSharingCreateToken admin:DeltaSharingDeleteShare admin:DeltaSharingDeleteToken admin:DeltaSharingGetShare admin:DeltaSharingListShares admin:DeltaSharingListTokens admin:DeltaSharingUpdateShare admin:DeltaSharingUseRecipient admin:DeltaSharingUseShare admin:DescribeBatchJob admin:DisableGroup admin:DisableUser admin:DistJobStatus admin:DriveInfo admin:DriveList admin:EnableGroup admin:EnableUser admin:ExportBucketMetadata admin:ExportIAM admin:ForceUnlock admin:GenerateBatchJob admin:GetBucketCompression admin:GetBucketQuota admin:GetBucketTarget admin:GetGroup admin:GetPolicy admin:GetUser admin:Heal admin:ImportBucketMetadata admin:ImportIAM admin:InspectData admin:InventoryControl admin:KMSCreateKey admin:KMSKeyStatus admin:LicenseInfo admin:ListBatchJobs admin:ListGroups admin:ListServiceAccounts admin:ListTemporaryAccounts admin:ListTier admin:ListUserPolicies admin:ListUsers admin:NodeInfo admin:NodeList admin:OBDInfo admin:PoolInfo admin:PoolList admin:Profiling admin:Prometheus admin:ReadAPILogs admin:ReadAlerts admin:ReadAuditLogs admin:ReadErrorLogs admin:Rebalance admin:RemoveServiceAccount admin:RemoveUserFromGroup admin:ReplicationDiff admin:ServerInfo admin:ServerTrace admin:ServerUpdate admin:ServiceCordon admin:ServiceFreeze admin:ServiceRestart admin:ServiceStop admin:SetBucketCompression admin:SetBucketQuota admin:SetBucketTarget admin:SetInfo admin:SetRootAccess admin:SetTier admin:SiteReplicationAdd admin:SiteReplicationDisable admin:SiteReplicationInfo admin:SiteReplicationOperation admin:SiteReplicationRemove admin:SiteReplicationResync admin:StartBatchJob admin:StorageInfo admin:TablesReplicationAdd admin:TablesReplicationCatalogAdmin admin:TablesReplicationInfo admin:TablesReplicationRemove admin:TablesReplicationStartFailover admin:TopLocksInfo admin:UpdatePolicyAssociation admin:UpdateServiceAccount admin:KMSEnable admin:KMSBackup admin:KMSRestore admin:KMSKeyRotate] named=[admin:AddUserToGroup admin:AttachUserOrGroupPolicy admin:BandwidthMonitor admin:CancelBatchJob admin:ChangeMyPassword admin:ClusterInfo admin:ConfigUpdate admin:ConsoleLog admin:CreatePolicy admin:CreateServiceAccount admin:CreateUser admin:DataUsageInfo admin:Decommission admin:DeletePolicy admin:DeleteUser admin:DeltaSharing admin:DeltaSharingCreateShare admin:DeltaSharingCreateToken admin:DeltaSharingDeleteShare admin:DeltaSharingDeleteToken admin:DeltaSharingGetShare admin:DeltaSharingListShares admin:DeltaSharingListTokens admin:DeltaSharingUpdateShare admin:DeltaSharingUseRecipient admin:DeltaSharingUseShare admin:DescribeBatchJob admin:DisableGroup admin:DisableUser admin:DistJobStatus admin:DriveInfo admin:DriveList admin:EnableGroup admin:EnableUser admin:ExportBucketMetadata admin:ExportIAM admin:ForceUnlock admin:GenerateBatchJob admin:GetBucketCompression admin:GetBucketQuota admin:GetBucketTarget admin:GetGroup admin:GetPolicy admin:GetUser admin:Heal admin:ImportBucketMetadata admin:ImportIAM admin:InspectData admin:InventoryControl admin:KMSCreateKey admin:KMSKeyStatus admin:LicenseInfo admin:ListBatchJobs admin:ListGroups admin:ListServiceAccounts admin:ListTemporaryAccounts admin:ListTier admin:ListUserPolicies admin:ListUsers admin:NodeInfo admin:NodeList admin:OBDInfo admin:PoolInfo admin:PoolList admin:Profiling admin:Prometheus admin:ReadAPILogs admin:ReadAlerts admin:ReadAuditLogs admin:ReadErrorLogs admin:Rebalance admin:RemoveServiceAccount admin:RemoveUserFromGroup admin:ReplicationDiff admin:ServerInfo admin:ServerTrace admin:ServerUpdate admin:ServiceCordon admin:ServiceFreeze admin:ServiceRestart admin:ServiceStop admin:SetBucketCompression admin:SetBucketQuota admin:SetBucketTarget admin:SetInfo admin:SetRootAccess admin:SetTier admin:SiteReplicationAdd admin:SiteReplicationDisable admin:SiteReplicationInfo admin:SiteReplicationOperation admin:SiteReplicationRemove admin:SiteReplicationResync admin:StartBatchJob admin:StorageInfo admin:TablesReplicationAdd admin:TablesReplicationCatalogAdmin admin:TablesReplicationInfo admin:TablesReplicationRemove admin:TablesReplicationStartFailover admin:TopLocksInfo admin:UpdatePolicyAssociation admin:UpdateServiceAccount admin:KMSEnable admin:KMSBackup admin:KMSRestore admin:KMSKeyRotate]
+"admin:Get*": match=[admin:GetBucketCompression admin:GetBucketQuota admin:GetBucketTarget admin:GetGroup admin:GetPolicy admin:GetUser] named=[admin:GetBucketCompression admin:GetBucketQuota admin:GetBucketTarget admin:GetGroup admin:GetPolicy admin:GetUser]
+"admin:KMS*": match=[admin:KMSCreateKey admin:KMSKeyStatus admin:KMSEnable admin:KMSBackup admin:KMSRestore admin:KMSKeyRotate] named=[admin:KMSCreateKey admin:KMSKeyStatus admin:KMSEnable admin:KMSBackup admin:KMSRestore admin:KMSKeyRotate]
+"kms:*": match=[kms:API kms:AssignPolicy kms:AuditLog kms:CleanupLocalKeys kms:CreateKey kms:DeleteIdentity kms:DeleteKey kms:DeletePolicy kms:DescribeIdentity kms:DescribePolicy kms:DescribeSelfIdentity kms:Enable kms:ErrorLog kms:GetPolicy kms:ImportKey kms:KeyRotate kms:KeyStatus kms:ListIdentities kms:ListKeys kms:ListPolicies kms:Metrics kms:MigrateKeys kms:SetPolicy kms:Status kms:Version] named=[kms:API kms:AssignPolicy kms:AuditLog kms:CleanupLocalKeys kms:CreateKey kms:DeleteIdentity kms:DeleteKey kms:DeletePolicy kms:DescribeIdentity kms:DescribePolicy kms:DescribeSelfIdentity kms:Enable kms:ErrorLog kms:GetPolicy kms:ImportKey kms:KeyRotate kms:KeyStatus kms:ListIdentities kms:ListKeys kms:ListPolicies kms:Metrics kms:MigrateKeys kms:SetPolicy kms:Status kms:Version]
+"kms:Create*": match=[kms:CreateKey] named=[kms:CreateKey]
+"memory:*": match=[memory:CreateAgent memory:CreateCortex memory:DeleteAgent memory:DeleteCortex memory:DeleteSecret memory:GetAgent memory:GetCortex memory:GetObjectBio memory:GetSecret memory:ListAgents memory:ListCortexes memory:ListSecrets memory:PutAgent memory:PutSecret memory:Search memory:UpdateAgent] named=[memory:CreateAgent memory:CreateCortex memory:DeleteAgent memory:DeleteCortex memory:DeleteSecret memory:GetAgent memory:GetCortex memory:GetObjectBio memory:GetSecret memory:ListAgents memory:ListCortexes memory:ListSecrets memory:PutAgent memory:PutSecret memory:Search memory:UpdateAgent]
+"memory:List*": match=[memory:ListAgents memory:ListCortexes memory:ListSecrets] named=[memory:ListAgents memory:ListCortexes memory:ListSecrets]
+"s3:*": match=[s3:AbortMultipartUpload s3:BypassGovernanceRetention s3:CreateBucket s3:DeleteBucket s3:DeleteBucketCors s3:DeleteBucketPolicy s3:DeleteObject s3:DeleteObjectAnnotation s3:DeleteObjectTagging s3:DeleteObjectVersion s3:DeleteObjectVersionTagging s3:ForceDeleteBucket s3:GetBucketCors s3:GetBucketLocation s3:GetBucketNotification s3:GetBucketObjectLockConfiguration s3:GetBucketPolicy s3:GetBucketPolicyStatus s3:GetBucketQOS s3:GetBucketTagging s3:GetBucketVersioning s3:GetEncryptionConfiguration s3:GetInventoryConfiguration s3:GetLifecycleConfiguration s3:GetObject s3:GetObjectAnnotation s3:GetObjectAttributes s3:GetObjectLegalHold s3:GetObjectRetention s3:GetObjectTagging s3:GetObjectVersion s3:GetObjectVersionAnnotationForReplication s3:GetObjectVersionAttributes s3:GetObjectVersionForReplication s3:GetObjectVersionTagging s3:GetReplicationConfiguration s3:HeadBucket s3:ListAllMyBuckets s3:ListBucket s3:ListBucketMultipartUploads s3:ListBucketVersions s3:ListMultipartUploadParts s3:ListObjectAnnotations s3:ListenBucketNotification s3:ListenNotification s3:PutBucketCors s3:PutBucketNotification s3:PutBucketObjectLockConfiguration s3:PutBucketPolicy s3:PutBucketQOS s3:PutBucketTagging s3:PutBucketVersioning s3:PutEncryptionConfiguration s3:PutInventoryConfiguration s3:PutLifecycleConfiguration s3:PutObject s3:PutObjectAnnotation s3:PutObjectFanOut s3:PutObjectLegalHold s3:PutObjectRetention s3:PutObjectTagging s3:PutObjectVersionTagging s3:PutReplicationConfiguration s3:ReplicateDelete s3:ReplicateObject s3:ReplicateObjectAnnotation s3:ReplicateTags s3:ResetBucketReplicationState s3:RestoreObject s3:UpdateObjectEncryption] named=[s3:AbortMultipartUpload s3:BypassGovernanceRetention s3:CreateBucket s3:DeleteBucket s3:DeleteBucketCors s3:DeleteBucketPolicy s3:DeleteObject s3:DeleteObjectAnnotation s3:DeleteObjectTagging s3:DeleteObjectVersion s3:DeleteObjectVersionTagging s3:ForceDeleteBucket s3:GetBucketCors s3:GetBucketLocation s3:GetBucketNotification s3:GetBucketObjectLockConfiguration s3:GetBucketPolicy s3:GetBucketPolicyStatus s3:GetBucketQOS s3:GetBucketTagging s3:GetBucketVersioning s3:GetEncryptionConfiguration s3:GetInventoryConfiguration s3:GetLifecycleConfiguration s3:GetObject s3:GetObjectAnnotation s3:GetObjectAttributes s3:GetObjectLegalHold s3:GetObjectRetention s3:GetObjectTagging s3:GetObjectVersion s3:GetObjectVersionAnnotationForReplication s3:GetObjectVersionAttributes s3:GetObjectVersionForReplication s3:GetObjectVersionTagging s3:GetReplicationConfiguration s3:HeadBucket s3:ListAllMyBuckets s3:ListBucket s3:ListBucketMultipartUploads s3:ListBucketVersions s3:ListMultipartUploadParts s3:ListObjectAnnotations s3:ListenBucketNotification s3:ListenNotification s3:PutBucketCors s3:PutBucketNotification s3:PutBucketObjectLockConfiguration s3:PutBucketPolicy s3:PutBucketQOS s3:PutBucketTagging s3:PutBucketVersioning s3:PutEncryptionConfiguration s3:PutInventoryConfiguration s3:PutLifecycleConfiguration s3:PutObject s3:PutObjectAnnotation s3:PutObjectFanOut s3:PutObjectLegalHold s3:PutObjectRetention s3:PutObjectTagging s3:PutObjectVersionTagging s3:PutReplicationConfiguration s3:ReplicateDelete s3:ReplicateObject s3:ReplicateObjectAnnotation s3:ReplicateTags s3:ResetBucketReplicationState s3:RestoreObject s3:UpdateObjectEncryption]
+"s3:*Object*": match=[s3:DeleteObject s3:DeleteObjectAnnotation s3:DeleteObjectTagging s3:DeleteObjectVersion s3:DeleteObjectVersionTagging s3:GetBucketObjectLockConfiguration s3:GetObject s3:GetObjectAnnotation s3:GetObjectAttributes s3:GetObjectLegalHold s3:GetObjectRetention s3:GetObjectTagging s3:GetObjectVersion s3:GetObjectVersionAnnotationForReplication s3:GetObjectVersionAttributes s3:GetObjectVersionForReplication s3:GetObjectVersionTagging s3:ListObjectAnnotations s3:PutBucketObjectLockConfiguration s3:PutObject s3:PutObjectAnnotation s3:PutObjectFanOut s3:PutObjectLegalHold s3:PutObjectRetention s3:PutObjectTagging s3:PutObjectVersionTagging s3:ReplicateObject s3:ReplicateObjectAnnotation s3:RestoreObject s3:UpdateObjectEncryption] named=[s3:DeleteObject s3:DeleteObjectAnnotation s3:DeleteObjectTagging s3:DeleteObjectVersion s3:DeleteObjectVersionTagging s3:GetBucketObjectLockConfiguration s3:GetObject s3:GetObjectAnnotation s3:GetObjectAttributes s3:GetObjectLegalHold s3:GetObjectRetention s3:GetObjectTagging s3:GetObjectVersion s3:GetObjectVersionAnnotationForReplication s3:GetObjectVersionAttributes s3:GetObjectVersionForReplication s3:GetObjectVersionTagging s3:ListObjectAnnotations s3:PutBucketObjectLockConfiguration s3:PutObject s3:PutObjectAnnotation s3:PutObjectFanOut s3:PutObjectLegalHold s3:PutObjectRetention s3:PutObjectTagging s3:PutObjectVersionTagging s3:ReplicateObject s3:ReplicateObjectAnnotation s3:RestoreObject s3:UpdateObjectEncryption]
+"s3:Get*": match=[s3:GetBucketCors s3:GetBucketLocation s3:GetBucketNotification s3:GetBucketObjectLockConfiguration s3:GetBucketPolicy s3:GetBucketPolicyStatus s3:GetBucketQOS s3:GetBucketTagging s3:GetBucketVersioning s3:GetEncryptionConfiguration s3:GetInventoryConfiguration s3:GetLifecycleConfiguration s3:GetObject s3:GetObjectAnnotation s3:GetObjectAttributes s3:GetObjectLegalHold s3:GetObjectRetention s3:GetObjectTagging s3:GetObjectVersion s3:GetObjectVersionAnnotationForReplication s3:GetObjectVersionAttributes s3:GetObjectVersionForReplication s3:GetObjectVersionTagging s3:GetReplicationConfiguration] named=[s3:GetBucketCors s3:GetBucketLocation s3:GetBucketNotification s3:GetBucketObjectLockConfiguration s3:GetBucketPolicy s3:GetBucketPolicyStatus s3:GetBucketQOS s3:GetBucketTagging s3:GetBucketVersioning s3:GetEncryptionConfiguration s3:GetInventoryConfiguration s3:GetLifecycleConfiguration s3:GetObject s3:GetObjectAnnotation s3:GetObjectAttributes s3:GetObjectLegalHold s3:GetObjectRetention s3:GetObjectTagging s3:GetObjectVersion s3:GetObjectVersionAnnotationForReplication s3:GetObjectVersionAttributes s3:GetObjectVersionForReplication s3:GetObjectVersionTagging s3:GetReplicationConfiguration]
+"s3:GetObjectVersion": match=[s3:GetObject] named=[]
+"s3:Put?bject": match=[s3:PutObject] named=[s3:PutObject]
+"s3express:*": match=[s3express:CreateSession] named=[s3express:CreateSession]
+"s3files:*": match=[s3files:CreateExport s3files:DeleteExport s3files:GetExportStats s3files:GetExportStatus s3files:SetExportAccess s3files:UpdateExport] named=[s3files:CreateExport s3files:DeleteExport s3files:GetExportStats s3files:GetExportStatus s3files:SetExportAccess s3files:UpdateExport]
+"s3files:Get*": match=[s3files:GetExportStats s3files:GetExportStatus] named=[s3files:GetExportStats s3files:GetExportStatus]
+"s3tables:*": match=[s3:AbortMultipartUpload s3:DeleteObject s3:GetObject s3:ListBucket s3:ListMultipartUploadParts s3:PutObject s3tables:CreateFunction s3tables:CreateNamespace s3tables:CreateTable s3tables:CreateTableBucket s3tables:CreateView s3tables:CreateWarehouse s3tables:DeleteFunction s3tables:DeleteNamespace s3tables:DeleteTable s3tables:DeleteTableAnnotation s3tables:DeleteTableBucket s3tables:DeleteTableBucketEncryption s3tables:DeleteTableBucketPolicy s3tables:DeleteTableEncryption s3tables:DeleteTablePolicy s3tables:DeleteView s3tables:DeleteWarehouse s3tables:DeleteWarehouseEncryption s3tables:DeleteWarehousePolicy s3tables:GetConfig s3tables:GetFunction s3tables:GetNamespace s3tables:GetTable s3tables:GetTableAnnotation s3tables:GetTableBucket s3tables:GetTableBucketEncryption s3tables:GetTableBucketMaintenanceConfiguration s3tables:GetTableBucketPolicy s3tables:GetTableData s3tables:GetTableEncryption s3tables:GetTableMaintenanceConfiguration s3tables:GetTableMaintenanceJobStatus s3tables:GetTableMetadataLocation s3tables:GetTablePolicy s3tables:GetView s3tables:GetWarehouse s3tables:GetWarehouseEncryption s3tables:GetWarehouseMaintenanceConfiguration s3tables:GetWarehousePolicy s3tables:ListFunctions s3tables:ListNamespaces s3tables:ListTableAnnotations s3tables:ListTableBuckets s3tables:ListTables s3tables:ListTagsForTable s3tables:ListTagsForWarehouse s3tables:ListViews s3tables:ListWarehouses s3tables:PutTableAnnotation s3tables:PutTableBucketEncryption s3tables:PutTableBucketMaintenanceConfiguration s3tables:PutTableBucketPolicy s3tables:PutTableData s3tables:PutTableEncryption s3tables:PutTableMaintenanceConfiguration s3tables:PutTablePolicy s3tables:PutWarehouseEncryption s3tables:PutWarehouseMaintenanceConfiguration s3tables:PutWarehousePolicy s3tables:RegisterFunction s3tables:RegisterTable s3tables:RegisterView s3tables:RenameFunction s3tables:RenameTable s3tables:RenameView s3tables:TableMetrics s3tables:TagTable s3tables:TagWarehouse s3tables:UntagTable s3tables:UntagWarehouse s3tables:UpdateFunction s3tables:UpdateNamespaceProperties s3tables:UpdateTable s3tables:UpdateTableMetadataLocation s3tables:UpdateView] named=[s3tables:CreateFunction s3tables:CreateNamespace s3tables:CreateTable s3tables:CreateTableBucket s3tables:CreateView s3tables:CreateWarehouse s3tables:DeleteFunction s3tables:DeleteNamespace s3tables:DeleteTable s3tables:DeleteTableAnnotation s3tables:DeleteTableBucket s3tables:DeleteTableBucketEncryption s3tables:DeleteTableBucketPolicy s3tables:DeleteTableEncryption s3tables:DeleteTablePolicy s3tables:DeleteView s3tables:DeleteWarehouse s3tables:DeleteWarehouseEncryption s3tables:DeleteWarehousePolicy s3tables:GetConfig s3tables:GetFunction s3tables:GetNamespace s3tables:GetTable s3tables:GetTableAnnotation s3tables:GetTableBucket s3tables:GetTableBucketEncryption s3tables:GetTableBucketMaintenanceConfiguration s3tables:GetTableBucketPolicy s3tables:GetTableData s3tables:GetTableEncryption s3tables:GetTableMaintenanceConfiguration s3tables:GetTableMaintenanceJobStatus s3tables:GetTableMetadataLocation s3tables:GetTablePolicy s3tables:GetView s3tables:GetWarehouse s3tables:GetWarehouseEncryption s3tables:GetWarehouseMaintenanceConfiguration s3tables:GetWarehousePolicy s3tables:ListFunctions s3tables:ListNamespaces s3tables:ListTableAnnotations s3tables:ListTableBuckets s3tables:ListTables s3tables:ListTagsForTable s3tables:ListTagsForWarehouse s3tables:ListViews s3tables:ListWarehouses s3tables:PutTableAnnotation s3tables:PutTableBucketEncryption s3tables:PutTableBucketMaintenanceConfiguration s3tables:PutTableBucketPolicy s3tables:PutTableData s3tables:PutTableEncryption s3tables:PutTableMaintenanceConfiguration s3tables:PutTablePolicy s3tables:PutWarehouseEncryption s3tables:PutWarehouseMaintenanceConfiguration s3tables:PutWarehousePolicy s3tables:RegisterFunction s3tables:RegisterTable s3tables:RegisterView s3tables:RenameFunction s3tables:RenameTable s3tables:RenameView s3tables:TableMetrics s3tables:TagTable s3tables:TagWarehouse s3tables:UntagTable s3tables:UntagWarehouse s3tables:UpdateFunction s3tables:UpdateNamespaceProperties s3tables:UpdateTable s3tables:UpdateTableMetadataLocation s3tables:UpdateView]
+"s3tables:*TableBucket*": match=[s3tables:CreateTableBucket s3tables:CreateWarehouse s3tables:DeleteTableBucket s3tables:DeleteTableBucketEncryption s3tables:DeleteTableBucketPolicy s3tables:DeleteWarehouse s3tables:DeleteWarehouseEncryption s3tables:DeleteWarehousePolicy s3tables:GetTableBucket s3tables:GetTableBucketEncryption s3tables:GetTableBucketMaintenanceConfiguration s3tables:GetTableBucketPolicy s3tables:GetWarehouse s3tables:GetWarehouseEncryption s3tables:GetWarehouseMaintenanceConfiguration s3tables:GetWarehousePolicy s3tables:ListTableBuckets s3tables:ListWarehouses s3tables:PutTableBucketEncryption s3tables:PutTableBucketMaintenanceConfiguration s3tables:PutTableBucketPolicy s3tables:PutWarehouseEncryption s3tables:PutWarehouseMaintenanceConfiguration s3tables:PutWarehousePolicy] named=[s3tables:CreateTableBucket s3tables:CreateWarehouse s3tables:DeleteTableBucket s3tables:DeleteTableBucketEncryption s3tables:DeleteTableBucketPolicy s3tables:DeleteWarehouse s3tables:DeleteWarehouseEncryption s3tables:DeleteWarehousePolicy s3tables:GetTableBucket s3tables:GetTableBucketEncryption s3tables:GetTableBucketMaintenanceConfiguration s3tables:GetTableBucketPolicy s3tables:GetWarehouse s3tables:GetWarehouseEncryption s3tables:GetWarehouseMaintenanceConfiguration s3tables:GetWarehousePolicy s3tables:ListTableBuckets s3tables:ListWarehouses s3tables:PutTableBucketEncryption s3tables:PutTableBucketMaintenanceConfiguration s3tables:PutTableBucketPolicy s3tables:PutWarehouseEncryption s3tables:PutWarehouseMaintenanceConfiguration s3tables:PutWarehousePolicy]
+"s3tables:*Warehouse*": match=[s3tables:CreateTableBucket s3tables:CreateWarehouse s3tables:DeleteTableBucket s3tables:DeleteTableBucketEncryption s3tables:DeleteTableBucketPolicy s3tables:DeleteWarehouse s3tables:DeleteWarehouseEncryption s3tables:DeleteWarehousePolicy s3tables:GetTableBucket s3tables:GetTableBucketEncryption s3tables:GetTableBucketMaintenanceConfiguration s3tables:GetTableBucketPolicy s3tables:GetWarehouse s3tables:GetWarehouseEncryption s3tables:GetWarehouseMaintenanceConfiguration s3tables:GetWarehousePolicy s3tables:ListTableBuckets s3tables:ListTagsForWarehouse s3tables:ListWarehouses s3tables:PutTableBucketEncryption s3tables:PutTableBucketMaintenanceConfiguration s3tables:PutTableBucketPolicy s3tables:PutWarehouseEncryption s3tables:PutWarehouseMaintenanceConfiguration s3tables:PutWarehousePolicy s3tables:TagWarehouse s3tables:UntagWarehouse] named=[s3tables:CreateTableBucket s3tables:CreateWarehouse s3tables:DeleteTableBucket s3tables:DeleteTableBucketEncryption s3tables:DeleteTableBucketPolicy s3tables:DeleteWarehouse s3tables:DeleteWarehouseEncryption s3tables:DeleteWarehousePolicy s3tables:GetTableBucket s3tables:GetTableBucketEncryption s3tables:GetTableBucketMaintenanceConfiguration s3tables:GetTableBucketPolicy s3tables:GetWarehouse s3tables:GetWarehouseEncryption s3tables:GetWarehouseMaintenanceConfiguration s3tables:GetWarehousePolicy s3tables:ListTableBuckets s3tables:ListTagsForWarehouse s3tables:ListWarehouses s3tables:PutTableBucketEncryption s3tables:PutTableBucketMaintenanceConfiguration s3tables:PutTableBucketPolicy s3tables:PutWarehouseEncryption s3tables:PutWarehouseMaintenanceConfiguration s3tables:PutWarehousePolicy s3tables:TagWarehouse s3tables:UntagWarehouse]
+"s3tables:CreateTableBucket": match=[s3tables:CreateWarehouse] named=[s3tables:CreateWarehouse]
+"s3tables:CreateWarehouse": match=[s3tables:CreateTableBucket] named=[s3tables:CreateTableBucket]
+"s3tables:DeleteTable": match=[s3:DeleteObject] named=[]
+"s3tables:DeleteTableBucket": match=[s3tables:DeleteWarehouse] named=[s3tables:DeleteWarehouse]
+"s3tables:DeleteTableBucketEncryption": match=[s3tables:DeleteWarehouseEncryption] named=[s3tables:DeleteWarehouseEncryption]
+"s3tables:DeleteTableBucketPolicy": match=[s3tables:DeleteWarehousePolicy] named=[s3tables:DeleteWarehousePolicy]
+"s3tables:DeleteWarehouse": match=[s3tables:DeleteTableBucket] named=[s3tables:DeleteTableBucket]
+"s3tables:DeleteWarehouseEncryption": match=[s3tables:DeleteTableBucketEncryption] named=[s3tables:DeleteTableBucketEncryption]
+"s3tables:DeleteWarehousePolicy": match=[s3tables:DeleteTableBucketPolicy] named=[s3tables:DeleteTableBucketPolicy]
+"s3tables:Get*": match=[s3tables:GetConfig s3tables:GetFunction s3tables:GetNamespace s3tables:GetTable s3tables:GetTableAnnotation s3tables:GetTableBucket s3tables:GetTableBucketEncryption s3tables:GetTableBucketMaintenanceConfiguration s3tables:GetTableBucketPolicy s3tables:GetTableData s3tables:GetTableEncryption s3tables:GetTableMaintenanceConfiguration s3tables:GetTableMaintenanceJobStatus s3tables:GetTableMetadataLocation s3tables:GetTablePolicy s3tables:GetView s3tables:GetWarehouse s3tables:GetWarehouseEncryption s3tables:GetWarehouseMaintenanceConfiguration s3tables:GetWarehousePolicy] named=[s3tables:GetConfig s3tables:GetFunction s3tables:GetNamespace s3tables:GetTable s3tables:GetTableAnnotation s3tables:GetTableBucket s3tables:GetTableBucketEncryption s3tables:GetTableBucketMaintenanceConfiguration s3tables:GetTableBucketPolicy s3tables:GetTableData s3tables:GetTableEncryption s3tables:GetTableMaintenanceConfiguration s3tables:GetTableMaintenanceJobStatus s3tables:GetTableMetadataLocation s3tables:GetTablePolicy s3tables:GetView s3tables:GetWarehouse s3tables:GetWarehouseEncryption s3tables:GetWarehouseMaintenanceConfiguration s3tables:GetWarehousePolicy]
+"s3tables:GetTableBucket": match=[s3tables:GetWarehouse] named=[s3tables:GetWarehouse]
+"s3tables:GetTableBucketEncryption": match=[s3tables:GetWarehouseEncryption] named=[s3tables:GetWarehouseEncryption]
+"s3tables:GetTableBucketMaintenanceConfiguration": match=[s3tables:GetWarehouseMaintenanceConfiguration] named=[s3tables:GetWarehouseMaintenanceConfiguration]
+"s3tables:GetTableBucketPolicy": match=[s3tables:GetWarehousePolicy] named=[s3tables:GetWarehousePolicy]
+"s3tables:GetTableData": match=[s3:GetObject s3:ListMultipartUploadParts] named=[]
+"s3tables:GetWarehouse": match=[s3tables:GetTableBucket] named=[s3tables:GetTableBucket]
+"s3tables:GetWarehouseEncryption": match=[s3tables:GetTableBucketEncryption] named=[s3tables:GetTableBucketEncryption]
+"s3tables:GetWarehouseMaintenanceConfiguration": match=[s3tables:GetTableBucketMaintenanceConfiguration] named=[s3tables:GetTableBucketMaintenanceConfiguration]
+"s3tables:GetWarehousePolicy": match=[s3tables:GetTableBucketPolicy] named=[s3tables:GetTableBucketPolicy]
+"s3tables:ListTableBuckets": match=[s3tables:ListWarehouses] named=[s3tables:ListWarehouses]
+"s3tables:ListWarehouses": match=[s3tables:ListTableBuckets] named=[s3tables:ListTableBuckets]
+"s3tables:PutTableBucketEncryption": match=[s3tables:PutWarehouseEncryption] named=[s3tables:PutWarehouseEncryption]
+"s3tables:PutTableBucketMaintenanceConfiguration": match=[s3tables:PutWarehouseMaintenanceConfiguration] named=[s3tables:PutWarehouseMaintenanceConfiguration]
+"s3tables:PutTableBucketPolicy": match=[s3tables:PutWarehousePolicy] named=[s3tables:PutWarehousePolicy]
+"s3tables:PutTableData": match=[s3:AbortMultipartUpload s3:ListBucket s3:PutObject] named=[]
+"s3tables:PutWarehouseEncryption": match=[s3tables:PutTableBucketEncryption] named=[s3tables:PutTableBucketEncryption]
+"s3tables:PutWarehouseMaintenanceConfiguration": match=[s3tables:PutTableBucketMaintenanceConfiguration] named=[s3tables:PutTableBucketMaintenanceConfiguration]
+"s3tables:PutWarehousePolicy": match=[s3tables:PutTableBucketPolicy] named=[s3tables:PutTableBucketPolicy]
+"s3vectors:*": match=[s3vectors:CreateIndex s3vectors:CreateVectorBucket s3vectors:DeleteIndex s3vectors:DeleteVectorBucket s3vectors:DeleteVectors s3vectors:GetIndex s3vectors:GetVectorBucket s3vectors:GetVectors s3vectors:ListIndexes s3vectors:ListVectorBuckets s3vectors:ListVectors s3vectors:PutVectors s3vectors:QueryVectors] named=[s3vectors:CreateIndex s3vectors:CreateVectorBucket s3vectors:DeleteIndex s3vectors:DeleteVectorBucket s3vectors:DeleteVectors s3vectors:GetIndex s3vectors:GetVectorBucket s3vectors:GetVectors s3vectors:ListIndexes s3vectors:ListVectorBuckets s3vectors:ListVectors s3vectors:PutVectors s3vectors:QueryVectors]
+"s3vectors:Get*": match=[s3vectors:GetIndex s3vectors:GetVectorBucket s3vectors:GetVectors] named=[s3vectors:GetIndex s3vectors:GetVectorBucket s3vectors:GetVectors]
+"sts:*": match=[sts:AssumeRole sts:AssumeRoleLDAPIdentity sts:AssumeRoleWithClientCertificate sts:AssumeRoleWithClientGrants sts:AssumeRoleWithCustomToken sts:AssumeRoleWithWebIdentity] named=[sts:AssumeRole sts:AssumeRoleLDAPIdentity sts:AssumeRoleWithClientCertificate sts:AssumeRoleWithClientGrants sts:AssumeRoleWithCustomToken sts:AssumeRoleWithWebIdentity]
+"sts:Assume*": match=[sts:AssumeRole sts:AssumeRoleLDAPIdentity sts:AssumeRoleWithClientCertificate sts:AssumeRoleWithClientGrants sts:AssumeRoleWithCustomToken sts:AssumeRoleWithWebIdentity] named=[sts:AssumeRole sts:AssumeRoleLDAPIdentity sts:AssumeRoleWithClientCertificate sts:AssumeRoleWithClientGrants sts:AssumeRoleWithCustomToken sts:AssumeRoleWithWebIdentity]
+
+# Validation
+"": none=load: Resource must not be empty | s3=load: unsupported action '' | s3+ip=load: unsupported action ''
+"*": none=ok | s3=ok | s3+ip=load: unsupported condition keys '[aws:SourceIp]' used for action '*'
+"a*": none=ok | s3=ok | s3+ip=load: unsupported condition keys '[aws:SourceIp]' used for action 'a*'
+"admin:*": none=ok | s3=ok | s3+ip=ok
+"admin:?ealth": none=load: Resource must not be empty | s3=load: unsupported action 'admin:?ealth' | s3+ip=load: unsupported action 'admin:?ealth'
+"admin:AddUserToGroup": none=ok | s3=ok | s3+ip=ok
+"admin:AttachUserOrGroupPolicy": none=ok | s3=ok | s3+ip=ok
+"admin:BandwidthMonitor": none=ok | s3=ok | s3+ip=ok
+"admin:CancelBatchJob": none=ok | s3=ok | s3+ip=ok
+"admin:ChangeMyPassword": none=ok | s3=ok | s3+ip=ok
+"admin:ClusterInfo": none=ok | s3=ok | s3+ip=ok
+"admin:ConfigUpdate": none=ok | s3=ok | s3+ip=ok
+"admin:ConsoleLog": none=ok | s3=ok | s3+ip=ok
+"admin:CreatePolicy": none=ok | s3=ok | s3+ip=ok
+"admin:CreateServiceAccount": none=ok | s3=ok | s3+ip=ok
+"admin:CreateUser": none=ok | s3=ok | s3+ip=ok
+"admin:DataUsageInfo": none=ok | s3=ok | s3+ip=ok
+"admin:Decommission": none=ok | s3=ok | s3+ip=ok
+"admin:DeletePolicy": none=ok | s3=ok | s3+ip=ok
+"admin:DeleteUser": none=ok | s3=ok | s3+ip=ok
+"admin:DeltaSharing": none=ok | s3=ok | s3+ip=ok
+"admin:DeltaSharingCreateShare": none=ok | s3=ok | s3+ip=ok
+"admin:DeltaSharingCreateToken": none=ok | s3=ok | s3+ip=ok
+"admin:DeltaSharingDeleteShare": none=ok | s3=ok | s3+ip=ok
+"admin:DeltaSharingDeleteToken": none=ok | s3=ok | s3+ip=ok
+"admin:DeltaSharingGetShare": none=ok | s3=ok | s3+ip=ok
+"admin:DeltaSharingListShares": none=ok | s3=ok | s3+ip=ok
+"admin:DeltaSharingListTokens": none=ok | s3=ok | s3+ip=ok
+"admin:DeltaSharingUpdateShare": none=ok | s3=ok | s3+ip=ok
+"admin:DeltaSharingUseRecipient": none=ok | s3=ok | s3+ip=ok
+"admin:DeltaSharingUseShare": none=ok | s3=ok | s3+ip=ok
+"admin:DescribeBatchJob": none=ok | s3=ok | s3+ip=ok
+"admin:DisableGroup": none=ok | s3=ok | s3+ip=ok
+"admin:DisableUser": none=ok | s3=ok | s3+ip=ok
+"admin:DistJobStatus": none=ok | s3=ok | s3+ip=ok
+"admin:DriveInfo": none=ok | s3=ok | s3+ip=ok
+"admin:DriveList": none=ok | s3=ok | s3+ip=ok
+"admin:EnableGroup": none=ok | s3=ok | s3+ip=ok
+"admin:EnableUser": none=ok | s3=ok | s3+ip=ok
+"admin:ExportBucketMetadata": none=ok | s3=ok | s3+ip=ok
+"admin:ExportIAM": none=ok | s3=ok | s3+ip=ok
+"admin:ForceUnlock": none=ok | s3=ok | s3+ip=ok
+"admin:GenerateBatchJob": none=ok | s3=ok | s3+ip=ok
+"admin:Get*": none=ok | s3=ok | s3+ip=load: unsupported condition keys '[aws:SourceIp]' used for action 'admin:Get*'
+"admin:GetBucketCompression": none=ok | s3=ok | s3+ip=ok
+"admin:GetBucketQuota": none=ok | s3=ok | s3+ip=ok
+"admin:GetBucketTarget": none=ok | s3=ok | s3+ip=ok
+"admin:GetGroup": none=ok | s3=ok | s3+ip=ok
+"admin:GetPolicy": none=ok | s3=ok | s3+ip=ok
+"admin:GetUser": none=ok | s3=ok | s3+ip=ok
+"admin:Heal": none=ok | s3=ok | s3+ip=ok
+"admin:ImportBucketMetadata": none=ok | s3=ok | s3+ip=ok
+"admin:ImportIAM": none=ok | s3=ok | s3+ip=ok
+"admin:InspectData": none=ok | s3=ok | s3+ip=ok
+"admin:InventoryControl": none=ok | s3=ok | s3+ip=ok
+"admin:KMS*": none=ok | s3=ok | s3+ip=load: unsupported condition keys '[aws:SourceIp]' used for action 'admin:KMS*'
+"admin:KMSBackup": none=load: Resource must not be empty | s3=load: unsupported action 'admin:KMSBackup' | s3+ip=load: unsupported action 'admin:KMSBackup'
+"admin:KMSCreateKey": none=ok | s3=ok | s3+ip=ok
+"admin:KMSEnable": none=load: Resource must not be empty | s3=load: unsupported action 'admin:KMSEnable' | s3+ip=load: unsupported action 'admin:KMSEnable'
+"admin:KMSKeyRotate": none=load: Resource must not be empty | s3=load: unsupported action 'admin:KMSKeyRotate' | s3+ip=load: unsupported action 'admin:KMSKeyRotate'
+"admin:KMSKeyStatus": none=ok | s3=ok | s3+ip=ok
+"admin:KMSRestore": none=load: Resource must not be empty | s3=load: unsupported action 'admin:KMSRestore' | s3+ip=load: unsupported action 'admin:KMSRestore'
+"admin:LicenseInfo": none=ok | s3=ok | s3+ip=ok
+"admin:ListBatchJobs": none=ok | s3=ok | s3+ip=ok
+"admin:ListGroups": none=ok | s3=ok | s3+ip=ok
+"admin:ListServiceAccounts": none=ok | s3=ok | s3+ip=ok
+"admin:ListTemporaryAccounts": none=ok | s3=ok | s3+ip=ok
+"admin:ListTier": none=ok | s3=ok | s3+ip=ok
+"admin:ListUserPolicies": none=ok | s3=ok | s3+ip=ok
+"admin:ListUsers": none=ok | s3=ok | s3+ip=ok
+"admin:NodeInfo": none=ok | s3=ok | s3+ip=ok
+"admin:NodeList": none=ok | s3=ok | s3+ip=ok
+"admin:OBDInfo": none=ok | s3=ok | s3+ip=ok
+"admin:PoolInfo": none=ok | s3=ok | s3+ip=ok
+"admin:PoolList": none=ok | s3=ok | s3+ip=ok
+"admin:Profiling": none=ok | s3=ok | s3+ip=ok
+"admin:Prometheus": none=ok | s3=ok | s3+ip=ok
+"admin:ReadAPILogs": none=ok | s3=ok | s3+ip=ok
+"admin:ReadAlerts": none=ok | s3=ok | s3+ip=ok
+"admin:ReadAuditLogs": none=ok | s3=ok | s3+ip=ok
+"admin:ReadErrorLogs": none=ok | s3=ok | s3+ip=ok
+"admin:Rebalance": none=ok | s3=ok | s3+ip=ok
+"admin:RemoveServiceAccount": none=ok | s3=ok | s3+ip=ok
+"admin:RemoveUserFromGroup": none=ok | s3=ok | s3+ip=ok
+"admin:ReplicationDiff": none=ok | s3=ok | s3+ip=ok
+"admin:ServerInfo": none=ok | s3=ok | s3+ip=ok
+"admin:ServerTrace": none=ok | s3=ok | s3+ip=ok
+"admin:ServerUpdate": none=ok | s3=ok | s3+ip=ok
+"admin:ServiceCordon": none=ok | s3=ok | s3+ip=ok
+"admin:ServiceFreeze": none=ok | s3=ok | s3+ip=ok
+"admin:ServiceRestart": none=ok | s3=ok | s3+ip=ok
+"admin:ServiceStop": none=ok | s3=ok | s3+ip=ok
+"admin:SetBucketCompression": none=ok | s3=ok | s3+ip=ok
+"admin:SetBucketQuota": none=ok | s3=ok | s3+ip=ok
+"admin:SetBucketTarget": none=ok | s3=ok | s3+ip=ok
+"admin:SetInfo": none=ok | s3=ok | s3+ip=ok
+"admin:SetRootAccess": none=ok | s3=ok | s3+ip=ok
+"admin:SetTier": none=ok | s3=ok | s3+ip=ok
+"admin:SiteReplicationAdd": none=ok | s3=ok | s3+ip=ok
+"admin:SiteReplicationDisable": none=ok | s3=ok | s3+ip=ok
+"admin:SiteReplicationInfo": none=ok | s3=ok | s3+ip=ok
+"admin:SiteReplicationOperation": none=ok | s3=ok | s3+ip=ok
+"admin:SiteReplicationRemove": none=ok | s3=ok | s3+ip=ok
+"admin:SiteReplicationResync": none=ok | s3=ok | s3+ip=ok
+"admin:StartBatchJob": none=ok | s3=ok | s3+ip=ok
+"admin:StorageInfo": none=ok | s3=ok | s3+ip=ok
+"admin:TablesReplicationAdd": none=ok | s3=ok | s3+ip=ok
+"admin:TablesReplicationCatalogAdmin": none=ok | s3=ok | s3+ip=ok
+"admin:TablesReplicationInfo": none=ok | s3=ok | s3+ip=ok
+"admin:TablesReplicationRemove": none=ok | s3=ok | s3+ip=ok
+"admin:TablesReplicationStartFailover": none=ok | s3=ok | s3+ip=ok
+"admin:TopLocksInfo": none=ok | s3=ok | s3+ip=ok
+"admin:UpdatePolicyAssociation": none=ok | s3=ok | s3+ip=ok
+"admin:UpdateServiceAccount": none=ok | s3=ok | s3+ip=ok
+"bogus:Action": none=load: Resource must not be empty | s3=load: unsupported action 'bogus:Action' | s3+ip=load: unsupported action 'bogus:Action'
+"kms:*": none=ok | s3=load: resource 'arn:aws:s3:::bucket/*' type is not KMS | s3+ip=load: resource 'arn:aws:s3:::bucket/*' type is not KMS
+"kms:API": none=ok | s3=load: resource 'arn:aws:s3:::bucket/*' type is not KMS | s3+ip=load: resource 'arn:aws:s3:::bucket/*' type is not KMS
+"kms:AssignPolicy": none=ok | s3=load: resource 'arn:aws:s3:::bucket/*' type is not KMS | s3+ip=load: resource 'arn:aws:s3:::bucket/*' type is not KMS
+"kms:AuditLog": none=ok | s3=load: resource 'arn:aws:s3:::bucket/*' type is not KMS | s3+ip=load: resource 'arn:aws:s3:::bucket/*' type is not KMS
+"kms:CleanupLocalKeys": none=ok | s3=load: resource 'arn:aws:s3:::bucket/*' type is not KMS | s3+ip=load: resource 'arn:aws:s3:::bucket/*' type is not KMS
+"kms:Create*": none=load: Resource must not be empty | s3=load: unsupported action 'kms:Create*' | s3+ip=load: unsupported action 'kms:Create*'
+"kms:CreateKey": none=ok | s3=load: resource 'arn:aws:s3:::bucket/*' type is not KMS | s3+ip=load: resource 'arn:aws:s3:::bucket/*' type is not KMS
+"kms:DeleteIdentity": none=ok | s3=load: resource 'arn:aws:s3:::bucket/*' type is not KMS | s3+ip=load: resource 'arn:aws:s3:::bucket/*' type is not KMS
+"kms:DeleteKey": none=ok | s3=load: resource 'arn:aws:s3:::bucket/*' type is not KMS | s3+ip=load: resource 'arn:aws:s3:::bucket/*' type is not KMS
+"kms:DeletePolicy": none=ok | s3=load: resource 'arn:aws:s3:::bucket/*' type is not KMS | s3+ip=load: resource 'arn:aws:s3:::bucket/*' type is not KMS
+"kms:DescribeIdentity": none=ok | s3=load: resource 'arn:aws:s3:::bucket/*' type is not KMS | s3+ip=load: resource 'arn:aws:s3:::bucket/*' type is not KMS
+"kms:DescribePolicy": none=ok | s3=load: resource 'arn:aws:s3:::bucket/*' type is not KMS | s3+ip=load: resource 'arn:aws:s3:::bucket/*' type is not KMS
+"kms:DescribeSelfIdentity": none=ok | s3=load: resource 'arn:aws:s3:::bucket/*' type is not KMS | s3+ip=load: resource 'arn:aws:s3:::bucket/*' type is not KMS
+"kms:Enable": none=ok | s3=load: resource 'arn:aws:s3:::bucket/*' type is not KMS | s3+ip=load: resource 'arn:aws:s3:::bucket/*' type is not KMS
+"kms:ErrorLog": none=ok | s3=load: resource 'arn:aws:s3:::bucket/*' type is not KMS | s3+ip=load: resource 'arn:aws:s3:::bucket/*' type is not KMS
+"kms:GetPolicy": none=ok | s3=load: resource 'arn:aws:s3:::bucket/*' type is not KMS | s3+ip=load: resource 'arn:aws:s3:::bucket/*' type is not KMS
+"kms:ImportKey": none=ok | s3=load: resource 'arn:aws:s3:::bucket/*' type is not KMS | s3+ip=load: resource 'arn:aws:s3:::bucket/*' type is not KMS
+"kms:KeyRotate": none=ok | s3=load: resource 'arn:aws:s3:::bucket/*' type is not KMS | s3+ip=load: resource 'arn:aws:s3:::bucket/*' type is not KMS
+"kms:KeyStatus": none=ok | s3=load: resource 'arn:aws:s3:::bucket/*' type is not KMS | s3+ip=load: resource 'arn:aws:s3:::bucket/*' type is not KMS
+"kms:ListIdentities": none=ok | s3=load: resource 'arn:aws:s3:::bucket/*' type is not KMS | s3+ip=load: resource 'arn:aws:s3:::bucket/*' type is not KMS
+"kms:ListKeys": none=ok | s3=load: resource 'arn:aws:s3:::bucket/*' type is not KMS | s3+ip=load: resource 'arn:aws:s3:::bucket/*' type is not KMS
+"kms:ListPolicies": none=ok | s3=load: resource 'arn:aws:s3:::bucket/*' type is not KMS | s3+ip=load: resource 'arn:aws:s3:::bucket/*' type is not KMS
+"kms:Metrics": none=ok | s3=load: resource 'arn:aws:s3:::bucket/*' type is not KMS | s3+ip=load: resource 'arn:aws:s3:::bucket/*' type is not KMS
+"kms:MigrateKeys": none=ok | s3=load: resource 'arn:aws:s3:::bucket/*' type is not KMS | s3+ip=load: resource 'arn:aws:s3:::bucket/*' type is not KMS
+"kms:SetPolicy": none=ok | s3=load: resource 'arn:aws:s3:::bucket/*' type is not KMS | s3+ip=load: resource 'arn:aws:s3:::bucket/*' type is not KMS
+"kms:Status": none=ok | s3=load: resource 'arn:aws:s3:::bucket/*' type is not KMS | s3+ip=load: resource 'arn:aws:s3:::bucket/*' type is not KMS
+"kms:Version": none=ok | s3=load: resource 'arn:aws:s3:::bucket/*' type is not KMS | s3+ip=load: resource 'arn:aws:s3:::bucket/*' type is not KMS
+"memory:*": none=load: Resource must not be empty | s3=load: resource 'arn:aws:s3:::bucket/*' type is not Memory | s3+ip=load: resource 'arn:aws:s3:::bucket/*' type is not Memory
+"memory:CreateAgent": none=load: Resource must not be empty | s3=load: resource 'arn:aws:s3:::bucket/*' type is not Memory | s3+ip=load: resource 'arn:aws:s3:::bucket/*' type is not Memory
+"memory:CreateCortex": none=load: Resource must not be empty | s3=load: resource 'arn:aws:s3:::bucket/*' type is not Memory | s3+ip=load: resource 'arn:aws:s3:::bucket/*' type is not Memory
+"memory:DeleteAgent": none=load: Resource must not be empty | s3=load: resource 'arn:aws:s3:::bucket/*' type is not Memory | s3+ip=load: resource 'arn:aws:s3:::bucket/*' type is not Memory
+"memory:DeleteCortex": none=load: Resource must not be empty | s3=load: resource 'arn:aws:s3:::bucket/*' type is not Memory | s3+ip=load: resource 'arn:aws:s3:::bucket/*' type is not Memory
+"memory:DeleteSecret": none=load: Resource must not be empty | s3=load: resource 'arn:aws:s3:::bucket/*' type is not Memory | s3+ip=load: resource 'arn:aws:s3:::bucket/*' type is not Memory
+"memory:GetAgent": none=load: Resource must not be empty | s3=load: resource 'arn:aws:s3:::bucket/*' type is not Memory | s3+ip=load: resource 'arn:aws:s3:::bucket/*' type is not Memory
+"memory:GetCortex": none=load: Resource must not be empty | s3=load: resource 'arn:aws:s3:::bucket/*' type is not Memory | s3+ip=load: resource 'arn:aws:s3:::bucket/*' type is not Memory
+"memory:GetObjectBio": none=load: Resource must not be empty | s3=load: resource 'arn:aws:s3:::bucket/*' type is not Memory | s3+ip=load: resource 'arn:aws:s3:::bucket/*' type is not Memory
+"memory:GetSecret": none=load: Resource must not be empty | s3=load: resource 'arn:aws:s3:::bucket/*' type is not Memory | s3+ip=load: resource 'arn:aws:s3:::bucket/*' type is not Memory
+"memory:List*": none=load: Resource must not be empty | s3=load: unsupported action 'memory:List*' | s3+ip=load: unsupported action 'memory:List*'
+"memory:ListAgents": none=load: Resource must not be empty | s3=load: resource 'arn:aws:s3:::bucket/*' type is not Memory | s3+ip=load: resource 'arn:aws:s3:::bucket/*' type is not Memory
+"memory:ListCortexes": none=load: Resource must not be empty | s3=load: resource 'arn:aws:s3:::bucket/*' type is not Memory | s3+ip=load: resource 'arn:aws:s3:::bucket/*' type is not Memory
+"memory:ListSecrets": none=load: Resource must not be empty | s3=load: resource 'arn:aws:s3:::bucket/*' type is not Memory | s3+ip=load: resource 'arn:aws:s3:::bucket/*' type is not Memory
+"memory:PutAgent": none=load: Resource must not be empty | s3=load: resource 'arn:aws:s3:::bucket/*' type is not Memory | s3+ip=load: resource 'arn:aws:s3:::bucket/*' type is not Memory
+"memory:PutSecret": none=load: Resource must not be empty | s3=load: resource 'arn:aws:s3:::bucket/*' type is not Memory | s3+ip=load: resource 'arn:aws:s3:::bucket/*' type is not Memory
+"memory:Search": none=load: Resource must not be empty | s3=load: resource 'arn:aws:s3:::bucket/*' type is not Memory | s3+ip=load: resource 'arn:aws:s3:::bucket/*' type is not Memory
+"memory:UpdateAgent": none=load: Resource must not be empty | s3=load: resource 'arn:aws:s3:::bucket/*' type is not Memory | s3+ip=load: resource 'arn:aws:s3:::bucket/*' type is not Memory
+"s3:*": none=load: Resource must not be empty | s3=ok | s3+ip=ok
+"s3:*Object*": none=load: Resource must not be empty | s3=ok | s3+ip=ok
+"s3:AbortMultipartUpload": none=load: Resource must not be empty | s3=ok | s3+ip=ok
+"s3:BypassGovernanceRetention": none=load: Resource must not be empty | s3=ok | s3+ip=ok
+"s3:CreateBucket": none=load: Resource must not be empty | s3=ok | s3+ip=ok
+"s3:DeleteBucket": none=load: Resource must not be empty | s3=ok | s3+ip=ok
+"s3:DeleteBucketCors": none=load: Resource must not be empty | s3=ok | s3+ip=ok
+"s3:DeleteBucketPolicy": none=load: Resource must not be empty | s3=ok | s3+ip=ok
+"s3:DeleteObject": none=load: Resource must not be empty | s3=ok | s3+ip=ok
+"s3:DeleteObjectAnnotation": none=load: Resource must not be empty | s3=ok | s3+ip=ok
+"s3:DeleteObjectTagging": none=load: Resource must not be empty | s3=ok | s3+ip=ok
+"s3:DeleteObjectVersion": none=load: Resource must not be empty | s3=ok | s3+ip=ok
+"s3:DeleteObjectVersionTagging": none=load: Resource must not be empty | s3=ok | s3+ip=ok
+"s3:ForceDeleteBucket": none=load: Resource must not be empty | s3=ok | s3+ip=ok
+"s3:Get*": none=load: Resource must not be empty | s3=ok | s3+ip=ok
+"s3:GetBucketCors": none=load: Resource must not be empty | s3=ok | s3+ip=ok
+"s3:GetBucketLocation": none=load: Resource must not be empty | s3=ok | s3+ip=ok
+"s3:GetBucketNotification": none=load: Resource must not be empty | s3=ok | s3+ip=ok
+"s3:GetBucketObjectLockConfiguration": none=load: Resource must not be empty | s3=ok | s3+ip=ok
+"s3:GetBucketPolicy": none=load: Resource must not be empty | s3=ok | s3+ip=ok
+"s3:GetBucketPolicyStatus": none=load: Resource must not be empty | s3=ok | s3+ip=ok
+"s3:GetBucketQOS": none=load: Resource must not be empty | s3=ok | s3+ip=ok
+"s3:GetBucketTagging": none=load: Resource must not be empty | s3=ok | s3+ip=ok
+"s3:GetBucketVersioning": none=load: Resource must not be empty | s3=ok | s3+ip=ok
+"s3:GetEncryptionConfiguration": none=load: Resource must not be empty | s3=ok | s3+ip=ok
+"s3:GetInventoryConfiguration": none=load: Resource must not be empty | s3=ok | s3+ip=ok
+"s3:GetLifecycleConfiguration": none=load: Resource must not be empty | s3=ok | s3+ip=ok
+"s3:GetObject": none=load: Resource must not be empty | s3=ok | s3+ip=ok
+"s3:GetObjectAnnotation": none=load: Resource must not be empty | s3=ok | s3+ip=ok
+"s3:GetObjectAttributes": none=load: Resource must not be empty | s3=ok | s3+ip=ok
+"s3:GetObjectLegalHold": none=load: Resource must not be empty | s3=ok | s3+ip=ok
+"s3:GetObjectRetention": none=load: Resource must not be empty | s3=ok | s3+ip=ok
+"s3:GetObjectTagging": none=load: Resource must not be empty | s3=ok | s3+ip=ok
+"s3:GetObjectVersion": none=load: Resource must not be empty | s3=ok | s3+ip=ok
+"s3:GetObjectVersionAnnotationForReplication": none=load: Resource must not be empty | s3=ok | s3+ip=ok
+"s3:GetObjectVersionAttributes": none=load: Resource must not be empty | s3=ok | s3+ip=ok
+"s3:GetObjectVersionForReplication": none=load: Resource must not be empty | s3=ok | s3+ip=ok
+"s3:GetObjectVersionTagging": none=load: Resource must not be empty | s3=ok | s3+ip=ok
+"s3:GetReplicationConfiguration": none=load: Resource must not be empty | s3=ok | s3+ip=ok
+"s3:HeadBucket": none=load: Resource must not be empty | s3=ok | s3+ip=ok
+"s3:ListAllMyBuckets": none=load: Resource must not be empty | s3=ok | s3+ip=ok
+"s3:ListBucket": none=load: Resource must not be empty | s3=ok | s3+ip=ok
+"s3:ListBucketMultipartUploads": none=load: Resource must not be empty | s3=ok | s3+ip=ok
+"s3:ListBucketVersions": none=load: Resource must not be empty | s3=ok | s3+ip=ok
+"s3:ListMultipartUploadParts": none=load: Resource must not be empty | s3=ok | s3+ip=ok
+"s3:ListObjectAnnotations": none=load: Resource must not be empty | s3=ok | s3+ip=ok
+"s3:ListenBucketNotification": none=load: Resource must not be empty | s3=ok | s3+ip=ok
+"s3:ListenNotification": none=load: Resource must not be empty | s3=ok | s3+ip=ok
+"s3:Put?bject": none=load: Resource must not be empty | s3=ok | s3+ip=ok
+"s3:PutBucketCors": none=load: Resource must not be empty | s3=ok | s3+ip=ok
+"s3:PutBucketNotification": none=load: Resource must not be empty | s3=ok | s3+ip=ok
+"s3:PutBucketObjectLockConfiguration": none=load: Resource must not be empty | s3=ok | s3+ip=ok
+"s3:PutBucketPolicy": none=load: Resource must not be empty | s3=ok | s3+ip=ok
+"s3:PutBucketQOS": none=load: Resource must not be empty | s3=ok | s3+ip=ok
+"s3:PutBucketTagging": none=load: Resource must not be empty | s3=ok | s3+ip=ok
+"s3:PutBucketVersioning": none=load: Resource must not be empty | s3=ok | s3+ip=ok
+"s3:PutEncryptionConfiguration": none=load: Resource must not be empty | s3=ok | s3+ip=ok
+"s3:PutInventoryConfiguration": none=load: Resource must not be empty | s3=ok | s3+ip=ok
+"s3:PutLifecycleConfiguration": none=load: Resource must not be empty | s3=ok | s3+ip=ok
+"s3:PutObject": none=load: Resource must not be empty | s3=ok | s3+ip=ok
+"s3:PutObjectAnnotation": none=load: Resource must not be empty | s3=ok | s3+ip=ok
+"s3:PutObjectFanOut": none=load: Resource must not be empty | s3=ok | s3+ip=ok
+"s3:PutObjectLegalHold": none=load: Resource must not be empty | s3=ok | s3+ip=ok
+"s3:PutObjectRetention": none=load: Resource must not be empty | s3=ok | s3+ip=ok
+"s3:PutObjectTagging": none=load: Resource must not be empty | s3=ok | s3+ip=ok
+"s3:PutObjectVersionTagging": none=load: Resource must not be empty | s3=ok | s3+ip=ok
+"s3:PutReplicationConfiguration": none=load: Resource must not be empty | s3=ok | s3+ip=ok
+"s3:ReplicateDelete": none=load: Resource must not be empty | s3=ok | s3+ip=ok
+"s3:ReplicateObject": none=load: Resource must not be empty | s3=ok | s3+ip=ok
+"s3:ReplicateObjectAnnotation": none=load: Resource must not be empty | s3=ok | s3+ip=ok
+"s3:ReplicateTags": none=load: Resource must not be empty | s3=ok | s3+ip=ok
+"s3:ResetBucketReplicationState": none=load: Resource must not be empty | s3=ok | s3+ip=ok
+"s3:RestoreObject": none=load: Resource must not be empty | s3=ok | s3+ip=ok
+"s3:UpdateObjectEncryption": none=load: Resource must not be empty | s3=ok | s3+ip=ok
+"s3express:*": none=load: Resource must not be empty | s3=ok | s3+ip=ok
+"s3express:CreateSession": none=load: Resource must not be empty | s3=ok | s3+ip=ok
+"s3files:*": none=ok | s3=load: s3files actions do not take a Resource or NotResource | s3+ip=load: s3files actions do not take a Resource or NotResource
+"s3files:CreateExport": none=ok | s3=load: s3files actions do not take a Resource or NotResource | s3+ip=load: s3files actions do not take a Resource or NotResource
+"s3files:DeleteExport": none=ok | s3=load: s3files actions do not take a Resource or NotResource | s3+ip=load: s3files actions do not take a Resource or NotResource
+"s3files:Get*": none=load: Resource must not be empty | s3=load: unsupported action 's3files:Get*' | s3+ip=load: unsupported action 's3files:Get*'
+"s3files:GetExportStats": none=ok | s3=load: s3files actions do not take a Resource or NotResource | s3+ip=load: s3files actions do not take a Resource or NotResource
+"s3files:GetExportStatus": none=ok | s3=load: s3files actions do not take a Resource or NotResource | s3+ip=load: s3files actions do not take a Resource or NotResource
+"s3files:SetExportAccess": none=ok | s3=load: s3files actions do not take a Resource or NotResource | s3+ip=load: s3files actions do not take a Resource or NotResource
+"s3files:UpdateExport": none=ok | s3=load: s3files actions do not take a Resource or NotResource | s3+ip=load: s3files actions do not take a Resource or NotResource
+"s3tables:*": none=load: Resource must not be empty | s3=load: resource 'arn:aws:s3:::bucket/*' type is not S3 Tables | s3+ip=load: resource 'arn:aws:s3:::bucket/*' type is not S3 Tables
+"s3tables:*TableBucket*": none=load: Resource must not be empty | s3=load: unsupported action 's3tables:*TableBucket*' | s3+ip=load: unsupported action 's3tables:*TableBucket*'
+"s3tables:*Warehouse*": none=load: Resource must not be empty | s3=load: unsupported action 's3tables:*Warehouse*' | s3+ip=load: unsupported action 's3tables:*Warehouse*'
+"s3tables:CreateFunction": none=load: Resource must not be empty | s3=load: resource 'arn:aws:s3:::bucket/*' type is not S3 Tables | s3+ip=load: resource 'arn:aws:s3:::bucket/*' type is not S3 Tables
+"s3tables:CreateNamespace": none=load: Resource must not be empty | s3=load: resource 'arn:aws:s3:::bucket/*' type is not S3 Tables | s3+ip=load: resource 'arn:aws:s3:::bucket/*' type is not S3 Tables
+"s3tables:CreateTable": none=load: Resource must not be empty | s3=load: resource 'arn:aws:s3:::bucket/*' type is not S3 Tables | s3+ip=load: resource 'arn:aws:s3:::bucket/*' type is not S3 Tables
+"s3tables:CreateTableBucket": none=load: Resource must not be empty | s3=load: resource 'arn:aws:s3:::bucket/*' type is not S3 Tables | s3+ip=load: resource 'arn:aws:s3:::bucket/*' type is not S3 Tables
+"s3tables:CreateView": none=load: Resource must not be empty | s3=load: resource 'arn:aws:s3:::bucket/*' type is not S3 Tables | s3+ip=load: resource 'arn:aws:s3:::bucket/*' type is not S3 Tables
+"s3tables:CreateWarehouse": none=load: Resource must not be empty | s3=load: resource 'arn:aws:s3:::bucket/*' type is not S3 Tables | s3+ip=load: resource 'arn:aws:s3:::bucket/*' type is not S3 Tables
+"s3tables:DeleteFunction": none=load: Resource must not be empty | s3=load: resource 'arn:aws:s3:::bucket/*' type is not S3 Tables | s3+ip=load: resource 'arn:aws:s3:::bucket/*' type is not S3 Tables
+"s3tables:DeleteNamespace": none=load: Resource must not be empty | s3=load: resource 'arn:aws:s3:::bucket/*' type is not S3 Tables | s3+ip=load: resource 'arn:aws:s3:::bucket/*' type is not S3 Tables
+"s3tables:DeleteTable": none=load: Resource must not be empty | s3=load: resource 'arn:aws:s3:::bucket/*' type is not S3 Tables | s3+ip=load: resource 'arn:aws:s3:::bucket/*' type is not S3 Tables
+"s3tables:DeleteTableAnnotation": none=load: Resource must not be empty | s3=load: resource 'arn:aws:s3:::bucket/*' type is not S3 Tables | s3+ip=load: resource 'arn:aws:s3:::bucket/*' type is not S3 Tables
+"s3tables:DeleteTableBucket": none=load: Resource must not be empty | s3=load: resource 'arn:aws:s3:::bucket/*' type is not S3 Tables | s3+ip=load: resource 'arn:aws:s3:::bucket/*' type is not S3 Tables
+"s3tables:DeleteTableBucketEncryption": none=load: Resource must not be empty | s3=load: resource 'arn:aws:s3:::bucket/*' type is not S3 Tables | s3+ip=load: resource 'arn:aws:s3:::bucket/*' type is not S3 Tables
+"s3tables:DeleteTableBucketPolicy": none=load: Resource must not be empty | s3=load: resource 'arn:aws:s3:::bucket/*' type is not S3 Tables | s3+ip=load: resource 'arn:aws:s3:::bucket/*' type is not S3 Tables
+"s3tables:DeleteTableEncryption": none=load: Resource must not be empty | s3=load: resource 'arn:aws:s3:::bucket/*' type is not S3 Tables | s3+ip=load: resource 'arn:aws:s3:::bucket/*' type is not S3 Tables
+"s3tables:DeleteTablePolicy": none=load: Resource must not be empty | s3=load: resource 'arn:aws:s3:::bucket/*' type is not S3 Tables | s3+ip=load: resource 'arn:aws:s3:::bucket/*' type is not S3 Tables
+"s3tables:DeleteView": none=load: Resource must not be empty | s3=load: resource 'arn:aws:s3:::bucket/*' type is not S3 Tables | s3+ip=load: resource 'arn:aws:s3:::bucket/*' type is not S3 Tables
+"s3tables:DeleteWarehouse": none=load: Resource must not be empty | s3=load: resource 'arn:aws:s3:::bucket/*' type is not S3 Tables | s3+ip=load: resource 'arn:aws:s3:::bucket/*' type is not S3 Tables
+"s3tables:DeleteWarehouseEncryption": none=load: Resource must not be empty | s3=load: resource 'arn:aws:s3:::bucket/*' type is not S3 Tables | s3+ip=load: resource 'arn:aws:s3:::bucket/*' type is not S3 Tables
+"s3tables:DeleteWarehousePolicy": none=load: Resource must not be empty | s3=load: resource 'arn:aws:s3:::bucket/*' type is not S3 Tables | s3+ip=load: resource 'arn:aws:s3:::bucket/*' type is not S3 Tables
+"s3tables:Get*": none=load: Resource must not be empty | s3=load: unsupported action 's3tables:Get*' | s3+ip=load: unsupported action 's3tables:Get*'
+"s3tables:GetConfig": none=load: Resource must not be empty | s3=load: resource 'arn:aws:s3:::bucket/*' type is not S3 Tables | s3+ip=load: resource 'arn:aws:s3:::bucket/*' type is not S3 Tables
+"s3tables:GetFunction": none=load: Resource must not be empty | s3=load: resource 'arn:aws:s3:::bucket/*' type is not S3 Tables | s3+ip=load: resource 'arn:aws:s3:::bucket/*' type is not S3 Tables
+"s3tables:GetNamespace": none=load: Resource must not be empty | s3=load: resource 'arn:aws:s3:::bucket/*' type is not S3 Tables | s3+ip=load: resource 'arn:aws:s3:::bucket/*' type is not S3 Tables
+"s3tables:GetTable": none=load: Resource must not be empty | s3=load: resource 'arn:aws:s3:::bucket/*' type is not S3 Tables | s3+ip=load: resource 'arn:aws:s3:::bucket/*' type is not S3 Tables
+"s3tables:GetTableAnnotation": none=load: Resource must not be empty | s3=load: resource 'arn:aws:s3:::bucket/*' type is not S3 Tables | s3+ip=load: resource 'arn:aws:s3:::bucket/*' type is not S3 Tables
+"s3tables:GetTableBucket": none=load: Resource must not be empty | s3=load: resource 'arn:aws:s3:::bucket/*' type is not S3 Tables | s3+ip=load: resource 'arn:aws:s3:::bucket/*' type is not S3 Tables
+"s3tables:GetTableBucketEncryption": none=load: Resource must not be empty | s3=load: resource 'arn:aws:s3:::bucket/*' type is not S3 Tables | s3+ip=load: resource 'arn:aws:s3:::bucket/*' type is not S3 Tables
+"s3tables:GetTableBucketMaintenanceConfiguration": none=load: Resource must not be empty | s3=load: resource 'arn:aws:s3:::bucket/*' type is not S3 Tables | s3+ip=load: resource 'arn:aws:s3:::bucket/*' type is not S3 Tables
+"s3tables:GetTableBucketPolicy": none=load: Resource must not be empty | s3=load: resource 'arn:aws:s3:::bucket/*' type is not S3 Tables | s3+ip=load: resource 'arn:aws:s3:::bucket/*' type is not S3 Tables
+"s3tables:GetTableData": none=load: Resource must not be empty | s3=load: resource 'arn:aws:s3:::bucket/*' type is not S3 Tables | s3+ip=load: resource 'arn:aws:s3:::bucket/*' type is not S3 Tables
+"s3tables:GetTableEncryption": none=load: Resource must not be empty | s3=load: resource 'arn:aws:s3:::bucket/*' type is not S3 Tables | s3+ip=load: resource 'arn:aws:s3:::bucket/*' type is not S3 Tables
+"s3tables:GetTableMaintenanceConfiguration": none=load: Resource must not be empty | s3=load: resource 'arn:aws:s3:::bucket/*' type is not S3 Tables | s3+ip=load: resource 'arn:aws:s3:::bucket/*' type is not S3 Tables
+"s3tables:GetTableMaintenanceJobStatus": none=load: Resource must not be empty | s3=load: resource 'arn:aws:s3:::bucket/*' type is not S3 Tables | s3+ip=load: resource 'arn:aws:s3:::bucket/*' type is not S3 Tables
+"s3tables:GetTableMetadataLocation": none=load: Resource must not be empty | s3=load: resource 'arn:aws:s3:::bucket/*' type is not S3 Tables | s3+ip=load: resource 'arn:aws:s3:::bucket/*' type is not S3 Tables
+"s3tables:GetTablePolicy": none=load: Resource must not be empty | s3=load: resource 'arn:aws:s3:::bucket/*' type is not S3 Tables | s3+ip=load: resource 'arn:aws:s3:::bucket/*' type is not S3 Tables
+"s3tables:GetView": none=load: Resource must not be empty | s3=load: resource 'arn:aws:s3:::bucket/*' type is not S3 Tables | s3+ip=load: resource 'arn:aws:s3:::bucket/*' type is not S3 Tables
+"s3tables:GetWarehouse": none=load: Resource must not be empty | s3=load: resource 'arn:aws:s3:::bucket/*' type is not S3 Tables | s3+ip=load: resource 'arn:aws:s3:::bucket/*' type is not S3 Tables
+"s3tables:GetWarehouseEncryption": none=load: Resource must not be empty | s3=load: resource 'arn:aws:s3:::bucket/*' type is not S3 Tables | s3+ip=load: resource 'arn:aws:s3:::bucket/*' type is not S3 Tables
+"s3tables:GetWarehouseMaintenanceConfiguration": none=load: Resource must not be empty | s3=load: resource 'arn:aws:s3:::bucket/*' type is not S3 Tables | s3+ip=load: resource 'arn:aws:s3:::bucket/*' type is not S3 Tables
+"s3tables:GetWarehousePolicy": none=load: Resource must not be empty | s3=load: resource 'arn:aws:s3:::bucket/*' type is not S3 Tables | s3+ip=load: resource 'arn:aws:s3:::bucket/*' type is not S3 Tables
+"s3tables:ListFunctions": none=load: Resource must not be empty | s3=load: resource 'arn:aws:s3:::bucket/*' type is not S3 Tables | s3+ip=load: resource 'arn:aws:s3:::bucket/*' type is not S3 Tables
+"s3tables:ListNamespaces": none=load: Resource must not be empty | s3=load: resource 'arn:aws:s3:::bucket/*' type is not S3 Tables | s3+ip=load: resource 'arn:aws:s3:::bucket/*' type is not S3 Tables
+"s3tables:ListTableAnnotations": none=load: Resource must not be empty | s3=load: resource 'arn:aws:s3:::bucket/*' type is not S3 Tables | s3+ip=load: resource 'arn:aws:s3:::bucket/*' type is not S3 Tables
+"s3tables:ListTableBuckets": none=load: Resource must not be empty | s3=load: resource 'arn:aws:s3:::bucket/*' type is not S3 Tables | s3+ip=load: resource 'arn:aws:s3:::bucket/*' type is not S3 Tables
+"s3tables:ListTables": none=load: Resource must not be empty | s3=load: resource 'arn:aws:s3:::bucket/*' type is not S3 Tables | s3+ip=load: resource 'arn:aws:s3:::bucket/*' type is not S3 Tables
+"s3tables:ListTagsForTable": none=load: Resource must not be empty | s3=load: resource 'arn:aws:s3:::bucket/*' type is not S3 Tables | s3+ip=load: resource 'arn:aws:s3:::bucket/*' type is not S3 Tables
+"s3tables:ListTagsForWarehouse": none=load: Resource must not be empty | s3=load: resource 'arn:aws:s3:::bucket/*' type is not S3 Tables | s3+ip=load: resource 'arn:aws:s3:::bucket/*' type is not S3 Tables
+"s3tables:ListViews": none=load: Resource must not be empty | s3=load: resource 'arn:aws:s3:::bucket/*' type is not S3 Tables | s3+ip=load: resource 'arn:aws:s3:::bucket/*' type is not S3 Tables
+"s3tables:ListWarehouses": none=load: Resource must not be empty | s3=load: resource 'arn:aws:s3:::bucket/*' type is not S3 Tables | s3+ip=load: resource 'arn:aws:s3:::bucket/*' type is not S3 Tables
+"s3tables:PutTableAnnotation": none=load: Resource must not be empty | s3=load: resource 'arn:aws:s3:::bucket/*' type is not S3 Tables | s3+ip=load: resource 'arn:aws:s3:::bucket/*' type is not S3 Tables
+"s3tables:PutTableBucketEncryption": none=load: Resource must not be empty | s3=load: resource 'arn:aws:s3:::bucket/*' type is not S3 Tables | s3+ip=load: resource 'arn:aws:s3:::bucket/*' type is not S3 Tables
+"s3tables:PutTableBucketMaintenanceConfiguration": none=load: Resource must not be empty | s3=load: resource 'arn:aws:s3:::bucket/*' type is not S3 Tables | s3+ip=load: resource 'arn:aws:s3:::bucket/*' type is not S3 Tables
+"s3tables:PutTableBucketPolicy": none=load: Resource must not be empty | s3=load: resource 'arn:aws:s3:::bucket/*' type is not S3 Tables | s3+ip=load: resource 'arn:aws:s3:::bucket/*' type is not S3 Tables
+"s3tables:PutTableData": none=load: Resource must not be empty | s3=load: resource 'arn:aws:s3:::bucket/*' type is not S3 Tables | s3+ip=load: resource 'arn:aws:s3:::bucket/*' type is not S3 Tables
+"s3tables:PutTableEncryption": none=load: Resource must not be empty | s3=load: resource 'arn:aws:s3:::bucket/*' type is not S3 Tables | s3+ip=load: resource 'arn:aws:s3:::bucket/*' type is not S3 Tables
+"s3tables:PutTableMaintenanceConfiguration": none=load: Resource must not be empty | s3=load: resource 'arn:aws:s3:::bucket/*' type is not S3 Tables | s3+ip=load: resource 'arn:aws:s3:::bucket/*' type is not S3 Tables
+"s3tables:PutTablePolicy": none=load: Resource must not be empty | s3=load: resource 'arn:aws:s3:::bucket/*' type is not S3 Tables | s3+ip=load: resource 'arn:aws:s3:::bucket/*' type is not S3 Tables
+"s3tables:PutWarehouseEncryption": none=load: Resource must not be empty | s3=load: resource 'arn:aws:s3:::bucket/*' type is not S3 Tables | s3+ip=load: resource 'arn:aws:s3:::bucket/*' type is not S3 Tables
+"s3tables:PutWarehouseMaintenanceConfiguration": none=load: Resource must not be empty | s3=load: resource 'arn:aws:s3:::bucket/*' type is not S3 Tables | s3+ip=load: resource 'arn:aws:s3:::bucket/*' type is not S3 Tables
+"s3tables:PutWarehousePolicy": none=load: Resource must not be empty | s3=load: resource 'arn:aws:s3:::bucket/*' type is not S3 Tables | s3+ip=load: resource 'arn:aws:s3:::bucket/*' type is not S3 Tables
+"s3tables:RegisterFunction": none=load: Resource must not be empty | s3=load: resource 'arn:aws:s3:::bucket/*' type is not S3 Tables | s3+ip=load: resource 'arn:aws:s3:::bucket/*' type is not S3 Tables
+"s3tables:RegisterTable": none=load: Resource must not be empty | s3=load: resource 'arn:aws:s3:::bucket/*' type is not S3 Tables | s3+ip=load: resource 'arn:aws:s3:::bucket/*' type is not S3 Tables
+"s3tables:RegisterView": none=load: Resource must not be empty | s3=load: resource 'arn:aws:s3:::bucket/*' type is not S3 Tables | s3+ip=load: resource 'arn:aws:s3:::bucket/*' type is not S3 Tables
+"s3tables:RenameFunction": none=load: Resource must not be empty | s3=load: resource 'arn:aws:s3:::bucket/*' type is not S3 Tables | s3+ip=load: resource 'arn:aws:s3:::bucket/*' type is not S3 Tables
+"s3tables:RenameTable": none=load: Resource must not be empty | s3=load: resource 'arn:aws:s3:::bucket/*' type is not S3 Tables | s3+ip=load: resource 'arn:aws:s3:::bucket/*' type is not S3 Tables
+"s3tables:RenameView": none=load: Resource must not be empty | s3=load: resource 'arn:aws:s3:::bucket/*' type is not S3 Tables | s3+ip=load: resource 'arn:aws:s3:::bucket/*' type is not S3 Tables
+"s3tables:TableMetrics": none=load: Resource must not be empty | s3=load: resource 'arn:aws:s3:::bucket/*' type is not S3 Tables | s3+ip=load: resource 'arn:aws:s3:::bucket/*' type is not S3 Tables
+"s3tables:TagTable": none=load: Resource must not be empty | s3=load: resource 'arn:aws:s3:::bucket/*' type is not S3 Tables | s3+ip=load: resource 'arn:aws:s3:::bucket/*' type is not S3 Tables
+"s3tables:TagWarehouse": none=load: Resource must not be empty | s3=load: resource 'arn:aws:s3:::bucket/*' type is not S3 Tables | s3+ip=load: resource 'arn:aws:s3:::bucket/*' type is not S3 Tables
+"s3tables:UntagTable": none=load: Resource must not be empty | s3=load: resource 'arn:aws:s3:::bucket/*' type is not S3 Tables | s3+ip=load: resource 'arn:aws:s3:::bucket/*' type is not S3 Tables
+"s3tables:UntagWarehouse": none=load: Resource must not be empty | s3=load: resource 'arn:aws:s3:::bucket/*' type is not S3 Tables | s3+ip=load: resource 'arn:aws:s3:::bucket/*' type is not S3 Tables
+"s3tables:UpdateFunction": none=load: Resource must not be empty | s3=load: resource 'arn:aws:s3:::bucket/*' type is not S3 Tables | s3+ip=load: resource 'arn:aws:s3:::bucket/*' type is not S3 Tables
+"s3tables:UpdateNamespaceProperties": none=load: Resource must not be empty | s3=load: resource 'arn:aws:s3:::bucket/*' type is not S3 Tables | s3+ip=load: resource 'arn:aws:s3:::bucket/*' type is not S3 Tables
+"s3tables:UpdateTable": none=load: Resource must not be empty | s3=load: resource 'arn:aws:s3:::bucket/*' type is not S3 Tables | s3+ip=load: resource 'arn:aws:s3:::bucket/*' type is not S3 Tables
+"s3tables:UpdateTableMetadataLocation": none=load: Resource must not be empty | s3=load: resource 'arn:aws:s3:::bucket/*' type is not S3 Tables | s3+ip=load: resource 'arn:aws:s3:::bucket/*' type is not S3 Tables
+"s3tables:UpdateView": none=load: Resource must not be empty | s3=load: resource 'arn:aws:s3:::bucket/*' type is not S3 Tables | s3+ip=load: resource 'arn:aws:s3:::bucket/*' type is not S3 Tables
+"s3vectors:*": none=load: Resource must not be empty | s3=ok | s3+ip=ok
+"s3vectors:CreateIndex": none=load: Resource must not be empty | s3=ok | s3+ip=ok
+"s3vectors:CreateVectorBucket": none=load: Resource must not be empty | s3=ok | s3+ip=ok
+"s3vectors:DeleteIndex": none=load: Resource must not be empty | s3=ok | s3+ip=ok
+"s3vectors:DeleteVectorBucket": none=load: Resource must not be empty | s3=ok | s3+ip=ok
+"s3vectors:DeleteVectors": none=load: Resource must not be empty | s3=ok | s3+ip=ok
+"s3vectors:Get*": none=load: Resource must not be empty | s3=load: unsupported action 's3vectors:Get*' | s3+ip=load: unsupported action 's3vectors:Get*'
+"s3vectors:GetIndex": none=load: Resource must not be empty | s3=ok | s3+ip=ok
+"s3vectors:GetVectorBucket": none=load: Resource must not be empty | s3=ok | s3+ip=ok
+"s3vectors:GetVectors": none=load: Resource must not be empty | s3=ok | s3+ip=ok
+"s3vectors:ListIndexes": none=load: Resource must not be empty | s3=ok | s3+ip=ok
+"s3vectors:ListVectorBuckets": none=load: Resource must not be empty | s3=ok | s3+ip=ok
+"s3vectors:ListVectors": none=load: Resource must not be empty | s3=ok | s3+ip=ok
+"s3vectors:PutVectors": none=load: Resource must not be empty | s3=ok | s3+ip=ok
+"s3vectors:QueryVectors": none=load: Resource must not be empty | s3=ok | s3+ip=ok
+"sts:*": none=ok | s3=ok | s3+ip=load: unsupported condition keys '[aws:SourceIp]' used for action 'sts:*'
+"sts:Assume*": none=load: Resource must not be empty | s3=load: unsupported action 'sts:Assume*' | s3+ip=load: unsupported action 'sts:Assume*'
+"sts:AssumeRole": none=ok | s3=ok | s3+ip=load: unsupported condition keys '[aws:SourceIp]' used for action 'sts:AssumeRole'
+"sts:AssumeRoleLDAPIdentity": none=ok | s3=ok | s3+ip=load: unsupported condition keys '[aws:SourceIp]' used for action 'sts:AssumeRoleLDAPIdentity'
+"sts:AssumeRoleWithClientCertificate": none=ok | s3=ok | s3+ip=load: unsupported condition keys '[aws:SourceIp]' used for action 'sts:AssumeRoleWithClientCertificate'
+"sts:AssumeRoleWithClientGrants": none=ok | s3=ok | s3+ip=load: unsupported condition keys '[aws:SourceIp]' used for action 'sts:AssumeRoleWithClientGrants'
+"sts:AssumeRoleWithCustomToken": none=ok | s3=ok | s3+ip=load: unsupported condition keys '[aws:SourceIp]' used for action 'sts:AssumeRoleWithCustomToken'
+"sts:AssumeRoleWithWebIdentity": none=ok | s3=ok | s3+ip=load: unsupported condition keys '[aws:SourceIp]' used for action 'sts:AssumeRoleWithWebIdentity'
