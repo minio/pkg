@@ -89,6 +89,10 @@ func (statement Statement) isAllowedFor(args *Args, resource string) bool {
 		}
 
 		class := statement.classify()
+		// A wildcard such as admin:* also names other admin actions, which a
+		// KMS key Resource does not scope.
+		_, adminKMSKeyRequest := adminKMSKeyActions[AdminAction(args.Action)]
+		adminKMSKey := adminKMSKeyRequest && class.has(classAdminKMSKey)
 
 		if class.has(classTable) && !TableAction(args.Action).IsValid() && !isTableResourceString(resource) {
 			// A tables action implies the S3 data actions Iceberg uses on table
@@ -115,7 +119,7 @@ func (statement Statement) isAllowedFor(args *Args, resource string) bool {
 			}
 		}
 
-		if class.has(classKMS) || class.has(classAdminKMSKey) {
+		if class.has(classKMS) || adminKMSKey {
 			// An admin KMS key statement scoped by NotResource alone still
 			// matches it below.
 			noResources := len(statement.Resources) == 0 && (class.has(classKMS) || len(statement.NotResources) == 0)
@@ -135,7 +139,7 @@ func (statement Statement) isAllowedFor(args *Args, resource string) bool {
 		// bucket-scoped admin actions (e.g. SetBucketQuota),
 		// resource matching is enforced when Resources are present.
 		ignoreResourceMatch := class.has(classSTS) ||
-			(class.has(classAdmin) && !class.has(classAdminResource) && !class.has(classAdminKMSKey))
+			(class.has(classAdmin) && !class.has(classAdminResource) && !adminKMSKey)
 
 		if !ignoreResourceMatch && len(statement.Resources) > 0 && !statement.Resources.Match(resource, args.ConditionValues) {
 			return false
@@ -248,7 +252,7 @@ func (statement Statement) computeClass() statementClass {
 		if AdminAction(action).HasResource() {
 			c |= classAdminResource
 		}
-		if _, ok := adminKMSKeyActions[AdminAction(action)]; ok && statement.hasKMSResource() {
+		if isAdminKMSKeyAction(action) && statement.hasKMSResource() {
 			c |= classAdminKMSKey
 		}
 		if STSAction(action).IsValid() {
@@ -269,6 +273,17 @@ func (statement Statement) computeClass() statementClass {
 var adminKMSKeyActions = map[AdminAction]struct{}{
 	KMSCreateKeyAdminAction: {},
 	KMSKeyStatusAdminAction: {},
+}
+
+// isAdminKMSKeyAction reports whether the action, a wildcard pattern included,
+// matches an admin action on one KMS key.
+func isAdminKMSKeyAction(action Action) bool {
+	for a := range adminKMSKeyActions {
+		if action.Match(Action(a)) {
+			return true
+		}
+	}
+	return false
 }
 
 // hasKMSResource reports whether the statement's Resource or NotResource names
