@@ -18,6 +18,7 @@
 package policy
 
 import (
+	"encoding/json"
 	"strings"
 	"testing"
 )
@@ -420,5 +421,36 @@ func TestResourcePolicyAllowedActions(t *testing.T) {
 	want := NewActionSet(Action(S3TablesGetTableAction), Action(S3TablesListNamespacesAction))
 	if !got.Equals(want) {
 		t.Fatalf("got %v, want %v", got, want)
+	}
+}
+
+func TestResourcePolicyJSONUnmarshalIndexes(t *testing.T) {
+	doc := rpDoc(
+		`{"Effect":"Allow","Principal":"*","Action":["s3tables:GetTable"],"Resource":["arn:aws:s3tables:::bucket/wh/table/*"]}`,
+		`{"Effect":"Deny","Principal":"*","Action":["s3tables:DeleteTable"],"Resource":["arn:aws:s3tables:::bucket/wh/table/*"]}`,
+	)
+	var p ResourcePolicy
+	if err := json.Unmarshal([]byte(doc), &p); err != nil {
+		t.Fatal(err)
+	}
+	if got := p.Decide(rpTableArgs(Action(S3TablesGetTableAction), nil)); got != AllowDecision {
+		t.Fatalf("Allow: got %v, want AllowDecision", got)
+	}
+	if got := p.Decide(rpTableArgs(Action(S3TablesUpdateTableAction), nil)); got != NoDecision {
+		t.Fatalf("unnamed action: got %v, want NoDecision", got)
+	}
+}
+
+func TestResourcePolicyReindex(t *testing.T) {
+	p := mustParseResourcePolicy(t, rpDoc(
+		`{"Effect":"Allow","Principal":"*","Action":["s3tables:GetTable"],"Resource":["arn:aws:s3tables:::bucket/wh/table/*"]}`,
+	))
+	p.Statements[0].Actions = NewActionSet(Action(S3TablesUpdateTableAction))
+	p.Reindex()
+	if got := p.Decide(rpTableArgs(Action(S3TablesGetTableAction), nil)); got != NoDecision {
+		t.Fatalf("replaced action: got %v, want NoDecision", got)
+	}
+	if got := p.Decide(rpTableArgs(Action(S3TablesUpdateTableAction), nil)); got != AllowDecision {
+		t.Fatalf("new action: got %v, want AllowDecision", got)
 	}
 }

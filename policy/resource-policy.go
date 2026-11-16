@@ -61,9 +61,9 @@ type ResourceStatement struct {
 	NotResources ResourceSet         `json:"NotResource,omitempty"`
 	Conditions   condition.Functions `json:"Condition,omitempty"`
 
-	// eval is the statement as an identity policy statement, filled in on
-	// parse.
-	eval Statement
+	// eval and grants cache statement() and canAllow(); see Reindex.
+	eval   Statement
+	grants bool
 }
 
 // statement returns s as an identity policy statement, classified so its
@@ -108,8 +108,19 @@ func ParseResourcePolicy(data []byte) (*ResourcePolicy, error) {
 	if dec.More() {
 		return nil, Errorf("unexpected data after the policy document")
 	}
-	p.index()
 	return &p, nil
+}
+
+// UnmarshalJSON decodes the policy and indexes it for evaluation.
+func (p *ResourcePolicy) UnmarshalJSON(data []byte) error {
+	type plain ResourcePolicy
+	var v plain
+	if err := json.Unmarshal(data, &v); err != nil {
+		return err
+	}
+	*p = ResourcePolicy(v)
+	p.Reindex()
+	return nil
 }
 
 // ParseResourcePolicyForWrite parses a resource policy about to be attached
@@ -241,9 +252,13 @@ func checkResourcePolicyResource(resource Resource, target ResourcePolicyTarget)
 	return nil
 }
 
-func (p *ResourcePolicy) index() {
+// Reindex rebuilds the cached evaluation state of every statement. Call it
+// after changing Statements.
+func (p *ResourcePolicy) Reindex() {
 	for i := range p.Statements {
-		p.Statements[i].eval = p.Statements[i].statement()
+		rs := &p.Statements[i]
+		rs.eval = rs.statement()
+		rs.grants = rs.canAllow()
 	}
 }
 
@@ -265,7 +280,7 @@ func (p *ResourcePolicy) decide(args *Args, capability bool) Decision {
 				return DenyDecision
 			}
 		case Allow:
-			if !allowed && rs.canAllow() && rs.eval.isAllowedFor(args, resource) {
+			if !allowed && rs.grants && rs.eval.isAllowedFor(args, resource) {
 				allowed = true
 			}
 		}
@@ -304,7 +319,7 @@ func (p *ResourcePolicy) AllowedActions() ActionSet {
 	actions := NewActionSet()
 	for i := range p.Statements {
 		rs := &p.Statements[i]
-		if !rs.canAllow() {
+		if !rs.grants {
 			continue
 		}
 		for action := range rs.Actions {
