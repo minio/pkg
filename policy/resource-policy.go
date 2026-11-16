@@ -82,13 +82,12 @@ func (s ResourceStatement) statement() Statement {
 	return st
 }
 
-// canAllow reports whether the statement is an Allow this release can grant
-// as written. One a write would refuse, which only a policy stored under other
-// write rules can hold, grants nothing.
+// canAllow reports whether the statement is an Allow that can grant access.
 func (s *ResourceStatement) canAllow() bool {
 	return s.Effect == Allow && s.appliesToEveryone() &&
 		len(s.Actions) > 0 && len(s.NotActions) == 0 &&
-		len(s.Resources) > 0 && len(s.NotResources) == 0
+		len(s.Resources) > 0 && len(s.NotResources) == 0 &&
+		Statement{Actions: s.Actions}.validateActionTypes() == nil
 }
 
 // appliesToEveryone reports whether the statement's Principal is the
@@ -300,7 +299,7 @@ func (p *ResourcePolicy) decide(args *Args, capability bool) Decision {
 // A statement whose Principal is not the wildcard, which only a policy stored
 // under other write rules can hold, fails closed: its Deny applies to every
 // caller and its Allow grants nothing. So does an Allow without Action or
-// Resource, or with NotAction or NotResource.
+// Resource, with NotAction or NotResource, or mixing action namespaces.
 func (p *ResourcePolicy) Decide(args *Args) Decision {
 	return p.decide(args, false)
 }

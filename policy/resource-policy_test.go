@@ -454,3 +454,19 @@ func TestResourcePolicyReindex(t *testing.T) {
 		t.Fatalf("new action: got %v, want AllowDecision", got)
 	}
 }
+
+func TestResourcePolicyStoredMixedNamespacesGrantNothing(t *testing.T) {
+	otherTable := &Args{Action: Action(S3TablesGetTableAction), BucketName: "bucket", ObjectName: rpWarehouse + "/table/other"}
+	for _, extra := range []string{"admin:CreateUser", "sts:AssumeRole"} {
+		t.Run(extra, func(t *testing.T) {
+			doc := rpDoc(`{"Effect":"Allow","Principal":"*","Action":["s3tables:GetTable","` + extra + `"],"Resource":["arn:aws:s3tables:::bucket/wh/table/` + rpTable + `"]}`)
+			p := mustParseResourcePolicy(t, doc)
+			if got := p.Decide(otherTable); got != NoDecision {
+				t.Fatalf("another table: got %v, want NoDecision", got)
+			}
+			if got := p.AllowedActions(); !got.IsEmpty() {
+				t.Fatalf("AllowedActions: got %v, want none", got)
+			}
+		})
+	}
+}
