@@ -49,50 +49,6 @@ func (actionSet ActionSet) IsEmpty() bool {
 	return len(actionSet) == 0
 }
 
-var implicitActions = map[Action]ActionSet{
-	GetObjectVersionAction: NewActionSet(GetObjectAction),
-
-	// S3Tables actions implicitly allow their data actions
-	Action(S3TablesGetTableDataAction): NewActionSet(GetObjectAction, ListMultipartUploadPartsAction),
-	Action(S3TablesPutTableDataAction): NewActionSet(PutObjectAction, AbortMultipartUploadAction, ListBucketAction),
-	// Action(S3TablesDeleteTableAction) implicitly allows DeleteObjectAction to support table purging.
-	// This is needed because Spark's DROP TABLE ... PURGE performs client-side deletes rather than
-	// using purgeRequested=true to let the catalog handle deletion. This workaround grants the
-	// necessary privilege until the issue is fixed in Spark/Iceberg upstream.
-	// See: https://github.com/apache/iceberg/issues/14743
-	//      https://github.com/apache/iceberg/issues/11023
-	Action(S3TablesDeleteTableAction): NewActionSet(DeleteObjectAction),
-	Action(AllS3TablesActions):        NewActionSet(GetObjectAction, PutObjectAction, DeleteObjectAction, ListBucketAction, ListMultipartUploadPartsAction, AbortMultipartUploadAction),
-
-	// TableBucket actions implicitly allow their Warehouse counterparts
-	Action(S3TablesCreateTableBucketAction):                      NewActionSet(Action(S3TablesCreateWarehouseAction)),
-	Action(S3TablesDeleteTableBucketAction):                      NewActionSet(Action(S3TablesDeleteWarehouseAction)),
-	Action(S3TablesDeleteTableBucketEncryptionAction):            NewActionSet(Action(S3TablesDeleteWarehouseEncryptionAction)),
-	Action(S3TablesDeleteTableBucketPolicyAction):                NewActionSet(Action(S3TablesDeleteWarehousePolicyAction)),
-	Action(S3TablesGetTableBucketAction):                         NewActionSet(Action(S3TablesGetWarehouseAction)),
-	Action(S3TablesGetTableBucketEncryptionAction):               NewActionSet(Action(S3TablesGetWarehouseEncryptionAction)),
-	Action(S3TablesGetTableBucketMaintenanceConfigurationAction): NewActionSet(Action(S3TablesGetWarehouseMaintenanceConfigurationAction)),
-	Action(S3TablesGetTableBucketPolicyAction):                   NewActionSet(Action(S3TablesGetWarehousePolicyAction)),
-	Action(S3TablesListTableBucketsAction):                       NewActionSet(Action(S3TablesListWarehousesAction)),
-	Action(S3TablesPutTableBucketEncryptionAction):               NewActionSet(Action(S3TablesPutWarehouseEncryptionAction)),
-	Action(S3TablesPutTableBucketMaintenanceConfigurationAction): NewActionSet(Action(S3TablesPutWarehouseMaintenanceConfigurationAction)),
-	Action(S3TablesPutTableBucketPolicyAction):                   NewActionSet(Action(S3TablesPutWarehousePolicyAction)),
-
-	// Warehouse actions implicitly allow their TableBucket counterparts
-	Action(S3TablesCreateWarehouseAction):                      NewActionSet(Action(S3TablesCreateTableBucketAction)),
-	Action(S3TablesDeleteWarehouseAction):                      NewActionSet(Action(S3TablesDeleteTableBucketAction)),
-	Action(S3TablesDeleteWarehouseEncryptionAction):            NewActionSet(Action(S3TablesDeleteTableBucketEncryptionAction)),
-	Action(S3TablesDeleteWarehousePolicyAction):                NewActionSet(Action(S3TablesDeleteTableBucketPolicyAction)),
-	Action(S3TablesGetWarehouseAction):                         NewActionSet(Action(S3TablesGetTableBucketAction)),
-	Action(S3TablesGetWarehouseEncryptionAction):               NewActionSet(Action(S3TablesGetTableBucketEncryptionAction)),
-	Action(S3TablesGetWarehouseMaintenanceConfigurationAction): NewActionSet(Action(S3TablesGetTableBucketMaintenanceConfigurationAction)),
-	Action(S3TablesGetWarehousePolicyAction):                   NewActionSet(Action(S3TablesGetTableBucketPolicyAction)),
-	Action(S3TablesListWarehousesAction):                       NewActionSet(Action(S3TablesListTableBucketsAction)),
-	Action(S3TablesPutWarehouseEncryptionAction):               NewActionSet(Action(S3TablesPutTableBucketEncryptionAction)),
-	Action(S3TablesPutWarehouseMaintenanceConfigurationAction): NewActionSet(Action(S3TablesPutTableBucketMaintenanceConfigurationAction)),
-	Action(S3TablesPutWarehousePolicyAction):                   NewActionSet(Action(S3TablesPutTableBucketPolicyAction)),
-}
-
 // Match - matches object name with anyone of action pattern in action set.
 func (actionSet ActionSet) Match(action Action) bool {
 	for r := range actionSet {
@@ -107,6 +63,31 @@ func (actionSet ActionSet) Match(action Action) bool {
 		}
 	}
 
+	return actionSet.matchesAlias(action)
+}
+
+// matchesAlias reports whether the set names another name of action. Match
+// and matchesNamed call it only after action itself failed to match, which
+// keeps the alias lookup off the common path.
+func (actionSet ActionSet) matchesAlias(action Action) bool {
+	if len(actionSet) == 0 || !hasActionAliases(action) {
+		return false
+	}
+	aliases := actionAliases[action]
+	for r := range actionSet {
+		if matchesAny(r, aliases) {
+			return true
+		}
+	}
+	return false
+}
+
+func matchesAny(pattern Action, names []Action) bool {
+	for _, name := range names {
+		if pattern.Match(name) {
+			return true
+		}
+	}
 	return false
 }
 
@@ -118,7 +99,7 @@ func (actionSet ActionSet) matchesNamed(action Action) bool {
 			return true
 		}
 	}
-	return false
+	return actionSet.matchesAlias(action)
 }
 
 // Equals - checks whether given action set is equal to current action set or not.
