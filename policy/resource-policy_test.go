@@ -185,6 +185,12 @@ func TestParseResourcePolicyForWrite(t *testing.T) {
 			wantErr: "'Resources' is not supported",
 		},
 		{
+			name:    "document-level condition",
+			doc:     `{"Version":"2012-10-17","Condition":{"StringEquals":{"aws:username":["alice"]}},"Statement":[` + allow(`"*"`, `"s3tables:GetTable"`, tablesWh) + `]}`,
+			target:  rpWarehouseTarget,
+			wantErr: "'Condition' is not supported",
+		},
+		{
 			name:    "S3 action",
 			doc:     rpDoc(allow(`"*"`, `"s3:GetObject"`, tablesWh)),
 			target:  rpWarehouseTarget,
@@ -291,8 +297,10 @@ func TestParseResourcePolicyLoadsWhatWriteRefuses(t *testing.T) {
 	if _, err := ParseResourcePolicy([]byte(doc)); err != nil {
 		t.Fatalf("stored policy did not load: %v", err)
 	}
-	if _, err := ParseResourcePolicy([]byte(`{"Statement":[]} {}`)); err == nil {
-		t.Fatal("trailing data accepted")
+	for _, trailing := range []string{` {}`, `}`, `]`, `}garbage`} {
+		if _, err := ParseResourcePolicy([]byte(`{"Statement":[]}` + trailing)); err == nil {
+			t.Fatalf("trailing data %q accepted", trailing)
+		}
 	}
 }
 

@@ -18,8 +18,8 @@
 package policy
 
 import (
-	"bytes"
 	"encoding/json"
+	"slices"
 	"strings"
 
 	"github.com/minio/pkg/v3/policy/condition"
@@ -100,12 +100,8 @@ func (s ResourceStatement) appliesToEveryone() bool {
 // checked, so a policy saved under other write rules still loads.
 func ParseResourcePolicy(data []byte) (*ResourcePolicy, error) {
 	var p ResourcePolicy
-	dec := json.NewDecoder(bytes.NewReader(data))
-	if err := dec.Decode(&p); err != nil {
+	if err := json.Unmarshal(data, &p); err != nil {
 		return nil, Errorf("%w", err)
-	}
-	if dec.More() {
-		return nil, Errorf("unexpected data after the policy document")
 	}
 	return &p, nil
 }
@@ -144,21 +140,31 @@ func ParseResourcePolicyForWrite(data []byte, target ResourcePolicyTarget) (*Res
 // checkResourcePolicyFields refuses keys the document must not carry, so a
 // misspelled or unsupported field is not silently dropped.
 func checkResourcePolicyFields(data []byte) error {
-	var doc struct {
-		Statement []map[string]json.RawMessage `json:"Statement"`
-	}
+	var doc map[string]json.RawMessage
 	if err := json.Unmarshal(data, &doc); err != nil {
 		return Errorf("%w", err)
 	}
-	allowed := map[string]bool{
-		"Sid": true, "Effect": true, "Principal": true, "Action": true,
-		"Resource": true, "Condition": true,
+	if err := checkKeys(doc, "ID", "Version", "Statement"); err != nil {
+		return err
 	}
-	for _, st := range doc.Statement {
-		for key := range st {
-			if !allowed[key] {
-				return Errorf("'%v' is not supported in a resource policy", key)
-			}
+	var statements []map[string]json.RawMessage
+	if raw, ok := doc["Statement"]; ok {
+		if err := json.Unmarshal(raw, &statements); err != nil {
+			return Errorf("%w", err)
+		}
+	}
+	for _, st := range statements {
+		if err := checkKeys(st, "Sid", "Effect", "Principal", "Action", "Resource", "Condition"); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func checkKeys(obj map[string]json.RawMessage, allowed ...string) error {
+	for key := range obj {
+		if !slices.Contains(allowed, key) {
+			return Errorf("'%v' is not supported in a resource policy", key)
 		}
 	}
 	return nil
