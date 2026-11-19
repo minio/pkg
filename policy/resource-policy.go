@@ -144,7 +144,8 @@ func checkResourcePolicyFields(data []byte) error {
 	if err := json.Unmarshal(data, &doc); err != nil {
 		return Errorf("%w", err)
 	}
-	if err := checkKeys(doc, "ID", "Version", "Statement"); err != nil {
+	// AWS documents spell the policy ID "Id"; this package writes "ID".
+	if err := checkKeys(doc, "ID", "Id", "Version", "Statement"); err != nil {
 		return err
 	}
 	var statements []map[string]json.RawMessage

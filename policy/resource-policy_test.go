@@ -114,6 +114,16 @@ func TestParseResourcePolicyForWrite(t *testing.T) {
 			target: rpWarehouseTarget,
 		},
 		{
+			name:   "policy ID",
+			doc:    `{"ID":"p1","Version":"2012-10-17","Statement":[` + allow(`"*"`, `"s3tables:GetTable"`, tablesWh) + `]}`,
+			target: rpWarehouseTarget,
+		},
+		{
+			name:   "AWS policy Id",
+			doc:    `{"Id":"p1","Version":"2012-10-17","Statement":[` + allow(`"*"`, `"s3tables:GetTable"`, tablesWh) + `]}`,
+			target: rpWarehouseTarget,
+		},
+		{
 			name:   "AWS wildcard principal",
 			doc:    rpDoc(allow(`{"AWS":"*"}`, `"s3tables:GetTable"`, tablesWh)),
 			target: rpWarehouseTarget,
