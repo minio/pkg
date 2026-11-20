@@ -233,6 +233,12 @@ const (
 	// S3TablesUpdateNamespacePropertiesAction is an AIStor extension for updating namespace properties.
 	S3TablesUpdateNamespacePropertiesAction TableAction = "s3tables:UpdateNamespaceProperties"
 
+	// S3TablesUpgradeBucketToWarehouseAction is an AIStor extension gating conversion
+	// of an existing regular bucket into a warehouse. It is a high-privilege action,
+	// separate from CreateWarehouse, because converting a bucket brings its existing
+	// objects under the warehouse (Tables) permission model.
+	S3TablesUpgradeBucketToWarehouseAction TableAction = "s3tables:UpgradeBucketToWarehouse"
+
 	// S3TablesTagWarehouseAction is an AIStor extension for tagging Iceberg warehouses.
 	S3TablesTagWarehouseAction TableAction = "s3tables:TagWarehouse"
 	// S3TablesUntagWarehouseAction is an AIStor extension for removing tags from Iceberg warehouses.
@@ -331,6 +337,7 @@ var SupportedTableActions = map[TableAction]struct{}{
 	S3TablesListFunctionsAction:                          {},
 	S3TablesRegisterFunctionAction:                       {},
 	S3TablesUpdateNamespacePropertiesAction:              {},
+	S3TablesUpgradeBucketToWarehouseAction:               {},
 	S3TablesTagWarehouseAction:                           {},
 	S3TablesUntagWarehouseAction:                         {},
 	S3TablesListTagsForWarehouseAction:                   {},
@@ -453,6 +460,7 @@ func createTableActionConditionKeyMap() map[Action]condition.KeySet {
 	tableActionConditionKeyMap[Action(S3TablesRenameTableAction)] = withTableCommon()
 	tableActionConditionKeyMap[Action(S3TablesUpdateTableMetadataLocationAction)] = withTableCommon()
 	tableActionConditionKeyMap[Action(S3TablesCreateWarehouseAction)] = withCommon(s3TablesKMSKeyKey, s3TablesSSEAlgorithmKey)
+	tableActionConditionKeyMap[Action(S3TablesUpgradeBucketToWarehouseAction)] = withCommon(s3TablesKMSKeyKey, s3TablesSSEAlgorithmKey)
 	tableActionConditionKeyMap[Action(S3TablesDeleteWarehouseAction)] = withWarehouseCommon()
 	tableActionConditionKeyMap[Action(S3TablesDeleteWarehouseEncryptionAction)] = withWarehouseCommon()
 	tableActionConditionKeyMap[Action(S3TablesDeleteWarehousePolicyAction)] = withWarehouseCommon()
