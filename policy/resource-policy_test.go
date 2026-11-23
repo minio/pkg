@@ -58,7 +58,7 @@ func TestTableActionScopeCoversEveryAction(t *testing.T) {
 
 func TestTableActionIsGlobal(t *testing.T) {
 	for _, action := range []TableAction{
-		S3TablesCreateWarehouseAction, S3TablesCreateTableBucketAction,
+		S3TablesCreateWarehouseAction, S3TablesUpgradeBucketToWarehouseAction, S3TablesCreateTableBucketAction,
 		S3TablesListWarehousesAction, S3TablesListTableBucketsAction, S3TablesTableMetricsAction,
 	} {
 		if !action.IsGlobal() {
