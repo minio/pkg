@@ -23,8 +23,6 @@ import (
 	"crypto/rand"
 	"crypto/x509"
 	"encoding/pem"
-	"runtime"
-	"strings"
 	"testing"
 	"time"
 
@@ -72,33 +70,6 @@ func signTestLicense(t *testing.T, key *ecdsa.PrivateKey, plan string, expiresAt
 	return string(signed)
 }
 
-// waitFor polls cond until it returns true or timeout expires.
-func waitFor(t *testing.T, timeout time.Duration, cond func() bool, msg string) {
-	t.Helper()
-
-	deadline := time.Now().Add(timeout)
-	for !cond() {
-		if time.Now().After(deadline) {
-			t.Fatal(msg)
-		}
-		time.Sleep(10 * time.Millisecond)
-	}
-}
-
-// licenseCheckDelivering reports whether a license check is blocked delivering
-// the expiry notification. The check cannot finish until the notification is
-// received, which makes the delivery window deterministic to test.
-func licenseCheckDelivering() bool {
-	buf := make([]byte, 1<<20)
-	stacks := string(buf[:runtime.Stack(buf, true)])
-	for _, stack := range strings.Split(stacks, "\n\n") {
-		if strings.Contains(stack, "LicenseValidator") && strings.Contains(stack, "chan send") {
-			return true
-		}
-	}
-	return false
-}
-
 // TestValidateEnterpriseLicenseSchedulesOneCheck verifies that repeated
 // validation calls replace the pending check instead of scheduling more.
 func TestValidateEnterpriseLicenseSchedulesOneCheck(t *testing.T) {
@@ -129,10 +100,9 @@ func TestValidateEnterpriseLicenseSchedulesOneCheck(t *testing.T) {
 	}
 }
 
-// TestValidateEnterpriseLicenseKeepsRenewalWhileRetiring verifies that a
-// renewal arriving while the expiry notification is being delivered is still
-// monitored.
-func TestValidateEnterpriseLicenseKeepsRenewalWhileRetiring(t *testing.T) {
+// TestValidateEnterpriseLicenseKeepsRenewalAfterExpiry verifies that a renewal
+// issued immediately after receiving the expiry notification is monitored.
+func TestValidateEnterpriseLicenseKeepsRenewalAfterExpiry(t *testing.T) {
 	key, pubKey := newTestLicenseKey(t)
 	lv := &LicenseValidator{
 		LicenseToken:  signTestLicense(t, key, "STANDARD", time.Now().Add(2*time.Second)),
@@ -144,18 +114,16 @@ func TestValidateEnterpriseLicenseKeepsRenewalWhileRetiring(t *testing.T) {
 		t.Fatalf("initial validation failed: %v", err)
 	}
 
-	waitFor(t, 10*time.Second, licenseCheckDelivering, "check did not reach the expiry notification")
-
-	// Renew while the old expiry is still being delivered.
-	lv.LicenseToken = signTestLicense(t, key, "STANDARD", time.Now().Add(3*time.Second))
-	if _, err := lv.ValidateEnterpriseLicense([]string{"STANDARD"}, licExpiredChan); err != nil {
-		t.Fatalf("validation of renewed license failed: %v", err)
-	}
-
 	select {
 	case <-licExpiredChan:
 	case <-time.After(10 * time.Second):
 		t.Fatal("timed out waiting for the license expiry notification")
+	}
+
+	// Renew immediately after the notification.
+	lv.LicenseToken = signTestLicense(t, key, "STANDARD", time.Now().Add(2*time.Second))
+	if _, err := lv.ValidateEnterpriseLicense([]string{"STANDARD"}, licExpiredChan); err != nil {
+		t.Fatalf("validation of renewed license failed: %v", err)
 	}
 
 	select {

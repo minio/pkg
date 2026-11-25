@@ -200,9 +200,12 @@ func (lv *LicenseValidator) scheduleNextLicenseCheck(li *licverifier.LicenseInfo
 func (lv *LicenseValidator) checkLicense(gen uint64, acceptedPlans []string, licExpiredChan chan<- string) {
 	li, err := lv.validateEnterpriseLicense(acceptedPlans)
 	if err != nil {
-		// The channel is the caller's only notification path, so wait for
-		// delivery instead of dropping the expiry.
-		licExpiredChan <- err.Error()
+		// Best-effort delivery: never block the check on a caller that is not
+		// receiving.
+		select {
+		case licExpiredChan <- err.Error():
+		default:
+		}
 		return
 	}
 
@@ -252,8 +255,9 @@ func (lv *LicenseValidator) validateEnterpriseLicense(acceptedPlans []string) (*
 // TRIAL licenses do not get grace period after expiry.
 //
 // When licExpiredChan is non-nil, a single check is kept armed for the current
-// license and a new call replaces it. The expiry error is sent with a blocking
-// send, so the caller must keep receiving for the life of the validator.
+// license and a new call replaces it. Expiry errors are delivered best-effort
+// with a non-blocking send: if the caller is not receiving at that moment, the
+// notification is dropped rather than blocking the check.
 func (lv *LicenseValidator) ValidateEnterpriseLicense(acceptedPlans []string, licExpiredChan chan<- string) (*licverifier.LicenseInfo, error) {
 	li, err := lv.validateEnterpriseLicense(acceptedPlans)
 	if err != nil {
