@@ -18,6 +18,7 @@
 package policy
 
 import (
+	"slices"
 	"strings"
 	"testing"
 
@@ -255,5 +256,116 @@ func TestDeltaSharingUseActions(t *testing.T) {
 		if !wildcard.IsAllowed(Args{AccountName: "tester", Action: Action(action)}) {
 			t.Errorf("admin:DeltaSharing* does not allow %s", action)
 		}
+	}
+}
+
+// TestClusterEncryptionAdminActions asserts that the cluster encryption actions
+// parse in a policy, and which built-in policies grant them.
+func TestClusterEncryptionAdminActions(t *testing.T) {
+	actions := map[AdminAction]string{
+		ClusterEncryptionEnableAdminAction:    "admin:ClusterEncryptionEnable",
+		ClusterEncryptionDisableAdminAction:   "admin:ClusterEncryptionDisable",
+		ClusterEncryptionRotateKeyAdminAction: "admin:ClusterEncryptionRotateKey",
+		ClusterEncryptionStatusAdminAction:    "admin:ClusterEncryptionStatus",
+		ClusterEncryptionRewriteAdminAction:   "admin:ClusterEncryptionRewrite",
+	}
+	grants := map[string][]AdminAction{
+		"consoleAdmin": {
+			ClusterEncryptionEnableAdminAction,
+			ClusterEncryptionDisableAdminAction,
+			ClusterEncryptionRotateKeyAdminAction,
+			ClusterEncryptionStatusAdminAction,
+			ClusterEncryptionRewriteAdminAction,
+		},
+		"infraAdmin":         {ClusterEncryptionStatusAdminAction, ClusterEncryptionRewriteAdminAction},
+		"securityAuditAdmin": {ClusterEncryptionStatusAdminAction},
+		"iamAdmin":           nil,
+		"diagnostics":        nil,
+		"readwrite":          nil,
+	}
+	for action, name := range actions {
+		want := map[string]bool{}
+		for policyName, granted := range grants {
+			want[policyName] = slices.Contains(granted, action)
+		}
+		if string(action) != name {
+			t.Errorf("action = %q, want %q", action, name)
+		}
+		if !action.IsValid() {
+			t.Errorf("%s.IsValid() = false, want true: the action is missing from SupportedAdminActions", action)
+		}
+		if action.HasResource() {
+			t.Errorf("%s.HasResource() = true, want false: the action applies to the whole cluster", action)
+		}
+		if !AllAdminActions.Match(action) {
+			t.Errorf("admin:* does not match %s", action)
+		}
+
+		p, err := ParseConfig(strings.NewReader(`{"Version":"2012-10-17","Statement":[{"Effect":"Allow","Action":["` + name + `"]}]}`))
+		if err != nil {
+			t.Fatalf("a policy naming %s does not parse: %v", name, err)
+		}
+		if !p.IsAllowed(Args{AccountName: "tester", Action: Action(action)}) {
+			t.Errorf("a policy naming %s does not allow it", name)
+		}
+
+		seen := map[string]bool{}
+		for _, dp := range DefaultPolicies {
+			expected, checked := want[dp.Name]
+			if !checked {
+				continue
+			}
+			seen[dp.Name] = true
+			if got := dp.Definition.IsAllowed(Args{AccountName: "tester", Action: Action(action)}); got != expected {
+				t.Errorf("policy %q allows %s = %v, want %v", dp.Name, action, got, expected)
+			}
+		}
+		for name := range want {
+			if !seen[name] {
+				t.Errorf("built-in policy %q not found in DefaultPolicies", name)
+			}
+		}
+	}
+}
+
+// TestClusterEncryptionAdminWildcards asserts that the cluster encryption actions
+// match the wildcards that the other admin actions match.
+func TestClusterEncryptionAdminWildcards(t *testing.T) {
+	prefixAllow := Policy{
+		Version:    DefaultVersion,
+		Statements: []Statement{NewStatement("", Allow, NewActionSet(Action("admin:ClusterEncryption*")), NewResourceSet(), condition.NewFunctions())},
+	}
+	denyPrefix := Policy{
+		Version: DefaultVersion,
+		Statements: []Statement{
+			NewStatement("", Allow, NewActionSet(Action(AllAdminActions)), NewResourceSet(), condition.NewFunctions()),
+			NewStatement("", Deny, NewActionSet(Action("admin:ClusterEncryption*")), NewResourceSet(), condition.NewFunctions()),
+		},
+	}
+	for _, action := range []AdminAction{
+		ClusterEncryptionEnableAdminAction,
+		ClusterEncryptionDisableAdminAction,
+		ClusterEncryptionRotateKeyAdminAction,
+		ClusterEncryptionStatusAdminAction,
+		ClusterEncryptionRewriteAdminAction,
+	} {
+		if !AllAdminActions.Match(action) {
+			t.Errorf("admin:* does not match %s", action)
+		}
+		args := Args{AccountName: "tester", Action: Action(action)}
+		if !prefixAllow.IsAllowed(args) {
+			t.Errorf("admin:ClusterEncryption* does not allow %s", action)
+		}
+		if denyPrefix.IsAllowed(args) {
+			t.Errorf("a deny of admin:ClusterEncryption* does not override admin:* for %s", action)
+		}
+	}
+
+	other := Args{AccountName: "tester", Action: Action(ServerInfoAdminAction)}
+	if prefixAllow.IsAllowed(other) {
+		t.Errorf("admin:ClusterEncryption* allows %s", ServerInfoAdminAction)
+	}
+	if !denyPrefix.IsAllowed(other) {
+		t.Errorf("a deny of admin:ClusterEncryption* denies %s", ServerInfoAdminAction)
 	}
 }
