@@ -194,25 +194,12 @@ func (lv *LicenseValidator) scheduleNextLicenseCheck(li *licverifier.LicenseInfo
 	})
 }
 
-// checkSuperseded reports whether a newer validation has replaced the check
-// identified by gen.
-func (lv *LicenseValidator) checkSuperseded(gen uint64) bool {
-	lv.checkMu.Lock()
-	defer lv.checkMu.Unlock()
-	return gen != lv.checkGen
-}
-
 // checkLicense re-validates the license when its timer fires. It resets the
 // timer itself while the license is still valid (expired within the grace
 // period) and stops once the license is rejected.
 func (lv *LicenseValidator) checkLicense(gen uint64, acceptedPlans []string, licExpiredChan chan<- string) {
 	li, err := lv.validateEnterpriseLicense(acceptedPlans)
 	if err != nil {
-		if lv.checkSuperseded(gen) {
-			// A newer validation has already replaced this check, so the
-			// expiry it saw is no longer interesting.
-			return
-		}
 		// The channel is the caller's only notification path, so wait for
 		// delivery instead of dropping the expiry.
 		licExpiredChan <- err.Error()
