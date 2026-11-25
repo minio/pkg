@@ -72,43 +72,42 @@ func signTestLicense(t *testing.T, key *ecdsa.PrivateKey, plan string, expiresAt
 	return string(signed)
 }
 
-// countLicenseSchedulers counts the background license schedulers of this
-// process by looking for their stack frames.
-func countLicenseSchedulers() int {
-	buf := make([]byte, 1<<20)
-	return strings.Count(string(buf[:runtime.Stack(buf, true)]), "scheduleNextLicenseCheck")
-}
-
-// schedulerActive reports whether a background scheduler is still running.
-func schedulerActive(lv *LicenseValidator) bool {
-	lv.schedulerMu.Lock()
-	defer lv.schedulerMu.Unlock()
-	return lv.schedulerRunning
-}
-
-// waitForSchedulerStop waits for the background scheduler to exit, so tests do
-// not leak goroutines into each other.
-func waitForSchedulerStop(t *testing.T, lv *LicenseValidator) {
+// waitFor polls cond until it returns true or timeout expires.
+func waitFor(t *testing.T, timeout time.Duration, cond func() bool, msg string) {
 	t.Helper()
 
-	deadline := time.Now().Add(10 * time.Second)
-	for schedulerActive(lv) {
+	deadline := time.Now().Add(timeout)
+	for !cond() {
 		if time.Now().After(deadline) {
-			t.Fatal("license scheduler did not stop")
+			t.Fatal(msg)
 		}
-		time.Sleep(time.Millisecond)
+		time.Sleep(10 * time.Millisecond)
 	}
 }
 
-// TestValidateEnterpriseLicenseStartsOneScheduler verifies that repeated
-// validation calls do not keep spawning background schedulers.
-func TestValidateEnterpriseLicenseStartsOneScheduler(t *testing.T) {
+// licenseCheckDelivering reports whether a license check is blocked delivering
+// the expiry notification. The check cannot finish until the notification is
+// received, which makes the delivery window deterministic to test.
+func licenseCheckDelivering() bool {
+	buf := make([]byte, 1<<20)
+	stacks := string(buf[:runtime.Stack(buf, true)])
+	for _, stack := range strings.Split(stacks, "\n\n") {
+		if strings.Contains(stack, "LicenseValidator") && strings.Contains(stack, "chan send") {
+			return true
+		}
+	}
+	return false
+}
+
+// TestValidateEnterpriseLicenseSchedulesOneCheck verifies that repeated
+// validation calls replace the pending check instead of scheduling more.
+func TestValidateEnterpriseLicenseSchedulesOneCheck(t *testing.T) {
 	key, pubKey := newTestLicenseKey(t)
 	lv := &LicenseValidator{
 		LicenseToken:  signTestLicense(t, key, "STANDARD", time.Now().Add(2*time.Second)),
 		offlinePubKey: pubKey,
 	}
-	licExpiredChan := make(chan string, 1)
+	licExpiredChan := make(chan string, 5)
 
 	for i := range 5 {
 		if _, err := lv.ValidateEnterpriseLicense([]string{"STANDARD"}, licExpiredChan); err != nil {
@@ -116,33 +115,23 @@ func TestValidateEnterpriseLicenseStartsOneScheduler(t *testing.T) {
 		}
 	}
 
-	// Give the started goroutines a chance to show up in the stack dump.
-	time.Sleep(100 * time.Millisecond)
-
-	if got := countLicenseSchedulers(); got != 1 {
-		t.Fatalf("expected exactly 1 background license check, got %d", got)
+	select {
+	case <-licExpiredChan:
+	case <-time.After(10 * time.Second):
+		t.Fatal("timed out waiting for the license expiry notification")
 	}
 
-	waitForSchedulerStop(t, lv)
-}
-
-// schedulerDelivering reports whether a background scheduler is blocked
-// delivering the expiry notification. The scheduler cannot retire while the
-// send is blocked, which makes the retirement window deterministic to test.
-func schedulerDelivering() bool {
-	buf := make([]byte, 1<<20)
-	stacks := string(buf[:runtime.Stack(buf, true)])
-	for _, stack := range strings.Split(stacks, "\n\n") {
-		if strings.Contains(stack, "scheduleNextLicenseCheck") && strings.Contains(stack, "chan send") {
-			return true
-		}
+	// A leaked check would report the same expiry again.
+	select {
+	case <-licExpiredChan:
+		t.Fatal("multiple license checks were scheduled")
+	case <-time.After(500 * time.Millisecond):
 	}
-	return false
 }
 
 // TestValidateEnterpriseLicenseKeepsRenewalWhileRetiring verifies that a
-// renewal arriving while the scheduler is delivering the expiry notification
-// is handed to that scheduler instead of being dropped when it retires.
+// renewal arriving while the expiry notification is being delivered is still
+// monitored.
 func TestValidateEnterpriseLicenseKeepsRenewalWhileRetiring(t *testing.T) {
 	key, pubKey := newTestLicenseKey(t)
 	lv := &LicenseValidator{
@@ -155,23 +144,14 @@ func TestValidateEnterpriseLicenseKeepsRenewalWhileRetiring(t *testing.T) {
 		t.Fatalf("initial validation failed: %v", err)
 	}
 
-	// Wait until the scheduler is blocked sending the expiry notification.
-	deadline := time.Now().Add(10 * time.Second)
-	for !schedulerDelivering() {
-		if time.Now().After(deadline) {
-			t.Fatal("scheduler did not reach the expiry notification")
-		}
-		time.Sleep(10 * time.Millisecond)
-	}
+	waitFor(t, 10*time.Second, licenseCheckDelivering, "check did not reach the expiry notification")
 
-	// Renew while the scheduler is still retiring.
+	// Renew while the old expiry is still being delivered.
 	lv.LicenseToken = signTestLicense(t, key, "STANDARD", time.Now().Add(3*time.Second))
 	if _, err := lv.ValidateEnterpriseLicense([]string{"STANDARD"}, licExpiredChan); err != nil {
 		t.Fatalf("validation of renewed license failed: %v", err)
 	}
 
-	// Let the old notification complete, then expect the renewed license to be
-	// monitored by the scheduler that just reported the expiry.
 	select {
 	case <-licExpiredChan:
 	case <-time.After(10 * time.Second):
@@ -181,8 +161,42 @@ func TestValidateEnterpriseLicenseKeepsRenewalWhileRetiring(t *testing.T) {
 	select {
 	case <-licExpiredChan:
 	case <-time.After(10 * time.Second):
-		t.Fatal("renewed license expiry was not reported, scheduler retired")
+		t.Fatal("renewed license expiry was not reported")
+	}
+}
+
+// TestValidateEnterpriseLicenseRenewalRetargetsAndRearms verifies that a
+// renewal replaces the pending check so the renewed expiry is used and the
+// notification goes to the channel of the most recent successful call.
+func TestValidateEnterpriseLicenseRenewalRetargetsAndRearms(t *testing.T) {
+	key, pubKey := newTestLicenseKey(t)
+	lv := &LicenseValidator{
+		LicenseToken:  signTestLicense(t, key, "STANDARD", time.Now().Add(30*time.Second)),
+		offlinePubKey: pubKey,
+	}
+	prevChan := make(chan string, 1)
+	nextChan := make(chan string, 1)
+
+	if _, err := lv.ValidateEnterpriseLicense([]string{"STANDARD"}, prevChan); err != nil {
+		t.Fatalf("initial validation failed: %v", err)
 	}
 
-	waitForSchedulerStop(t, lv)
+	// Renew with a license that expires much sooner, on a new channel. The
+	// pending check must not keep waiting for the original 30s expiry.
+	lv.LicenseToken = signTestLicense(t, key, "STANDARD", time.Now().Add(2*time.Second))
+	if _, err := lv.ValidateEnterpriseLicense([]string{"STANDARD"}, nextChan); err != nil {
+		t.Fatalf("validation of renewed license failed: %v", err)
+	}
+
+	select {
+	case <-nextChan:
+	case <-time.After(10 * time.Second):
+		t.Fatal("renewed license expiry was not reported on the new channel")
+	}
+
+	select {
+	case <-prevChan:
+		t.Fatal("expiry notification was sent to the previous channel")
+	default:
+	}
 }
