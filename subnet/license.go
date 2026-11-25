@@ -24,7 +24,7 @@ import (
 	"net/http"
 	"os"
 	"strings"
-	"sync/atomic"
+	"sync"
 	"time"
 
 	"github.com/lestrrat-go/jwx/v3/jwt"
@@ -57,9 +57,13 @@ type LicenseValidator struct {
 	LicenseToken      string
 	ExpiryGracePeriod time.Duration
 
-	// schedulerRunning is set while the background license check runs, so
-	// repeated validation calls do not start duplicate schedulers.
-	schedulerRunning atomic.Bool
+	// schedulerMu serializes scheduler lifecycle changes. A validation that
+	// succeeds while the scheduler is running sets schedulerRenewed, so a
+	// renewal racing with scheduler retirement is handed to the running
+	// scheduler instead of being dropped.
+	schedulerMu      sync.Mutex
+	schedulerRunning bool
+	schedulerRenewed bool
 }
 
 // LicenseValidatorParams holds parameters for creating a new LicenseValidator.
@@ -179,22 +183,39 @@ func getDurationForNextLicenseCheck(li *licverifier.LicenseInfo) time.Duration {
 // fails or the process exits. It must call validateEnterpriseLicense, not
 // ValidateEnterpriseLicense, to avoid starting another scheduler on every tick.
 func (lv *LicenseValidator) scheduleNextLicenseCheck(li *licverifier.LicenseInfo, acceptedPlans []string, licExpiredChan chan<- string) {
-	defer lv.schedulerRunning.Store(false)
-
 	timer := time.NewTimer(getDurationForNextLicenseCheck(li))
 	defer timer.Stop()
 
 	for range timer.C {
-		li, err := lv.validateEnterpriseLicense(acceptedPlans)
-		if err != nil {
-			// The channel is the caller's only notification path, so wait for
-			// delivery instead of dropping the expiry. If the caller stops
-			// receiving, schedulerRunning stays set and no further schedulers
-			// are started.
+		// Renewals registered before this point are already visible in the
+		// token validated below.
+		lv.schedulerMu.Lock()
+		lv.schedulerRenewed = false
+		lv.schedulerMu.Unlock()
+
+		for {
+			li, err := lv.validateEnterpriseLicense(acceptedPlans)
+			if err == nil {
+				timer.Reset(getDurationForNextLicenseCheck(li))
+				break
+			}
+
+			// Deliver the expiry before retiring: a caller that renews in
+			// response is then registered against this scheduler in the
+			// window below, instead of racing with its release.
 			licExpiredChan <- err.Error()
+
+			lv.schedulerMu.Lock()
+			if lv.schedulerRenewed {
+				lv.schedulerRenewed = false
+				lv.schedulerMu.Unlock()
+				// Keep this scheduler and validate the renewed license.
+				continue
+			}
+			lv.schedulerRunning = false
+			lv.schedulerMu.Unlock()
 			return
 		}
-		timer.Reset(getDurationForNextLicenseCheck(li))
 	}
 }
 
@@ -241,10 +262,18 @@ func (lv *LicenseValidator) ValidateEnterpriseLicense(acceptedPlans []string, li
 	// validation successful. start a background routine to validate the license
 	// - daily if already expired (within grace period)
 	// - just after expiry if not expired
-	if licExpiredChan != nil && lv.schedulerRunning.CompareAndSwap(false, true) {
+	if licExpiredChan != nil {
 		// if the expiry channel is nil, it means client doesn't want to be notified
 		// when license expires. In that case we don't schedule the background check.
-		go lv.scheduleNextLicenseCheck(li, acceptedPlans, licExpiredChan)
+		lv.schedulerMu.Lock()
+		if lv.schedulerRunning {
+			// Hand the renewed license to the running scheduler.
+			lv.schedulerRenewed = true
+		} else {
+			lv.schedulerRunning = true
+			go lv.scheduleNextLicenseCheck(li, acceptedPlans, licExpiredChan)
+		}
+		lv.schedulerMu.Unlock()
 	}
 
 	return li, nil
