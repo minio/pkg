@@ -24,7 +24,7 @@ import (
 	"net/http"
 	"os"
 	"strings"
-	"sync"
+	"sync/atomic"
 	"time"
 
 	"github.com/lestrrat-go/jwx/v3/jwt"
@@ -57,10 +57,9 @@ type LicenseValidator struct {
 	LicenseToken      string
 	ExpiryGracePeriod time.Duration
 
-	// scheduleOnce ensures at most one background license check is started
-	// for this validator, even if ValidateEnterpriseLicense is called more
-	// than once.
-	scheduleOnce sync.Once
+	// schedulerRunning is set while the background license check runs, so
+	// repeated validation calls do not start duplicate schedulers.
+	schedulerRunning atomic.Bool
 }
 
 // LicenseValidatorParams holds parameters for creating a new LicenseValidator.
@@ -177,32 +176,32 @@ func getDurationForNextLicenseCheck(li *licverifier.LicenseInfo) time.Duration {
 }
 
 // scheduleNextLicenseCheck periodically re-validates the license until it
-// fails or the process exits. It calls ValidateEnterpriseLicense again, but
-// scheduleOnce guarantees that no additional background check is started.
+// fails or the process exits. It must call validateEnterpriseLicense, not
+// ValidateEnterpriseLicense, to avoid starting another scheduler on every tick.
 func (lv *LicenseValidator) scheduleNextLicenseCheck(li *licverifier.LicenseInfo, acceptedPlans []string, licExpiredChan chan<- string) {
+	defer lv.schedulerRunning.Store(false)
+
 	timer := time.NewTimer(getDurationForNextLicenseCheck(li))
 	defer timer.Stop()
 
 	for range timer.C {
-		li, err := lv.ValidateEnterpriseLicense(acceptedPlans, licExpiredChan)
+		li, err := lv.validateEnterpriseLicense(acceptedPlans)
 		if err != nil {
-			// The consumer may have gone away; do not block the goroutine
-			// forever waiting for someone to receive the notification.
-			select {
-			case licExpiredChan <- err.Error():
-			default:
-			}
+			// The channel is the caller's only notification path, so wait for
+			// delivery instead of dropping the expiry. If the caller stops
+			// receiving, schedulerRunning stays set and no further schedulers
+			// are started.
+			licExpiredChan <- err.Error()
 			return
 		}
 		timer.Reset(getDurationForNextLicenseCheck(li))
 	}
 }
 
-// ValidateEnterpriseLicense validates the ENTERPRISE license file.
-// Since there are multiple variants of ENTERPRISE licenses, ones
-// accepted by the application can be passed as `acceptedPlans`.
-// TRIAL licenses do not get grace period after expiry.
-func (lv *LicenseValidator) ValidateEnterpriseLicense(acceptedPlans []string, licExpiredChan chan<- string) (*licverifier.LicenseInfo, error) {
+// validateEnterpriseLicense validates the ENTERPRISE license without scheduling
+// the background check, so callers that already run a scheduler can re-validate
+// without starting another one.
+func (lv *LicenseValidator) validateEnterpriseLicense(acceptedPlans []string) (*licverifier.LicenseInfo, error) {
 	li, err := lv.ValidateLicense()
 	if err != nil {
 		return nil, err
@@ -226,15 +225,26 @@ func (lv *LicenseValidator) ValidateEnterpriseLicense(acceptedPlans []string, li
 		}
 	}
 
+	return li, nil
+}
+
+// ValidateEnterpriseLicense validates the ENTERPRISE license file.
+// Since there are multiple variants of ENTERPRISE licenses, ones
+// accepted by the application can be passed as `acceptedPlans`.
+// TRIAL licenses do not get grace period after expiry.
+func (lv *LicenseValidator) ValidateEnterpriseLicense(acceptedPlans []string, licExpiredChan chan<- string) (*licverifier.LicenseInfo, error) {
+	li, err := lv.validateEnterpriseLicense(acceptedPlans)
+	if err != nil {
+		return nil, err
+	}
+
 	// validation successful. start a background routine to validate the license
 	// - daily if already expired (within grace period)
 	// - just after expiry if not expired
-	if licExpiredChan != nil {
+	if licExpiredChan != nil && lv.schedulerRunning.CompareAndSwap(false, true) {
 		// if the expiry channel is nil, it means client doesn't want to be notified
 		// when license expires. In that case we don't schedule the background check.
-		lv.scheduleOnce.Do(func() {
-			go lv.scheduleNextLicenseCheck(li, acceptedPlans, licExpiredChan)
-		})
+		go lv.scheduleNextLicenseCheck(li, acceptedPlans, licExpiredChan)
 	}
 
 	return li, nil
