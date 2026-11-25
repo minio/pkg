@@ -232,8 +232,8 @@ var DefaultPolicies = []struct {
 	},
 
 	// InfraAdmin - provides infrastructure and server management access
-	// (config, pools, healing, tiers, batch jobs) but no
-	// IAM or S3 data access.
+	// (config, pools, healing, tiers, batch jobs, cluster encryption status and
+	// rewrite) but no IAM or S3 data access.
 	{
 		Name: "infraAdmin",
 		Definition: Policy{
@@ -280,6 +280,8 @@ var DefaultPolicies = []struct {
 						Action(DescribeBatchJobAction),
 						Action(CancelBatchJobAction),
 						Action(GenerateBatchJobAction),
+						Action(ClusterEncryptionStatusAdminAction),
+						Action(ClusterEncryptionRewriteAdminAction),
 						// Inventory
 						Action(InventoryControlAction),
 						// Cluster topology (v4 APIs)
@@ -499,6 +501,7 @@ var DefaultPolicies = []struct {
 						Action(StorageInfoAdminAction),
 						Action(DataUsageInfoAdminAction),
 						Action(LicenseInfoAdminAction),
+						Action(ClusterEncryptionStatusAdminAction),
 						Action(ClusterInfoAction),
 						Action(PoolListAction),
 						Action(PoolInfoAction),

@@ -251,6 +251,25 @@ const (
 	// regardless of which job type is being queried.
 	DistJobStatusAction AdminAction = "admin:DistJobStatus"
 
+	// Cluster encryption Actions
+
+	// ClusterEncryptionEnableAdminAction - allow enabling cluster encryption of
+	// new writes. An AIStor extension.
+	ClusterEncryptionEnableAdminAction AdminAction = "admin:ClusterEncryptionEnable"
+	// ClusterEncryptionDisableAdminAction - allow disabling cluster encryption of
+	// new writes. An AIStor extension.
+	ClusterEncryptionDisableAdminAction AdminAction = "admin:ClusterEncryptionDisable"
+	// ClusterEncryptionRotateKeyAdminAction - allow adding a version to the drive
+	// key. An AIStor extension.
+	ClusterEncryptionRotateKeyAdminAction AdminAction = "admin:ClusterEncryptionRotateKey"
+	// ClusterEncryptionStatusAdminAction - allow getting the cluster encryption
+	// status, the encryption of an object version and the status of the job that
+	// encrypts existing data. An AIStor extension.
+	ClusterEncryptionStatusAdminAction AdminAction = "admin:ClusterEncryptionStatus"
+	// ClusterEncryptionRewriteAdminAction - allow starting, stopping, pausing and
+	// resuming the job that encrypts existing data. An AIStor extension.
+	ClusterEncryptionRewriteAdminAction AdminAction = "admin:ClusterEncryptionRewrite"
+
 	// Inventory Control Actions
 
 	// InventoryControlAction - allows control of inventory jobs
@@ -407,6 +426,12 @@ var SupportedAdminActions = map[AdminAction]struct{}{
 	GenerateBatchJobAction: {},
 
 	DistJobStatusAction: {},
+
+	ClusterEncryptionEnableAdminAction:    {},
+	ClusterEncryptionDisableAdminAction:   {},
+	ClusterEncryptionRotateKeyAdminAction: {},
+	ClusterEncryptionStatusAdminAction:    {},
+	ClusterEncryptionRewriteAdminAction:   {},
 
 	InventoryControlAction: {},
 
