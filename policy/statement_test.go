@@ -21,6 +21,7 @@ import (
 	"encoding/json"
 	"net"
 	"reflect"
+	"strings"
 	"testing"
 
 	"github.com/minio/pkg/v3/policy/condition"
@@ -588,6 +589,77 @@ func TestStatementValidate(t *testing.T) {
 
 		if expectErr != testCase.expectErr {
 			t.Fatalf("case %v: error: expected: %v, got: %v", i+1, testCase.expectErr, expectErr)
+		}
+	}
+}
+
+// TestStatementAdminKMSKeyResource checks that the admin actions on one KMS
+// key honor the KMS key resources a statement names, as the kms: actions do,
+// and keep ignoring a Resource of any other kind.
+func TestStatementAdminKMSKeyResource(t *testing.T) {
+	for _, tc := range []struct {
+		name   string
+		policy string
+		action AdminAction
+		key    string
+		want   bool
+	}{
+		{"scoped, action-only check", `{"Effect":"Allow","Action":["admin:KMSCreateKey"],"Resource":["arn:minio:kms:::fabric-*"]}`, KMSCreateKeyAdminAction, "", true},
+		{"scoped, matching key", `{"Effect":"Allow","Action":["admin:KMSCreateKey"],"Resource":["arn:minio:kms:::fabric-*"]}`, KMSCreateKeyAdminAction, "fabric-a", true},
+		{"scoped, other key", `{"Effect":"Allow","Action":["admin:KMSCreateKey"],"Resource":["arn:minio:kms:::fabric-*"]}`, KMSCreateKeyAdminAction, "other", false},
+		{"scoped status, matching key", `{"Effect":"Allow","Action":["admin:KMSKeyStatus"],"Resource":["arn:minio:kms:::fabric-*"]}`, KMSKeyStatusAdminAction, "fabric-1", true},
+		{"no resource", `{"Effect":"Allow","Action":["admin:KMSCreateKey"]}`, KMSCreateKeyAdminAction, "other", true},
+		{"S3 resource is ignored as before", `{"Effect":"Allow","Action":["admin:KMSCreateKey"],"Resource":["arn:aws:s3:::*"]}`, KMSCreateKeyAdminAction, "other", true},
+		{"scoped deny, other key", `{"Effect":"Allow","Action":["admin:KMSCreateKey"]},{"Effect":"Deny","Action":["admin:KMSCreateKey"],"Resource":["arn:minio:kms:::secret-*"]}`, KMSCreateKeyAdminAction, "other", true},
+		{"not-resource allow, excluded key", `{"Effect":"Allow","Action":["admin:KMSCreateKey"],"NotResource":["arn:minio:kms:::secret-*"]}`, KMSCreateKeyAdminAction, "secret-1", false},
+		{"not-resource allow, other key", `{"Effect":"Allow","Action":["admin:KMSCreateKey"],"NotResource":["arn:minio:kms:::secret-*"]}`, KMSCreateKeyAdminAction, "fabric-1", true},
+		{"not-resource deny, excluded key", `{"Effect":"Allow","Action":["admin:KMSCreateKey"]},{"Effect":"Deny","Action":["admin:KMSCreateKey"],"NotResource":["arn:minio:kms:::fabric-*"]}`, KMSCreateKeyAdminAction, "fabric-1", true},
+		{"not-resource deny, other key", `{"Effect":"Allow","Action":["admin:KMSCreateKey"]},{"Effect":"Deny","Action":["admin:KMSCreateKey"],"NotResource":["arn:minio:kms:::fabric-*"]}`, KMSCreateKeyAdminAction, "other", false},
+		{"scoped deny, matching key", `{"Effect":"Allow","Action":["admin:KMSCreateKey"]},{"Effect":"Deny","Action":["admin:KMSCreateKey"],"Resource":["arn:minio:kms:::secret-*"]}`, KMSCreateKeyAdminAction, "secret-1", false},
+		{"wildcard action, matching key", `{"Effect":"Allow","Action":["admin:KMSCreate*"],"Resource":["arn:minio:kms:::fabric-*"]}`, KMSCreateKeyAdminAction, "fabric-a", true},
+		{"wildcard action, other key", `{"Effect":"Allow","Action":["admin:KMSCreate*"],"Resource":["arn:minio:kms:::fabric-*"]}`, KMSCreateKeyAdminAction, "other-key", false},
+		{"admin:*, other key", `{"Effect":"Allow","Action":["admin:*"],"Resource":["arn:minio:kms:::fabric-*"]}`, KMSKeyStatusAdminAction, "other-key", false},
+		{"admin:*, other admin action", `{"Effect":"Allow","Action":["admin:*"],"Resource":["arn:minio:kms:::fabric-*"]}`, ServerInfoAdminAction, "", false},
+		{"wildcard and literal, other admin action", `{"Effect":"Allow","Action":["admin:KMSCreate*","admin:ServerInfo"],"Resource":["arn:minio:kms:::fabric-*"]}`, ServerInfoAdminAction, "", true},
+		{"wildcard deny, matching key", `{"Effect":"Allow","Action":["admin:KMSCreateKey"]},{"Effect":"Deny","Action":["admin:KMS*"],"Resource":["arn:minio:kms:::secret-*"]}`, KMSCreateKeyAdminAction, "secret-1", false},
+		{"wildcard deny, other key", `{"Effect":"Allow","Action":["admin:KMSCreateKey"]},{"Effect":"Deny","Action":["admin:KMS*"],"Resource":["arn:minio:kms:::secret-*"]}`, KMSCreateKeyAdminAction, "other", true},
+	} {
+		p, err := ParseConfig(strings.NewReader(`{"Version":"2012-10-17","Statement":[` + tc.policy + `]}`))
+		if err != nil {
+			t.Fatalf("%s: %v", tc.name, err)
+		}
+		args := Args{AccountName: "user", Action: Action(tc.action), BucketName: tc.key, ConditionValues: map[string][]string{}}
+		if got := p.IsAllowed(args); got != tc.want {
+			t.Errorf("%s: %s on key %q allowed %v, want %v", tc.name, tc.action, tc.key, got, tc.want)
+		}
+	}
+}
+
+// TestStatementKMSScopedDenyActionCheck checks that a Deny scoped to KMS keys
+// leaves the action-only check, made with no key, to the check that names one.
+func TestStatementKMSScopedDenyActionCheck(t *testing.T) {
+	for _, tc := range []struct {
+		name   string
+		policy string
+		action Action
+		key    string
+		want   bool
+	}{
+		{"admin deny, action-only check", `{"Effect":"Allow","Action":["admin:KMSCreateKey"]},{"Effect":"Deny","Action":["admin:KMSCreateKey"],"Resource":["arn:minio:kms:::secret-*"]}`, Action(KMSCreateKeyAdminAction), "", true},
+		{"admin deny, other key", `{"Effect":"Allow","Action":["admin:KMSCreateKey"]},{"Effect":"Deny","Action":["admin:KMSCreateKey"],"Resource":["arn:minio:kms:::secret-*"]}`, Action(KMSCreateKeyAdminAction), "fabric-a", true},
+		{"admin deny, denied key", `{"Effect":"Allow","Action":["admin:KMSCreateKey"]},{"Effect":"Deny","Action":["admin:KMSCreateKey"],"Resource":["arn:minio:kms:::secret-*"]}`, Action(KMSCreateKeyAdminAction), "secret-1", false},
+		{"admin not-resource deny, action-only check", `{"Effect":"Allow","Action":["admin:KMSKeyStatus"]},{"Effect":"Deny","Action":["admin:KMSKeyStatus"],"NotResource":["arn:minio:kms:::fabric-*"]}`, Action(KMSKeyStatusAdminAction), "", true},
+		{"kms deny, action-only check", `{"Effect":"Allow","Action":["kms:CreateKey"]},{"Effect":"Deny","Action":["kms:CreateKey"],"Resource":["arn:minio:kms:::secret-*"]}`, Action(KMSCreateKeyAction), "", true},
+		{"kms deny, denied key", `{"Effect":"Allow","Action":["kms:CreateKey"]},{"Effect":"Deny","Action":["kms:CreateKey"],"Resource":["arn:minio:kms:::secret-*"]}`, Action(KMSCreateKeyAction), "secret-1", false},
+		{"unscoped kms deny, action-only check", `{"Effect":"Allow","Action":["kms:CreateKey"]},{"Effect":"Deny","Action":["kms:CreateKey"]}`, Action(KMSCreateKeyAction), "", false},
+	} {
+		p, err := ParseConfig(strings.NewReader(`{"Version":"2012-10-17","Statement":[` + tc.policy + `]}`))
+		if err != nil {
+			t.Fatalf("%s: %v", tc.name, err)
+		}
+		args := Args{AccountName: "user", Action: tc.action, BucketName: tc.key, ConditionValues: map[string][]string{}}
+		if got := p.IsAllowed(args); got != tc.want {
+			t.Errorf("%s: %s on key %q allowed %v, want %v", tc.name, tc.action, tc.key, got, tc.want)
 		}
 	}
 }
