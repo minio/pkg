@@ -183,12 +183,7 @@ func getDurationForNextLicenseCheck(li *licverifier.LicenseInfo) time.Duration {
 func (lv *LicenseValidator) scheduleNextLicenseCheck(li *licverifier.LicenseInfo, acceptedPlans []string, licExpiredChan chan<- string) {
 	lv.checkMu.Lock()
 	defer lv.checkMu.Unlock()
-	lv.armLicenseCheck(li, acceptedPlans, licExpiredChan)
-}
 
-// armLicenseCheck schedules the next check. It must be called with checkMu
-// held.
-func (lv *LicenseValidator) armLicenseCheck(li *licverifier.LicenseInfo, acceptedPlans []string, licExpiredChan chan<- string) {
 	lv.checkGen++
 	gen := lv.checkGen
 	if lv.checkTimer != nil {
@@ -199,9 +194,9 @@ func (lv *LicenseValidator) armLicenseCheck(li *licverifier.LicenseInfo, accepte
 	})
 }
 
-// checkLicense re-validates the license when a check fires. It re-arms the
-// check while the license is still valid (expired within the grace period) and
-// stops once the license is rejected.
+// checkLicense re-validates the license when its timer fires. It resets the
+// timer itself while the license is still valid (expired within the grace
+// period) and stops once the license is rejected.
 func (lv *LicenseValidator) checkLicense(gen uint64, acceptedPlans []string, licExpiredChan chan<- string) {
 	li, err := lv.validateEnterpriseLicense(acceptedPlans)
 	if err != nil {
@@ -226,7 +221,7 @@ func (lv *LicenseValidator) checkLicense(gen uint64, acceptedPlans []string, lic
 		// already armed a newer check.
 		return
 	}
-	lv.armLicenseCheck(li, acceptedPlans, licExpiredChan)
+	lv.checkTimer.Reset(getDurationForNextLicenseCheck(li))
 }
 
 // validateEnterpriseLicense validates the ENTERPRISE license without scheduling
