@@ -205,6 +205,14 @@ func (lv *LicenseValidator) armLicenseCheck(li *licverifier.LicenseInfo, accepte
 func (lv *LicenseValidator) checkLicense(gen uint64, acceptedPlans []string, licExpiredChan chan<- string) {
 	li, err := lv.validateEnterpriseLicense(acceptedPlans)
 	if err != nil {
+		lv.checkMu.Lock()
+		replaced := gen != lv.checkGen
+		lv.checkMu.Unlock()
+		if replaced {
+			// A newer validation has already replaced this check, so the
+			// expiry it saw is no longer interesting.
+			return
+		}
 		// The channel is the caller's only notification path, so wait for
 		// delivery instead of dropping the expiry.
 		licExpiredChan <- err.Error()
@@ -255,6 +263,10 @@ func (lv *LicenseValidator) validateEnterpriseLicense(acceptedPlans []string) (*
 // Since there are multiple variants of ENTERPRISE licenses, ones
 // accepted by the application can be passed as `acceptedPlans`.
 // TRIAL licenses do not get grace period after expiry.
+//
+// When licExpiredChan is non-nil, a single check is kept armed for the current
+// license and a new call replaces it. The expiry error is sent with a blocking
+// send, so the caller must keep receiving for the life of the validator.
 func (lv *LicenseValidator) ValidateEnterpriseLicense(acceptedPlans []string, licExpiredChan chan<- string) (*licverifier.LicenseInfo, error) {
 	li, err := lv.validateEnterpriseLicense(acceptedPlans)
 	if err != nil {
