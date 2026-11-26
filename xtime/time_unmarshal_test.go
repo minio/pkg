@@ -160,3 +160,30 @@ durationPointer: 168h0m1s
 		t.Errorf("JSON round-trip mismatch: got %+v", back)
 	}
 }
+
+func TestDuration_UnmarshalJSONNull(t *testing.T) {
+	type s struct {
+		Dur Duration `json:"dur" yaml:"dur"`
+	}
+
+	// A JSON null leaves the field alone, as it does for a type with no
+	// Unmarshaler, and as the YAML side of this type already does.
+	v := s{Dur: Duration(time.Hour)}
+	if err := json.Unmarshal([]byte(`{"dur":null}`), &v); err != nil {
+		t.Fatalf("json null: %v", err)
+	}
+	if v.Dur.D() != time.Hour {
+		t.Errorf("json null overwrote the field: got %v, want 1h0m0s", v.Dur.D())
+	}
+	var y s
+	if err := yaml.Unmarshal([]byte("dur: null\n"), &y); err != nil {
+		t.Fatalf("yaml null: %v", err)
+	}
+
+	// A JSON number is not a duration. Reading it as zero hides the
+	// mistake from whoever wrote the config.
+	var n s
+	if err := json.Unmarshal([]byte(`{"dur":12}`), &n); err == nil {
+		t.Errorf("expected an error for a JSON number, got %v", n.Dur.D())
+	}
+}
