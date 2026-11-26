@@ -18,13 +18,13 @@
 package subnet
 
 import (
-	"context"
 	"crypto/tls"
 	"fmt"
 	"net"
 	"net/http"
 	"os"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/lestrrat-go/jwx/v3/jwt"
@@ -56,6 +56,13 @@ type LicenseValidator struct {
 	offlinePubKey     []byte
 	LicenseToken      string
 	ExpiryGracePeriod time.Duration
+
+	// checkMu serializes re-arming of the license check timer. Every
+	// successful validation replaces the pending check, so only one check is
+	// scheduled and the latest license and notification channel are used.
+	checkMu    sync.Mutex
+	checkGen   uint64
+	checkTimer *time.Timer
 }
 
 // LicenseValidatorParams holds parameters for creating a new LicenseValidator.
@@ -171,32 +178,51 @@ func getDurationForNextLicenseCheck(li *licverifier.LicenseInfo) time.Duration {
 	return time.Until(li.ExpiresAt.Add(time.Second))
 }
 
+// scheduleNextLicenseCheck arms the check for the next license expiry,
+// replacing any check still pending from an earlier validation.
 func (lv *LicenseValidator) scheduleNextLicenseCheck(li *licverifier.LicenseInfo, acceptedPlans []string, licExpiredChan chan<- string) {
-	duration := getDurationForNextLicenseCheck(li)
-	timer := time.NewTimer(duration)
-	defer timer.Stop()
+	lv.checkMu.Lock()
+	defer lv.checkMu.Unlock()
 
-	ctxt := context.Background()
-	for {
-		select {
-		case <-timer.C:
-			li, err := lv.ValidateEnterpriseLicense(acceptedPlans, licExpiredChan)
-			if err != nil {
-				licExpiredChan <- err.Error()
-				return
-			}
-			timer.Reset(getDurationForNextLicenseCheck(li))
-		case <-ctxt.Done():
-			return
-		}
+	lv.checkGen++
+	gen := lv.checkGen
+	if lv.checkTimer != nil {
+		lv.checkTimer.Stop()
 	}
+	lv.checkTimer = time.AfterFunc(getDurationForNextLicenseCheck(li), func() {
+		lv.checkLicense(gen, acceptedPlans, licExpiredChan)
+	})
 }
 
-// ValidateEnterpriseLicense validates the ENTERPRISE license file.
-// Since there are multiple variants of ENTERPRISE licenses, ones
-// accepted by the application can be passed as `acceptedPlans`.
-// TRIAL licenses do not get grace period after expiry.
-func (lv *LicenseValidator) ValidateEnterpriseLicense(acceptedPlans []string, licExpiredChan chan<- string) (*licverifier.LicenseInfo, error) {
+// checkLicense re-validates the license when its timer fires. It resets the
+// timer itself while the license is still valid (expired within the grace
+// period) and stops once the license is rejected.
+func (lv *LicenseValidator) checkLicense(gen uint64, acceptedPlans []string, licExpiredChan chan<- string) {
+	li, err := lv.validateEnterpriseLicense(acceptedPlans)
+	if err != nil {
+		// Best-effort delivery: never block the check on a caller that is not
+		// receiving.
+		select {
+		case licExpiredChan <- err.Error():
+		default:
+		}
+		return
+	}
+
+	lv.checkMu.Lock()
+	defer lv.checkMu.Unlock()
+	if gen != lv.checkGen {
+		// A validation that completed while this check was running has
+		// already armed a newer check.
+		return
+	}
+	lv.checkTimer.Reset(getDurationForNextLicenseCheck(li))
+}
+
+// validateEnterpriseLicense validates the ENTERPRISE license without scheduling
+// the background check, so callers that already run a scheduler can re-validate
+// without starting another one.
+func (lv *LicenseValidator) validateEnterpriseLicense(acceptedPlans []string) (*licverifier.LicenseInfo, error) {
 	li, err := lv.ValidateLicense()
 	if err != nil {
 		return nil, err
@@ -220,13 +246,31 @@ func (lv *LicenseValidator) ValidateEnterpriseLicense(acceptedPlans []string, li
 		}
 	}
 
-	// validation successful. start a background routine to validate the license
+	return li, nil
+}
+
+// ValidateEnterpriseLicense validates the ENTERPRISE license file.
+// Since there are multiple variants of ENTERPRISE licenses, ones
+// accepted by the application can be passed as `acceptedPlans`.
+// TRIAL licenses do not get grace period after expiry.
+//
+// When licExpiredChan is non-nil, a single check is kept armed for the current
+// license and a new call replaces it. Expiry errors are delivered best-effort
+// with a non-blocking send: if the caller is not receiving at that moment, the
+// notification is dropped rather than blocking the check.
+func (lv *LicenseValidator) ValidateEnterpriseLicense(acceptedPlans []string, licExpiredChan chan<- string) (*licverifier.LicenseInfo, error) {
+	li, err := lv.validateEnterpriseLicense(acceptedPlans)
+	if err != nil {
+		return nil, err
+	}
+
+	// validation successful. schedule the next check
 	// - daily if already expired (within grace period)
 	// - just after expiry if not expired
 	if licExpiredChan != nil {
 		// if the expiry channel is nil, it means client doesn't want to be notified
 		// when license expires. In that case we don't schedule the background check.
-		go lv.scheduleNextLicenseCheck(li, acceptedPlans, licExpiredChan)
+		lv.scheduleNextLicenseCheck(li, acceptedPlans, licExpiredChan)
 	}
 
 	return li, nil
