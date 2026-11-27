@@ -904,6 +904,34 @@ func TestStringFuncKMSKeyIDSpelling(t *testing.T) {
 	}
 }
 
+// With IgnoreCase the case is folded before the prefix is removed, so an
+// upper-case prefix names the same key as the lower-case one.
+func TestStringFuncKMSKeyIDIgnoreCasePrefix(t *testing.T) {
+	key := S3XAmzServerSideEncryptionAwsKmsKeyID.ToKey()
+	testCases := []struct {
+		name      string
+		newFunc   func(qualifier string, key Key, values ...string) (Function, error)
+		condValue string
+		reqValue  string
+		want      bool
+	}{
+		{"equals, upper-case prefix in the policy", NewStringEqualsIgnoreCaseFunc, "ARN:AWS:KMS:mykey", "mykey", true},
+		{"not equals, upper-case prefix in the policy", NewStringNotEqualsIgnoreCaseFunc, "ARN:AWS:KMS:mykey", "mykey", false},
+		{"equals, upper-case prefix in the request", NewStringEqualsIgnoreCaseFunc, "arn:aws:kms:mykey", "ARN:AWS:KMS:mykey", true},
+	}
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			f, err := tc.newFunc("", key, tc.condValue)
+			if err != nil {
+				t.Fatal(err)
+			}
+			if got := f.evaluate(map[string][]string{key.Name(): {tc.reqValue}}); got != tc.want {
+				t.Fatalf("condition %q, request %q: got %v, want %v", tc.condValue, tc.reqValue, got, tc.want)
+			}
+		})
+	}
+}
+
 // The prefix is removed once, as the server does, and only for the SSE-KMS key
 // id. Nothing else about the comparison changes.
 func TestStringFuncKMSKeyIDSpellingLimits(t *testing.T) {
