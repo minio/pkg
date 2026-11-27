@@ -53,9 +53,23 @@ type stringFunc struct {
 	negate     bool
 }
 
+// kmsKeyARNPrefix is the ARN form of an SSE-KMS key id. The server reads
+// "arn:aws:kms:name" and "name" as one key.
+const kmsKeyARNPrefix = "arn:aws:kms:"
+
+// kmsKeyName maps both spellings of an SSE-KMS key id to the key name, so that a
+// condition holds for a key and not for one way of writing it.
+func kmsKeyName(keyID string) string {
+	return strings.TrimPrefix(keyID, kmsKeyARNPrefix)
+}
+
 func (f stringFunc) eval(values map[string][]string) bool {
 	rvalues := set.CreateStringSet(getValuesByKey(values, f.k)...)
 	fvalues := f.values.ApplyFunc(substitute(values))
+	if f.k.Is(S3XAmzServerSideEncryptionAwsKmsKeyID) {
+		rvalues = rvalues.ApplyFunc(kmsKeyName)
+		fvalues = fvalues.ApplyFunc(kmsKeyName)
+	}
 	if f.ignoreCase {
 		rvalues = rvalues.ApplyFunc(strings.ToLower)
 		fvalues = fvalues.ApplyFunc(strings.ToLower)
@@ -136,7 +150,14 @@ type stringLikeFunc struct {
 func (f stringLikeFunc) eval(values map[string][]string) bool {
 	rvalues := getValuesByKey(values, f.k)
 	fvalues := f.values.ApplyFunc(substitutePattern(values))
+	kmsKeyID := f.k.Is(S3XAmzServerSideEncryptionAwsKmsKeyID)
+	if kmsKeyID {
+		fvalues = fvalues.ApplyFunc(kmsKeyName)
+	}
 	for _, v := range rvalues {
+		if kmsKeyID {
+			v = kmsKeyName(v)
+		}
 		matched := !fvalues.FuncMatch(wildcard.MatchEscaped, v).IsEmpty()
 		if f.n.qualifier == forAllValues {
 			if !matched {

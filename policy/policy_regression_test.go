@@ -22,6 +22,7 @@ import (
 	"fmt"
 	"maps"
 	"slices"
+	"strings"
 	"testing"
 
 	"github.com/minio/pkg/v3/policy/condition"
@@ -253,5 +254,78 @@ func TestIsAllowedActionsSelfServiceVsExplicitGrant(t *testing.T) {
 				t.Errorf("IsAllowedActions contains %s = %v, want %v", tt.action, got, tt.want)
 			}
 		})
+	}
+}
+
+// A Deny or an Allow on the SSE-KMS key id decides for a key. The bare name and
+// its ARN form are one key, in the policy and in the request, for a condition
+// and for its negation.
+func TestKMSKeyIDConditionSpelling(t *testing.T) {
+	const arnPrefix = "arn:aws:kms:"
+	condKey := condition.S3XAmzServerSideEncryptionAwsKmsKeyID
+	spellings := func(name string) []string { return []string{name, arnPrefix + name} }
+
+	testCases := []struct {
+		name      string
+		statement string // %s takes the policy's spelling of "mykey"
+		allowed   map[string]bool
+	}{
+		{
+			name: "Deny StringEquals",
+			statement: `{"Effect":"Allow","Action":"s3:PutObject","Resource":"arn:aws:s3:::bucket/*"%[1]s},
+				{"Effect":"Deny","Action":"s3:PutObject","Resource":"arn:aws:s3:::bucket/*"%[1]s,
+				 "Condition":{"StringEquals":{"` + string(condKey) + `":"%[2]s"}}}`,
+			allowed: map[string]bool{"mykey": false, "otherkey": true},
+		},
+		{
+			name: "Deny StringNotEquals",
+			statement: `{"Effect":"Allow","Action":"s3:PutObject","Resource":"arn:aws:s3:::bucket/*"%[1]s},
+				{"Effect":"Deny","Action":"s3:PutObject","Resource":"arn:aws:s3:::bucket/*"%[1]s,
+				 "Condition":{"StringNotEquals":{"` + string(condKey) + `":"%[2]s"}}}`,
+			allowed: map[string]bool{"mykey": true, "otherkey": false},
+		},
+		{
+			name: "Allow StringEquals",
+			statement: `{"Effect":"Allow","Action":"s3:PutObject","Resource":"arn:aws:s3:::bucket/*"%[1]s,
+				 "Condition":{"StringEquals":{"` + string(condKey) + `":"%[2]s"}}}`,
+			allowed: map[string]bool{"mykey": true, "otherkey": false},
+		},
+		{
+			name: "Allow StringNotEquals",
+			statement: `{"Effect":"Allow","Action":"s3:PutObject","Resource":"arn:aws:s3:::bucket/*"%[1]s,
+				 "Condition":{"StringNotEquals":{"` + string(condKey) + `":"%[2]s"}}}`,
+			allowed: map[string]bool{"mykey": false, "otherkey": true},
+		},
+	}
+
+	for _, tc := range testCases {
+		for _, condValue := range spellings("mykey") {
+			iamPolicy, err := ParseConfig(strings.NewReader(
+				`{"Version":"2012-10-17","Statement":[` + fmt.Sprintf(tc.statement, "", condValue) + `]}`))
+			if err != nil {
+				t.Fatalf("%s: %v", tc.name, err)
+			}
+			bucketPolicy, err := ParseBucketPolicyConfig(strings.NewReader(
+				`{"Version":"2012-10-17","Statement":[`+fmt.Sprintf(tc.statement, `,"Principal":"*"`, condValue)+`]}`), "bucket")
+			if err != nil {
+				t.Fatalf("%s: %v", tc.name, err)
+			}
+
+			for requested, want := range tc.allowed {
+				for _, reqValue := range spellings(requested) {
+					values := map[string][]string{condKey.Name(): {reqValue}}
+					if got := iamPolicy.IsAllowed(Args{
+						Action: PutObjectAction, BucketName: "bucket", ObjectName: "object", ConditionValues: values,
+					}); got != want {
+						t.Errorf("%s, identity policy %q, request %q: allowed %v, want %v", tc.name, condValue, reqValue, got, want)
+					}
+					if got := bucketPolicy.IsAllowed(BucketPolicyArgs{
+						Action: PutObjectAction, BucketName: "bucket", ObjectName: "object", ConditionValues: values,
+					}); got != want {
+						t.Errorf("%s, bucket policy %q, request %q: allowed %v, want %v", tc.name, condValue, reqValue, got, want)
+					}
+				}
+			}
+		}
 	}
 }

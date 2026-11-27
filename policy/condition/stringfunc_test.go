@@ -859,3 +859,113 @@ func TestStringFuncEscapes(t *testing.T) {
 		})
 	}
 }
+
+// A condition on the SSE-KMS key id holds for a key, whichever way the policy
+// and the request spell it. The answer for every spelling pair must be the one
+// the policy and the request give when both use the bare name.
+func TestStringFuncKMSKeyIDSpelling(t *testing.T) {
+	key := S3XAmzServerSideEncryptionAwsKmsKeyID.ToKey()
+	b64 := func(s string) string { return base64.StdEncoding.EncodeToString([]byte(s)) }
+	spellings := func(name string) []string { return []string{name, kmsKeyARNPrefix + name} }
+
+	operators := []struct {
+		name    string
+		negated bool
+		newFunc func(qualifier, value string) (Function, error)
+	}{
+		{stringEquals, false, func(q, v string) (Function, error) { return NewStringEqualsFunc(q, key, v) }},
+		{stringNotEquals, true, func(q, v string) (Function, error) { return NewStringNotEqualsFunc(q, key, v) }},
+		{stringEqualsIgnoreCase, false, func(q, v string) (Function, error) { return NewStringEqualsIgnoreCaseFunc(q, key, v) }},
+		{stringNotEqualsIgnoreCase, true, func(q, v string) (Function, error) { return NewStringNotEqualsIgnoreCaseFunc(q, key, v) }},
+		{stringLike, false, func(q, v string) (Function, error) { return NewStringLikeFunc(q, key, v) }},
+		{stringNotLike, true, func(q, v string) (Function, error) { return NewStringNotLikeFunc(q, key, v) }},
+		{binaryEquals, false, func(q, v string) (Function, error) { return NewBinaryEqualsFunc(q, key, b64(v)) }},
+	}
+
+	for _, op := range operators {
+		for _, qualifier := range []string{"", forAnyValue, forAllValues} {
+			for _, requested := range []string{"mykey", "otherkey"} {
+				sameKey := requested == "mykey"
+				for _, condValue := range spellings("mykey") {
+					for _, reqValue := range spellings(requested) {
+						f, err := op.newFunc(qualifier, condValue)
+						if err != nil {
+							t.Fatalf("%v: %v", op.name, err)
+						}
+						got := f.evaluate(map[string][]string{key.Name(): {reqValue}})
+						if want := sameKey != op.negated; got != want {
+							t.Errorf("%v %v: condition %q, request %q: got %v, want %v",
+								qualifier, op.name, condValue, reqValue, got, want)
+						}
+					}
+				}
+			}
+		}
+	}
+}
+
+// The prefix is removed once, as the server does, and only for the SSE-KMS key
+// id. Nothing else about the comparison changes.
+func TestStringFuncKMSKeyIDSpellingLimits(t *testing.T) {
+	kmsKey := S3XAmzServerSideEncryptionAwsKmsKeyID.ToKey()
+	arn := func(name string) string { return kmsKeyARNPrefix + name }
+
+	testCases := []struct {
+		name      string
+		key       Key
+		like      bool
+		condValue string
+		reqValue  string
+		want      bool
+	}{
+		{"a doubled prefix names another key", kmsKey, false, arn("mykey"), arn(arn("mykey")), false},
+		{"a doubled prefix matches itself", kmsKey, false, arn(arn("mykey")), arn(arn("mykey")), true},
+		{"the prefix is case sensitive", kmsKey, false, "ARN:AWS:KMS:mykey", "mykey", false},
+		{"other keys compare as written", S3XAmzStorageClass.ToKey(), false, arn("mykey"), "mykey", false},
+		{"other keys compare as written, like", S3XAmzStorageClass.ToKey(), true, arn("my*"), "mykey", false},
+		{"a pattern with the prefix matches the bare name", kmsKey, true, arn("my*"), "mykey", true},
+		{"a bare pattern matches the ARN form", kmsKey, true, "my*", arn("mykey"), true},
+		{"a pattern with the prefix rejects another key", kmsKey, true, arn("my*"), arn("otherkey"), false},
+		{"a pattern is matched against the key name", kmsKey, true, "arn:*", arn("mykey"), false},
+		{"a variable is expanded before the prefix is removed", kmsKey, false, arn("${aws:username}"), "david", true},
+		{"the prefix alone is the empty key id", kmsKey, false, arn(""), "", true},
+	}
+
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			newFunc := NewStringEqualsFunc
+			if tc.like {
+				newFunc = NewStringLikeFunc
+			}
+			f, err := newFunc("", tc.key, tc.condValue)
+			if err != nil {
+				t.Fatal(err)
+			}
+			values := map[string][]string{"username": {"david"}, tc.key.Name(): {tc.reqValue}}
+			if got := f.evaluate(values); got != tc.want {
+				t.Fatalf("condition %q, request %q: got %v, want %v", tc.condValue, tc.reqValue, got, tc.want)
+			}
+		})
+	}
+
+	// A request that sends no key id matches no value, the empty one included.
+	for _, condValue := range []string{"", arn(""), arn("mykey")} {
+		f, err := NewStringEqualsFunc("", kmsKey, condValue)
+		if err != nil {
+			t.Fatal(err)
+		}
+		if f.evaluate(map[string][]string{}) {
+			t.Fatalf("condition %q matched a request without a key id", condValue)
+		}
+	}
+
+	// The policy document keeps the spelling its author wrote.
+	f, err := NewStringEqualsFunc("", kmsKey, arn("mykey"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	want := map[Key]ValueSet{kmsKey: NewValueSet(NewStringValue(arn("mykey")))}
+	if got := f.toMap(); !reflect.DeepEqual(got, want) {
+		t.Fatalf("toMap: got %v, want %v", got, want)
+	}
+}
