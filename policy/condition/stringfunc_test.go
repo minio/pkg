@@ -904,8 +904,10 @@ func TestStringFuncKMSKeyIDSpelling(t *testing.T) {
 	}
 }
 
-// With IgnoreCase the case is folded before the prefix is removed, so an
-// upper-case prefix names the same key as the lower-case one.
+// A request value is read as the server reads it: only the lower-case prefix
+// is removed, so a request with an upper-case prefix names another key. With
+// IgnoreCase a policy value may write the prefix in any case, and it still
+// names the key the server reads from the same value.
 func TestStringFuncKMSKeyIDIgnoreCasePrefix(t *testing.T) {
 	key := S3XAmzServerSideEncryptionAwsKmsKeyID.ToKey()
 	testCases := []struct {
@@ -917,7 +919,11 @@ func TestStringFuncKMSKeyIDIgnoreCasePrefix(t *testing.T) {
 	}{
 		{"equals, upper-case prefix in the policy", NewStringEqualsIgnoreCaseFunc, "ARN:AWS:KMS:mykey", "mykey", true},
 		{"not equals, upper-case prefix in the policy", NewStringNotEqualsIgnoreCaseFunc, "ARN:AWS:KMS:mykey", "mykey", false},
-		{"equals, upper-case prefix in the request", NewStringEqualsIgnoreCaseFunc, "arn:aws:kms:mykey", "ARN:AWS:KMS:mykey", true},
+		{"equals, upper-case prefix in the request", NewStringEqualsIgnoreCaseFunc, "mykey", "ARN:AWS:KMS:mykey", false},
+		{"equals, upper-case prefix in the request, prefix in the policy", NewStringEqualsIgnoreCaseFunc, "arn:aws:kms:mykey", "ARN:AWS:KMS:mykey", false},
+		{"not equals, upper-case prefix in the request", NewStringNotEqualsIgnoreCaseFunc, "mykey", "ARN:AWS:KMS:mykey", true},
+		{"equals, upper-case key name in the request", NewStringEqualsIgnoreCaseFunc, "mykey", "arn:aws:kms:MYKEY", true},
+		{"equals, the same upper-case prefix on both sides", NewStringEqualsIgnoreCaseFunc, "ARN:AWS:KMS:mykey", "ARN:AWS:KMS:mykey", true},
 	}
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
@@ -929,6 +935,25 @@ func TestStringFuncKMSKeyIDIgnoreCasePrefix(t *testing.T) {
 				t.Fatalf("condition %q, request %q: got %v, want %v", tc.condValue, tc.reqValue, got, tc.want)
 			}
 		})
+	}
+
+	// IgnoreCase matches whatever the case-sensitive operator matches.
+	spellings := []string{"mykey", "MYKEY", "arn:aws:kms:mykey", "ARN:AWS:KMS:mykey", "arn:aws:kms:MYKEY", "arn:aws:kms:ARN:AWS:KMS:mykey"}
+	for _, condValue := range spellings {
+		equals, err := NewStringEqualsFunc("", key, condValue)
+		if err != nil {
+			t.Fatal(err)
+		}
+		ignoreCase, err := NewStringEqualsIgnoreCaseFunc("", key, condValue)
+		if err != nil {
+			t.Fatal(err)
+		}
+		for _, reqValue := range spellings {
+			values := map[string][]string{key.Name(): {reqValue}}
+			if equals.evaluate(values) && !ignoreCase.evaluate(values) {
+				t.Errorf("condition %q, request %q: StringEquals matches and StringEqualsIgnoreCase does not", condValue, reqValue)
+			}
+		}
 	}
 }
 
