@@ -66,13 +66,18 @@ func kmsKeyName(keyID string) string {
 func (f stringFunc) eval(values map[string][]string) bool {
 	rvalues := set.CreateStringSet(getValuesByKey(values, f.k)...)
 	fvalues := f.values.ApplyFunc(substitute(values))
+	if f.k.Is(S3XAmzServerSideEncryptionAwsKmsKeyID) {
+		if f.ignoreCase {
+			// A policy value may write the prefix in any case. A request may
+			// not: the server removes only the lower-case prefix.
+			fvalues = fvalues.Union(fvalues.ApplyFunc(strings.ToLower))
+		}
+		rvalues = rvalues.ApplyFunc(kmsKeyName)
+		fvalues = fvalues.ApplyFunc(kmsKeyName)
+	}
 	if f.ignoreCase {
 		rvalues = rvalues.ApplyFunc(strings.ToLower)
 		fvalues = fvalues.ApplyFunc(strings.ToLower)
-	}
-	if f.k.Is(S3XAmzServerSideEncryptionAwsKmsKeyID) {
-		rvalues = rvalues.ApplyFunc(kmsKeyName)
-		fvalues = fvalues.ApplyFunc(kmsKeyName)
 	}
 	ivalues := rvalues.Intersection(fvalues)
 	if f.n.qualifier == forAllValues {
